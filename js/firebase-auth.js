@@ -1,0 +1,151 @@
+// =====================================================================
+//  FIREBASE: ІНІЦІАЛІЗАЦІЯ, АВТО-ВХІД, CRUD ДЛЯ FIRESTORE
+// =====================================================================
+let firebaseReady = false;
+let firebaseAuth = null;
+let firebaseDb = null;
+let firebaseUser = null;
+
+function initFirebase() {
+  try {
+    // Перевіряємо, чи firebase глобально доступний
+    if (typeof firebase === 'undefined') {
+      console.error('❌ Firebase SDK не завантажився! Перевірте підключення скриптів.');
+      return;
+    }
+
+    const app = firebase.initializeApp(firebaseConfig);
+    firebaseAuth = firebase.auth(app);
+    firebaseDb = firebase.firestore(app);
+    firebaseReady = true;
+
+    console.log('🔥 Firebase підключено!');
+
+    firebaseAuth.onAuthStateChanged(async (user) => {
+      if (user) {
+        firebaseUser = user;
+        console.log('🔥 Користувач увійшов:', user.email);
+        // Якщо сторінка входу ще видима – автоматично входимо
+        if (document.getElementById('authPage').style.display !== 'none') {
+          currentUser = user.email;
+          isGuest = false;
+          await loadFromFirestore(user.uid);
+          if (!STATE) {
+            STATE = ensureStateDefaults({
+              name: user.email.split('@')[0],
+              level: 'A1',
+              levelTestDone: false,
+              srs: {},
+              stats: { wordsSeen: {}, testsCompleted: 0, sessionCount: 0, activityDates: [], bestStreak: 0 },
+              settings: { goal: "", reminderTime: "18:00", pace: "steady" },
+              leaderboardScore: 0,
+              customWords: [],
+              streak: 0,
+              xp: 0,
+              achievements: [],
+              trollGear: { equipped: { hat: null, glasses: null, bg: null }, unlocked: [] },
+              lessonsDone: [],
+            });
+          }
+          saveSession(currentUser, false);
+          document.getElementById('authPage').style.display = 'none';
+          document.getElementById('app').classList.add('active');
+          initAssistantWidget();
+          navigate('home');
+        } else if (STATE && !isGuest && currentUser !== 'guest' && currentUser === user.email) {
+          await loadFromFirestore(user.uid);
+        }
+      } else {
+        firebaseUser = null;
+        console.log('🔥 Користувач вийшов');
+      }
+    });
+  } catch (e) {
+    console.error('❌ Помилка ініціалізації Firebase:', e);
+  }
+}
+
+async function loadFromFirestore(uid) {
+  if (!firebaseReady || !firebaseDb) return null;
+  try {
+    const docRef = firebaseDb.collection('users').doc(uid);
+    const docSnap = await docRef.get();
+    if (docSnap.exists) {
+      Object.assign(STATE, docSnap.data());
+      updateState();
+      return docSnap.data();
+    }
+    return null;
+  } catch (e) {
+    console.error('❌ Помилка завантаження з Firestore:', e);
+    return null;
+  }
+}
+
+async function saveToFirestore(uid, data) {
+  if (!firebaseReady || !firebaseDb) return;
+  try {
+    const docRef = firebaseDb.collection('users').doc(uid);
+    await docRef.set(data, { merge: true });
+    console.log('💾 Дані збережено у Firestore');
+  } catch (e) {
+    console.error('❌ Помилка збереження у Firestore:', e);
+  }
+}
+
+async function signUpWithFirebase(email, password) {
+  if (!firebaseReady) return { success: false, error: 'Firebase не готовий' };
+  try {
+    const userCredential = await firebaseAuth.createUserWithEmailAndPassword(email, password);
+    const user = userCredential.user;
+    await saveToFirestore(user.uid, {
+      name: email.split('@')[0],
+      level: 'A1',
+      levelTestDone: false,
+      srs: {},
+      stats: { wordsSeen: {}, testsCompleted: 0, sessionCount: 0, activityDates: [], bestStreak: 0 },
+      settings: { goal: "", reminderTime: "18:00", pace: "steady" },
+      leaderboardScore: 0,
+      customWords: [],
+      streak: 0,
+      xp: 0,
+      achievements: [],
+      trollGear: { equipped: { hat: null, glasses: null, bg: null }, unlocked: [] },
+      lessonsDone: [],
+    });
+    return { success: true, user };
+  } catch (e) {
+    console.error('❌ Помилка реєстрації:', e);
+    return { success: false, error: e.message };
+  }
+}
+
+async function signInWithFirebase(email, password) {
+  if (!firebaseReady) return { success: false, error: 'Firebase не готовий' };
+  try {
+    const userCredential = await firebaseAuth.signInWithEmailAndPassword(email, password);
+    const user = userCredential.user;
+    await loadFromFirestore(user.uid);
+    return { success: true, user };
+  } catch (e) {
+    console.error('❌ Помилка входу:', e);
+    return { success: false, error: e.message };
+  }
+}
+
+async function signOutFromFirebase() {
+  if (!firebaseReady) return;
+  try {
+    await firebaseAuth.signOut();
+    firebaseUser = null;
+    clearSession();
+    location.reload();
+  } catch (e) {
+    console.error('❌ Помилка виходу:', e);
+  }
+}
+
+// Цей inline-скрипт розташований у кінці <body>, DOM вже повністю завантажений
+// на момент його виконання — подія DOMContentLoaded вже відбулась і ніколи не
+// спрацює повторно. Тому викликаємо initFirebase() одразу, напряму.
+initFirebase();

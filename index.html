@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Fjord — вивчай норвезьку</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Стилі винесено в окремий файл -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Firebase SDK (класичний) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+   <!-- ===== AUTH PAGE ===== -->
+<div id="authPage" class="auth-page">
+    <div class="auth-box">
+        <div class="brand">
+            <span class="mark"><svg viewBox="0 0 30 30" width="30" height="30"><circle cx="15" cy="20" r="6" fill="#2FA89B"/><path d="M2 20 A13 13 0 0 1 28 20" stroke="#E8A33D" stroke-width="2" fill="none"/></svg></span>
+            Fjord
+        </div>
+        <div class="lang-switch" id="authLangSwitch" style="display:flex;gap:6px;justify-content:center;margin-bottom:14px;">
+            <button class="chip lang-chip" data-lang="uk">UK</button>
+            <button class="chip lang-chip" data-lang="en">EN</button>
+            <button class="chip lang-chip" data-lang="ru">RU</button>
+        </div>
+        <h2 id="authTitle">Вхід</h2>
+        <div class="field"><label>Логін</label><input type="text" id="authLogin" placeholder="Ваш логін"></div>
+        <div class="field"><label>Пароль</label><input type="password" id="authPassword" placeholder="Пароль"></div>
+ <div style="text-align:right;margin-top:-4px;margin-bottom:12px;">
+            <span id="forgotPasswordLink" style="color:var(--teal);cursor:pointer;font-size:.8rem;text-decoration:underline;">Забули пароль?</span>
+        </div>
+        <div class="auth-error" id="authError"></div>
+        <button class="btn btn-primary" id="authSubmit">Увійти</button>
+
+        <!-- Нова кнопка гостя з логотипом -->
+        <button class="btn btn-guest" id="guestBtn">
+            <span class="mark" style="display:inline-block;vertical-align:middle;margin-right:8px;width:20px;height:20px;">
+                <svg viewBox="0 0 30 30" width="20" height="20">
+                    <circle cx="15" cy="20" r="6" fill="#2FA89B"/>
+                    <path d="M2 20 A13 13 0 0 1 28 20" stroke="#E8A33D" stroke-width="2" fill="none"/>
+                </svg>
+            </span>
+            Продовжити як гість
+        </button>
+
+        <div class="auth-divider">або</div>
+        <div class="toggle-link"><span id="authToggle">Ще немає акаунта? Зареєструватися</span></div>
+    </div>
+</div>
+
+    <!-- ===== APP ===== -->
+    <div id="app">
+        <div class="topbar">
+            <div class="brand"><span class="mark"><svg viewBox="0 0 30 30" width="26" height="26"><circle cx="15" cy="20" r="6" fill="#2FA89B"/><path d="M2 20 A13 13 0 0 1 28 20" stroke="#E8A33D" stroke-width="2" fill="none"/></svg></span> Fjord</div>
+            <nav class="nav" id="mainnav"></nav>
+            <div class="user-area">
+                <div class="lang-switch" id="appLangSwitch" style="display:flex;gap:4px;">
+                    <button class="chip lang-chip" data-lang="uk">UK</button>
+                    <button class="chip lang-chip" data-lang="en">EN</button>
+                    <button class="chip lang-chip" data-lang="ru">RU</button>
+                </div>
+                <span class="username" id="userNameDisplay"></span>
+                <button class="logout-btn" id="logoutBtn">Вийти</button>
+                <button class="hamburger" id="hamburger">☰</button>
+            </div>
+        </div>
+        <main id="mainContent"></main>
+        <footer class="appfoot">Fjord · ваш прогрес зберігається локально під вашим логіном</footer>
+
+        <!-- =====================================================================
+             AI-ПОМІЧНИК: ПЛАВАЮЧА КНОПКА + БІЧНА ПАНЕЛЬ
+             Розмітка живе тут, усередині #app (а не всередині <main>), тому вона
+             НЕ перемальовується під час навігації між вкладками (render() очищає
+             лише #mainContent) — кнопка "супроводжує" користувача на будь-якому
+             екрані. Клік по ній не є навігацією: ROUTE не змінюється, поточна
+             вкладка залишається на місці, просто збоку виїжджає чат.
+             ===================================================================== -->
+        <button class="assistant-fab" id="assistantFab" title="Тролль-помічник" aria-label="Відкрити чат з тролем-помічником">
+            <span id="assistantFabAvatar" class="assistant-fab-avatar"></span><span class="fab-dot"></span>
+        </button>
+        <div class="assistant-overlay" id="assistantOverlay"></div>
+        <aside class="assistant-panel" id="assistantPanel" aria-hidden="true">
+            <div class="assistant-panel-header">
+                <div class="assistant-panel-title">Тролль-помічник</div>
+                <button class="assistant-close-btn" id="assistantCloseBtn" title="Закрити" aria-label="Закрити чат">✕</button>
+            </div>
+            <p class="assistant-panel-sub">
+                Онлайн-тролль, одягнений так само, як у вкладці «Тролль». Запитай про граматику, слова, переклад чи просто попроси підказку — і продовжуй те, чим займався.
+            </p>
+            <div class="chat-shell assistant-chat-shell">
+                <div class="chat-log" id="chatLog"></div>
+                <div class="chat-suggest-row" id="chatSuggest">
+                    <button class="chat-suggest-chip" data-q="Поясни різницю між en, et і ei">en / et / ei?</button>
+                    <button class="chat-suggest-chip" data-q="Перевір це речення норвезькою: ">Перевір речення</button>
+                    <button class="chat-suggest-chip" data-q="Дай 3 приклади речень зі словом ">Приклади речень</button>
+                    <button class="chat-suggest-chip" data-q="Порадь, що вчити далі на моєму рівні">Що вчити далі?</button>
+                </div>
+                <div class="chat-input-bar">
+                    <textarea id="chatInput" placeholder="Напиши повідомлення тролю…" rows="1" maxlength="2000"></textarea>
+                    <button class="chat-send-btn" id="chatSendBtn" title="Надіслати">➤</button>
+                </div>
+            </div>
+            <div class="assistant-panel-footer">
+                <button class="btn btn-ghost btn-sm" id="chatClearBtn">Очистити чат</button>
+            </div>
+        </aside>
+    </div>
+
+    <!--
+        =====================================================================
+        JS-МОДУЛІ (порядок збережено таким самим, яким він був у первинному
+        монолітному <script>-блоці, тож жодна логіка виконання не змінилась —
+        просто той самий код тепер лежить у окремих файлах):
+        =====================================================================
+        1. firebase-config.js  – конфіг Firebase + URL AI-проксі
+        2. firebase-auth.js    – ініціалізація Firebase, авто-вхід, Firestore
+        3. state.js            – користувачі/сесія/STATE у localStorage
+        4. assistant.js        – система-промпт AI, запит до проксі,
+                                  + плаваюча бічна панель чату (нове)
+        5. data.js             – словник, Norskprøve, граматика, рівневий тест
+        6. helpers.js          – онбординг + загальні утиліти (el, toast, SRS…)
+        7. troll.js            – тролль-маскот, SVG, XP/рівні, ачівки
+        8. router.js           – ROUTE/navigate/render/меню вкладок
+        9. views-core.js       – Головна, картки, словник, тести, граматика, тролль
+       10. views-more.js       – Кабінет, Norskprøve, онбординг
+       11. auth.js             – логіка входу/реєстрації/гостя + запуск застосунку
+        =====================================================================
+    -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-auth.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/assistant.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/helpers.js"></script>
+    <script src="js/bust-accessories.js"></script>
+    <script src="js/troll.js"></script>
+    <script src="js/router.js"></script>
+    <script src="js/views-core.js"></script>
+    <script src="js/views-more.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@edge-tts/universal/dist/index.global.js"></script>
+</body>
+</html>
