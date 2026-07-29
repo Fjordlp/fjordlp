@@ -59,7 +59,7 @@ const AI_SYSTEM_PROMPT = "Ти — дружній тролль-помічник 
 // промпту — працює з вашим поточним Worker'ом просто зараз) і "mode"
 // (коротка назва — запрацює автоматично, якщо/коли ви таки задеплоїте
 // посилений Worker, який ігнорує "system" і сам вибирає промпт за mode).
-async function callAiRaw(mode, systemPromptText, userText, history) {
+async function callAiRaw(mode, systemPromptText, userText, history, lang) {
     if (!AI_PROXY_URL) {
         const err = new Error('NOT_CONFIGURED');
         err.code = 'NOT_CONFIGURED';
@@ -69,10 +69,7 @@ async function callAiRaw(mode, systemPromptText, userText, history) {
         system: systemPromptText,
         mode: mode,
         message: userText,
-        // Останні кілька повідомлень для контексту (без системного промпту)
-        // history тут уже містить щойно надіслане повідомлення користувача
-        // (воно додається у STATE ще до виклику), тож відрізаємо останній
-        // елемент, щоб не дублювати його — він і так іде окремим полем message.
+        lang: lang || 'uk', // Додаємо мову
         history: (history || []).slice(0, -1).slice(-12).map(m => ({ role: m.role, text: m.text })),
     };
     let res;
@@ -111,7 +108,8 @@ async function callAiRaw(mode, systemPromptText, userText, history) {
 }
 
 async function callAiAssistant(userText, history) {
-    return callAiRaw('chat', buildAiSystemPrompt(), userText, history);
+    const lang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+    return callAiRaw('chat', buildAiSystemPrompt(), userText, history, lang);
 }
 
 // =====================================================================
@@ -152,10 +150,9 @@ const AI_WRITING_CHECK_PROMPT =
     "як справжній тролль-репетитор.";
 
 async function checkWritingWithAI(level, topic, taskPrompt, studentText) {
-    const userMsg =
-        `Рівень: ${level}\nТема завдання: ${topic || ''}\nФормулювання завдання: ${taskPrompt || ''}\n\n` +
-        `Текст студента норвезькою:\n"""${studentText}"""`;
-    return callAiRaw('writing_check', buildWritingCheckPrompt(), userMsg, []);
+    const lang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+    const userMsg = `Рівень: ${level}\nТема завдання: ${topic || ''}\nФормулювання завдання: ${taskPrompt || ''}\n\nТекст студента норвезькою:\n"""${studentText}"""`;
+    return callAiRaw('writing_check', buildWritingCheckPrompt(), userMsg, [], lang);
 }
 
 // =====================================================================
