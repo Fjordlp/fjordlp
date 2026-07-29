@@ -687,3 +687,12 @@
 .leaderboard-row.you .rank { color: var(--teal); }
 .leaderboard-row.you .name { font-weight: 700; }
 .leaderboard-row.you .pts { color: var(--teal); }
+
+/* Адмін-панель */
+.admin-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+.admin-card:active {
+    transform: scale(0.98);
+}

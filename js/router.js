@@ -41,6 +41,12 @@
 ["onboarding", t('nav_onboarding')],
                 ["norskprove", t('nav_norskprove')],
             ];
+
+// Якщо користувач адмін – додаємо адмін-панель
+if (STATE && STATE.admin) {
+    items.push(["admin", "⚙️ Адмін"]);
+}
+
             nav.innerHTML = '';
             items.forEach(([r, label]) => {
                 const b = el(`<button>${label}</button>`);
@@ -95,6 +101,17 @@ case 'onboarding':
     return viewOnboarding();
                 case 'norskprove':
                     return viewNorskprove();
+case 'admin':
+    return viewAdmin();
+case 'admin-words':
+    return viewAdminWords();
+case 'admin-tournaments':
+    return viewAdminTournaments();
+case 'admin-daily':
+    return viewAdminDaily();
+case 'admin-users':
+    return viewAdminUsers();
+
                 default:
                     return el('<div class="view"><p>Сторінку не знайдено.</p></div>');
             }
