@@ -4,38 +4,38 @@
             <div class="view">
               <h1>${t('h_profile')}</h1>
               <div class="grid cols-4" style="margin-bottom:16px;">
-                <div class="card stat-box"><div class="num">${Object.keys(STATE.stats?.wordsSeen||{}).length}</div><div class="label">слів опрацьовано</div></div>
-                <div class="card stat-box"><div class="num">${STATE.stats?.testsCompleted||0}</div><div class="label">тестів</div></div>
-                <div class="card stat-box"><div class="num">${STATE.streak||0}</div><div class="label">днів поспіль</div></div>
-                <div class="card stat-box"><div class="num">${STATE.stats?.bestStreak||0}</div><div class="label">найкраща серія</div></div>
+                <div class="card stat-box"><div class="num">${Object.keys(STATE.stats?.wordsSeen||{}).length}</div><div class="label">${t('stat_words_studied')}</div></div>
+                <div class="card stat-box"><div class="num">${STATE.stats?.testsCompleted||0}</div><div class="label">${t('stat_tests')}</div></div>
+                <div class="card stat-box"><div class="num">${STATE.streak||0}</div><div class="label">${t('stat_streak_days')}</div></div>
+                <div class="card stat-box"><div class="num">${STATE.stats?.bestStreak||0}</div><div class="label">${t('stat_best_streak')}</div></div>
               </div>
               <div class="grid cols-2">
                 <div class="card">
-                  <h3>Календар (15 днів)</h3>
+                  <h3>${t('calendar_15days')}</h3>
                   <div class="calendar-grid" id="calgrid"></div>
                 </div>
                 <div class="card">
-                  <h3>Налаштування</h3>
-                  <div class="field"><label>Ім'я</label><input id="setName" value="${STATE.name||''}"></div>
-                  <div class="field"><label>Мета</label><input id="setGoal" value="${STATE.settings?.goal||''}" placeholder="напр. скласти іспит B1"></div>
-                  <div class="field"><label>Час нагадування</label><input type="time" id="setTime" value="${STATE.settings?.reminderTime||'18:00'}"></div>
-                  <div class="field"><label>Темп</label>
+                  <h3>${t('settings_title')}</h3>
+                  <div class="field"><label>${t('field_name')}</label><input id="setName" value="${STATE.name||''}"></div>
+                  <div class="field"><label>${t('field_goal')}</label><input id="setGoal" value="${STATE.settings?.goal||''}" placeholder="${t('field_goal_placeholder')}"></div>
+                  <div class="field"><label>${t('field_reminder_time')}</label><input type="time" id="setTime" value="${STATE.settings?.reminderTime||'18:00'}"></div>
+                  <div class="field"><label>${t('field_pace')}</label>
                     <select id="setPace">
-                      <option value="calm" ${STATE.settings?.pace==='calm'?'selected':''}>Спокійний</option>
-                      <option value="steady" ${STATE.settings?.pace==='steady'?'selected':''}>Стабільний</option>
-                      <option value="intense" ${STATE.settings?.pace==='intense'?'selected':''}>Інтенсивний</option>
+                      <option value="calm" ${STATE.settings?.pace==='calm'?'selected':''}>${t('pace_calm')}</option>
+                      <option value="steady" ${STATE.settings?.pace==='steady'?'selected':''}>${t('pace_steady')}</option>
+                      <option value="intense" ${STATE.settings?.pace==='intense'?'selected':''}>${t('pace_intense')}</option>
                     </select>
                   </div>
-                  <button class="btn btn-primary btn-block" id="saveSettings">Зберегти</button>
+                  <button class="btn btn-primary btn-block" id="saveSettings">${t('save_btn2')}</button>
                 </div>
               </div>
               <div class="card" style="margin-top:16px;">
-                <h3>Таблиця лідерів</h3>
+                <h3>${t('leaderboard_title')}</h3>
                 <div id="lb"></div>
               </div>
               <div class="card" style="margin-top:16px;">
-                <h3>Дані</h3>
-                <p style="font-size:.8rem;color:var(--ink-soft);">Прогрес зберігається локально під вашим логіном.</p>
+                <h3>${t('data_title')}</h3>
+                <p style="font-size:.8rem;color:var(--ink-soft);">${t('data_note')}</p>
               </div>
             </div>
           `);
@@ -71,7 +71,7 @@
                 STATE.settings.reminderTime = wrap.querySelector('#setTime').value;
                 STATE.settings.pace = wrap.querySelector('#setPace').value;
                 updateState();
-                toast("Налаштування збережено");
+                toast(t('settings_saved'));
                 document.getElementById('userNameDisplay').textContent = STATE.name;
             };
             return wrap;

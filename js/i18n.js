@@ -33,6 +33,12 @@ const UI_STRINGS = {
         col_word: 'Слово', col_translation: 'Переклад', col_topic: 'Тема', col_status: 'Статус',
         how_translate: 'Як перекладається', write_word_norwegian: 'напишіть слово норвезькою',
         greeting_hi: 'Привіт', student_word: 'Учень', level_word: 'Рівень', words_viewed: 'слів переглянуто',
+        stat_words_studied: 'слів опрацьовано', stat_tests: 'тестів', stat_streak_days: 'днів поспіль', stat_best_streak: 'найкраща серія',
+        calendar_15days: 'Календар (15 днів)', settings_title: 'Налаштування', field_name: "Ім'я", field_goal: 'Мета',
+        field_goal_placeholder: 'напр. скласти іспит B1', field_reminder_time: 'Час нагадування', field_pace: 'Темп',
+        pace_calm: 'Спокійний', pace_steady: 'Стабільний', pace_intense: 'Інтенсивний', save_btn2: 'Зберегти',
+        leaderboard_title: 'Таблиця лідерів', data_title: 'Дані', data_note: 'Прогрес зберігається локально під вашим логіном.',
+        settings_saved: 'Налаштування збережено',
     },
     en: {
         nav_home: 'Home', nav_flashcards: 'Flashcards', nav_vocabulary: 'Vocabulary',
@@ -60,6 +66,12 @@ const UI_STRINGS = {
         col_word: 'Word', col_translation: 'Translation', col_topic: 'Topic', col_status: 'Status',
         how_translate: 'How do you translate', write_word_norwegian: 'write the word in Norwegian',
         greeting_hi: 'Hi', student_word: 'Learner', level_word: 'Level', words_viewed: 'words viewed',
+        stat_words_studied: 'words studied', stat_tests: 'tests', stat_streak_days: 'day streak', stat_best_streak: 'best streak',
+        calendar_15days: 'Calendar (15 days)', settings_title: 'Settings', field_name: 'Name', field_goal: 'Goal',
+        field_goal_placeholder: 'e.g. pass the B1 exam', field_reminder_time: 'Reminder time', field_pace: 'Pace',
+        pace_calm: 'Calm', pace_steady: 'Steady', pace_intense: 'Intense', save_btn2: 'Save',
+        leaderboard_title: 'Leaderboard', data_title: 'Data', data_note: 'Your progress is stored locally under your login.',
+        settings_saved: 'Settings saved',
     },
     ru: {
         nav_home: 'Главная', nav_flashcards: 'Карточки', nav_vocabulary: 'Словарь',
@@ -87,6 +99,12 @@ const UI_STRINGS = {
         col_word: 'Слово', col_translation: 'Перевод', col_topic: 'Тема', col_status: 'Статус',
         how_translate: 'Как переводится', write_word_norwegian: 'напишите слово на норвежском',
         greeting_hi: 'Привет', student_word: 'Ученик', level_word: 'Уровень', words_viewed: 'слов просмотрено',
+        stat_words_studied: 'слов изучено', stat_tests: 'тестов', stat_streak_days: 'дней подряд', stat_best_streak: 'лучшая серия',
+        calendar_15days: 'Календарь (15 дней)', settings_title: 'Настройки', field_name: 'Имя', field_goal: 'Цель',
+        field_goal_placeholder: 'напр. сдать экзамен B1', field_reminder_time: 'Время напоминания', field_pace: 'Темп',
+        pace_calm: 'Спокойный', pace_steady: 'Стабильный', pace_intense: 'Интенсивный', save_btn2: 'Сохранить',
+        leaderboard_title: 'Таблица лидеров', data_title: 'Данные', data_note: 'Прогресс сохраняется локально под вашим логином.',
+        settings_saved: 'Настройки сохранены',
     },
 };
 

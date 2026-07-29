@@ -1438,7 +1438,7 @@ ${(() => {
                 TROLL_UNLOCKABLES.forEach(item => {
                     const unlocked = STATE.trollGear.unlocked.includes(item.id);
                     const equipped = STATE.trollGear.equipped[item.type] === item.id;
-                    const badge = el(`<div class="gear-badge ${unlocked?'':'locked'} ${equipped?'equipped':''}" title="${item.name}${unlocked?'':' (рівень '+item.unlockLevel+')'}">${gearIconSVG(item, 34)}</div>`);
+                    const badge = el(`<div class="gear-badge ${unlocked?'':'locked'} ${equipped?'equipped':''}" title="${gearItemName(item)}${unlocked?'':' ('+t('level_word')+' '+item.unlockLevel+')'}">${gearIconSVG(item, 34)}</div>`);
                     if (unlocked) {
                         badge.onclick = () => {
                             STATE.trollGear.equipped[item.type] = equipped ? null : item.id;
@@ -1458,8 +1458,8 @@ ${(() => {
                 achGrid.appendChild(el(`
               <div class="ach-item ${unlocked?'unlocked':'locked'}">
                 <div class="ach-icon">${unlocked?'🏆':'🔒'}</div>
-                <div style="font-weight:700;">${a.name}</div>
-                <div style="color:var(--ink-soft);font-size:.72rem;margin-top:2px;">${a.desc}</div>
+                <div style="font-weight:700;">${achievementName(a)}</div>
+                <div style="color:var(--ink-soft);font-size:.72rem;margin-top:2px;">${achievementDesc(a)}</div>
               </div>
             `));
             });

@@ -19,4 +19,4 @@ const firebaseConfig = {
 // const AI_PROXY_URL = "https://fjord-ai-proxy.твій-нік.workers.dev";
 // Поки поле порожнє – чат покаже користувачу повідомлення, що асистент
 // ще не підключений (і не буде намагатись стукати в нікуди).
-const AI_PROXY_URL = "https://fjord-ai-proxy.maksimenkonazar013.workers.dev/";
+const AI_PROXY_URL = "https://fjord.fjordlearningplatform.workers.dev/";

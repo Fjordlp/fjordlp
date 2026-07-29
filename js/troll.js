@@ -69,17 +69,39 @@
         }
 
         const TROLL_PHRASES = {
-            greeting: ["Hei! Готовий вивчати норвезьку сьогодні?", "Привіт! Радий тебе бачити знову 🧌", "Hei hei! Продовжимо?"],
-            correct: ["Riktig! Так тримати!", "Супер, правильно!", "Bra jobbet! (Гарна робота!)", "Точно! Ти молодець."],
-            wrong: ["Не страшно, навіть тролі плутають en і et спочатку!", "Майже! Спробуй ще раз наступного разу.", "Помилка — це теж крок уперед.", "Feil svar, але не здавайся!"],
-            sessionComplete: ["Готово! Ти чудово попрацював.", "Сесію завершено — я пишаюсь тобою!", "Flott! (Чудово!) До наступного разу."],
-            testComplete: ["Тест завершено! +100 XP у скарбничку.", "Ще один тест позаду. Så bra!"],
-            streak: ["Ти на хвилі! Серія триває.", "Дні поспіль — це справжня дисципліна!"],
-            levelUp: ["Новий рівень тролля! Дещо розблоковано 🎉", "Ти виріс! І я теж, здається."],
+            uk: {
+                greeting: ["Hei! Готовий вивчати норвезьку сьогодні?", "Привіт! Радий тебе бачити знову 🧌", "Hei hei! Продовжимо?"],
+                correct: ["Riktig! Так тримати!", "Супер, правильно!", "Bra jobbet! (Гарна робота!)", "Точно! Ти молодець."],
+                wrong: ["Не страшно, навіть тролі плутають en і et спочатку!", "Майже! Спробуй ще раз наступного разу.", "Помилка — це теж крок уперед.", "Feil svar, але не здавайся!"],
+                sessionComplete: ["Готово! Ти чудово попрацював.", "Сесію завершено — я пишаюсь тобою!", "Flott! (Чудово!) До наступного разу."],
+                testComplete: ["Тест завершено! +100 XP у скарбничку.", "Ще один тест позаду. Så bra!"],
+                streak: ["Ти на хвилі! Серія триває.", "Дні поспіль — це справжня дисципліна!"],
+                levelUp: ["Новий рівень тролля! Дещо розблоковано 🎉", "Ти виріс! І я теж, здається."],
+            },
+            en: {
+                greeting: ["Hei! Ready to study Norwegian today?", "Hi! Good to see you again 🧌", "Hei hei! Shall we continue?"],
+                correct: ["Riktig! Keep it up!", "Great, that's correct!", "Bra jobbet! (Good job!)", "Exactly! Well done."],
+                wrong: ["No worries, even trolls mix up en and et at first!", "Almost! Try again next time.", "A mistake is a step forward too.", "Feil svar, but don't give up!"],
+                sessionComplete: ["Done! You worked great.", "Session complete — I'm proud of you!", "Flott! (Great!) See you next time."],
+                testComplete: ["Test complete! +100 XP in the piggy bank.", "Another test behind you. Så bra!"],
+                streak: ["You're on a roll! The streak continues.", "Days in a row — that's real discipline!"],
+                levelUp: ["New troll level! Something's been unlocked 🎉", "You've grown! And so have I, it seems."],
+            },
+            ru: {
+                greeting: ["Hei! Готов изучать норвежский сегодня?", "Привет! Рад видеть тебя снова 🧌", "Hei hei! Продолжим?"],
+                correct: ["Riktig! Так держать!", "Супер, правильно!", "Bra jobbet! (Отличная работа!)", "Точно! Молодец."],
+                wrong: ["Не страшно, даже тролли путают en и et поначалу!", "Почти! Попробуй ещё раз в следующий раз.", "Ошибка — это тоже шаг вперёд.", "Feil svar, но не сдавайся!"],
+                sessionComplete: ["Готово! Ты отлично поработал.", "Сессия завершена — я горжусь тобой!", "Flott! (Отлично!) До следующего раза."],
+                testComplete: ["Тест завершён! +100 XP в копилку.", "Ещё один тест позади. Så bra!"],
+                streak: ["Ты на волне! Серия продолжается.", "Дни подряд — это настоящая дисциплина!"],
+                levelUp: ["Новый уровень тролля! Кое-что разблокировано 🎉", "Ты вырос! И я, кажется, тоже."],
+            },
         };
 
         function trollSay(context) {
-            const arr = TROLL_PHRASES[context] || TROLL_PHRASES.greeting;
+            const lang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+            const dict = TROLL_PHRASES[lang] || TROLL_PHRASES.uk;
+            const arr = dict[context] || dict.greeting;
             return arr[Math.floor(Math.random() * arr.length)];
         }
 
@@ -239,9 +261,13 @@
                 }
             });
             if (justUnlocked.length === 1) {
-                toast(`Тролль розблокував: ${justUnlocked[0].emoji} ${justUnlocked[0].name}!`);
+                const lang0 = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+                const unlockMsg = { uk: 'Тролль розблокував', en: 'Troll unlocked', ru: 'Тролль разблокировал' }[lang0];
+                toast(`${unlockMsg}: ${justUnlocked[0].emoji} ${gearItemName(justUnlocked[0])}!`);
             } else if (justUnlocked.length > 1) {
-                toast(`Розблоковано нове спорядження: ${justUnlocked.length} шт.!`);
+                const lang0 = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+                const unlockMsg = { uk: 'Розблоковано нове спорядження', en: 'New gear unlocked', ru: 'Разблокировано новое снаряжение' }[lang0];
+                toast(`${unlockMsg}: ${justUnlocked.length}${lang0==='uk'?' шт.':''}!`);
             }
             if (justUnlocked.length) updateState();
             return justUnlocked.length > 0;
@@ -254,7 +280,11 @@
             checkTrollUnlocks();
             checkAchievements();
             updateState();
-            if (after > before) { toast(`🧌 Рівень тролля підвищено: ${after}!`); }
+            if (after > before) {
+                const lang1 = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+                const msg = { uk: 'Рівень тролля підвищено', en: 'Troll level increased', ru: 'Уровень тролля повышен' }[lang1];
+                toast(`🧌 ${msg}: ${after}!`);
+            }
             return amount;
         }
 
@@ -293,7 +323,9 @@
             ACHIEVEMENTS.forEach(a => {
                 if (!STATE.achievements.includes(a.id) && a.check(STATE, ctx)) {
                     STATE.achievements.push(a.id);
-                    toast(`🏆 Досягнення: ${a.name}!`);
+                    const lang2 = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+                    const msg2 = { uk: 'Досягнення', en: 'Achievement', ru: 'Достижение' }[lang2];
+                    toast(`🏆 ${msg2}: ${achievementName(a)}!`);
                     unlockedSomething = true;
                 }
             });
