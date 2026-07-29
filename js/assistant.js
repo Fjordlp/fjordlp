@@ -21,6 +21,40 @@ function buildAiSystemPrompt() {
         "рядками, що починаються з «- ».";
 }
 
+// =====================================================================
+//  ДОПОМІЖНІ ФУНКЦІЇ ДЛЯ РЕНДЕРИНГУ
+// =====================================================================
+function escapeHtmlGlobal(s) {
+    return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function renderLiteMarkdownGlobal(text) {
+    const escaped = escapeHtmlGlobal(text);
+    const lines = escaped.split('\n');
+    let html = '';
+    let inList = false;
+    lines.forEach(line => {
+        const bulletMatch = line.match(/^\s*[*-]\s+(.*)$/);
+        if (bulletMatch) {
+            if (!inList) { html += '<ul style="margin:4px 0;padding-left:20px;">'; inList = true; }
+            html += `<li>${bulletMatch[1]}</li>`;
+        } else {
+            if (inList) { html += '</ul>'; inList = false; }
+            html += (html ? '\n' : '') + line;
+        }
+    });
+    if (inList) html += '</ul>';
+    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '<em>$1</em>');
+    html = html.replace(/_([^_\n]+)_/g, '<em>$1</em>');
+    return html;
+}
+
 async function callAiRaw(mode, systemPromptText, userText, history, lang) {
     if (!AI_PROXY_URL) {
         const err = new Error('NOT_CONFIGURED');
@@ -31,7 +65,7 @@ async function callAiRaw(mode, systemPromptText, userText, history, lang) {
         system: systemPromptText,
         mode: mode,
         message: userText,
-        lang: lang || 'uk', // <-- ДОДАНО
+        lang: lang || 'uk',
         history: (history || []).slice(0, -1).slice(-12).map(m => ({ role: m.role, text: m.text })),
     };
     let res;
@@ -150,15 +184,58 @@ async function generateVocabWordsAI(level, existingTopics) {
 }
 
 // =====================================================================
-//  ІНІЦІАЛІЗАЦІЯ АСИСТЕНТА (без змін)
+//  АВТОМАТИЧНИЙ ВХІД
 // =====================================================================
 let autoLoginAttempts = 0;
 const maxAutoLoginAttempts = 10;
 
-function checkAutoLogin() { /* ... без змін ... */ }
-function tryAutoLogin() { /* ... без змін ... */ }
+function checkAutoLogin() {
+    if (firebaseReady && firebaseAuth && firebaseAuth.currentUser) {
+        const user = firebaseAuth.currentUser;
+        firebaseUser = user;
+        currentUser = user.email;
+        isGuest = false;
+        loadFromFirestore(user.uid).then(() => {
+            if (!STATE) {
+                STATE = ensureStateDefaults({
+                    name: user.email.split('@')[0],
+                    level: 'A1',
+                    levelTestDone: false,
+                    srs: {},
+                    stats: { wordsSeen: {}, testsCompleted: 0, sessionCount: 0, activityDates: [], bestStreak: 0 },
+                    settings: { goal: "", reminderTime: "18:00", pace: "steady" },
+                    leaderboardScore: 0,
+                    customWords: [],
+                    streak: 0,
+                    xp: 0,
+                    achievements: [],
+                    trollGear: { equipped: { hat: null, glasses: null, bg: null }, unlocked: [] },
+                    lessonsDone: [],
+                });
+            }
+            saveSession(currentUser, false);
+            document.getElementById('authPage').style.display = 'none';
+            document.getElementById('app').classList.add('active');
+            initAssistantWidget();
+            navigate('home');
+        });
+        return true;
+    }
+    return false;
+}
+
+function tryAutoLogin() {
+    if (checkAutoLogin()) return;
+    if (++autoLoginAttempts < maxAutoLoginAttempts) {
+        setTimeout(tryAutoLogin, 500);
+    }
+}
+
 setTimeout(tryAutoLogin, 500);
 
+// =====================================================================
+//  ВІДЖЕТ AI-ПОМІЧНИКА (плаваюча панель)
+// =====================================================================
 let _assistantWidgetReady = false;
 let _assistantRenderAll = null;
 
@@ -230,8 +307,17 @@ function initAssistantWidget() {
     _assistantRenderAll = renderAll;
     renderAll();
 
-    function showTyping() { /* без змін */ }
-    function hideTyping() { /* без змін */ }
+    function showTyping() {
+        const row = el(`<div class="chat-row bot" id="chatTypingRow"></div>`);
+        row.appendChild(el(`<div class="chat-avatar">${avatarHtml()}</div>`));
+        row.appendChild(el(`<div class="chat-bubble"><span class="chat-typing"><span></span><span></span><span></span></span></div>`));
+        log.appendChild(row);
+        scrollToBottom();
+    }
+    function hideTyping() {
+        const row = log.querySelector('#chatTypingRow');
+        if (row) row.remove();
+    }
 
     async function send(text) {
         text = (text || input.value).trim();
@@ -256,7 +342,27 @@ function initAssistantWidget() {
         } catch (e) {
             hideTyping();
             console.error('[AI Assistant] Помилка чату:', e);
-            // ... обробка помилок
+            let msg;
+            if (e && e.code === 'NOT_CONFIGURED') {
+                msg = 'Тролль ще спить 💤 — власник сайту ще не підключив AI-проксі (AI_PROXY_URL порожній у коді сторінки).';
+            } else if (e && e.code === 'NETWORK_ERROR') {
+                msg = 'Не вдалося достукатись до проксі-сервера (CORS, невірний URL або Worker не працює). ' +
+                      'Деталі — у консолі браузера (F12 → Console).';
+            } else if (e && e.code === 'PROXY_ERROR') {
+                if (e.status === 500) {
+                    msg = 'Проксі відповів помилкою 500 — схоже, на Worker\'і не задано секрет GEMINI_API_KEY.';
+                } else if (e.status === 401 || e.status === 403) {
+                    msg = 'Проксі відповів помилкою ' + e.status + ' — Google API-ключ, схоже, недійсний або обмежений.';
+                } else if (e.status === 429) {
+                    msg = 'Досягнуто безкоштовного ліміту запитів Gemini (429). Спробуй трохи пізніше.';
+                } else if (e.status === 502) {
+                    msg = 'Google Gemini зараз недоступний або сталася несподівана помилка на сервері. Деталі — у консолі браузера (F12).';
+                } else {
+                    msg = 'Проксі відповів помилкою ' + e.status + '. Деталі — у консолі браузера (F12 → Console).';
+                }
+            } else {
+                msg = 'Ой, тролль спіткнувся об камінь і не зміг відповісти. Деталі — у консолі браузера (F12 → Console).';
+            }
             const errMsg = { role: 'model', text: msg, error: true, ts: Date.now() };
             renderMessage(errMsg);
             scrollToBottom();
@@ -266,19 +372,52 @@ function initAssistantWidget() {
     }
 
     sendBtn.onclick = () => send();
-    input.addEventListener('keydown', (e) => { /* без змін */ });
-    input.addEventListener('input', () => { /* без змін */ });
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            send();
+        }
+    });
+    input.addEventListener('input', () => {
+        input.style.height = 'auto';
+        input.style.height = Math.min(input.scrollHeight, 100) + 'px';
+    });
 
-    document.querySelectorAll('#chatSuggest .chat-suggest-chip').forEach(chip => { /* без змін */ });
-    if (clearBtn) { /* без змін */ }
+    document.querySelectorAll('#chatSuggest .chat-suggest-chip').forEach(chip => {
+        chip.onclick = () => {
+            input.value = chip.dataset.q;
+            input.focus();
+        };
+    });
 
-    function openAssistantPanel() { /* без змін */ }
-    function closeAssistantPanel() { /* без змін */ }
+    if (clearBtn) {
+        clearBtn.onclick = () => {
+            STATE.assistantChat = [];
+            updateState();
+            renderAll();
+        };
+    }
+
+    function openAssistantPanel() {
+        renderAll();
+        updateFabAvatar();
+        panel.classList.add('open');
+        overlay.classList.add('open');
+        document.body.classList.add('assistant-open');
+        setTimeout(() => input.focus(), 260);
+    }
+    function closeAssistantPanel() {
+        panel.classList.remove('open');
+        overlay.classList.remove('open');
+        document.body.classList.remove('assistant-open');
+    }
 
     fab.onclick = openAssistantPanel;
     if (closeBtn) closeBtn.onclick = closeAssistantPanel;
     if (overlay) overlay.onclick = closeAssistantPanel;
-    document.addEventListener('keydown', (e) => { /* без змін */ });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && panel.classList.contains('open')) closeAssistantPanel();
+    });
 
     window.openAssistantPanel = openAssistantPanel;
     window.closeAssistantPanel = closeAssistantPanel;
