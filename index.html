@@ -3,19 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Fjord — вивчай норвезьку</title>
+
+    <!-- ============ SEO ============ -->
+    <title>FjordLP — вивчай норвезьку з AI-тролем</title>
+    <meta name="description" content="Інтерактивна платформа для вивчення норвезької мови. Картки, тести, граматика, AI-помічник та підготовка до Norskprøve. Безкоштовно.">
+    <link rel="canonical" href="https://fjordlp.com/">
+
+    <!-- ============ Open Graph (Facebook, LinkedIn, Telegram) ============ -->
+    <meta property="og:title" content="FjordLP — вивчай норвезьку з AI-тролем">
+    <meta property="og:description" content="Гейміфікований застосунок для вивчення норвезької з AI-помічником та підготовкою до іспитів.">
+    <meta property="og:url" content="https://fjordlp.com/">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://fjordlp.com/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- ============ Twitter Card ============ -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="FjordLP — вивчай норвезьку з AI-тролем">
+    <meta name="twitter:description" content="Інтерактивна платформа для вивчення норвезької мови з AI-помічником.">
+    <meta name="twitter:image" content="https://fjordlp.com/og-image.jpg">
+
+    <!-- ============ Favicon (бажано додати) ============ -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+    <!-- ============ Шрифти ============ -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
-    <!-- Стилі винесено в окремий файл -->
+    <!-- ============ Стилі ============ -->
     <link rel="stylesheet" href="css/style.css">
 
-    <!-- Firebase SDK (класичний) -->
+    <!-- ============ Firebase SDK ============ -->
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
+
+    <!-- ============ Структуровані дані (JSON-LD) ============ -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "FjordLP",
+      "description": "Гейміфікована платформа для вивчення норвезької мови з AI-помічником та підготовкою до Norskprøve.",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Nazar Maksymenko"
+      },
+      "url": "https://fjordlp.com/"
+    }
+    </script>
 </head>
+
 <body>
 
    <!-- ===== AUTH PAGE ===== -->
