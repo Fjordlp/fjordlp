@@ -1464,43 +1464,53 @@ const NORSKPROVE_TASKS = {
 //  ЦІЛІ НАВЧАННЯ ТА ПЛАНИ
 // =====================================================================
 const GOALS = [
-    { id: 'travel', label: '🗺️ Подорожі та спілкування', desc: 'Розмовна норвезька для туризму та повсякденного життя.' },
-    { id: 'work', label: '💼 Робота та кар\'єра', desc: 'Ділова норвезька, листи, зустрічі, професійна лексика.' },
-    { id: 'study', label: '🎓 Навчання та іспити', desc: 'Підготовка до Norskprøve, вступ до університету.' },
-    { id: 'family', label: '👨‍👩‍👧‍👦 Сім\'я та друзі', desc: 'Спілкування з рідними, соціальна інтеграція.' },
-    { id: 'expert', label: '🧠 Експертний рівень', desc: 'Глибоке володіння мовою, робота з текстами та академічна мова.' },
+    { id: 'travel', label: '🗺️ Подорожі та спілкування', desc: 'Розмовна норвезька для туризму та повсякденного життя.',
+      label_en: '🗺️ Travel & communication', desc_en: 'Conversational Norwegian for tourism and everyday life.',
+      label_ru: '🗺️ Путешествия и общение', desc_ru: 'Разговорный норвежский для туризма и повседневной жизни.' },
+    { id: 'work', label: '💼 Робота та кар\'єра', desc: 'Ділова норвезька, листи, зустрічі, професійна лексика.',
+      label_en: '💼 Work & career', desc_en: 'Business Norwegian, emails, meetings, professional vocabulary.',
+      label_ru: '💼 Работа и карьера', desc_ru: 'Деловой норвежский, письма, встречи, профессиональная лексика.' },
+    { id: 'study', label: '🎓 Навчання та іспити', desc: 'Підготовка до Norskprøve, вступ до університету.',
+      label_en: '🎓 Studies & exams', desc_en: 'Preparing for Norskprøve, university admission.',
+      label_ru: '🎓 Учёба и экзамены', desc_ru: 'Подготовка к Norskprøve, поступление в университет.' },
+    { id: 'family', label: '👨‍👩‍👧‍👦 Сім\'я та друзі', desc: 'Спілкування з рідними, соціальна інтеграція.',
+      label_en: '👨‍👩‍👧‍👦 Family & friends', desc_en: 'Communicating with family, social integration.',
+      label_ru: '👨‍👩‍👧‍👦 Семья и друзья', desc_ru: 'Общение с близкими, социальная интеграция.' },
+    { id: 'expert', label: '🧠 Експертний рівень', desc: 'Глибоке володіння мовою, робота з текстами та академічна мова.',
+      label_en: '🧠 Expert level', desc_en: 'Deep language mastery, working with texts and academic language.',
+      label_ru: '🧠 Экспертный уровень', desc_ru: 'Глубокое владение языком, работа с текстами и академический язык.' },
 ];
 
 const STUDY_PLANS = {
     travel: {
-        A1: 'Фокус на базових фразах, покупках, їжі, транспорті. ~2-3 тижні.',
-        A2: 'Розмовні теми: напрямки, погода, ресторани. ~3-4 тижні.',
-        B1: 'Подорожі, бронювання, поради, опис місць. ~4-6 тижнів.',
-        B2: 'Складніші ситуації: оренда авто, екскурсії, культурні нюанси. ~6-8 тижнів.',
+        A1: { uk: "Фокус на базових фразах, покупках, їжі, транспорті. ~2-3 тижні.", en: "Focus on basic phrases, shopping, food, transport. ~2-3 weeks.", ru: "Фокус на базовых фразах, покупках, еде, транспорте. ~2-3 недели." },
+        A2: { uk: "Розмовні теми: напрямки, погода, ресторани. ~3-4 тижні.", en: "Conversational topics: directions, weather, restaurants. ~3-4 weeks.", ru: "Разговорные темы: направления, погода, рестораны. ~3-4 недели." },
+        B1: { uk: "Подорожі, бронювання, поради, опис місць. ~4-6 тижнів.", en: "Travel, bookings, advice, describing places. ~4-6 weeks.", ru: "Путешествия, бронирования, советы, описание мест. ~4-6 недель." },
+        B2: { uk: "Складніші ситуації: оренда авто, екскурсії, культурні нюанси. ~6-8 тижнів.", en: "More complex situations: car rental, tours, cultural nuances. ~6-8 weeks.", ru: "Более сложные ситуации: аренда авто, экскурсии, культурные нюансы. ~6-8 недель." },
     },
     work: {
-        A1: 'Базові ділові фрази, представлення, посади. ~2-3 тижні.',
-        A2: 'Листи, телефонні дзвінки, зустрічі. ~3-4 тижні.',
-        B1: 'Презентації, переговори, ділова переписка. ~4-6 тижнів.',
-        B2: 'Робочі проєкти, звіти, професійна лексика. ~6-8 тижнів.',
+        A1: { uk: "Базові ділові фрази, представлення, посади. ~2-3 тижні.", en: "Basic business phrases, introductions, job titles. ~2-3 weeks.", ru: "Базовые деловые фразы, представление, должности. ~2-3 недели." },
+        A2: { uk: "Листи, телефонні дзвінки, зустрічі. ~3-4 тижні.", en: "Emails, phone calls, meetings. ~3-4 weeks.", ru: "Письма, телефонные звонки, встречи. ~3-4 недели." },
+        B1: { uk: "Презентації, переговори, ділова переписка. ~4-6 тижнів.", en: "Presentations, negotiations, business correspondence. ~4-6 weeks.", ru: "Презентации, переговоры, деловая переписка. ~4-6 недель." },
+        B2: { uk: "Робочі проєкти, звіти, професійна лексика. ~6-8 тижнів.", en: "Work projects, reports, professional vocabulary. ~6-8 weeks.", ru: "Рабочие проекты, отчёты, профессиональная лексика. ~6-8 недель." },
     },
     study: {
-        A1: 'Основи граматики, читання простих текстів. ~3-4 тижні.',
-        A2: 'Розуміння простих текстів, базове письмо. ~4-6 тижнів.',
-        B1: 'Читання адаптованих текстів, письмові вправи. ~6-8 тижнів.',
-        B2: 'Підготовка до іспиту Norskprøve B1-B2. ~8-12 тижнів.',
-        C1: 'Поглиблена граматика, академічне письмо. ~10-14 тижнів.',
+        A1: { uk: "Основи граматики, читання простих текстів. ~3-4 тижні.", en: "Grammar basics, reading simple texts. ~3-4 weeks.", ru: "Основы грамматики, чтение простых текстов. ~3-4 недели." },
+        A2: { uk: "Розуміння простих текстів, базове письмо. ~4-6 тижнів.", en: "Understanding simple texts, basic writing. ~4-6 weeks.", ru: "Понимание простых текстов, базовое письмо. ~4-6 недель." },
+        B1: { uk: "Читання адаптованих текстів, письмові вправи. ~6-8 тижнів.", en: "Reading adapted texts, writing exercises. ~6-8 weeks.", ru: "Чтение адаптированных текстов, письменные упражнения. ~6-8 недель." },
+        B2: { uk: "Підготовка до іспиту Norskprøve B1-B2. ~8-12 тижнів.", en: "Preparing for the Norskprøve B1-B2 exam. ~8-12 weeks.", ru: "Подготовка к экзамену Norskprøve B1-B2. ~8-12 недель." },
+        C1: { uk: "Поглиблена граматика, академічне письмо. ~10-14 тижнів.", en: "Advanced grammar, academic writing. ~10-14 weeks.", ru: "Углублённая грамматика, академическое письмо. ~10-14 недель." },
     },
     family: {
-        A1: 'Сімейна лексика, привітання, повсякденні фрази. ~2-3 тижні.',
-        A2: 'Розмови про хобі, плани, спільні справи. ~3-4 тижні.',
-        B1: 'Розповіді про себе, сімейні історії, традиції. ~4-6 тижнів.',
+        A1: { uk: "Сімейна лексика, привітання, повсякденні фрази. ~2-3 тижні.", en: "Family vocabulary, greetings, everyday phrases. ~2-3 weeks.", ru: "Семейная лексика, приветствия, повседневные фразы. ~2-3 недели." },
+        A2: { uk: "Розмови про хобі, плани, спільні справи. ~3-4 тижні.", en: "Talking about hobbies, plans, shared activities. ~3-4 weeks.", ru: "Разговоры о хобби, планах, совместных делах. ~3-4 недели." },
+        B1: { uk: "Розповіді про себе, сімейні історії, традиції. ~4-6 тижнів.", en: "Talking about yourself, family stories, traditions. ~4-6 weeks.", ru: "Рассказы о себе, семейные истории, традиции. ~4-6 недель." },
     },
     expert: {
-        B2: 'Глибока граматика, стилістика, складні тексти. ~8-10 тижнів.',
-        C1: 'Академічна лексика, дискурс, нюанси мови. ~10-14 тижнів.',
-        C2: 'Майстерність: ідіоми, риторика, літературна мова. ~12-16 тижнів.',
-    }
+        B2: { uk: "Глибока граматика, стилістика, складні тексти. ~8-10 тижнів.", en: "Deep grammar, style, complex texts. ~8-10 weeks.", ru: "Глубокая грамматика, стилистика, сложные тексты. ~8-10 недель." },
+        C1: { uk: "Академічна лексика, дискурс, нюанси мови. ~10-14 тижнів.", en: "Academic vocabulary, discourse, language nuance. ~10-14 weeks.", ru: "Академическая лексика, дискурс, нюансы языка. ~10-14 недель." },
+        C2: { uk: "Майстерність: ідіоми, риторика, літературна мова. ~12-16 тижнів.", en: "Mastery: idioms, rhetoric, literary language. ~12-16 weeks.", ru: "Мастерство: идиомы, риторика, литературный язык. ~12-16 недель." },
+    },
 };
 
         // =====================================================================
@@ -1511,143 +1521,144 @@ const STUDY_PLANS = {
                     ["en", "en bil"],
                     ["ei", "ei bok"],
                     ["et", "et hus"]
-                ] }, ex: { q: "Оберіть артикль для 'katt'", opts: ["en", "ei", "et"], a: 0 } },
+                ] }, ex: { q: "Оберіть артикль для 'katt'", opts: ["en", "ei", "et"], a: 0 }, title_en: "Noun gender: en / ei / et", title_ru: "Род существительных: en / ei / et", exp_en: "Nouns have three genders.", exp_ru: "Существительные бывают трёх родов.", head_en: ["Gender", "Example"], head_ru: ["Род", "Пример"], q_en: "Choose the article for 'katt'", q_ru: "Выберите артикль для 'katt'" },
             { id: "gr2", level: "A1", title: "Означена форма", exp: "Додаємо закінчення.", table: { head: ["Неозначена", "Означена"], rows: [
                     ["en bil", "bilen"],
                     ["ei bok", "boka"],
                     ["et hus", "huset"]
-                ] }, ex: { q: "Означена форма від 'hus'", opts: ["huset", "husen", "hus"], a: 0 } },
+                ] }, ex: { q: "Означена форма від 'hus'", opts: ["huset", "husen", "hus"], a: 0 }, title_en: "Definite form", title_ru: "Определённая форма", exp_en: "We add an ending.", exp_ru: "Добавляем окончание.", head_en: ["Indefinite", "Definite"], head_ru: ["Неопределённая", "Определённая"], q_en: "Definite form of 'hus'", q_ru: "Определённая форма от 'hus'" },
             { id: "gr3", level: "A1", title: "Теперішній час дієслів", exp: "Дієслова в теперішньому часі мають -r.", table: { head: ["Особа", "Дієслово"], rows: [
                     ["jeg", "snakker"],
                     ["du", "snakker"],
                     ["han", "snakker"]
-                ] }, ex: { q: "Оберіть форму: Hun ___ norsk.", opts: ["snakke", "snakker", "snakket"], a: 1 } },
+                ] }, ex: { q: "Оберіть форму: Hun ___ norsk.", opts: ["snakke", "snakker", "snakket"], a: 1 }, title_en: "Present tense of verbs", title_ru: "Настоящее время глаголов", exp_en: "Verbs in the present tense end in -r.", exp_ru: "Глаголы в настоящем времени имеют окончание -r.", head_en: ["Person", "Verb"], head_ru: ["Лицо", "Глагол"], q_en: "Choose the form: Hun ___ norsk.", q_ru: "Выберите форму: Hun ___ norsk." },
             { id: "gr4", level: "A1", title: "Особові займенники", exp: "jeg, du, han, hun, vi, dere, de.", table: { head: ["Займенник", "Переклад"], rows: [
                     ["jeg", "я"],
                     ["du", "ти"],
                     ["han", "він"]
-                ] }, ex: { q: "Як сказати «вони»?", opts: ["dere", "de", "vi"], a: 1 } },
+                ] }, ex: { q: "Як сказати «вони»?", opts: ["dere", "de", "vi"], a: 1 }, title_en: "Personal pronouns", title_ru: "Личные местоимения", exp_en: "jeg, du, han, hun, vi, dere, de.", exp_ru: "jeg, du, han, hun, vi, dere, de.", head_en: ["Pronoun", "Translation"], head_ru: ["Местоимение", "Перевод"], q_en: "How do you say \"they\"?", q_ru: "Как сказать «они»?", rows_en: [["jeg","I"],["du","you"],["han","he"]], rows_ru: [["jeg","я"],["du","ты"],["han","он"]] },
             { id: "gr5", level: "A1", title: "Прикметники та узгодження", exp: "Прикметники узгоджуються з родом.", table: { head: ["Форма", "Приклад"], rows: [
                     ["en", "en rød bil"],
                     ["et", "et rødt hus"]
-                ] }, ex: { q: "Оберіть форму: et ___ hus (rød)", opts: ["rød", "rødt", "røde"], a: 1 } },
+                ] }, ex: { q: "Оберіть форму: et ___ hus (rød)", opts: ["rød", "rødt", "røde"], a: 1 }, title_en: "Adjectives and agreement", title_ru: "Прилагательные и согласование", exp_en: "Adjectives agree with gender.", exp_ru: "Прилагательные согласуются с родом.", head_en: ["Form", "Example"], head_ru: ["Форма", "Пример"], q_en: "Choose the form: et ___ hus (rød)", q_ru: "Выберите форму: et ___ hus (rød)" },
             { id: "gr6", level: "A1", title: "Множина іменників", exp: "Більшість додають -er.", table: { head: ["Однина", "Множина"], rows: [
                     ["en bil", "biler"],
                     ["et hus", "hus"]
-                ] }, ex: { q: "Множина від 'et bord'", opts: ["border", "bord", "bordene"], a: 1 } },
+                ] }, ex: { q: "Множина від 'et bord'", opts: ["border", "bord", "bordene"], a: 1 }, title_en: "Plural of nouns", title_ru: "Множественное число существительных", exp_en: "Most add -er.", exp_ru: "Большинство добавляют -er.", head_en: ["Singular", "Plural"], head_ru: ["Единственное", "Множественное"], q_en: "Plural of 'et bord'", q_ru: "Множественное число от 'et bord'" },
             { id: "gr7", level: "A1", title: "Заперечення з ikke", exp: "ikke після дієслова.", table: { head: ["Ствердження", "Заперечення"], rows: [
                     ["Jeg liker fisk.", "Jeg liker ikke fisk."]
-                ] }, ex: { q: "Оберіть заперечення", opts: ["Han ikke forstår.", "Han forstår ikke."], a: 1 } },
+                ] }, ex: { q: "Оберіть заперечення", opts: ["Han ikke forstår.", "Han forstår ikke."], a: 1 }, title_en: "Negation with ikke", title_ru: "Отрицание с ikke", exp_en: "ikke comes after the verb.", exp_ru: "ikke ставится после глагола.", head_en: ["Statement", "Negation"], head_ru: ["Утверждение", "Отрицание"], q_en: "Choose the negation", q_ru: "Выберите отрицание" },
             { id: "gr8", level: "A1", title: "Питальні слова", exp: "hva, hvem, hvor, når, hvorfor, hvordan.", table: { head: ["Слово", "Переклад"], rows: [
                     ["hva", "що"],
                     ["hvem", "хто"],
                     ["hvor", "де"]
-                ] }, ex: { q: "Слово для «чому»", opts: ["hvordan", "hvorfor", "hvor"], a: 1 } },
+                ] }, ex: { q: "Слово для «чому»", opts: ["hvordan", "hvorfor", "hvor"], a: 1 }, title_en: "Question words", title_ru: "Вопросительные слова", exp_en: "hva, hvem, hvor, når, hvorfor, hvordan.", exp_ru: "hva, hvem, hvor, når, hvorfor, hvordan.", head_en: ["Word", "Translation"], head_ru: ["Слово", "Перевод"], q_en: "The word for \"why\"", q_ru: "Слово для «почему»", rows_en: [["hva","what"],["hvem","who"],["hvor","where"]], rows_ru: [["hva","что"],["hvem","кто"],["hvor","где"]] },
             { id: "gr9", level: "A2", title: "Минулий час (preteritum)", exp: "Додаємо -et/-te або змінюємо корінь.", table: { head: ["Інфінітив", "Минулий"], rows: [
                     ["å snakke", "snakket"],
                     ["å gå", "gikk"]
-                ] }, ex: { q: "Минулий від 'å se'", opts: ["ser", "så", "sett"], a: 1 } },
+                ] }, ex: { q: "Минулий від 'å se'", opts: ["ser", "så", "sett"], a: 1 }, title_en: "Past tense (preteritum)", title_ru: "Прошедшее время (preteritum)", exp_en: "We add -et/-te or change the stem.", exp_ru: "Добавляем -et/-te или меняем корень.", head_en: ["Infinitive", "Past"], head_ru: ["Инфинитив", "Прошедшее"], q_en: "Past tense of 'å se'", q_ru: "Прошедшее время от 'å se'" },
             { id: "gr10", level: "A2", title: "Модальні дієслова", exp: "kan, må, skal, vil, bør + інфінітив без å.", table: { head: ["Модальне", "Значення"], rows: [
                     ["kan", "могти"],
                     ["må", "мусити"]
-                ] }, ex: { q: "Як сказати «я хочу»?", opts: ["Jeg vil", "Jeg må", "Jeg kan"], a: 0 } },
+                ] }, ex: { q: "Як сказати «я хочу»?", opts: ["Jeg vil", "Jeg må", "Jeg kan"], a: 0 }, title_en: "Modal verbs", title_ru: "Модальные глаголы", exp_en: "kan, må, skal, vil, bør + infinitive without å.", exp_ru: "kan, må, skal, vil, bør + инфинитив без å.", head_en: ["Modal", "Meaning"], head_ru: ["Модальный", "Значение"], q_en: "How do you say \"I want\"?", q_ru: "Как сказать «я хочу»?", rows_en: [["kan","can/be able to"],["må","must"]], rows_ru: [["kan","мочь"],["må","быть должным"]] },
             { id: "gr11", level: "A2", title: "Майбутній час", exp: "skal або vil + інфінітив.", table: { head: ["Конструкція", "Приклад"], rows: [
                     ["skal", "Jeg skal reise."],
                     ["vil", "Det vil regne."]
-                ] }, ex: { q: "Оберіть правильний варіант", opts: ["Jeg skal jobbe.", "Jeg skal å jobbe."], a: 0 } },
+                ] }, ex: { q: "Оберіть правильний варіант", opts: ["Jeg skal jobbe.", "Jeg skal å jobbe."], a: 0 }, title_en: "Future tense", title_ru: "Будущее время", exp_en: "skal or vil + infinitive.", exp_ru: "skal или vil + инфинитив.", head_en: ["Construction", "Example"], head_ru: ["Конструкция", "Пример"], q_en: "Choose the correct option", q_ru: "Выберите правильный вариант" },
             { id: "gr12", level: "A2", title: "Присвійні займенники", exp: "min/mi/mitt/mine тощо.", table: { head: ["Рід", "Форма"], rows: [
                     ["en", "min"],
                     ["ei", "mi"],
                     ["et", "mitt"]
-                ] }, ex: { q: "Форма для et-слова (мій)", opts: ["min", "mi", "mitt"], a: 2 } },
+                ] }, ex: { q: "Форма для et-слова (мій)", opts: ["min", "mi", "mitt"], a: 2 }, title_en: "Possessive pronouns", title_ru: "Притяжательные местоимения", exp_en: "min/mi/mitt/mine, etc.", exp_ru: "min/mi/mitt/mine и т. д.", head_en: ["Gender", "Form"], head_ru: ["Род", "Форма"], q_en: "Form for an et-word (my)", q_ru: "Форма для et-слова (мой)" },
             { id: "gr13", level: "A2", title: "Порядок слів V2", exp: "Дієслово завжди на другому місці.", table: { head: ["Речення"], rows: [
                     ["I dag går jeg på jobb."]
-                ] }, ex: { q: "Оберіть правильний порядок", opts: ["I dag jeg går.", "I dag går jeg."], a: 1 } },
+                ] }, ex: { q: "Оберіть правильний порядок", opts: ["I dag jeg går.", "I dag går jeg."], a: 1 }, title_en: "V2 word order", title_ru: "Порядок слов V2", exp_en: "The verb is always in second position.", exp_ru: "Глагол всегда стоит на втором месте.", head_en: ["Sentence"], head_ru: ["Предложение"], q_en: "Choose the correct word order", q_ru: "Выберите правильный порядок слов" },
             { id: "gr14", level: "B1", title: "Перфект (presens perfektum)", exp: "har + партисип II.", table: { head: ["Інфінітив", "Перфект"], rows: [
                     ["å snakke", "har snakket"],
                     ["å gå", "har gått"]
-                ] }, ex: { q: "Оберіть перфект: Jeg ___ spist.", opts: ["har", "hadde", "er"], a: 0 } },
+                ] }, ex: { q: "Оберіть перфект: Jeg ___ spist.", opts: ["har", "hadde", "er"], a: 0 }, title_en: "Present perfect (presens perfektum)", title_ru: "Перфект (presens perfektum)", exp_en: "har + past participle.", exp_ru: "har + причастие II.", head_en: ["Infinitive", "Perfect"], head_ru: ["Инфинитив", "Перфект"], q_en: "Choose the perfect: Jeg ___ spist.", q_ru: "Выберите перфект: Jeg ___ spist." },
             { id: "gr15", level: "B1", title: "Плюсквамперфект", exp: "hadde + партисип.", table: { head: ["Приклад"], rows: [
                     ["Hun hadde spist da jeg kom."]
-                ] }, ex: { q: "Оберіть правильну форму", opts: ["har", "hadde", "var"], a: 1 } },
+                ] }, ex: { q: "Оберіть правильну форму", opts: ["har", "hadde", "var"], a: 1 }, title_en: "Past perfect (pluperfect)", title_ru: "Плюсквамперфект", exp_en: "hadde + participle.", exp_ru: "hadde + причастие.", head_en: ["Example"], head_ru: ["Пример"], q_en: "Choose the correct form", q_ru: "Выберите правильную форму" },
             { id: "gr16", level: "B1", title: "Підрядні речення", exp: "ikke перед дієсловом.", table: { head: ["Приклад"], rows: [
                     ["...fordi han ikke kommer."]
-                ] }, ex: { q: "Оберіть правильне підрядне", opts: ["...at han ikke vet.", "...at han vet ikke."], a: 0 } },
+                ] }, ex: { q: "Оберіть правильне підрядне", opts: ["...at han ikke vet.", "...at han vet ikke."], a: 0 }, title_en: "Subordinate clauses", title_ru: "Придаточные предложения", exp_en: "ikke goes before the verb.", exp_ru: "ikke ставится перед глаголом.", head_en: ["Example"], head_ru: ["Пример"], q_en: "Choose the correct subordinate clause", q_ru: "Выберите правильное придаточное" },
             { id: "gr17", level: "B1", title: "Відносний займенник som", exp: "som не змінюється.", table: { head: ["Приклад"], rows: [
                     ["Mannen som bor her."]
-                ] }, ex: { q: "Заповніть: Mannen ___ bor her", opts: ["hvem", "som", "hvilken"], a: 1 } },
+                ] }, ex: { q: "Заповніть: Mannen ___ bor her", opts: ["hvem", "som", "hvilken"], a: 1 }, title_en: "Relative pronoun som", title_ru: "Относительное местоимение som", exp_en: "som doesn't change form.", exp_ru: "som не изменяется.", head_en: ["Example"], head_ru: ["Пример"], q_en: "Fill in: Mannen ___ bor her", q_ru: "Заполните: Mannen ___ bor her" },
             { id: "gr18", level: "B1", title: "Порівняння прикметників", exp: "-ere / -est або неправильні форми.", table: { head: ["Основна", "Вищий", "Найвищий"], rows: [
                     ["stor", "større", "størst"],
                     ["god", "bedre", "best"]
-                ] }, ex: { q: "Найвищий від 'god'", opts: ["best", "bedre", "godest"], a: 0 } },
+                ] }, ex: { q: "Найвищий від 'god'", opts: ["best", "bedre", "godest"], a: 0 }, title_en: "Comparison of adjectives", title_ru: "Сравнение прилагательных", exp_en: "-ere / -est or irregular forms.", exp_ru: "-ere / -est или неправильные формы.", head_en: ["Base", "Comparative", "Superlative"], head_ru: ["Основная", "Сравнительная", "Превосходная"], q_en: "Superlative of 'god'", q_ru: "Превосходная степень от 'god'" },
             { id: "gr19", level: "B2", title: "Пасивний стан", exp: "bli + партисип або s-пасив.", table: { head: ["Актив", "Пасив"], rows: [
                     ["Han skriver brevet.", "Brevet blir skrevet."]
-                ] }, ex: { q: "Оберіть пасив", opts: ["Brevet blir skrevet.", "Han skriver brevet."], a: 0 } },
+                ] }, ex: { q: "Оберіть пасив", opts: ["Brevet blir skrevet.", "Han skriver brevet."], a: 0 }, title_en: "Passive voice", title_ru: "Пассивный залог", exp_en: "bli + participle, or the s-passive.", exp_ru: "bli + причастие или s-пассив.", head_en: ["Active", "Passive"], head_ru: ["Актив", "Пассив"], q_en: "Choose the passive form", q_ru: "Выберите пассивную форму" },
             { id: "gr20", level: "B2", title: "Умовний спосіб", exp: "Hvis + preteritum, ... ville + інфінітив.", table: { head: ["Приклад"], rows: [
                     ["Hvis jeg hadde tid, ville jeg reist."]
-                ] }, ex: { q: "Заповніть: Hvis jeg ___ mer penger...", opts: ["har", "hadde", "hadde hatt"], a: 1 } },
+                ] }, ex: { q: "Заповніть: Hvis jeg ___ mer penger...", opts: ["har", "hadde", "hadde hatt"], a: 1 }, title_en: "Conditional mood", title_ru: "Условное наклонение", exp_en: "Hvis + past tense, ... ville + infinitive.", exp_ru: "Hvis + прошедшее время, ... ville + инфинитив.", head_en: ["Example"], head_ru: ["Пример"], q_en: "Fill in: Hvis jeg ___ mer penger...", q_ru: "Заполните: Hvis jeg ___ mer penger..." },
             { id: "gr21", level: "B2", title: "Непряма мова", exp: "Зсув часу назад.", table: { head: ["Пряма", "Непряма"], rows: [
                     ["«Jeg er trøtt», sa hun.", "Hun sa at hun var trøtt."]
-                ] }, ex: { q: "Оберіть непряму мову", opts: ["Hun sa at hun var trøtt.", "Hun sa at hun er trøtt."], a: 0 } },
+                ] }, ex: { q: "Оберіть непряму мову", opts: ["Hun sa at hun var trøtt.", "Hun sa at hun er trøtt."], a: 0 }, title_en: "Reported (indirect) speech", title_ru: "Косвенная речь", exp_en: "Tense shifts back.", exp_ru: "Сдвиг времени назад.", head_en: ["Direct", "Indirect"], head_ru: ["Прямая", "Косвенная"], q_en: "Choose the indirect speech", q_ru: "Выберите косвенную речь" },
             { id: "gr22", level: "B2", title: "Сполучники підрядності", exp: "selv om, mens, siden, ettersom.", table: { head: ["Сполучник", "Значення"], rows: [
                     ["selv om", "хоча"],
                     ["mens", "тоді як"]
-                ] }, ex: { q: "Оберіть сполучник: ___ det regnet, gikk vi tur.", opts: ["Selv om", "Fordi", "Når"], a: 0 } },
+                ] }, ex: { q: "Оберіть сполучник: ___ det regnet, gikk vi tur.", opts: ["Selv om", "Fordi", "Når"], a: 0 }, title_en: "Subordinating conjunctions", title_ru: "Подчинительные союзы", exp_en: "selv om, mens, siden, ettersom.", exp_ru: "selv om, mens, siden, ettersom.", head_en: ["Conjunction", "Meaning"], head_ru: ["Союз", "Значение"], q_en: "Choose the conjunction: ___ det regnet, gikk vi tur.", q_ru: "Выберите союз: ___ det regnet, gikk vi tur.", rows_en: [["selv om","even though"],["mens","while"]], rows_ru: [["selv om","хотя"],["mens","в то время как"]] },
             { id: "gr23", level: "C1", title: "Bokmål vs nynorsk", exp: "Відмінності: jeg/eg, ikke/ikkje.", table: { head: ["Bokmål", "Nynorsk"], rows: [
                     ["jeg", "eg"],
                     ["ikke", "ikkje"]
-                ] }, ex: { q: "Як буде «я» у nynorsk?", opts: ["jeg", "eg", "meg"], a: 1 } },
+                ] }, ex: { q: "Як буде «я» у nynorsk?", opts: ["jeg", "eg", "meg"], a: 1 }, title_en: "Bokmål vs Nynorsk", title_ru: "Bokmål против nynorsk", exp_en: "Differences: jeg/eg, ikke/ikkje.", exp_ru: "Отличия: jeg/eg, ikke/ikkje.", head_en: ["Bokmål", "Nynorsk"], head_ru: ["Bokmål", "Nynorsk"], q_en: "How is \"I\" said in Nynorsk?", q_ru: "Как будет «я» в nynorsk?" },
             { id: "gr24", level: "C1", title: "Партиципіальні звороти", exp: "Прикметники з -ende/-t.", table: { head: ["Приклад"], rows: [
                     ["Den kommende uken."]
-                ] }, ex: { q: "Партисип від 'å komme'", opts: ["kommet", "kommende", "kommer"], a: 1 } },
+                ] }, ex: { q: "Партисип від 'å komme'", opts: ["kommet", "kommende", "kommer"], a: 1 }, title_en: "Participial phrases", title_ru: "Причастные обороты", exp_en: "Adjectives with -ende/-t.", exp_ru: "Прилагательные с -ende/-t.", head_en: ["Example"], head_ru: ["Пример"], q_en: "Participle of 'å komme'", q_ru: "Причастие от 'å komme'" },
             { id: "gr25", level: "C1", title: "Номіналізація", exp: "Дієслова → іменники.", table: { head: ["Дієслово", "Іменник"], rows: [
                     ["å utvikle", "utvikling"],
                     ["å diskutere", "diskusjon"]
-                ] }, ex: { q: "Іменник від 'å analysere'", opts: ["analyse", "analysering", "analysjon"], a: 0 } },
+                ] }, ex: { q: "Іменник від 'å analysere'", opts: ["analyse", "analysering", "analysjon"], a: 0 }, title_en: "Nominalization", title_ru: "Номинализация", exp_en: "Verbs → nouns.", exp_ru: "Глаголы → существительные.", head_en: ["Verb", "Noun"], head_ru: ["Глагол", "Существительное"], q_en: "Noun form of 'å analysere'", q_ru: "Существительное от 'å analysere'" },
             { id: "gr26", level: "C2", title: "Модальні частинки", exp: "jo, nok, vel, liksom.", table: { head: ["Частинка", "Значення"], rows: [
                     ["nok", "напевно"],
                     ["vel", "мабуть"]
-                ] }, ex: { q: "Частинка для «напевно»", opts: ["jo", "nok", "liksom"], a: 1 } },
+                ] }, ex: { q: "Частинка для «напевно»", opts: ["jo", "nok", "liksom"], a: 1 }, title_en: "Modal particles", title_ru: "Модальные частицы", exp_en: "jo, nok, vel, liksom.", exp_ru: "jo, nok, vel, liksom.", head_en: ["Particle", "Meaning"], head_ru: ["Частица", "Значение"], q_en: "The particle for \"probably\"", q_ru: "Частица для «наверное»", rows_en: [["nok","probably"],["vel","I suppose"]], rows_ru: [["nok","наверное"],["vel","пожалуй"]] },
             { id: "gr27", level: "C2", title: "Стилістичні регістри", exp: "Формальна vs розмовна лексика.", table: { head: ["Формально", "Розмовно"], rows: [
                     ["å anskaffe", "å kjøpe"],
                     ["å avslutte", "å slutte"]
-                ] }, ex: { q: "Формальне слово для «купити»", opts: ["kjøpe", "anskaffe", "handle"], a: 1 } },
+                ] }, ex: { q: "Формальне слово для «купити»", opts: ["kjøpe", "anskaffe", "handle"], a: 1 }, title_en: "Stylistic registers", title_ru: "Стилистические регистры", exp_en: "Formal vs. colloquial vocabulary.", exp_ru: "Формальная и разговорная лексика.", head_en: ["Formal", "Colloquial"], head_ru: ["Формально", "Разговорно"], q_en: "The formal word for \"to buy\"", q_ru: "Формальное слово для «купить»" },
         ];
 
         // =====================================================================
         //  LEVEL TEST (ПОКРАЩЕНИЙ – 30 питань)
         // =====================================================================
         const LEVEL_TEST = [
-            { lvl: "A1", q: "«Привіт» норвезькою", opts: ["Hei", "Ha det", "Takk"], a: 0 },
-            { lvl: "A1", q: "«Дякую» — це", opts: ["Takk", "Unnskyld", "Vær så snill"], a: 0 },
-            { lvl: "A1", q: "«En» означає", opts: ["один", "два", "три"], a: 0 },
-            { lvl: "A1", q: "«Mor» — це", opts: ["мати", "батько", "сестра"], a: 0 },
-            { lvl: "A1", q: "«Rød» — це колір", opts: ["червоний", "синій", "жовтий"], a: 0 },
-            { lvl: "A2", q: "«Butikk» означає", opts: ["магазин", "школа", "лікарня"], a: 0 },
-            { lvl: "A2", q: "«Jobb» — це", opts: ["робота", "хобі", "відпустка"], a: 0 },
-            { lvl: "A2", q: "Минулий час від «å gå»", opts: ["går", "gikk", "gått"], a: 1 },
-            { lvl: "A2", q: "Оберіть правильний порядок слів", opts: ["I dag jeg går.", "I dag går jeg."], a: 1 },
-            { lvl: "A2", q: "Як сказати «я хочу»?", opts: ["Jeg vil", "Jeg må", "Jeg kan"], a: 0 },
-            { lvl: "A2", q: "Оберіть правильний артикль для 'hus'", opts: ["en", "ei", "et"], a: 2 },
-            { lvl: "B1", q: "«Flyplass» — це", opts: ["аеропорт", "вокзал", "порт"], a: 0 },
-            { lvl: "B1", q: "«Sykehus» — це", opts: ["лікарня", "аптека", "поліклініка"], a: 0 },
-            { lvl: "B1", q: "Перфект від «å spise»", opts: ["har spist", "har spise", "spiste"], a: 0 },
-            { lvl: "B1", q: "Найвищий ступінь від «god»", opts: ["best", "bedre", "godest"], a: 0 },
-            { lvl: "B1", q: "«Å forstå» означає", opts: ["розуміти", "говорити", "писати"], a: 0 },
-            { lvl: "B1", q: "«Miljø» — це", opts: ["довкілля", "економіка", "політика"], a: 0 },
-            { lvl: "B2", q: "«Regjering» означає", opts: ["уряд", "парламент", "міністр"], a: 0 },
-            { lvl: "B2", q: "«Økonomi» — це", opts: ["економіка", "політика", "культура"], a: 0 },
-            { lvl: "B2", q: "Пасив від «Han skriver brevet.»", opts: ["Brevet blir skrevet.", "Brevet skrives."], a: 0 },
-            { lvl: "B2", q: "Умовний спосіб: Hvis jeg ___ tid...", opts: ["har", "hadde", "hadde hatt"], a: 1 },
-            { lvl: "B2", q: "«Forskning» означає", opts: ["дослідження", "освіта", "культура"], a: 0 },
-            { lvl: "C1", q: "«Imidlertid» означає", opts: ["однак", "крім того", "отже"], a: 0 },
-            { lvl: "C1", q: "«Å antyde» — це", opts: ["натякати", "стверджувати", "заперечувати"], a: 0 },
-            { lvl: "C1", q: "Іменник від «å analysere»", opts: ["analyse", "analysering", "analysjon"], a: 0 },
-            { lvl: "C1", q: "Як буде «я» у nynorsk?", opts: ["jeg", "eg", "meg"], a: 1 },
-            { lvl: "C1", q: "«Eksistens» — це", opts: ["існування", "свідомість", "етика"], a: 0 },
-            { lvl: "C2", q: "«Å ta beina på nakken» означає", opts: ["втекти", "бігти", "впасти"], a: 0 },
-            { lvl: "C2", q: "«Nok» — це частинка зі значенням", opts: ["напевно", "адже", "мабуть"], a: 0 },
-            { lvl: "C2", q: "Формальне слово для «купити»", opts: ["kjøpe", "anskaffe", "handle"], a: 1 },
+            { lvl: "A1", q: "«Привіт» норвезькою", opts: ["Hei", "Ha det", "Takk"], a: 0, q_en: "\"Hi\" in Norwegian", opts_en: ["Hei", "Ha det", "Takk"], q_ru: "«Привет» по-норвежски", opts_ru: ["Hei", "Ha det", "Takk"] },
+            { lvl: "A1", q: "«Дякую» — це", opts: ["Takk", "Unnskyld", "Vær så snill"], a: 0, q_en: "\"Thanks\" is", opts_en: ["Takk", "Unnskyld", "Vær så snill"], q_ru: "«Спасибо» — это", opts_ru: ["Takk", "Unnskyld", "Vær så snill"] },
+            { lvl: "A1", q: "«En» означає", opts: ["один", "два", "три"], a: 0, q_en: "\"En\" means", opts_en: ["one", "two", "three"], q_ru: "«En» означает", opts_ru: ["один", "два", "три"] },
+            { lvl: "A1", q: "«Mor» — це", opts: ["мати", "батько", "сестра"], a: 0, q_en: "\"Mor\" is", opts_en: ["mother", "father", "sister"], q_ru: "«Mor» — это", opts_ru: ["мать", "отец", "сестра"] },
+            { lvl: "A1", q: "«Rød» — це колір", opts: ["червоний", "синій", "жовтий"], a: 0, q_en: "\"Rød\" is the color", opts_en: ["red", "blue", "yellow"], q_ru: "«Rød» — это цвет", opts_ru: ["красный", "синий", "жёлтый"] },
+            { lvl: "A2", q: "«Butikk» означає", opts: ["магазин", "школа", "лікарня"], a: 0, q_en: "\"Butikk\" means", opts_en: ["shop", "school", "hospital"], q_ru: "«Butikk» означает", opts_ru: ["магазин", "школа", "больница"] },
+            { lvl: "A2", q: "«Jobb» — це", opts: ["робота", "хобі", "відпустка"], a: 0, q_en: "\"Jobb\" is", opts_en: ["job", "hobby", "vacation"], q_ru: "«Jobb» — это", opts_ru: ["работа", "хобби", "отпуск"] },
+            { lvl: "A2", q: "Минулий час від «å gå»", opts: ["går", "gikk", "gått"], a: 1, q_en: "Past tense of \"å gå\"", opts_en: ["går", "gikk", "gått"], q_ru: "Прошедшее время от «å gå»", opts_ru: ["går", "gikk", "gått"] },
+            { lvl: "A2", q: "Оберіть правильний порядок слів", opts: ["I dag jeg går.", "I dag går jeg."], a: 1, q_en: "Choose the correct word order", opts_en: ["I dag jeg går.", "I dag går jeg."], q_ru: "Выберите правильный порядок слов", opts_ru: ["I dag jeg går.", "I dag går jeg."] },
+            { lvl: "A2", q: "Як сказати «я хочу»?", opts: ["Jeg vil", "Jeg må", "Jeg kan"], a: 0, q_en: "How do you say \"I want\"?", opts_en: ["Jeg vil", "Jeg må", "Jeg kan"], q_ru: "Как сказать «я хочу»?", opts_ru: ["Jeg vil", "Jeg må", "Jeg kan"] },
+            { lvl: "A2", q: "Оберіть правильний артикль для 'hus'", opts: ["en", "ei", "et"], a: 2, q_en: "Choose the correct article for 'hus'", opts_en: ["en", "ei", "et"], q_ru: "Выберите правильный артикль для 'hus'", opts_ru: ["en", "ei", "et"] },
+            { lvl: "B1", q: "«Flyplass» — це", opts: ["аеропорт", "вокзал", "порт"], a: 0, q_en: "\"Flyplass\" is", opts_en: ["airport", "train station", "port"], q_ru: "«Flyplass» — это", opts_ru: ["аэропорт", "вокзал", "порт"] },
+            { lvl: "B1", q: "«Sykehus» — це", opts: ["лікарня", "аптека", "поліклініка"], a: 0, q_en: "\"Sykehus\" is", opts_en: ["hospital", "pharmacy", "clinic"], q_ru: "«Sykehus» — это", opts_ru: ["больница", "аптека", "поликлиника"] },
+            { lvl: "B1", q: "Перфект від «å spise»", opts: ["har spist", "har spise", "spiste"], a: 0, q_en: "Perfect tense of \"å spise\"", opts_en: ["har spist", "har spise", "spiste"], q_ru: "Перфект от «å spise»", opts_ru: ["har spist", "har spise", "spiste"] },
+            { lvl: "B1", q: "Найвищий ступінь від «god»", opts: ["best", "bedre", "godest"], a: 0, q_en: "Superlative of \"god\"", opts_en: ["best", "bedre", "godest"], q_ru: "Превосходная степень от «god»", opts_ru: ["best", "bedre", "godest"] },
+            { lvl: "B1", q: "«Å forstå» означає", opts: ["розуміти", "говорити", "писати"], a: 0, q_en: "\"Å forstå\" means", opts_en: ["to understand", "to speak", "to write"], q_ru: "«Å forstå» означает", opts_ru: ["понимать", "говорить", "писать"] },
+            { lvl: "B1", q: "«Miljø» — це", opts: ["довкілля", "економіка", "політика"], a: 0, q_en: "\"Miljø\" is", opts_en: ["environment", "economy", "politics"], q_ru: "«Miljø» — это", opts_ru: ["окружающая среда", "экономика", "политика"] },
+            { lvl: "B2", q: "«Regjering» означає", opts: ["уряд", "парламент", "міністр"], a: 0, q_en: "\"Regjering\" means", opts_en: ["government", "parliament", "minister"], q_ru: "«Regjering» означает", opts_ru: ["правительство", "парламент", "министр"] },
+            { lvl: "B2", q: "«Økonomi» — це", opts: ["економіка", "політика", "культура"], a: 0, q_en: "\"Økonomi\" is", opts_en: ["economy", "politics", "culture"], q_ru: "«Økonomi» — это", opts_ru: ["экономика", "политика", "культура"] },
+            { lvl: "B2", q: "Пасив від «Han skriver brevet.»", opts: ["Brevet blir skrevet.", "Brevet skrives."], a: 0, q_en: "Passive of \"Han skriver brevet.\"", opts_en: ["Brevet blir skrevet.", "Brevet skrives."], q_ru: "Пассив от «Han skriver brevet.»", opts_ru: ["Brevet blir skrevet.", "Brevet skrives."] },
+            { lvl: "B2", q: "Умовний спосіб: Hvis jeg ___ tid...", opts: ["har", "hadde", "hadde hatt"], a: 1, q_en: "Conditional: Hvis jeg ___ tid...", opts_en: ["har", "hadde", "hadde hatt"], q_ru: "Условное наклонение: Hvis jeg ___ tid...", opts_ru: ["har", "hadde", "hadde hatt"] },
+            { lvl: "B2", q: "«Forskning» означає", opts: ["дослідження", "освіта", "культура"], a: 0, q_en: "\"Forskning\" means", opts_en: ["research", "education", "culture"], q_ru: "«Forskning» означает", opts_ru: ["исследование", "образование", "культура"] },
+            { lvl: "C1", q: "«Imidlertid» означає", opts: ["однак", "крім того", "отже"], a: 0, q_en: "\"Imidlertid\" means", opts_en: ["however", "besides", "therefore"], q_ru: "«Imidlertid» означает", opts_ru: ["однако", "кроме того", "следовательно"] },
+            { lvl: "C1", q: "«Å antyde» — це", opts: ["натякати", "стверджувати", "заперечувати"], a: 0, q_en: "\"Å antyde\" is", opts_en: ["to imply", "to assert", "to deny"], q_ru: "«Å antyde» — это", opts_ru: ["намекать", "утверждать", "отрицать"] },
+            { lvl: "C1", q: "Іменник від «å analysere»", opts: ["analyse", "analysering", "analysjon"], a: 0, q_en: "Noun form of \"å analysere\"", opts_en: ["analyse", "analysering", "analysjon"], q_ru: "Существительное от «å analysere»", opts_ru: ["analyse", "analysering", "analysjon"] },
+            { lvl: "C1", q: "Як буде «я» у nynorsk?", opts: ["jeg", "eg", "meg"], a: 1, q_en: "How is \"I\" said in Nynorsk?", opts_en: ["jeg", "eg", "meg"], q_ru: "Как будет «я» в nynorsk?", opts_ru: ["jeg", "eg", "meg"] },
+            { lvl: "C1", q: "«Eksistens» — це", opts: ["існування", "свідомість", "етика"], a: 0, q_en: "\"Eksistens\" is", opts_en: ["existence", "consciousness", "ethics"], q_ru: "«Eksistens» — это", opts_ru: ["существование", "сознание", "этика"] },
+            { lvl: "C2", q: "«Å ta beina på nakken» означає", opts: ["втекти", "бігти", "впасти"], a: 0, q_en: "\"Å ta beina på nakken\" means", opts_en: ["to flee", "to run", "to fall"], q_ru: "«Å ta beina på nakken» означает", opts_ru: ["сбежать", "бежать", "упасть"] },
+            { lvl: "C2", q: "«Nok» — це частинка зі значенням", opts: ["напевно", "адже", "мабуть"], a: 0, q_en: "\"Nok\" is a particle meaning", opts_en: ["probably", "after all", "I suppose"], q_ru: "«Nok» — это частица со значением", opts_ru: ["наверное", "ведь", "пожалуй"] },
+            { lvl: "C2", q: "Формальне слово для «купити»", opts: ["kjøpe", "anskaffe", "handle"], a: 1, q_en: "The formal word for \"to buy\"", opts_en: ["kjøpe", "anskaffe", "handle"], q_ru: "Формальное слово для «купить»", opts_ru: ["kjøpe", "anskaffe", "handle"] }
+        
         ];
 
         const TEST_TIERS = ["A1", "A2", "B1", "B2", "C1", "C2"];

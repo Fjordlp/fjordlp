@@ -85,3 +85,32 @@ function achievementDesc(a) {
     const tr = ACHIEVEMENT_I18N[a.id];
     return (tr && tr.desc[lang]) || a.desc;
 }
+
+function goalLabel(g) {
+    if (!g) return '';
+    const lang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+    if (lang === 'en') return g.label_en || g.label;
+    if (lang === 'ru') return g.label_ru || g.label;
+    return g.label;
+}
+function goalDesc(g) {
+    const lang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+    if (lang === 'en') return g.desc_en || g.desc;
+    if (lang === 'ru') return g.desc_ru || g.desc;
+    return g.desc;
+}
+
+function grammarLocalized(g) {
+    const lang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+    if (lang === 'uk') {
+        return { title: g.title, exp: g.exp, head: g.table.head, rows: g.table.rows, q: g.ex.q };
+    }
+    const suf = lang === 'en' ? '_en' : '_ru';
+    return {
+        title: g['title' + suf] || g.title,
+        exp: g['exp' + suf] || g.exp,
+        head: g['head' + suf] || g.table.head,
+        rows: g['rows' + suf] || g.table.rows,
+        q: g['q' + suf] || g.ex.q,
+    };
+}

@@ -6,14 +6,21 @@ function shouldShowOnboarding() {
 }
 
 function getStudyPlan(level, goalId) {
+    const lang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+    const noGoalMsg = { uk: 'Оберіть мету, щоб отримати план навчання.', en: 'Choose a goal to get a study plan.', ru: 'Выберите цель, чтобы получить план обучения.' }[lang];
+    const noPlanMsg = { uk: 'План буде складено після визначення рівня.', en: 'The plan will be created once your level is determined.', ru: 'План будет составлен после определения уровня.' }[lang];
     const goal = STUDY_PLANS[goalId];
-    if (!goal) return 'Оберіть мету, щоб отримати план навчання.';
+    if (!goal) return noGoalMsg;
     const levelIdx = LEVELS.indexOf(level);
     for (let i = levelIdx; i < LEVELS.length; i++) {
         const lv = LEVELS[i];
-        if (goal[lv]) return goal[lv];
+        if (goal[lv]) {
+            const entry = goal[lv];
+            if (typeof entry === 'string') return entry; // старі дані без перекладу (про всяк випадок)
+            return entry[lang] || entry.uk;
+        }
     }
-    return 'План буде складено після визначення рівня.';
+    return noPlanMsg;
 }
 
 function getLevelDisplay(level) {
@@ -207,8 +214,34 @@ function getLevelRecommendation() {
             STATE.srs[key] = s;
             if (!STATE.stats.wordsSeen) STATE.stats.wordsSeen = {};
             STATE.stats.wordsSeen[key] = (STATE.stats.wordsSeen[key] || 0) + 1;
+            bumpDailyGoal(1);
             updateState();
             if (wasNew && grade !== 'again') { addXP(10, 'new_word'); } // +10 XP за нове вивчене слово
+        }
+
+        // ---- Щоденна ціль (окремо від стріку — вимірює саме СЬОГОДНІШНЮ активність) ----
+        const DAILY_GOAL_TARGET = 10; // скільки дій (карток/питань) треба сьогодні для завершення цілі
+
+        function getDailyGoal() {
+            if (!STATE) return { count: 0, target: DAILY_GOAL_TARGET, done: false, pct: 0 };
+            const today = todayStr();
+            if (!STATE.dailyGoal || STATE.dailyGoal.date !== today) {
+                STATE.dailyGoal = { date: today, count: 0, rewardGiven: false };
+            }
+            const count = STATE.dailyGoal.count || 0;
+            const pct = Math.min(100, Math.round((count / DAILY_GOAL_TARGET) * 100));
+            return { count, target: DAILY_GOAL_TARGET, done: count >= DAILY_GOAL_TARGET, pct };
+        }
+
+        // Викликається з будь-якої "навчальної дії" (картка, питання тесту тощо).
+        function bumpDailyGoal(n) {
+            const goal = getDailyGoal(); // гарантує, що STATE.dailyGoal ініціалізовано й актуальне на сьогодні
+            STATE.dailyGoal.count += (n || 1);
+            if (STATE.dailyGoal.count >= DAILY_GOAL_TARGET && !STATE.dailyGoal.rewardGiven) {
+                STATE.dailyGoal.rewardGiven = true;
+                toast('🎉 Щоденну ціль виконано! +25 XP');
+                addXP(25, 'daily_goal');
+            }
         }
 
         function getWordStatus(word, level) {

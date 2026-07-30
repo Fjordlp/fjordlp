@@ -29,6 +29,24 @@
 
             toggleLink.onclick = switchMode;
 
+            // ---- Hero-кнопки лендингу ----
+            const heroTryBtn = document.getElementById('heroTryBtn');
+            if (heroTryBtn) {
+                heroTryBtn.onclick = () => document.getElementById('guestBtn').click(); // нуль тертя — одразу в застосунок
+            }
+            const heroLoginBtn = document.getElementById('heroLoginBtn');
+            if (heroLoginBtn) {
+                heroLoginBtn.onclick = () => {
+                    document.getElementById('authBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    loginInput.focus();
+                };
+            }
+            // Маленька превʼю-версія тролля на лендингу (та сама графіка, що й у застосунку)
+            const heroTrollEl = document.getElementById('heroTroll');
+            if (heroTrollEl && typeof trollSVG === 'function') {
+                heroTrollEl.innerHTML = trollSVG('happy', 88, {});
+            }
+
             // Гостьовий вхід
             document.getElementById('guestBtn').onclick = () => {
                 let guestState = getGuestState();
@@ -58,6 +76,7 @@
                 authPage.style.display = 'none';
                 app.classList.add('active');
                 initAssistantWidget();
+                checkAndApplyStreakFreeze();
                 if (shouldShowOnboarding()) {
     navigate('onboarding');
 } else {
@@ -106,6 +125,7 @@ document.getElementById('forgotPasswordLink').onclick = async () => {
     authPage.style.display = 'none';
     app.classList.add('active');
     initAssistantWidget();
+    checkAndApplyStreakFreeze();
     if (shouldShowOnboarding()) {
     navigate('onboarding');
 } else {
@@ -129,6 +149,7 @@ document.getElementById('forgotPasswordLink').onclick = async () => {
                 authPage.style.display = 'none';
                 app.classList.add('active');
                 initAssistantWidget();
+                checkAndApplyStreakFreeze();
                 navigate('home');
             }
         }

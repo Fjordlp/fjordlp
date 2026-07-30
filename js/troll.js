@@ -251,6 +251,39 @@
             return `<svg viewBox="0 0 120 120" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="120" height="120" rx="16" fill="var(--frost,#FBFCFA)"/>${content}</svg>`;
         }
 
+        // Перевіряє, чи є розрив рівно в 1 пропущений день, і якщо є вільна
+        // заморозка — тихо "затуляє" цей день, зберігаючи серію. Викликається
+        // раз при вході в застосунок (не на кожен рендер).
+        function checkAndApplyStreakFreeze() {
+            if (!STATE.stats) STATE.stats = { activityDates: [], bestStreak: 0 };
+            if (typeof STATE.streakFreezes !== 'number') STATE.streakFreezes = 0;
+            if (STATE.streakFreezes <= 0) return false;
+
+            const dates = new Set(STATE.stats.activityDates || []);
+            const today = todayStr();
+            const y = new Date(); y.setDate(y.getDate() - 1);
+            const twoAgo = new Date(); twoAgo.setDate(twoAgo.getDate() - 2);
+            const yesterday = todayStr(y);
+            const dayBefore = todayStr(twoAgo);
+
+            // Розрив рівно в 1 день: позавчора активність була, вчора — ні,
+            // сьогодні ще нічого не позначено. Це і є момент, коли серія
+            // щойно готова обнулитись — рятуємо її заморозкою.
+            if (dates.has(dayBefore) && !dates.has(yesterday) && !dates.has(today)) {
+                STATE.stats.activityDates.push(yesterday);
+                STATE.stats.activityDates.sort();
+                STATE.streakFreezes--;
+                recomputeStreak();
+                updateState();
+                const lang2 = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+                const usedMsg = { uk: 'Заморозку використано — серія', en: 'Freeze used — your streak of', ru: 'Заморозка использована — серия' }[lang2];
+                const savedMsg = { uk: 'врятована!', en: 'is saved!', ru: 'спасена!' }[lang2];
+                toast(`🧊 ${usedMsg} ${STATE.streak} 🔥 ${savedMsg}`);
+                return true;
+            }
+            return false;
+        }
+
         function checkTrollUnlocks() {
             const { lvl } = xpProgress(STATE.xp || 0);
             const justUnlocked = [];
@@ -279,12 +312,22 @@
             const after = trollLevelFromXp(STATE.xp);
             checkTrollUnlocks();
             checkAchievements();
-            updateState();
             if (after > before) {
                 const lang1 = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
                 const msg = { uk: 'Рівень тролля підвищено', en: 'Troll level increased', ru: 'Уровень тролля повышен' }[lang1];
                 toast(`🧌 ${msg}: ${after}!`);
+                // Заморозка стріку — нагорода за кожні 5 рівнів тролля, макс. 3 про запас.
+                // Рятує серію автоматично, якщо пропущено рівно один день.
+                if (after % 5 === 0) {
+                    if (typeof STATE.streakFreezes !== 'number') STATE.streakFreezes = 0;
+                    if (STATE.streakFreezes < 3) {
+                        STATE.streakFreezes++;
+                        const freezeMsg = { uk: 'Отримано заморозку серії! Тепер їх у вас', en: "Streak freeze earned! You now have", ru: 'Получена заморозка серии! Теперь у вас' }[lang1];
+                        toast(`🧊 ${freezeMsg}: ${STATE.streakFreezes}`);
+                    }
+                }
             }
+            updateState();
             return amount;
         }
 
