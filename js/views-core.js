@@ -30,9 +30,37 @@
     const dw = pickDailyWord();
     const { lvl: trollLvl, pct: trollPct } = xpProgress(STATE.xp || 0);
     const metaLoc = levelMetaLocalized(level);
+    const dg = getDailyGoal();
+    const freezes = STATE.streakFreezes || 0;
+    const ringR = 26, ringC = 2 * Math.PI * ringR;
+    const dgLang = STATE.uiLang || 'uk';
+    const dgTexts = {
+        uk: { title: '🎯 Щоденна ціль', done: 'Виконано! Сьогоднішня серія в безпеці. Приходьте завтра 🔥', progress: (c,t)=>`${c}/${t} — ще трохи, і серія за сьогодні в безпеці`, cont: 'Продовжити →', freezeTitle: 'Заморозки серії — рятують стрік, якщо пропустите день' },
+        en: { title: '🎯 Daily goal', done: "Done! Today's streak is safe. Come back tomorrow 🔥", progress: (c,t)=>`${c}/${t} — a bit more and today's streak is safe`, cont: 'Continue →', freezeTitle: "Streak freezes — save your streak if you miss a day" },
+        ru: { title: '🎯 Дневная цель', done: 'Готово! Сегодняшняя серия в безопасности. Приходите завтра 🔥', progress: (c,t)=>`${c}/${t} — ещё немного, и серия за сегодня в безопасности`, cont: 'Продолжить →', freezeTitle: 'Заморозки серии — спасают стрик, если пропустите день' },
+    }[dgLang] || { title: '🎯 Щоденна ціль', done: 'Виконано! Сьогоднішня серія в безпеці. Приходьте завтра 🔥', progress: (c,t)=>`${c}/${t} — ще трохи, і серія за сьогодні в безпеці`, cont: 'Продовжити →', freezeTitle: 'Заморозки серії — рятують стрік, якщо пропустите день' };
 
     const wrap = el(`
         <div class="view">
+            <div class="card daily-goal-card" style="margin-bottom:18px;">
+                <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                    <svg width="64" height="64" viewBox="0 0 64 64" style="flex:none;">
+                        <circle cx="32" cy="32" r="${ringR}" fill="none" stroke="var(--line-soft)" stroke-width="7"/>
+                        <circle cx="32" cy="32" r="${ringR}" fill="none" stroke="${dg.done?'var(--teal)':'var(--amber)'}" stroke-width="7"
+                            stroke-dasharray="${ringC}" stroke-dashoffset="${ringC * (1 - dg.pct/100)}"
+                            stroke-linecap="round" transform="rotate(-90 32 32)"/>
+                        <text x="32" y="37" text-anchor="middle" font-size="16" font-family="'JetBrains Mono',monospace" fill="var(--ink)">${dg.done?'✅':dg.pct+'%'}</text>
+                    </svg>
+                    <div style="flex:1;min-width:200px;">
+                        <h3 style="margin:0 0 4px;">${dgTexts.title}</h3>
+                        <p style="color:var(--ink-soft);font-size:.85rem;margin:0;">
+                            ${dg.done ? dgTexts.done : dgTexts.progress(dg.count, dg.target)}
+                        </p>
+                    </div>
+                    ${!dg.done ? `<button class="btn btn-primary btn-sm" data-r="flashcards">${dgTexts.cont}</button>` : ''}
+                    ${freezes > 0 ? `<span class="tag" style="background:rgba(139,199,224,.18);color:#4A90A4;" title="${dgTexts.freezeTitle}">🧊 ×${freezes}</span>` : ''}
+                </div>
+            </div>
             <div class="card" style="margin-bottom:18px;">
                 <div id="trollGreetSlot"></div>
 ${(() => {
