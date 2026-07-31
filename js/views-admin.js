@@ -209,6 +209,12 @@ function viewAdminDaily() {
                     <div class="field" style="grid-column:1/-1;"><label>Питання</label><input id="dailyQuestion" placeholder="Як перекладається 'bil'?"></div>
                     <div class="field" style="grid-column:1/-1;"><label>Варіанти (через кому)</label><input id="dailyOptions" placeholder="Машина, Човен, Літак, Велосипед"></div>
                     <div class="field"><label>Правильна (номер з 0)</label><input id="dailyCorrect" type="number" value="0"></div>
+<div class="field">
+    <label>Рівень</label>
+    <select id="dailyLevel">
+        ${['A1','A2','B1','B2','C1','C2'].map(l => `<option value="${l}">${l}</option>`).join('')}
+    </select>
+</div>
                     <div class="field"><label>Тип</label>
                         <select id="dailyType">
                             <option value="translation">Переклад</option>
@@ -323,8 +329,56 @@ window.adminCreateTournament = async function() {
     toast('🏆 Функція створення турніру в розробці');
 };
 
+// =====================================================================
+//  АДМІН-ФУНКЦІЯ: СТВОРИТИ ЗАВДАННЯ ДНЯ
+// =====================================================================
 window.adminCreateDaily = async function() {
-    toast('📅 Функція створення завдання дня в розробці');
+    const question = document.getElementById('dailyQuestion').value.trim();
+    const optionsRaw = document.getElementById('dailyOptions').value.trim();
+    const correct = parseInt(document.getElementById('dailyCorrect').value) || 0;
+    const type = document.getElementById('dailyType').value;
+    const level = document.getElementById('dailyLevel')?.value || STATE.level || 'A1';
+
+    if (!question || !optionsRaw) {
+        toast('❌ Заповніть питання та варіанти відповідей');
+        return;
+    }
+
+    const options = optionsRaw.split(',').map(s => s.trim());
+    if (options.length < 2) {
+        toast('❌ Варіантів має бути не менше 2');
+        return;
+    }
+
+    if (correct < 0 || correct >= options.length) {
+        toast(`❌ Правильна відповідь має бути від 0 до ${options.length - 1}`);
+        return;
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+
+    try {
+        await firebaseDb.collection('daily_tasks').doc(today).set({
+            question,
+            options,
+            correct,
+            type,
+            level,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        toast(`✅ Завдання на ${today} створено!`);
+        document.getElementById('dailyQuestion').value = '';
+        document.getElementById('dailyOptions').value = '';
+        document.getElementById('dailyCorrect').value = '0';
+        // Оновлюємо список
+        const list = document.getElementById('dailyList');
+        if (list) loadDailyList(list);
+        // Оновлюємо головну (якщо вона відкрита)
+        if (ROUTE === 'home') navigate('home');
+    } catch (e) {
+        console.error('Помилка створення завдання дня:', e);
+        toast('❌ Помилка створення завдання: ' + e.message);
+    }
 };
 
 window.adminDeleteTournament = async function(id) {
