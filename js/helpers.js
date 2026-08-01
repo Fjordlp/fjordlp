@@ -260,3 +260,29 @@ function getLevelRecommendation() {
             return 'due';
         }
 
+async function loadWordsForLang(lang) {
+    lang = lang || STATE.learningLang || 'no';
+    const cached = sessionStorage.getItem(`words_${lang}`);
+    if (cached) return JSON.parse(cached);
+    
+    // Спершу пробуємо з sharedVocab
+    let snap = await firebaseDb.collection('sharedVocab')
+        .where('lang', '==', lang)
+        .get();
+    
+    // Якщо нічого немає, беремо з words (для норвезької)
+    if (snap.empty && lang === 'no') {
+        snap = await firebaseDb.collection('words').get();
+    }
+    
+    const words = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    sessionStorage.setItem(`words_${lang}`, JSON.stringify(words));
+    return words;
+}
+
+async function vocabForLevel(level, lang) {
+    lang = lang || STATE.learningLang || 'no';
+    const all = await loadWordsForLang(lang);
+    return all.filter(w => w.level === level);
+}
+

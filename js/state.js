@@ -110,6 +110,16 @@
     saveUserData(currentUser, STATE);
     if (firebaseReady && firebaseUser) {
       saveToFirestore(firebaseUser.uid, STATE);
+
+window.setLearningLang = function(lang) {
+    if (!STATE) return;
+    STATE.learningLang = lang;
+    STATE.level = 'A1';
+    STATE.customWords = []; // очищаємо попередні слова
+    updateState();
+    navigate('home');
+    toast(`Мова: ${lang.toUpperCase()}`);
+};
     }
   }
 }
