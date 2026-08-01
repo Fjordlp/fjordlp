@@ -10,8 +10,10 @@ function aiResponseLangName() {
 
 function buildAiSystemPrompt() {
     return "Ти — дружній тролль-помічник у застосунку Fjord " +
-        "для вивчення норвезької мови. Відповідай " + aiResponseLangName() + " (норвезькі " +
-        "приклади можна давати норвезькою з перекладом). Допомагай пояснювати " +
+        "для вивчення іноземних мов (яку саме мову зараз вивчає користувач " +
+        "— дивись позначку на початку його повідомлення; якщо позначки " +
+        "нема — це норвезька). Відповідай " + aiResponseLangName() + " (приклади " +
+        "мовою вивчення можна давати з перекладом). Допомагай пояснювати " +
         "граматику, слова, перекладати короткі фрази, складати приклади речень " +
         "і підказувати, як користуватись розділами застосунку (картки, словник, " +
         "тести, граматика). Пиши коротко, дружньо, по суті, можеш зрідка додати " +
@@ -104,7 +106,15 @@ async function callAiRaw(mode, systemPromptText, userText, history, lang) {
 
 async function callAiAssistant(userText, history) {
     const lang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
-    return callAiRaw('chat', buildAiSystemPrompt(), userText, history, lang);
+    // Worker ігнорує system, який шле клієнт (у нього свій, спільний для
+    // всіх), і читає мову вивчення з тексту самого повідомлення — тож
+    // додаємо приховану підказку з мовою на початок (у чаті користувач
+    // її не бачить, бо renderMessage() малює оригінальний userText,
+    // а не те, що йде в AI).
+    const langHint = (typeof getLanguage === 'function' && typeof STATE !== 'undefined' && STATE && STATE.targetLang && STATE.targetLang !== 'no')
+        ? `[Користувач зараз вивчає мову: ${getLanguage(STATE.targetLang).name.uk}] `
+        : '';
+    return callAiRaw('chat', buildAiSystemPrompt(), langHint + userText, history, lang);
 }
 
 // =====================================================================
@@ -171,15 +181,17 @@ async function generateNorskTaskAI(level, mode) {
 }
 
 async function generateVocabWordsAI(level, existingTopics) {
-    const lang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+    const uiLang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+    const targetLang = (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
+    const targetLangName = typeof getLanguage === 'function' ? getLanguage(targetLang).name.uk : 'норвезької';
     const userMsg =
         `Рівень: ${level}. Наявні теми у словнику: ${(existingTopics || []).join(', ') || 'немає даних'}. ` +
-        `Згенеруй 5 нових корисних слів норвезької мови для цього рівня (уникай базових слів з рівня A1, якщо рівень вищий). ` +
-        `Формат масиву: [{"t": "тема українською (наприклад Їжа, Транспорт)", "no": "слово норвезькою", "uk": "переклад українською", "ex_no": "приклад речення норвезькою (мінімум 4 слова, містить це слово)", "ex_uk": "переклад прикладу"}, ...]`;
-    const sys = "Ти генеруєш нові слова для словника вивчення норвезької мови " +
+        `Згенеруй 5 нових корисних слів мовою "${targetLangName}" для цього рівня (уникай базових слів з рівня A1, якщо рівень вищий). ` +
+        `Формат масиву: [{"t": "тема українською (наприклад Їжа, Транспорт)", "no": "слово мовою вивчення", "uk": "переклад українською", "ex_no": "приклад речення мовою вивчення (мінімум 4 слова, містить це слово)", "ex_uk": "переклад прикладу"}, ...]`;
+    const sys = `Ти генеруєш нові слова для словника вивчення мови "${targetLangName}" ` +
         "(рівень CEFR A1-B2). Відповідай ЛИШЕ чистим JSON-масивом без " +
         "жодного тексту навколо, без markdown-огорожі.";
-    const reply = await callAiRaw('gen_vocab', sys, userMsg, [], lang);
+    const reply = await callAiRaw('gen_vocab', sys, userMsg, [], uiLang);
     return parseAiJson(reply);
 }
 

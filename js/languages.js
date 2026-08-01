@@ -177,3 +177,50 @@ async function ensureSharedVocabLoaded(lang, level) {
     }
 }
 
+// =====================================================================
+//  АВТОМАТИЧНА ПІДГОТОВКА СЛІВ ДЛЯ ОБРАНОЇ МОВИ (self-serve)
+// =====================================================================
+// Раніше ensureSharedVocabLoaded() була написана, але ніде не викликалась
+// — тобто навіть коли адмін публікував спільний словник, звичайний
+// користувач ніколи не отримував його автоматично. А для мов, які адмін
+// ще не встиг наповнити, слів не було взагалі — людина просто бачила
+// порожній словник/картки/тести без жодного способу це виправити самому.
+//
+// ensureVocabAvailable(lang, level) закриває обидва випадки:
+//  1) спершу пробує підвантажити вже опублікований адміном спільний
+//     словник (швидко, без витрати власної AI-квоти користувача);
+//  2) якщо його ще нема — генерує невеликий стартовий словник особисто
+//     для цього користувача через Gemini (ту саму AI, що й тролль-чат),
+//     і кешує в STATE.generatedVocab, щоб не генерувати повторно.
+// Викликати "тихо" (без await) на початку екранів словника/карток/тестів
+// — перший рендер може показати порожній стан, другий (після render())
+// вже покаже слова.
+let _vocabAutoGenLoading = {};
+async function ensureVocabAvailable(lang, level) {
+    if (!lang || lang === 'no') return; // вбудований словник — нічого підвантажувати не треба
+    ensureGeneratedVocabStore();
+    const already = STATE.generatedVocab[lang] && STATE.generatedVocab[lang][level];
+    if (already && already.length) return;
+    const key = lang + '|' + level;
+    if (_vocabAutoGenLoading[key]) return; // вже в процесі — не дублюємо запити
+    _vocabAutoGenLoading[key] = true;
+    try {
+        await ensureSharedVocabLoaded(lang, level);
+        const afterShared = STATE.generatedVocab[lang] && STATE.generatedVocab[lang][level];
+        if (afterShared && afterShared.length) return;
+        if (typeof generateBulkVocab !== 'function' || typeof callAiRaw !== 'function') return; // AI недоступна (наприклад, AI_PROXY_URL не налаштований)
+        // Невеликий пакет (2 запити ≈ до 120 слів) — досить, щоб одразу
+        // можна було почати вчитись, не чекаючи на адміна.
+        const words = await generateBulkVocab(lang, level, 2, null);
+        if (words && words.length) {
+            STATE.generatedVocab[lang][level] = words;
+            updateState();
+            if (typeof render === 'function' && STATE.targetLang === lang && (STATE.level || 'A1') === level) render();
+        }
+    } catch (e) {
+        console.error('[Словник] Не вдалося підготувати слова для', lang, level, e);
+    } finally {
+        _vocabAutoGenLoading[key] = false;
+    }
+}
+

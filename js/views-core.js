@@ -35,15 +35,21 @@ function viewHome() {
         ru: { title: '🎯 Дневная цель', done: 'Готово! Сегодняшняя серия в безопасности. Приходите завтра 🔥', progress: (c,t)=>`${c}/${t} — ещё немного, и серия за сегодня в безопасности`, cont: 'Продолжить →', freezeTitle: 'Заморозки серии — спасают стрик, если пропустите день' },
     }[dgLang] || { title: '🎯 Щоденна ціль', done: 'Виконано! Сьогоднішня серія в безпеці. Приходьте завтра 🔥', progress: (c,t)=>`${c}/${t} — ще трохи, і серія за сьогодні в безпеці`, cont: 'Продовжити →', freezeTitle: 'Заморозки серії — рятують стрік, якщо пропустите день' };
 
-    // ----- ВИБІР МОВИ -----
+    // ----- ВИБІР МОВИ (швидкий перемикач на головній) -----
+    // Раніше тут був окремий, непов'язаний перемикач на полі
+    // STATE.learningLang з onclick="..." прямо в HTML — CSP сайту
+    // (без unsafe-inline) його тихо блокувала, тож кнопки не працювали,
+    // і, навіть якби працювали, вони керували полем, яке ніде більше не
+    // використовувалось. Тепер це той самий STATE.targetLang, що й у
+    // Налаштуваннях, з робочими обробниками подій.
+    const HOME_QUICK_LANGS = ['no', 'en', 'de', 'es', 'fr', 'it'];
     const langOptions = `
-        <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;justify-content:center;">
-            ${['no','it','en','fr','de','es'].map(code => `
-                <button class="chip ${STATE.learningLang === code ? 'active' : ''}" 
-                        onclick="setLearningLang('${code}')">
-                    ${getLangName(code)}
-                </button>
-            `).join('')}
+        <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;justify-content:center;align-items:center;">
+            ${HOME_QUICK_LANGS.map(code => {
+                const l = getLanguage(code);
+                return `<button class="chip ${STATE.targetLang === code ? 'active' : ''}" data-lang="${code}">${l.flag} ${l.native}</button>`;
+            }).join('')}
+            <button class="chip" id="homeMoreLangsBtn">🌐 Ще мови…</button>
         </div>
     `;
 
@@ -166,6 +172,17 @@ function viewHome() {
     // ---- Обробники ----
     wrap.querySelector('#trollGreetSlot').appendChild(renderTrollBubble('idle', 'greeting', 64));
     wrap.querySelectorAll('[data-r]').forEach(b => b.onclick = () => navigate(b.dataset.r));
+    wrap.querySelectorAll('[data-lang]').forEach(b => {
+        b.onclick = () => {
+            const code = b.dataset.lang;
+            if (code === STATE.targetLang) return;
+            STATE.targetLang = code;
+            updateState();
+            navigate('home'); // словник/картки/тести залежать від мови — оновлюємо вкладку
+        };
+    });
+    const moreLangsBtn = wrap.querySelector('#homeMoreLangsBtn');
+    if (moreLangsBtn) moreLangsBtn.onclick = () => navigate('profile');
     const snd = wrap.querySelector('#dwSound');
     if (snd && dw) snd.onclick = () => speak(dw.no);
     const rt = wrap.querySelector('#retest');
@@ -398,8 +415,9 @@ function viewLevelTest() {
 // =====================================================================
 
 function viewFlashDeckPicker(lang) {
-    lang = lang || STATE.learningLang || 'no';
+    lang = lang || STATE.targetLang || 'no';
     const level = SUBSTATE.level || STATE.level || "A1";
+    ensureVocabAvailable(lang, level); // не блокує рендер; підвантажить і сама перемалює, якщо знайде/згенерує слова
     const words = vocabForLevel(level, lang);
     const topics = [...new Set(words.map(w => w.t))];
     const topic = SUBSTATE.topic || "Усі теми";
@@ -692,8 +710,9 @@ function renderTypeCard(item) {
 // =====================================================================
 
 function viewVocabulary() {
-    const lang = STATE.learningLang || 'no';
+    const lang = STATE.targetLang || 'no';
     const level = STATE.level || "A1";
+    ensureVocabAvailable(lang, level);
     const words = vocabForLevel(level, lang);
     const statusLabels = {
         uk: { new: 'нове', due: 'на повторення', mastered: 'засвоєне' },
@@ -811,12 +830,36 @@ function viewTestsHub() {
 }
 
 function currentLevelWords() {
-    const lang = STATE.learningLang || 'no';
-    const words = vocabForLevel(STATE.level || "A1", lang);
-    return words.length ? words : VOCAB.A1;
+    const lang = STATE.targetLang || 'no';
+    const level = STATE.level || "A1";
+    ensureVocabAvailable(lang, level);
+    const words = vocabForLevel(level, lang);
+    // Раніше тут був фолбек на VOCAB.A1 (норвезькі слова) для БУДЬ-ЯКОЇ
+    // мови, якщо для неї ще нема слів — тобто той, хто вчить іспанську,
+    // міг раптом побачити норвезькі картки. Фолбек лишаємо лише для
+    // самої норвезької (вбудований словник має бути не порожнім завжди);
+    // для решти мов повертаємо порожній список — виклики цієї функції вже
+    // мають порожній стан на цей випадок (і ensureVocabAvailable вище
+    // саме зараз намагається підвантажити/згенерувати слова).
+    if (words.length) return words;
+    return lang === 'no' ? VOCAB.A1 : [];
 }
 
 function runQuiz(sub, route, title) {
+    if (!sub.qs || sub.qs.length === 0) {
+        // Порожньо буває, коли для щойно обраної мови ще нема слів на
+        // цьому рівні — ensureVocabAvailable() (викликається зі
+        // currentLevelWords()) саме зараз намагається їх підвантажити чи
+        // згенерувати; коли це станеться, render() перемалює екран.
+        const v = el(
+            `<div class="view"><div class="empty-state"><h3>Готуємо слова…</h3>` +
+            `<p>Для цієї мови й рівня ще немає слів — вони генеруються. ` +
+            `Спробуйте оновити за кілька секунд або оберіть інший рівень.</p>` +
+            `<button class="btn btn-ghost" id="quizEmptyBack">До тестів</button></div></div>`
+        );
+        v.querySelector('#quizEmptyBack').onclick = () => navigate('tests');
+        return v;
+    }
     if (!sub.userAnswers) {
         sub.userAnswers = new Array(sub.qs.length).fill(null);
     }
@@ -973,7 +1016,7 @@ function runQuiz(sub, route, title) {
 // =====================================================================
 
 function viewTestMC() {
-    if (!SUBSTATE.qs) {
+    if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
         const level = STATE.level || "A1";
         const words = shuffle(currentLevelWords()).slice(0, 6);
         const gramQs = GRAMMAR.filter(g => g.level === (STATE.level || "A1")).map(g => ({ q: g.ex.q, opts: g.ex
@@ -1012,7 +1055,7 @@ function clozeBlank(word, exampleNo) {
 }
 
 function viewTestCloze() {
-    if (!SUBSTATE.qs) {
+    if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
         const eligible = currentLevelWords().filter(w => clozeBlank(w.no, w.ex_no) !== null);
         const words = shuffle(eligible).slice(0, 6);
         SUBSTATE.qs = words.map(w => {
@@ -1156,7 +1199,7 @@ function viewTestCloze() {
 }
 
 function viewTestOrder() {
-    if (!SUBSTATE.qs) {
+    if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
         const words = shuffle(currentLevelWords().filter(w => w.ex_no.split(' ').length >= 3 && w.ex_no.split(' ')
             .length <= 7)).slice(0, 5);
         SUBSTATE.qs = words.map(w => {
@@ -1322,7 +1365,7 @@ function viewTestOrder() {
 }
 
 function viewTestListen() {
-    if (!SUBSTATE.qs) {
+    if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
         const words = shuffle(currentLevelWords()).slice(0, 6);
         SUBSTATE.qs = words.map(w => {
             const distractors = shuffle(currentLevelWords().filter(x => x.no !== w.no)).slice(0, 3).map(x => x
@@ -1338,7 +1381,7 @@ function viewTestListen() {
 }
 
 function viewTestTranslate() {
-    if (!SUBSTATE.qs) {
+    if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
         const words = shuffle(currentLevelWords()).slice(0, 6);
         SUBSTATE.qs = words.map(w => {
             return { word: w, dirToNo: Math.random() < 0.5 };

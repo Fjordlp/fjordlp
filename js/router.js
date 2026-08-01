@@ -79,7 +79,7 @@ function renderView() {
             return viewHome();
         case 'flashcards':
             // Передаємо мову з SUBSTATE або з STATE
-            const lang = SUBSTATE.lang || STATE.learningLang || 'no';
+            const lang = SUBSTATE.lang || STATE.targetLang || 'no';
             return viewFlashDeckPicker(lang);
         case 'flashsession':
             return viewFlashSession();

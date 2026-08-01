@@ -15,8 +15,30 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Допоміжна перевірка: чи автентифікований користувач — адмін
+    // (дивиться його ж власний документ users/{uid}).
+    function isAdmin() {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.admin == true;
+    }
+
     match /users/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+      // Читати свій документ може кожен; адмін додатково може читати
+      // документи інших користувачів (потрібно для розділу
+      // "Користувачі" в адмін-панелі).
+      allow read: if request.auth != null &&
+        (request.auth.uid == uid || isAdmin());
+      // Дозволяємо створення власного документа, але НЕ дозволяємо одразу
+      // виставити собі admin: true.
+      allow create: if request.auth != null && request.auth.uid == uid &&
+        (!('admin' in request.resource.data) || request.resource.data.admin == false);
+      // При оновленні поле admin повинно залишатись ТАКИМ САМИМ, яким було
+      // (тобто користувач не може сам собі його змінити через клієнт —
+      // ані виставити true, ані змінити вже виставлене адміністратором
+      // значення). Змінити admin можна лише вручну через Firebase Console
+      // або довірений бекенд (Cloud Function), не через клієнтський SDK.
+      allow update: if request.auth != null && request.auth.uid == uid &&
+        request.resource.data.admin == resource.data.admin;
     }
     // Спільні словники (генеруються в адмін-панелі): читати може будь-хто
     // (навіть гості — це просто навчальний контент, не приватні дані), а
@@ -24,8 +46,30 @@ service cloud.firestore {
     // має admin: true.
     match /sharedVocab/{docId} {
       allow read: if true;
-      allow write: if request.auth != null &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.admin == true;
+      allow write: if isAdmin();
+    }
+    // Слова (окрема колекція, яку читає й наповнює адмін-панель) — той
+    // самий принцип: читати може будь-хто, писати лише адмін.
+    match /words/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    // Турніри — публічно видимі всім (таблиця лідерів, список активних
+    // турнірів), але створювати/редагувати може лише адмін.
+    // УВАГА: це лише опис/налаштування турніру. Якщо додаватимете подання
+    // результатів гравцями — НЕ дозволяйте писати в цей самий документ
+    // напряму з клієнта (інакше будь-хто підробить собі результат);
+    // рахунки мають рахуватись на довіреному бекенді (Cloud Function),
+    // а не прийматись від клієнта як готове число.
+    match /tournaments/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    // Завдання дня — так само: всі бачать сьогоднішнє завдання, редагує
+    // лише адмін.
+    match /daily_tasks/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
     // Явна заборона на все інше (без цього блоку Firestore і так
     // забороняє за замовчуванням шляхи, не описані вище, але залишаємо

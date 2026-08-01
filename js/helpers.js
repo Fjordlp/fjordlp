@@ -133,28 +133,14 @@ function getLevelRecommendation() {
 
         function wordKey(w) { return (w.level || '') + "|" + w.no; }
 
-        function vocabForLevel(level) {
-            const lang = (STATE && STATE.targetLang) || 'no';
-            let base;
-            if (lang === 'no') {
-                base = VOCAB[level] || [];
-            } else {
-                if (!STATE.generatedVocab) STATE.generatedVocab = {};
-                if (!STATE.generatedVocab[lang]) STATE.generatedVocab[lang] = {};
-                base = STATE.generatedVocab[lang][level] || [];
-            }
-            const custom = (STATE && Array.isArray(STATE.customWords)) ?
-                STATE.customWords.filter(w => w.level === level && (w.lang || 'no') === lang) : [];
-            return custom.length ? base.concat(custom) : base;
-        }
-
         // Додає нові слова (згенеровані AI або введені вручну) до словника
         // користувача. Слова одразу стають доступними у словнику, картках,
         // тестах і SRS — бо всі вони йдуть через vocabForLevel().
         function addCustomWords(level, words) {
             if (!Array.isArray(STATE.customWords)) STATE.customWords = [];
+            const lang = STATE.targetLang || 'no';
             const existing = new Set(
-                vocabForLevel(level).map(w => normalize(w.no))
+                vocabForLevel(level, lang).map(w => normalize(w.no))
             );
             let added = 0;
             words.forEach(w => {
@@ -164,6 +150,7 @@ function getLevelRecommendation() {
                 existing.add(key);
                 STATE.customWords.push({
                     level,
+                    lang,
                     t: w.t || 'Додано AI',
                     no: String(w.no).trim(),
                     uk: String(w.uk).trim(),
@@ -261,7 +248,7 @@ function getLevelRecommendation() {
         }
 
 async function loadWordsForLang(lang) {
-    lang = lang || STATE.learningLang || 'no';
+    lang = lang || STATE.targetLang || 'no';
     const cached = sessionStorage.getItem(`words_${lang}`);
     if (cached) return JSON.parse(cached);
     
