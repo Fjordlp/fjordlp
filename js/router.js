@@ -26,6 +26,13 @@
             main.appendChild(renderView());
             updateNav();
             document.getElementById('userNameDisplay').textContent = STATE.name || currentUser;
+            // Деякі адмін-сторінки повертають рядок HTML (не DOM-елемент через el()),
+            // тож прив'язати обробники подій можна лише ПІСЛЯ того, як розмітка вже
+            // реально в DOM. Викликаємо відповідну init-функцію тут, а не всередині
+            // самої view-функції, де DOM ще не існує.
+            if (ROUTE === 'admin-vocab-gen' && typeof initAdminSharedVocab === 'function') {
+                initAdminSharedVocab();
+            }
         }
 
         function updateNav() {
@@ -102,15 +109,17 @@ case 'onboarding':
                 case 'norskprove':
                     return viewNorskprove();
 case 'admin':
-    return viewAdmin();
+    return el(viewAdmin());
 case 'admin-words':
-    return viewAdminWords();
+    return el(viewAdminWords());
 case 'admin-tournaments':
-    return viewAdminTournaments();
+    return el(viewAdminTournaments());
 case 'admin-daily':
-    return viewAdminDaily();
+    return el(viewAdminDaily());
 case 'admin-users':
-    return viewAdminUsers();
+    return el(viewAdminUsers());
+case 'admin-vocab-gen':
+    return el(viewAdminSharedVocab());
 
                 default:
                     return el('<div class="view"><p>Сторінку не знайдено.</p></div>');

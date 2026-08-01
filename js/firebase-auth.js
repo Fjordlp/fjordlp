@@ -71,15 +71,7 @@ async function loadFromFirestore(uid) {
     const docRef = firebaseDb.collection('users').doc(uid);
     const docSnap = await docRef.get();
     if (docSnap.exists) {
-      // Якщо STATE ще null – створюємо порожній об'єкт
-      if (!STATE) {
-        STATE = {};
-      }
       Object.assign(STATE, docSnap.data());
-      // Переконуємося, що всі поля є (викликаємо ensureStateDefaults, якщо доступна)
-      if (typeof ensureStateDefaults === 'function') {
-        STATE = ensureStateDefaults(STATE);
-      }
       updateState();
       return docSnap.data();
     }

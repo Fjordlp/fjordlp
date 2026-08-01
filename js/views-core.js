@@ -1,4 +1,4 @@
-// =====================================================================
+        // =====================================================================
         //  VIEWS – повний набір сторінок
         // =====================================================================
 
@@ -10,15 +10,20 @@
     const total = vocab.length;
 
     // ----- НОВА ЛОГІКА ПРОГРЕСУ -----
+    // 1. Слова, які користувач вже бачив (є в stats.wordsSeen)
     const seenKeys = Object.keys(STATE.stats.wordsSeen || {});
     const seenCount = vocab.filter(w => {
         const key = wordKey(Object.assign({ level }, w));
         return seenKeys.includes(key);
     }).length;
+
+    // 2. Слова, які користувач засвоїв (reps >= 2)
     const mastered = vocab.filter(w => {
         const s = getSrs(wordKey(Object.assign({ level }, w)));
         return s && s.reps >= 2;
     }).length;
+
+    // 3. Відсоток – на основі переглянутих слів
     const pct = total ? Math.round((seenCount / total) * 100) : 0;
     // ----- КІНЕЦЬ НОВОЇ ЛОГІКИ -----
 
@@ -94,13 +99,13 @@ ${(() => {
                     </span>
                 </div>
                 <div class="homepick">
-                    <button class="btn" data-r="flashcards"> Вчити слова</button>
-                    <button class="btn" data-r="vocabulary"> Словник</button>
-                    <button class="btn" data-r="grammar"> Граматика</button>
-                    <button class="btn" data-r="tests"> Тести</button>
-                    <button class="btn" data-r="test-listen"> Аудіювання</button>
-                    <button class="btn" data-r="troll"> Тролль (${trollLvl} рів.)</button>
-                    <button class="btn" data-r="norskprove"> Norskprøve</button>
+                    <button class="btn" data-r="flashcards">📇 Вчити слова</button>
+                    <button class="btn" data-r="vocabulary">📚 Словник</button>
+                    <button class="btn" data-r="grammar">📖 Граматика</button>
+                    <button class="btn" data-r="tests">📝 Тести</button>
+                    <button class="btn" data-r="test-listen">🎧 Аудіювання</button>
+                    <button class="btn" data-r="troll">🧌 Тролль (${trollLvl} рів.)</button>
+                    <button class="btn" data-r="norskprove">🎓 Norskprøve</button>
                 </div>
             </div>
 
@@ -135,8 +140,6 @@ ${(() => {
                     <button class="btn btn-ghost btn-sm" id="retest">Пройти тест рівня знову</button>
                 </div>
             </div>
-            <!-- Завдання дня – додається динамічно -->
-            <div id="dailyTaskContainer" style="margin-top:16px;"></div>
         </div>
     `);
 
@@ -168,100 +171,51 @@ ${(() => {
         };
     }
 
-    // ---------- ЗАВАНТАЖЕННЯ ЗАВДАННЯ ДНЯ ----------
-    async function loadDailyTask() {
-        const container = wrap.querySelector('#dailyTaskContainer');
-        if (!container) return;
-        try {
-            const today = new Date().toISOString().slice(0, 10);
-            const doc = await firebaseDb.collection('daily_tasks').doc(today).get();
-            if (!doc.exists) {
-                container.innerHTML = '';
-                return;
-            }
-            const task = { id: doc.id, ...doc.data() };
-            const html = `
-                <div class="card" style="border: 2px solid var(--amber);">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <h3 style="margin:0;">📅 Завдання дня</h3>
-                        <span class="tag level-${task.level || 'A1'}">${task.level || 'A1'}</span>
-                    </div>
-                    <p style="font-size:1.05rem; margin-bottom:12px;">${escHtml(task.question)}</p>
-                    <div class="mc-options" id="dailyOptions" style="max-width:100%;">
-                        ${task.options.map((opt, idx) => `
-                            <button class="mc-opt" data-idx="${idx}" data-taskid="${task.id}">
-                                ${escHtml(opt)}
-                            </button>
-                        `).join('')}
-                    </div>
-                    <div id="dailyFeedback" style="margin-top:10px;"></div>
-                    <div id="dailyResult" style="margin-top:8px; font-size:.9rem; color:var(--ink-soft);"></div>
-                </div>
-            `;
-            container.innerHTML = html;
-
-            const opts = container.querySelectorAll('.mc-opt');
-            const correct = task.correct;
-            opts.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const selected = parseInt(this.dataset.idx);
-                    checkDailyTask(selected, correct, task.id, container);
-                });
-            });
-        } catch (e) {
-            console.error('Помилка завантаження завдання дня:', e);
-            container.innerHTML = '';
-        }
-    }
-
-    loadDailyTask();
-    // ---------- КІНЕЦЬ ДОДАВАННЯ ----------
-
     return wrap;
 }
 
-function pickDailyWord() {
-    const pool = allVocabUpTo(STATE.level || "A1");
-    if (pool.length === 0) return null;
-    const dayIndex = Math.floor(Date.now() / 86400000);
-    return pool[dayIndex % pool.length];
-}
+        function pickDailyWord() {
+            const pool = allVocabUpTo(STATE.level || "A1");
+            if (pool.length === 0) return null;
+            const dayIndex = Math.floor(Date.now() / 86400000);
+            return pool[dayIndex % pool.length];
+        }
 
-function sunArcSvg(pct) {
-    const angle = Math.PI * (1 - pct / 100);
-    const x = 140 + 110 * Math.cos(angle);
-    const y = 140 - 110 * Math.sin(angle);
-    return `<svg viewBox="0 0 280 160" width="280" height="160">
+        function sunArcSvg(pct) {
+            const angle = Math.PI * (1 - pct / 100);
+            const x = 140 + 110 * Math.cos(angle);
+            const y = 140 - 110 * Math.sin(angle);
+            return `<svg viewBox="0 0 280 160" width="280" height="160">
             <path d="M30 140 A110 110 0 0 1 250 140" stroke="rgba(255,255,255,.18)" stroke-width="3" fill="none"/>
             <path d="M30 140 A110 110 0 0 1 250 140" stroke="#E8A33D" stroke-width="3" fill="none" stroke-dasharray="345" stroke-dashoffset="${345*(1-pct/100)}"/>
             <circle cx="${x}" cy="${y}" r="10" fill="#2FA89B"/>
           </svg>`;
-}
+        }
 
-function renderWeekStrip() {
-    const dates = STATE.stats?.activityDates || [];
-    const set = new Set(dates);
-    let html = '<div class="calendar-strip">';
-    for (let i = 6; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const ds = todayStr(d);
-        const label = ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][d.getDay()];
-        html += `<div class="day ${set.has(ds)?'active':''} ${i===0?'today':''}">${label}</div>`;
-    }
-    html += '</div>';
-    return html;
-}
+        function renderWeekStrip() {
+            const dates = STATE.stats?.activityDates || [];
+            const set = new Set(dates);
+            let html = '<div class="calendar-strip">';
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const ds = todayStr(d);
+                const label = ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][d.getDay()];
+                html += `<div class="day ${set.has(ds)?'active':''} ${i===0?'today':''}">${label}</div>`;
+            }
+            html += '</div>';
+            return html;
+        }
 
-// ---- LEVELS & LEVEL TEST ----
-function viewLevels() {
-    const wrap = el(
-        `<div class="view"><h1>${t('h_pick_level')}</h1><p style="color:var(--ink-soft);margin-bottom:16px;">${t('level_change_note')}</p><div class="grid cols-3" id="lvlgrid"></div></div>`
-        );
-    const grid = wrap.querySelector('#lvlgrid');
-    LEVELS.forEach(lv => {
-        const meta = levelMetaLocalized(lv);
-        const card = el(`
+        // ---- LEVELS & LEVEL TEST ----
+        function viewLevels() {
+            const wrap = el(
+                `<div class="view"><h1>${t('h_pick_level')}</h1><p style="color:var(--ink-soft);margin-bottom:16px;">${t('level_change_note')}</p><div class="grid cols-3" id="lvlgrid"></div></div>`
+                );
+            const grid = wrap.querySelector('#lvlgrid');
+            LEVELS.forEach(lv => {
+                const meta = levelMetaLocalized(lv);
+                const card = el(`
               <div class="card level-card ${STATE.level===lv?'current':''}">
                 <span class="tag level-${lv}">${lv}</span>
                 <h3 style="margin-top:8px;">${meta.name}</h3>
@@ -269,31 +223,31 @@ function viewLevels() {
                 <div class="level-topics">${LEVEL_META[lv].topics.map(top=>`<span>${top}</span>`).join('')}</div>
               </div>
             `);
-        card.onclick = () => {
-            STATE.level = lv;
-            STATE.levelTestDone = true;
-            markActivityToday();
-            updateState();
-            toast(`Рівень встановлено: ${lv}`);
-            navigate('home');
-        };
-        grid.appendChild(card);
-    });
-    return wrap;
-}
+                card.onclick = () => {
+                    STATE.level = lv;
+                    STATE.levelTestDone = true;
+                    markActivityToday();
+                    updateState();
+                    toast(`Рівень встановлено: ${lv}`);
+                    navigate('home');
+                };
+                grid.appendChild(card);
+            });
+            return wrap;
+        }
 
-function viewLevelTest() {
-    if (!SUBSTATE.i) { SUBSTATE.i = 0;
-        SUBSTATE.answers = []; }
-    const i = SUBSTATE.i;
-    if (i >= LEVEL_TEST.length) {
-        const level = computeTestLevel(SUBSTATE.answers);
-        STATE.level = level;
-        STATE.levelTestDone = true;
-        markActivityToday();
-        checkAchievements();
-        updateState();
-        const resultView = el(`
+        function viewLevelTest() {
+            if (!SUBSTATE.i) { SUBSTATE.i = 0;
+                SUBSTATE.answers = []; }
+            const i = SUBSTATE.i;
+            if (i >= LEVEL_TEST.length) {
+                const level = computeTestLevel(SUBSTATE.answers);
+                STATE.level = level;
+                STATE.levelTestDone = true;
+                markActivityToday();
+                checkAchievements();
+                updateState();
+                const resultView = el(`
               <div class="view onb-wrap" style="max-width:500px;margin:30px auto;text-align:center;">
                 <h1>${t('h_your_level')}</h1>
                 <div class="tag level-${level}" style="font-size:1rem;padding:6px 18px;margin:12px 0;">${level}</div>
@@ -302,13 +256,13 @@ function viewLevelTest() {
                 <button class="btn btn-primary" id="goHome">Почати навчання</button>
               </div>
             `);
-        const trollSlot = resultView.querySelector('div[style*="justify-content:center"]');
-        trollSlot.appendChild(renderTrollBubble('excited', 'levelUp', 64));
-        resultView.querySelector('#goHome').onclick = () => navigate('home');
-        return resultView;
-    }
-    const q = LEVEL_TEST[i];
-    const wrap = el(`
+                const trollSlot = resultView.querySelector('div[style*="justify-content:center"]');
+                trollSlot.appendChild(renderTrollBubble('excited', 'levelUp', 64));
+                resultView.querySelector('#goHome').onclick = () => navigate('home');
+                return resultView;
+            }
+            const q = LEVEL_TEST[i];
+            const wrap = el(`
             <div class="view" style="max-width:500px;margin:20px auto;text-align:center;">
               <div class="qcounter">Питання ${i+1} з ${LEVEL_TEST.length}</div>
               <div class="progress-track" style="margin-bottom:18px;"><div class="progress-fill" style="width:${(i/LEVEL_TEST.length)*100}%"></div></div>
@@ -316,189 +270,191 @@ function viewLevelTest() {
               <div class="mc-options" style="margin:0 auto;"></div>
             </div>
           `);
-    const opts = wrap.querySelector('.mc-options');
-    q.opts.forEach((opt, idx) => {
-        const b = el(`<button class="mc-opt">${escHtml(opt)}</button>`);
-        b.onclick = () => {
-            SUBSTATE.answers.push(idx === q.a);
-            SUBSTATE.i++;
-            navigate('leveltest', SUBSTATE);
-        };
-        opts.appendChild(b);
-    });
-    return wrap;
+            const opts = wrap.querySelector('.mc-options');
+            q.opts.forEach((opt, idx) => {
+                const b = el(`<button class="mc-opt">${escHtml(opt)}</button>`);
+                b.onclick = () => {
+                    SUBSTATE.answers.push(idx === q.a);
+                    SUBSTATE.i++;
+                    navigate('leveltest', SUBSTATE);
+                };
+                opts.appendChild(b);
+            });
+            return wrap;
+        }
+
+        // ---- FLASHCARDS ----
+       function viewFlashDeckPicker() {
+  const level = SUBSTATE.level || STATE.level || "A1";
+  const words = vocabForLevel(level);
+  const topics = [...new Set(words.map(w => w.t))];
+  const topic = SUBSTATE.topic || "Усі теми";
+  const mode = SUBSTATE.mode || "flip";
+  const allMode = SUBSTATE.allMode || false;
+
+  const wrap = el(`
+    <div class="view">
+      <h1>${t('h_flashcards')}</h1>
+      <p style="color:var(--ink-soft);font-size:.9rem;">Оберіть рівень, тему та режим тренування.</p>
+      <div class="deckpicker" id="lvlpick"></div>
+      <div class="deckpicker" id="topicpick"></div>
+      <div class="deckpicker" id="modepick"></div>
+      <div class="deckpicker" id="allmodepick">
+        <button class="chip ${!allMode?'active':''}" data-all="false">📅 За розкладом (SRS)</button>
+        <button class="chip ${allMode?'active':''}" data-all="true">📚 Всі картки</button>
+      </div>
+      <div class="card" id="deckInfo" style="margin-top:8px;"></div>
+    </div>
+  `);
+
+  const lvlpick = wrap.querySelector('#lvlpick');
+  LEVELS.forEach(lv => {
+    const c = el(`<button class="chip ${lv===level?'active':''}">${lv}</button>`);
+    c.onclick = () => navigate('flashcards', { level: lv, topic, mode, allMode });
+    lvlpick.appendChild(c);
+  });
+
+  const topicpick = wrap.querySelector('#topicpick');
+  ["Усі теми", ...topics].forEach(t => {
+    const c = el(`<button class="chip ${t===topic?'active':''}">${t}</button>`);
+    c.onclick = () => navigate('flashcards', { level, topic: t, mode, allMode });
+    topicpick.appendChild(c);
+  });
+
+  const modepick = wrap.querySelector('#modepick');
+  [
+    ["flip", "Запам'ятовування"],
+    ["mc", "Вибір відповіді"],
+    ["type", "Написання слова"]
+  ].forEach(([m, label]) => {
+    const c = el(`<button class="chip ${m===mode?'active':''}">${label}</button>`);
+    c.onclick = () => navigate('flashcards', { level, topic, mode: m, allMode });
+    modepick.appendChild(c);
+  });
+
+  wrap.querySelectorAll('#allmodepick .chip').forEach(btn => {
+    btn.onclick = () => {
+      const newAllMode = btn.dataset.all === 'true';
+      navigate('flashcards', { level, topic, mode, allMode: newAllMode });
+    };
+  });
+
+  const deckWords = topic === "Усі теми" ? words : words.filter(w => w.t === topic);
+  const dueCount = deckWords.filter(w => {
+    const s = getSrs(wordKey(Object.assign({ level }, w)));
+    return s.due <= todayStr();
+  }).length;
+
+  const info = wrap.querySelector('#deckInfo');
+  if (deckWords.length === 0) {
+    info.innerHTML = `<div class="empty-state"><h3>Цей рівень ще в розробці</h3><p>Спробуйте A1–B1.</p></div>`;
+  } else {
+    const modeLabel = allMode ? 'всі картки' : `${dueCount} готові до повторення (SRS)`;
+    const maxCards = allMode ? deckWords.length : 20;
+    info.innerHTML = `
+      <p style="font-size:.9rem;"><b>${deckWords.length}</b> слів у колоді · <b>${modeLabel}</b></p>
+      <button class="btn btn-primary" id="startSession">Почати сесію (до ${maxCards} карток)</button>
+    `;
+    info.querySelector('#startSession').onclick = () => {
+      navigate('flashsession', { level, topic, mode, deckWords, allMode });
+    };
+  }
+  return wrap;
 }
 
-// ---- FLASHCARDS ----
-function viewFlashDeckPicker() {
-    const level = SUBSTATE.level || STATE.level || "A1";
-    const words = vocabForLevel(level);
-    const topics = [...new Set(words.map(w => w.t))];
-    const topic = SUBSTATE.topic || "Усі теми";
-    const mode = SUBSTATE.mode || "flip";
-    const allMode = SUBSTATE.allMode || false;
+        function buildQueue(deckWords, level, allMode) {
+  const withState = deckWords.map(w => {
+    const key = wordKey(Object.assign({ level }, w));
+    return { w, key, s: getSrs(key) };
+  });
 
-    const wrap = el(`
-        <div class="view">
-            <h1>${t('h_flashcards')}</h1>
-            <p style="color:var(--ink-soft);font-size:.9rem;">Оберіть рівень, тему та режим тренування.</p>
-            <div class="deckpicker" id="lvlpick"></div>
-            <div class="deckpicker" id="topicpick"></div>
-            <div class="deckpicker" id="modepick"></div>
-            <div class="deckpicker" id="allmodepick">
-                <button class="chip ${!allMode?'active':''}" data-all="false">📅 За розкладом (SRS)</button>
-                <button class="chip ${allMode?'active':''}" data-all="true">📚 Всі картки</button>
-            </div>
-            <div class="card" id="deckInfo" style="margin-top:8px;"></div>
-        </div>
-    `);
-
-    const lvlpick = wrap.querySelector('#lvlpick');
-    LEVELS.forEach(lv => {
-        const c = el(`<button class="chip ${lv===level?'active':''}">${lv}</button>`);
-        c.onclick = () => navigate('flashcards', { level: lv, topic, mode, allMode });
-        lvlpick.appendChild(c);
-    });
-
-    const topicpick = wrap.querySelector('#topicpick');
-    ["Усі теми", ...topics].forEach(t => {
-        const c = el(`<button class="chip ${t===topic?'active':''}">${t}</button>`);
-        c.onclick = () => navigate('flashcards', { level, topic: t, mode, allMode });
-        topicpick.appendChild(c);
-    });
-
-    const modepick = wrap.querySelector('#modepick');
-    [
-        ["flip", "Запам'ятовування"],
-        ["mc", "Вибір відповіді"],
-        ["type", "Написання слова"]
-    ].forEach(([m, label]) => {
-        const c = el(`<button class="chip ${m===mode?'active':''}">${label}</button>`);
-        c.onclick = () => navigate('flashcards', { level, topic, mode: m, allMode });
-        modepick.appendChild(c);
-    });
-
-    wrap.querySelectorAll('#allmodepick .chip').forEach(btn => {
-        btn.onclick = () => {
-            const newAllMode = btn.dataset.all === 'true';
-            navigate('flashcards', { level, topic, mode, allMode: newAllMode });
-        };
-    });
-
-    const deckWords = topic === "Усі теми" ? words : words.filter(w => w.t === topic);
-    const dueCount = deckWords.filter(w => {
-        const s = getSrs(wordKey(Object.assign({ level }, w)));
-        return s.due <= todayStr();
-    }).length;
-
-    const info = wrap.querySelector('#deckInfo');
-    if (deckWords.length === 0) {
-        info.innerHTML = `<div class="empty-state"><h3>Цей рівень ще в розробці</h3><p>Спробуйте A1–B1.</p></div>`;
-    } else {
-        const modeLabel = allMode ? 'всі картки' : `${dueCount} готові до повторення (SRS)`;
-        const maxCards = allMode ? deckWords.length : 20;
-        info.innerHTML = `
-            <p style="font-size:.9rem;"><b>${deckWords.length}</b> слів у колоді · <b>${modeLabel}</b></p>
-            <button class="btn btn-primary" id="startSession">Почати сесію (до ${maxCards} карток)</button>
-        `;
-        info.querySelector('#startSession').onclick = () => {
-            navigate('flashsession', { level, topic, mode, deckWords, allMode });
-        };
-    }
-    return wrap;
-}
-
-function buildQueue(deckWords, level, allMode) {
-    const withState = deckWords.map(w => {
-        const key = wordKey(Object.assign({ level }, w));
-        return { w, key, s: getSrs(key) };
-    });
-
-    if (allMode) {
-        const due = withState.filter(x => x.s.due <= todayStr() && x.s.reps > 0);
-        const fresh = withState.filter(x => x.s.reps === 0);
-        const mastered = withState.filter(x => x.s.reps > 0 && x.s.due > todayStr());
-        return shuffle(due).concat(shuffle(fresh)).concat(shuffle(mastered));
-    }
-
+  if (allMode) {
+    // Режим "Всі картки" – спочатку due, потім fresh, потім mastered
     const due = withState.filter(x => x.s.due <= todayStr() && x.s.reps > 0);
     const fresh = withState.filter(x => x.s.reps === 0);
-    return shuffle(due).concat(shuffle(fresh)).slice(0, 20);
+    const mastered = withState.filter(x => x.s.reps > 0 && x.s.due > todayStr());
+    return shuffle(due).concat(shuffle(fresh)).concat(shuffle(mastered));
+  }
+
+  // SRS-режим – тільки due + fresh
+  const due = withState.filter(x => x.s.due <= todayStr() && x.s.reps > 0);
+  const fresh = withState.filter(x => x.s.reps === 0);
+  return shuffle(due).concat(shuffle(fresh)).slice(0, 20);
 }
 
-function viewFlashSession() {
-    if (!SUBSTATE.queue) {
-        SUBSTATE.queue = buildQueue(SUBSTATE.deckWords, SUBSTATE.level, SUBSTATE.allMode || false);
-        SUBSTATE.pos = 0;
-        SUBSTATE.correct = 0;
-        SUBSTATE.flipped = false;
-    }
-    const { queue, pos, level, mode, allMode } = SUBSTATE;
+        function viewFlashSession() {
+  if (!SUBSTATE.queue) {
+    SUBSTATE.queue = buildQueue(SUBSTATE.deckWords, SUBSTATE.level, SUBSTATE.allMode || false);
+    SUBSTATE.pos = 0;
+    SUBSTATE.correct = 0;
+    SUBSTATE.flipped = false;
+  }
+  const { queue, pos, level, mode, allMode } = SUBSTATE;
 
-    if (queue.length === 0) {
-        return el(
-            `<div class="view"><div class="empty-state"><h3>Немає карток</h3><p>Усі слова заплановані на пізніше.</p><button class="btn btn-primary" onclick="navigate('flashcards')">До вибору</button></div></div>`
-        );
+  if (queue.length === 0) {
+    return el(
+      `<div class="view"><div class="empty-state"><h3>Немає карток</h3><p>Усі слова заплановані на пізніше.</p><button class="btn btn-primary" onclick="navigate('flashcards')">До вибору</button></div></div>`
+    );
+  }
+  if (pos >= queue.length) {
+    markActivityToday();
+    STATE.stats.sessionCount = (STATE.stats.sessionCount || 0) + 1;
+    const pctCorrect = Math.round((SUBSTATE.correct / queue.length) * 100);
+    if (!SUBSTATE._xpGranted) {
+      SUBSTATE._xpGranted = true;
+      const xpAmount = allMode ? Math.max(2, Math.round(SUBSTATE.correct * 1.5)) : Math.max(5, SUBSTATE.correct * 2);
+      addXP(xpAmount, 'session_complete');
     }
-    if (pos >= queue.length) {
-        markActivityToday();
-        STATE.stats.sessionCount = (STATE.stats.sessionCount || 0) + 1;
-        const pctCorrect = Math.round((SUBSTATE.correct / queue.length) * 100);
-        if (!SUBSTATE._xpGranted) {
-            SUBSTATE._xpGranted = true;
-            const xpAmount = allMode ? Math.max(2, Math.round(SUBSTATE.correct * 1.5)) : Math.max(5, SUBSTATE.correct * 2);
-            addXP(xpAmount, 'session_complete');
-        }
-        updateState();
-        const trollMood = pctCorrect >= 70 ? 'happy' : (pctCorrect >= 40 ? 'idle' : 'sad');
-        const wrap = el(`
-            <div class="view session-end card">
-                <h2>Сесію завершено!</h2>
-                <div class="bignum">${pctCorrect}%</div>
-                <p style="color:var(--ink-soft)">${SUBSTATE.correct} із ${queue.length} правильно · +${allMode ? Math.max(2, Math.round(SUBSTATE.correct * 1.5)) : Math.max(5, SUBSTATE.correct * 2)} XP</p>
-                <div style="display:flex;justify-content:center;margin:14px 0;"></div>
-                <div style="display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap;">
-                    <button class="btn btn-primary" id="again">Ще одна сесія</button>
-                    <button class="btn btn-ghost" id="toHome">На головну</button>
-                </div>
-            </div>
-        `);
-        const trollSlot = wrap.querySelector('div[style*="justify-content:center"]');
-        trollSlot.appendChild(renderTrollBubble(trollMood, 'sessionComplete', 64));
-        wrap.querySelector('#again').onclick = () => navigate('flashsession', {
-            level,
-            topic: SUBSTATE.topic,
-            mode,
-            deckWords: SUBSTATE.deckWords,
-            allMode: SUBSTATE.allMode
-        });
-        wrap.querySelector('#toHome').onclick = () => navigate('home');
-        return wrap;
-    }
-
-    const item = queue[pos];
-    const wrap = el(`<div class="view flash-stage"></div>`);
-    const progWrap = el(`
-        <div class="flash-progress">
-            <div class="meta"><span>${pos+1} / ${queue.length}</span><span>${escHtml(item.w.t)}</span></div>
-            <div class="progress-track"><div class="progress-fill" style="width:${(pos/queue.length)*100}%"></div></div>
+    updateState();
+    const trollMood = pctCorrect >= 70 ? 'happy' : (pctCorrect >= 40 ? 'idle' : 'sad');
+    const wrap = el(`
+      <div class="view session-end card">
+        <h2>Сесію завершено!</h2>
+        <div class="bignum">${pctCorrect}%</div>
+        <p style="color:var(--ink-soft)">${SUBSTATE.correct} із ${queue.length} правильно · +${allMode ? Math.max(2, Math.round(SUBSTATE.correct * 1.5)) : Math.max(5, SUBSTATE.correct * 2)} XP</p>
+        <div style="display:flex;justify-content:center;margin:14px 0;"></div>
+        <div style="display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap;">
+          <button class="btn btn-primary" id="again">Ще одна сесія</button>
+          <button class="btn btn-ghost" id="toHome">На головну</button>
         </div>
+      </div>
     `);
-    wrap.appendChild(progWrap);
-
-    if (mode === 'flip') {
-        wrap.appendChild(renderFlipCard(item));
-    } else if (mode === 'mc') {
-        wrap.appendChild(renderMCCard(item, SUBSTATE.deckWords, level));
-    } else {
-        wrap.appendChild(renderTypeCard(item));
-    }
+    const trollSlot = wrap.querySelector('div[style*="justify-content:center"]');
+    trollSlot.appendChild(renderTrollBubble(trollMood, 'sessionComplete', 64));
+    wrap.querySelector('#again').onclick = () => navigate('flashsession', {
+      level,
+      topic: SUBSTATE.topic,
+      mode,
+      deckWords: SUBSTATE.deckWords,
+      allMode: SUBSTATE.allMode
+    });
+    wrap.querySelector('#toHome').onclick = () => navigate('home');
     return wrap;
+  }
+
+  const item = queue[pos];
+  const wrap = el(`<div class="view flash-stage"></div>`);
+  const progWrap = el(`
+    <div class="flash-progress">
+      <div class="meta"><span>${pos+1} / ${queue.length}</span><span>${escHtml(item.w.t)}</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:${(pos/queue.length)*100}%"></div></div>
+    </div>
+  `);
+  wrap.appendChild(progWrap);
+
+  if (mode === 'flip') {
+    wrap.appendChild(renderFlipCard(item));
+  } else if (mode === 'mc') {
+    wrap.appendChild(renderMCCard(item, SUBSTATE.deckWords, level));
+  } else {
+    wrap.appendChild(renderTypeCard(item));
+  }
+  return wrap;
 }
 
-function renderFlipCard(item) {
-    const holder = el(`<div class="flash-card-holder"></div>`);
-    const cardWrap = el(`
+        function renderFlipCard(item) {
+            const holder = el(`<div class="flash-card-holder"></div>`);
+            const cardWrap = el(`
             <div class="flip-card">
               <div class="flip-inner">
                 <div class="flip-face flip-front">
@@ -513,44 +469,44 @@ function renderFlipCard(item) {
               </div>
             </div>
           `);
-    const inner = cardWrap.querySelector('.flip-inner');
-    inner.onclick = (e) => { if (e.target.id === 'fSound') return;
-        inner.classList.toggle('flipped');
-        SUBSTATE.flipped = inner.classList.contains('flipped');
-        renderGrades(); };
-    cardWrap.querySelector('#fSound').onclick = (e) => { e.stopPropagation();
-        speak(item.w.no); };
-    holder.appendChild(cardWrap);
+            const inner = cardWrap.querySelector('.flip-inner');
+            inner.onclick = (e) => { if (e.target.id === 'fSound') return;
+                inner.classList.toggle('flipped');
+                SUBSTATE.flipped = inner.classList.contains('flipped');
+                renderGrades(); };
+            cardWrap.querySelector('#fSound').onclick = (e) => { e.stopPropagation();
+                speak(item.w.no); };
+            holder.appendChild(cardWrap);
 
-    const gradeHolder = el(`<div></div>`);
-    holder.appendChild(gradeHolder);
+            const gradeHolder = el(`<div></div>`);
+            holder.appendChild(gradeHolder);
 
-    function renderGrades() {
-        gradeHolder.innerHTML = "";
-        if (!SUBSTATE.flipped) return;
-        const row = el(`
+            function renderGrades() {
+                gradeHolder.innerHTML = "";
+                if (!SUBSTATE.flipped) return;
+                const row = el(`
               <div class="grade-row">
                 <button class="btn btn-danger" data-g="again">Не знаю</button>
                 <button class="btn btn-amber" data-g="hard">Складно</button>
                 <button class="btn btn-primary" data-g="good">Знаю</button>
               </div>
             `);
-        row.querySelectorAll('[data-g]').forEach(b => b.onclick = () => {
-            gradeWord(item.key, b.dataset.g);
-            if (b.dataset.g !== 'again') SUBSTATE.correct++;
-            SUBSTATE.pos++;
-            SUBSTATE.flipped = false;
-            navigate('flashsession', SUBSTATE);
-        });
-        gradeHolder.appendChild(row);
-    }
-    renderGrades();
-    return holder;
-}
+                row.querySelectorAll('[data-g]').forEach(b => b.onclick = () => {
+                    gradeWord(item.key, b.dataset.g);
+                    if (b.dataset.g !== 'again') SUBSTATE.correct++;
+                    SUBSTATE.pos++;
+                    SUBSTATE.flipped = false;
+                    navigate('flashsession', SUBSTATE);
+                });
+                gradeHolder.appendChild(row);
+            }
+            renderGrades();
+            return holder;
+        }
 
-function renderMCCard(item, deckWords, level) {
-    const holder = el(`<div style="width:100%;display:flex;flex-direction:column;align-items:center;"></div>`);
-    const head = el(`
+        function renderMCCard(item, deckWords, level) {
+            const holder = el(`<div style="width:100%;display:flex;flex-direction:column;align-items:center;"></div>`);
+            const head = el(`
             <div class="flip-card" style="height:160px;">
               <div class="flip-face flip-front" style="position:static;box-shadow:var(--shadow);">
                 <div class="no-word">${escHtml(item.w.no)}</div>
@@ -558,35 +514,35 @@ function renderMCCard(item, deckWords, level) {
               </div>
             </div>
           `);
-    holder.appendChild(head);
-    head.querySelector('#mcSound').onclick = () => speak(item.w.no);
+            holder.appendChild(head);
+            head.querySelector('#mcSound').onclick = () => speak(item.w.no);
 
-    const distractors = shuffle(deckWords.filter(w => w.no !== item.w.no)).slice(0, 3).map(w => w.uk);
-    const options = shuffle([item.w.uk, ...distractors]);
-    const opts = el(`<div class="mc-options"></div>`);
-    options.forEach(opt => {
-        const b = el(`<button class="mc-opt">${escHtml(opt)}</button>`);
-        b.onclick = () => {
-            const correct = opt === item.w.uk;
-            opts.querySelectorAll('.mc-opt').forEach(o => {
-                o.disabled = true;
-                if (o.textContent === item.w.uk) o.classList.add('correct');
-                else if (o === b) o.classList.add('wrong');
+            const distractors = shuffle(deckWords.filter(w => w.no !== item.w.no)).slice(0, 3).map(w => w.uk);
+            const options = shuffle([item.w.uk, ...distractors]);
+            const opts = el(`<div class="mc-options"></div>`);
+            options.forEach(opt => {
+                const b = el(`<button class="mc-opt">${escHtml(opt)}</button>`);
+                b.onclick = () => {
+                    const correct = opt === item.w.uk;
+                    opts.querySelectorAll('.mc-opt').forEach(o => {
+                        o.disabled = true;
+                        if (o.textContent === item.w.uk) o.classList.add('correct');
+                        else if (o === b) o.classList.add('wrong');
+                    });
+                    gradeWord(item.key, correct ? 'good' : 'again');
+                    if (correct) SUBSTATE.correct++;
+                    setTimeout(() => { SUBSTATE.pos++;
+                        navigate('flashsession', SUBSTATE); }, 750);
+                };
+                opts.appendChild(b);
             });
-            gradeWord(item.key, correct ? 'good' : 'again');
-            if (correct) SUBSTATE.correct++;
-            setTimeout(() => { SUBSTATE.pos++;
-                navigate('flashsession', SUBSTATE); }, 750);
-        };
-        opts.appendChild(b);
-    });
-    holder.appendChild(opts);
-    return holder;
-}
+            holder.appendChild(opts);
+            return holder;
+        }
 
-function renderTypeCard(item) {
-    const holder = el(`<div style="width:100%;display:flex;flex-direction:column;align-items:center;"></div>`);
-    holder.appendChild(el(`
+        function renderTypeCard(item) {
+            const holder = el(`<div style="width:100%;display:flex;flex-direction:column;align-items:center;"></div>`);
+            holder.appendChild(el(`
             <div class="flip-card" style="height:170px;">
               <div class="flip-face flip-front" style="position:static;box-shadow:var(--shadow);">
                 <div class="uk-word">${escHtml(wordTranslation(item.w, item.key.split('|')[0]))}</div>
@@ -594,41 +550,67 @@ function renderTypeCard(item) {
               </div>
             </div>
           `));
-    const input = el(`<input class="type-input" placeholder="напишіть тут..." autocomplete="off">`);
-    holder.appendChild(input);
-    const fb = el(`<div></div>`);
-    holder.appendChild(fb);
-    const btn = el(`<button class="btn btn-primary">Перевірити</button>`);
-    holder.appendChild(btn);
+            const input = el(`<input class="type-input" placeholder="напишіть тут..." autocomplete="off">`);
+            holder.appendChild(input);
+            const fb = el(`<div></div>`);
+            holder.appendChild(fb);
+            const btn = el(`<button class="btn btn-primary">Перевірити</button>`);
+            holder.appendChild(btn);
 
-    function check() {
-        const val = input.value.trim();
-        const target = item.w.no;
-        const correct = isFuzzyMatch(val, target);
-        fb.innerHTML =
-            `<div class="feedback-banner ${correct?'ok':'bad'}">${correct? 'Правильно! 🎉' : 'Правильна відповідь: '+target}</div>`;
-        input.disabled = true;
-        btn.disabled = true;
-        gradeWord(item.key, correct ? 'good' : 'again');
-        if (correct) SUBSTATE.correct++;
-        setTimeout(() => { SUBSTATE.pos++;
-            navigate('flashsession', SUBSTATE); }, 1200);
-    }
-    btn.onclick = check;
-    input.onkeydown = (e) => { if (e.key === 'Enter') check(); };
-    return holder;
-}
+            function check() {
+                const val = input.value.trim();
+                const target = item.w.no;
+                const correct = isFuzzyMatch(val, target);
+                fb.innerHTML =
+                    `<div class="feedback-banner ${correct?'ok':'bad'}">${correct? 'Правильно! 🎉' : 'Правильна відповідь: '+target}</div>`;
+                input.disabled = true;
+                btn.disabled = true;
+                gradeWord(item.key, correct ? 'good' : 'again');
+                if (correct) SUBSTATE.correct++;
+                setTimeout(() => { SUBSTATE.pos++;
+                    navigate('flashsession', SUBSTATE); }, 1200);
+            }
+            btn.onclick = check;
+            input.onkeydown = (e) => { if (e.key === 'Enter') check(); };
+            return holder;
+        }
 
-// ---- VOCABULARY ----
-function viewVocabulary() {
-    const level = STATE.level || "A1";
-    const words = vocabForLevel(level);
-    const statusLabels = {
-        uk: { new: 'нове', due: 'на повторення', mastered: 'засвоєне' },
-        en: { new: 'new', due: 'due for review', mastered: 'mastered' },
-        ru: { new: 'новое', due: 'на повторение', mastered: 'освоено' },
-    }[STATE.uiLang] || { new: 'нове', due: 'на повторення', mastered: 'засвоєне' };
-    const wrap = el(`
+        // ---- VOCABULARY ----
+        function viewVocabulary() {
+            const level = STATE.level || "A1";
+            const langObj = getLanguage(STATE.targetLang || 'no');
+            ensureSharedVocabLoaded(STATE.targetLang || 'no', level); // тихо підвантажує спільний словник, якщо його ще нема в кеші
+            const words = vocabForLevel(level);
+            const statusLabels = {
+                uk: { new: 'нове', due: 'на повторення', mastered: 'засвоєне' },
+                en: { new: 'new', due: 'due for review', mastered: 'mastered' },
+                ru: { new: 'новое', due: 'на повторение', mastered: 'освоено' },
+            }[STATE.uiLang] || { new: 'нове', due: 'на повторення', mastered: 'засвоєне' };
+
+            if (!langObj.builtin && words.length === 0) {
+                // Звичайний користувач нічого не генерує — словник наповнює
+                // адміністратор через адмін-панель (Спільні словники). Тут лише
+                // дружнє повідомлення про очікування, і для адміна — ярлик.
+                const emptyMsg = {
+                    uk: `Словник для «${targetLangName()}», рівень ${level}, ще готується. Спробуйте пізніше або оберіть інший рівень.`,
+                    en: `The vocabulary for "${targetLangName()}", level ${level}, isn't ready yet. Try again later or pick another level.`,
+                    ru: `Словарь для «${targetLangName()}», уровень ${level}, ещё готовится. Попробуйте позже или выберите другой уровень.`,
+                }[STATE.uiLang] || '';
+                const wrap = el(`
+                <div class="view">
+                  <h1>${t('h_vocabulary')}</h1>
+                  <div class="card" style="text-align:center;padding:40px 24px;">
+                    <div style="font-size:2.4rem;margin-bottom:12px;">${langObj.flag}</div>
+                    <p style="color:var(--ink-soft);margin-bottom:18px;">${emptyMsg}</p>
+                    ${STATE.admin ? `<button class="btn btn-primary" id="goAdminVocabBtn">⚙️ Згенерувати в адмін-панелі</button>` : ''}
+                  </div>
+                </div>
+              `);
+                const goAdminBtn = wrap.querySelector('#goAdminVocabBtn');
+                if (goAdminBtn) goAdminBtn.onclick = () => navigate('admin-vocab-gen', { presetLang: STATE.targetLang, presetLevel: level });
+                return wrap;
+            }
+            const wrap = el(`
             <div class="view">
               <h1>${t('h_vocabulary')}</h1>
               <p style="color:var(--ink-soft);margin-bottom:12px;font-size:.85rem;">${t('all_level_words')} (${level}). ${t('status_label')}: <span class="status new">${statusLabels.new}</span> <span class="status due">${statusLabels.due}</span> <span class="status mastered">${statusLabels.mastered}</span></p>
@@ -638,7 +620,7 @@ function viewVocabulary() {
                   <option value="all">${t('all_topics')}</option>
                   ${[...new Set(words.map(w=>w.t))].map(t=>`<option value="${t}">${t}</option>`).join('')}
                 </select>
-                <button class="btn btn-ghost btn-sm" id="vocabGenBtn" style="white-space:nowrap;">🎲 AI: додати нові слова</button>
+                ${(langObj.builtin || STATE.admin) ? `<button class="btn btn-ghost btn-sm" id="vocabGenBtn" style="white-space:nowrap;">🎲 AI: додати нові слова</button>` : ''}
               </div>
               <div class="card" style="padding:0;overflow-x:auto;">
                 <table class="vocab-table">
@@ -648,116 +630,134 @@ function viewVocabulary() {
               </div>
             </div>
           `);
-    const tbody = wrap.querySelector('#vocabBody');
-    const search = wrap.querySelector('#vocabSearch');
-    const topicFilter = wrap.querySelector('#vocabTopic');
+            const tbody = wrap.querySelector('#vocabBody');
+            const search = wrap.querySelector('#vocabSearch');
+            const topicFilter = wrap.querySelector('#vocabTopic');
 
-    function renderList() {
-        const q = search.value.toLowerCase().trim();
-        const topic = topicFilter.value;
-        let filtered = words.filter(w => {
-            const matchWord = w.no.toLowerCase().includes(q) || w.uk.toLowerCase().includes(q);
-            const matchTopic = topic === 'all' || w.t === topic;
-            return matchWord && matchTopic;
-        });
-        tbody.innerHTML = filtered.map(w => {
-            const status = getWordStatus(w, level);
-            const translated = wordTranslation(w, level, STATE.vocabLang);
-            return `<tr>
+            function renderList() {
+                const q = search.value.toLowerCase().trim();
+                const topic = topicFilter.value;
+                let filtered = words.filter(w => {
+                    const matchWord = w.no.toLowerCase().includes(q) || w.uk.toLowerCase().includes(q);
+                    const matchTopic = topic === 'all' || w.t === topic;
+                    return matchWord && matchTopic;
+                });
+                tbody.innerHTML = filtered.map(w => {
+                    const status = getWordStatus(w, level);
+                    const translated = wordTranslation(w, level, STATE.vocabLang);
+                    return `<tr>
                 <td><strong>${escHtml(w.no)}</strong></td>
                 <td>${escHtml(translated)}</td>
                 <td><span style="font-size:.7rem;background:var(--line-soft);padding:2px 8px;border-radius:999px;">${escHtml(w.t)}</span></td>
                 <td><span class="status ${status}">${statusLabels[status]}</span></td>
               </tr>`;
-        }).join('');
-        if (!filtered.length) {
-            tbody.innerHTML =
-                `<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--ink-soft);font-size:.85rem;">${t('no_words_found')}</td></tr>`;
-        }
-        return filtered;
-    }
-    renderList();
-    search.oninput = renderList;
-    topicFilter.onchange = renderList;
-
-    const genBtn = wrap.querySelector('#vocabGenBtn');
-    genBtn.onclick = async () => {
-        genBtn.disabled = true;
-        const originalLabel = genBtn.textContent;
-        genBtn.textContent = '🎲 Генерую…';
-        try {
-            const existingTopics = [...new Set(words.map(w => w.t))];
-            const newWords = await generateVocabWordsAI(level, existingTopics);
-            const added = addCustomWords(level, Array.isArray(newWords) ? newWords : []);
-            if (added > 0) {
-                toast(`✅ Додано нових слів: ${added}`);
-                navigate('vocabulary');
-            } else {
-                toast('🤔 AI не запропонував нових унікальних слів. Спробуй ще раз.');
-                genBtn.disabled = false;
-                genBtn.textContent = originalLabel;
+                }).join('');
+                if (!filtered.length) {
+                    tbody.innerHTML =
+                        `<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--ink-soft);font-size:.85rem;">${t('no_words_found')}</td></tr>`;
+                }
+                return filtered;
             }
-        } catch (e) {
-            console.error('[Словник] Помилка генерації слів:', e);
-            toast('⚠️ Не вдалося згенерувати слова. Спробуй ще раз.');
-            genBtn.disabled = false;
-            genBtn.textContent = originalLabel;
+            renderList();
+            search.oninput = renderList;
+            topicFilter.onchange = renderList;
+
+            // AI-генерація нових слів: для норвезької додаються в STATE.customWords,
+            // для інших мов — у STATE.generatedVocab[lang][level]. Обидва одразу
+            // стають частиною словника, карток, тестів і SRS для цього рівня.
+            const genBtn = wrap.querySelector('#vocabGenBtn');
+            if (genBtn) genBtn.onclick = async () => {
+                genBtn.disabled = true;
+                const originalLabel = genBtn.textContent;
+                try {
+                    if (langObj.builtin) {
+                        genBtn.textContent = '🎲 Генерую…';
+                        const existingTopics = [...new Set(words.map(w => w.t))];
+                        const newWords = await generateVocabWordsAI(level, existingTopics);
+                        const added = addCustomWords(level, Array.isArray(newWords) ? newWords : []);
+                        if (added > 0) {
+                            toast(`✅ Додано нових слів: ${added}`);
+                            navigate('vocabulary');
+                        } else {
+                            toast('🤔 AI не запропонував нових унікальних слів. Спробуй ще раз.');
+                            genBtn.disabled = false;
+                            genBtn.textContent = originalLabel;
+                        }
+                    } else {
+                        // Для не вбудованих мов — той самий великий пакетний генератор,
+                        // що й для стартового словника, але додає ПОВЕРХ уже наявних слів.
+                        const more = await generateBulkVocab(STATE.targetLang, level, 3, (done, total) => {
+                            genBtn.textContent = `🎲 ${done}/${total}`;
+                        });
+                        ensureGeneratedVocabStore();
+                        const existingKeys = new Set(words.map(w => w.no.trim().toLowerCase()));
+                        const uniqueNew = more.filter(w => !existingKeys.has(w.no.trim().toLowerCase()));
+                        STATE.generatedVocab[STATE.targetLang][level] = words.concat(uniqueNew);
+                        updateState();
+                        toast(`✅ Додано нових слів: ${uniqueNew.length}`);
+                        navigate('vocabulary');
+                    }
+                } catch (e) {
+                    console.error('[Словник] Помилка генерації слів:', e);
+                    toast('⚠️ Не вдалося згенерувати слова. Спробуй ще раз.');
+                    genBtn.disabled = false;
+                    genBtn.textContent = originalLabel;
+                }
+            };
+
+            return wrap;
         }
-    };
 
-    return wrap;
-}
-
-// ---- TESTS (з навігацією) ----
-function viewTestsHub() {
-    const wrap = el(`
+        // ---- TESTS (з навігацією) ----
+        function viewTestsHub() {
+            const wrap = el(`
             <div class="view">
               <h1>${t('h_tests')}</h1>
               <p style="color:var(--ink-soft);margin-bottom:16px;">Оберіть тип вправи для рівня ${STATE.level||'A1'}.</p>
               <div class="grid cols-3" id="thub"></div>
             </div>
           `);
-    const items = [
-        ["test-mc", "🔤", "Вибір форми", "Оберіть правильний переклад або форму."],
-        ["test-cloze", "✏️", "Заповни пропуск", "Вставте пропущене слово."],
-        ["test-order", "🧩", "Склади речення", "Розташуйте слова у правильному порядку."],
-        ["test-listen", "🎧", "Аудіювання", "Прослухайте слово і оберіть переклад."],
-        ["test-translate", "🌐", "Переклад", "Напишіть переклад слова."],
-    ];
-    const grid = wrap.querySelector('#thub');
-    items.forEach(([r, icon, title, desc]) => {
-        const c = el(
-            `<div class="card test-type-card"><div class="icon">${icon}</div><h3>${title}</h3><p>${desc}</p><button class="btn btn-primary btn-sm">Почати</button></div>`
-            );
-        c.querySelector('button').onclick = () => navigate(r);
-        grid.appendChild(c);
-    });
-    return wrap;
-}
-
-function currentLevelWords() {
-    const words = vocabForLevel(STATE.level || "A1");
-    return words.length ? words : VOCAB.A1;
-}
-
-// Універсальна функція для тестів
-function runQuiz(sub, route, title) {
-    if (!sub.userAnswers) {
-        sub.userAnswers = new Array(sub.qs.length).fill(null);
-    }
-    if (sub.i >= sub.qs.length && sub.userAnswers.every(a => a !== null)) {
-        STATE.stats.testsCompleted = (STATE.stats.testsCompleted || 0) + 1;
-        STATE.leaderboardScore = (STATE.leaderboardScore || 0) + sub.correct * 10;
-        markActivityToday();
-        const pct = Math.round((sub.correct / sub.qs.length) * 100);
-        if (!sub._xpGranted) {
-            sub._xpGranted = true;
-            addXP(100, 'test_complete');
-            checkAchievements({ perfectTest: pct === 100 });
+            const items = [
+                ["test-mc", "🔤", "Вибір форми", "Оберіть правильний переклад або форму."],
+                ["test-cloze", "✏️", "Заповни пропуск", "Вставте пропущене слово."],
+                ["test-order", "🧩", "Склади речення", "Розташуйте слова у правильному порядку."],
+                ["test-listen", "🎧", "Аудіювання", "Прослухайте слово і оберіть переклад."],
+                ["test-translate", "🌐", "Переклад", "Напишіть переклад слова."],
+            ];
+            const grid = wrap.querySelector('#thub');
+            items.forEach(([r, icon, title, desc]) => {
+                const c = el(
+                    `<div class="card test-type-card"><div class="icon">${icon}</div><h3>${title}</h3><p>${desc}</p><button class="btn btn-primary btn-sm">Почати</button></div>`
+                    );
+                c.querySelector('button').onclick = () => navigate(r);
+                grid.appendChild(c);
+            });
+            return wrap;
         }
-        updateState();
-        const trollMood = pct >= 70 ? 'happy' : (pct >= 40 ? 'idle' : 'sad');
-        const wrap = el(`
+
+        function currentLevelWords() {
+            const words = vocabForLevel(STATE.level || "A1");
+            return words.length ? words : VOCAB.A1;
+        }
+
+        // Універсальна функція для тестів
+        function runQuiz(sub, route, title) {
+            if (!sub.userAnswers) {
+                sub.userAnswers = new Array(sub.qs.length).fill(null);
+            }
+            if (sub.i >= sub.qs.length && sub.userAnswers.every(a => a !== null)) {
+                STATE.stats.testsCompleted = (STATE.stats.testsCompleted || 0) + 1;
+                STATE.leaderboardScore = (STATE.leaderboardScore || 0) + sub.correct * 10;
+                markActivityToday();
+                const pct = Math.round((sub.correct / sub.qs.length) * 100);
+                if (!sub._xpGranted) {
+                    sub._xpGranted = true;
+                    addXP(100, 'test_complete'); // +100 XP за тест
+                    checkAchievements({ perfectTest: pct === 100 });
+                }
+                updateState();
+                const trollMood = pct >= 70 ? 'happy' : (pct >= 40 ? 'idle' : 'sad');
+                const wrap = el(`
               <div class="view session-end card">
                 <h2>${title}: завершено</h2>
                 <div class="bignum">${pct}%</div>
@@ -766,195 +766,205 @@ function runQuiz(sub, route, title) {
                 <button class="btn btn-ghost" id="hub">До тестів</button>
               </div>
             `);
-        const trollSlot = wrap.querySelector('div[style*="justify-content:center"]');
-        trollSlot.appendChild(renderTrollBubble(trollMood, 'testComplete', 64));
-        wrap.querySelector('#hub').onclick = () => navigate('tests');
-        return wrap;
-    }
-    if (sub.i >= sub.qs.length) sub.i = sub.qs.length - 1;
-    if (sub.i < 0) sub.i = 0;
+                const trollSlot = wrap.querySelector('div[style*="justify-content:center"]');
+                trollSlot.appendChild(renderTrollBubble(trollMood, 'testComplete', 64));
+                wrap.querySelector('#hub').onclick = () => navigate('tests');
+                return wrap;
+            }
+            if (sub.i >= sub.qs.length) sub.i = sub.qs.length - 1;
+            if (sub.i < 0) sub.i = 0;
 
-    const currentQ = sub.qs[sub.i];
-    const currentAnswer = sub.userAnswers[sub.i];
+            const currentQ = sub.qs[sub.i];
+            const currentAnswer = sub.userAnswers[sub.i];
 
-    function renderDots() {
-        let html = '<div class="test-nav">';
-        sub.qs.forEach((_, idx) => {
-            const ans = sub.userAnswers[idx];
-            let cls = 'dot';
-            if (idx === sub.i) cls += ' active';
-            if (ans !== null) cls += ans.correct ? ' correct' : ' wrong';
-            html += `<div class="${cls}" data-idx="${idx}">${idx+1}</div>`;
-        });
-        html += '</div>';
-        return html;
-    }
+            function renderDots() {
+                let html = '<div class="test-nav">';
+                sub.qs.forEach((_, idx) => {
+                    const ans = sub.userAnswers[idx];
+                    let cls = 'dot';
+                    if (idx === sub.i) cls += ' active';
+                    if (ans !== null) cls += ans.correct ? ' correct' : ' wrong';
+                    html += `<div class="${cls}" data-idx="${idx}">${idx+1}</div>`;
+                });
+                html += '</div>';
+                return html;
+            }
 
-    function renderControls() {
-        let html = '<div class="test-controls">';
-        html += `<button class="btn btn-ghost btn-sm" id="prevBtn" ${sub.i===0?'disabled':''}>◀ Назад</button>`;
-        html +=
-            `<button class="btn btn-primary btn-sm" id="nextBtn" ${sub.i>=sub.qs.length-1?'disabled':''}>Вперед ▶</button>`;
-        html += '</div>';
-        return html;
-    }
+            function renderControls() {
+                let html = '<div class="test-controls">';
+                html += `<button class="btn btn-ghost btn-sm" id="prevBtn" ${sub.i===0?'disabled':''}>◀ Назад</button>`;
+                html +=
+                    `<button class="btn btn-primary btn-sm" id="nextBtn" ${sub.i>=sub.qs.length-1?'disabled':''}>Вперед ▶</button>`;
+                html += '</div>';
+                return html;
+            }
 
-    const wrap = el(`<div class="view" style="max-width:600px;margin:0 auto;"></div>`);
-    const dotsWrap = el(renderDots());
-    wrap.appendChild(dotsWrap);
+            const wrap = el(`<div class="view" style="max-width:600px;margin:0 auto;"></div>`);
+            const dotsWrap = el(renderDots());
+            wrap.appendChild(dotsWrap);
 
-    const questionContainer = el(`<div style="text-align:center;margin:10px 0;"></div>`);
-    wrap.appendChild(questionContainer);
+            const questionContainer = el(`<div style="text-align:center;margin:10px 0;"></div>`);
+            wrap.appendChild(questionContainer);
 
-    function renderQuestion() {
-        questionContainer.innerHTML = '';
-        const q = currentQ;
-        const ans = currentAnswer;
+            function renderQuestion() {
+                questionContainer.innerHTML = '';
+                const q = currentQ;
+                const ans = currentAnswer;
 
-        const header = el(`<div class="qcounter">${title} · ${sub.i+1} / ${sub.qs.length}</div>`);
-        questionContainer.appendChild(header);
+                const header = el(`<div class="qcounter">${title} · ${sub.i+1} / ${sub.qs.length}</div>`);
+                questionContainer.appendChild(header);
 
-        const progress = el(
-            `<div class="progress-track" style="margin-bottom:12px;"><div class="progress-fill" style="width:${((sub.i+1)/sub.qs.length)*100}%"></div></div>`
-            );
-        questionContainer.appendChild(progress);
+                const progress = el(
+                    `<div class="progress-track" style="margin-bottom:12px;"><div class="progress-fill" style="width:${((sub.i+1)/sub.qs.length)*100}%"></div></div>`
+                    );
+                questionContainer.appendChild(progress);
 
-        const qText = el(`<div class="question-text" style="font-size:1.1rem;margin-bottom:16px;">${escHtml(q.q)}</div>`);
-        questionContainer.appendChild(qText);
+                const qText = el(`<div class="question-text" style="font-size:1.1rem;margin-bottom:16px;">${escHtml(q.q)}</div>`);
+                questionContainer.appendChild(qText);
 
-        if (q.opts) {
-            const optsContainer = el(`<div class="mc-options" style="margin:0 auto;"></div>`);
-            q.opts.forEach((opt, idx) => {
-                const b = el(`<button class="mc-opt" ${ans !== null ? 'disabled' : ''}>${escHtml(opt)}</button>`);
-                if (ans !== null) {
-                    if (idx === q.a) b.classList.add('correct');
-                    else if (idx === ans.selected) b.classList.add('wrong');
-                }
-                b.onclick = () => {
-                    if (ans !== null) return;
-                    const correct = idx === q.a;
-                    sub.userAnswers[sub.i] = { selected: idx, correct: correct };
-                    if (correct) sub.correct = (sub.correct || 0) + 1;
-                    const allOpts = optsContainer.querySelectorAll('.mc-opt');
-                    allOpts.forEach(o => o.disabled = true);
-                    allOpts.forEach((o, oi) => {
-                        if (oi === q.a) o.classList.add('correct');
-                        else if (oi === idx) o.classList.add('wrong');
+                if (q.opts) {
+                    const optsContainer = el(`<div class="mc-options" style="margin:0 auto;"></div>`);
+                    q.opts.forEach((opt, idx) => {
+                        const b = el(`<button class="mc-opt" ${ans !== null ? 'disabled' : ''}>${escHtml(opt)}</button>`);
+                        if (ans !== null) {
+                            if (idx === q.a) b.classList.add('correct');
+                            else if (idx === ans.selected) b.classList.add('wrong');
+                        }
+                        b.onclick = () => {
+                            if (ans !== null) return;
+                            const correct = idx === q.a;
+                            sub.userAnswers[sub.i] = { selected: idx, correct: correct };
+                            if (correct) sub.correct = (sub.correct || 0) + 1;
+                            const allOpts = optsContainer.querySelectorAll('.mc-opt');
+                            allOpts.forEach(o => o.disabled = true);
+                            allOpts.forEach((o, oi) => {
+                                if (oi === q.a) o.classList.add('correct');
+                                else if (oi === idx) o.classList.add('wrong');
+                            });
+                            updateDots();
+                            setTimeout(() => {
+                                let nextIdx = sub.i + 1;
+                                while (nextIdx < sub.qs.length && sub.userAnswers[nextIdx] !== null)
+                                    nextIdx++;
+                                if (nextIdx < sub.qs.length) sub.i = nextIdx;
+                                else sub.i = sub.qs.length;
+                                navigate(route, sub);
+                            }, 2000);
+                        };
+                        optsContainer.appendChild(b);
                     });
-                    updateDots();
-                    setTimeout(() => {
-                        let nextIdx = sub.i + 1;
-                        while (nextIdx < sub.qs.length && sub.userAnswers[nextIdx] !== null)
-                            nextIdx++;
-                        if (nextIdx < sub.qs.length) sub.i = nextIdx;
-                        else sub.i = sub.qs.length;
-                        navigate(route, sub);
-                    }, 2000);
+                    questionContainer.appendChild(optsContainer);
+                }
+
+                const controls = el(renderControls());
+                questionContainer.appendChild(controls);
+
+                controls.querySelector('#prevBtn').onclick = () => {
+                    if (sub.i > 0) { sub.i--;
+                        navigate(route, sub); }
                 };
-                optsContainer.appendChild(b);
+                controls.querySelector('#nextBtn').onclick = () => {
+                    let nextIdx = sub.i + 1;
+                    while (nextIdx < sub.qs.length && sub.userAnswers[nextIdx] !== null) nextIdx++;
+                    if (nextIdx < sub.qs.length) sub.i = nextIdx;
+                    else sub.i = sub.qs.length;
+                    navigate(route, sub);
+                };
+            }
+
+            function updateDots() {
+                const dots = dotsWrap.querySelectorAll('.dot');
+                dots.forEach((dot, idx) => {
+                    const ans = sub.userAnswers[idx];
+                    dot.className = 'dot';
+                    if (idx === sub.i) dot.classList.add('active');
+                    if (ans !== null) dot.classList.add(ans.correct ? 'correct' : 'wrong');
+                });
+            }
+
+            renderQuestion();
+            dotsWrap.querySelectorAll('.dot').forEach(dot => {
+                dot.onclick = () => {
+                    const idx = parseInt(dot.dataset.idx);
+                    if (idx !== sub.i) { sub.i = idx;
+                        navigate(route, sub); }
+                };
             });
-            questionContainer.appendChild(optsContainer);
+            return wrap;
         }
 
-        const controls = el(renderControls());
-        questionContainer.appendChild(controls);
+        function viewTestMC() {
+            if (!SUBSTATE.qs) {
+                const level = STATE.level || "A1";
+                const words = shuffle(currentLevelWords()).slice(0, 6);
+                const gramQs = GRAMMAR.filter(g => g.level === (STATE.level || "A1")).map(g => ({ q: g.ex.q, opts: g.ex
+                        .opts, a: g.ex.a }));
+                const wordQs = words.map(w => {
+                    const correctTranslation = wordTranslation(w, level, STATE.vocabLang);
+                    const distractors = shuffle(currentLevelWords().filter(x => x.no !== w.no)).slice(0, 3).map(x => wordTranslation(x, level, STATE.vocabLang));
+                    const opts = shuffle([correctTranslation, ...distractors]);
+                    return { q: `${t('how_translate')} «${w.no}»?`, opts, a: opts.indexOf(correctTranslation) };
+                });
+                SUBSTATE.qs = shuffle(wordQs.concat(gramQs)).slice(0, 8);
+                SUBSTATE.i = 0;
+                SUBSTATE.correct = 0;
+                SUBSTATE.userAnswers = null;
+            }
+            return runQuiz(SUBSTATE, 'test-mc', "Вибір форми");
+        }
 
-        controls.querySelector('#prevBtn').onclick = () => {
-            if (sub.i > 0) { sub.i--;
-                navigate(route, sub); }
-        };
-        controls.querySelector('#nextBtn').onclick = () => {
-            let nextIdx = sub.i + 1;
-            while (nextIdx < sub.qs.length && sub.userAnswers[nextIdx] !== null) nextIdx++;
-            if (nextIdx < sub.qs.length) sub.i = nextIdx;
-            else sub.i = sub.qs.length;
-            navigate(route, sub);
-        };
-    }
+        function escapeRegex(s) {
+            return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
 
-    function updateDots() {
-        const dots = dotsWrap.querySelectorAll('.dot');
-        dots.forEach((dot, idx) => {
-            const ans = sub.userAnswers[idx];
-            dot.className = 'dot';
-            if (idx === sub.i) dot.classList.add('active');
-            if (ans !== null) dot.classList.add(ans.correct ? 'correct' : 'wrong');
-        });
-    }
+        // Норвезькі слова часто з'являються у прикладному реченні в іншій
+        // формі, ніж у словнику: множина/означена форма (suppe → suppa,
+        // kone → kona), дієслово без "å " та у відмінюванні (å skrive →
+        // skriver) тощо. Пряме порівняння рядків тоді не знаходить збігу, і
+        // вправа "заповни пропуск" показує ціле речення без жодного пропуску
+        // (по суті зламану вправу). Ця функція намагається знайти потрібне
+        // слово у реченні кількома способами (точний збіг → перше слово
+        // фрази → корінь слова), і повертає null, якщо це справді не
+        // вдається — тоді виклик відсіює таке слово з вправи заздалегідь,
+        // замість показувати незламану вправу.
+        function clozeBlank(word, exampleNo) {
+            if (!word || !exampleNo) return null;
+            const bare = word.replace(/^å\s+/i, '').trim();
+            const firstWord = bare.split(' ')[0];
+            let re = new RegExp(escapeRegex(bare), 'i');
+            if (re.test(exampleNo)) return exampleNo.replace(re, '____');
+            re = new RegExp('\\b' + escapeRegex(firstWord), 'i');
+            if (re.test(exampleNo)) return exampleNo.replace(re, '____');
+            const stemLen = Math.max(3, Math.ceil(firstWord.length * 0.6));
+            const stem = firstWord.slice(0, stemLen);
+            re = new RegExp('\\b' + escapeRegex(stem) + '\\w*', 'i');
+            if (re.test(exampleNo)) return exampleNo.replace(re, '____');
+            return null;
+        }
 
-    renderQuestion();
-    dotsWrap.querySelectorAll('.dot').forEach(dot => {
-        dot.onclick = () => {
-            const idx = parseInt(dot.dataset.idx);
-            if (idx !== sub.i) { sub.i = idx;
-                navigate(route, sub); }
-        };
-    });
-    return wrap;
-}
-
-function viewTestMC() {
-    if (!SUBSTATE.qs) {
-        const level = STATE.level || "A1";
-        const words = shuffle(currentLevelWords()).slice(0, 6);
-        const gramQs = GRAMMAR.filter(g => g.level === (STATE.level || "A1")).map(g => ({ q: g.ex.q, opts: g.ex
-                .opts, a: g.ex.a }));
-        const wordQs = words.map(w => {
-            const correctTranslation = wordTranslation(w, level, STATE.vocabLang);
-            const distractors = shuffle(currentLevelWords().filter(x => x.no !== w.no)).slice(0, 3).map(x => wordTranslation(x, level, STATE.vocabLang));
-            const opts = shuffle([correctTranslation, ...distractors]);
-            return { q: `${t('how_translate')} «${w.no}»?`, opts, a: opts.indexOf(correctTranslation) };
-        });
-        SUBSTATE.qs = shuffle(wordQs.concat(gramQs)).slice(0, 8);
-        SUBSTATE.i = 0;
-        SUBSTATE.correct = 0;
-        SUBSTATE.userAnswers = null;
-    }
-    return runQuiz(SUBSTATE, 'test-mc', "Вибір форми");
-}
-
-function escapeRegex(s) {
-    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function clozeBlank(word, exampleNo) {
-    if (!word || !exampleNo) return null;
-    const bare = word.replace(/^å\s+/i, '').trim();
-    const firstWord = bare.split(' ')[0];
-    let re = new RegExp(escapeRegex(bare), 'i');
-    if (re.test(exampleNo)) return exampleNo.replace(re, '____');
-    re = new RegExp('\\b' + escapeRegex(firstWord), 'i');
-    if (re.test(exampleNo)) return exampleNo.replace(re, '____');
-    const stemLen = Math.max(3, Math.ceil(firstWord.length * 0.6));
-    const stem = firstWord.slice(0, stemLen);
-    re = new RegExp('\\b' + escapeRegex(stem) + '\\w*', 'i');
-    if (re.test(exampleNo)) return exampleNo.replace(re, '____');
-    return null;
-}
-
-function viewTestCloze() {
-    if (!SUBSTATE.qs) {
-        const eligible = currentLevelWords().filter(w => clozeBlank(w.no, w.ex_no) !== null);
-        const words = shuffle(eligible).slice(0, 6);
-        SUBSTATE.qs = words.map(w => {
-            const sentence = clozeBlank(w.no, w.ex_no);
-            const distractors = shuffle(currentLevelWords().filter(x => x.no !== w.no)).slice(0, 3).map(x => x
-                .no);
-            const opts = shuffle([w.no, ...distractors]);
-            return { sentence, translation: w.ex_uk, opts, a: opts.indexOf(w.no) };
-        });
-        SUBSTATE.i = 0;
-        SUBSTATE.correct = 0;
-        SUBSTATE.userAnswers = null;
-    }
-    const sub = SUBSTATE;
-    if (sub.i >= sub.qs.length && sub.userAnswers && sub.userAnswers.every(a => a !== null)) {
-        STATE.stats.testsCompleted = (STATE.stats.testsCompleted || 0) + 1;
-        STATE.leaderboardScore = (STATE.leaderboardScore || 0) + sub.correct * 10;
-        markActivityToday();
-        updateState();
-        const pct = Math.round((sub.correct / sub.qs.length) * 100);
-        const wrap = el(`
+        function viewTestCloze() {
+            if (!SUBSTATE.qs) {
+                const eligible = currentLevelWords().filter(w => clozeBlank(w.no, w.ex_no) !== null);
+                const words = shuffle(eligible).slice(0, 6);
+                SUBSTATE.qs = words.map(w => {
+                    const sentence = clozeBlank(w.no, w.ex_no);
+                    const distractors = shuffle(currentLevelWords().filter(x => x.no !== w.no)).slice(0, 3).map(x => x
+                        .no);
+                    const opts = shuffle([w.no, ...distractors]);
+                    return { sentence, translation: w.ex_uk, opts, a: opts.indexOf(w.no) };
+                });
+                SUBSTATE.i = 0;
+                SUBSTATE.correct = 0;
+                SUBSTATE.userAnswers = null;
+            }
+            const sub = SUBSTATE;
+            if (sub.i >= sub.qs.length && sub.userAnswers && sub.userAnswers.every(a => a !== null)) {
+                STATE.stats.testsCompleted = (STATE.stats.testsCompleted || 0) + 1;
+                STATE.leaderboardScore = (STATE.leaderboardScore || 0) + sub.correct * 10;
+                markActivityToday();
+                updateState();
+                const pct = Math.round((sub.correct / sub.qs.length) * 100);
+                const wrap = el(`
               <div class="view session-end card">
                 <h2>Заповни пропуск: завершено</h2>
                 <div class="bignum">${pct}%</div>
@@ -962,141 +972,141 @@ function viewTestCloze() {
                 <button class="btn btn-ghost" id="hub">До тестів</button>
               </div>
             `);
-        wrap.querySelector('#hub').onclick = () => navigate('tests');
-        return wrap;
-    }
-    if (!sub.userAnswers) sub.userAnswers = new Array(sub.qs.length).fill(null);
-    if (sub.i >= sub.qs.length) sub.i = sub.qs.length - 1;
-    if (sub.i < 0) sub.i = 0;
-
-    const currentQ = sub.qs[sub.i];
-    const currentAnswer = sub.userAnswers[sub.i];
-
-    const wrap = el(`<div class="view" style="max-width:600px;margin:0 auto;"></div>`);
-    let dotsHtml = '<div class="test-nav">';
-    sub.qs.forEach((_, idx) => {
-        const ans = sub.userAnswers[idx];
-        let cls = 'dot';
-        if (idx === sub.i) cls += ' active';
-        if (ans !== null) cls += ans.correct ? ' correct' : ' wrong';
-        dotsHtml += `<div class="${cls}" data-idx="${idx}">${idx+1}</div>`;
-    });
-    dotsHtml += '</div>';
-    const dotsWrap = el(dotsHtml);
-    wrap.appendChild(dotsWrap);
-
-    const container = el(`<div style="text-align:center;margin:10px 0;"></div>`);
-    wrap.appendChild(container);
-
-    function renderCloze() {
-        container.innerHTML = '';
-        const q = currentQ;
-        const ans = currentAnswer;
-
-        const header = el(`<div class="qcounter">Заповни пропуск · ${sub.i+1} / ${sub.qs.length}</div>`);
-        container.appendChild(header);
-        const progress = el(
-            `<div class="progress-track" style="margin-bottom:12px;"><div class="progress-fill" style="width:${((sub.i+1)/sub.qs.length)*100}%"></div></div>`
-            );
-        container.appendChild(progress);
-
-        const sentence = el(`<div class="cloze-sentence">${escHtml(q.sentence)}</div>`);
-        container.appendChild(sentence);
-        const trans = el(
-            `<p style="color:var(--ink-soft);font-size:.85rem;margin-bottom:12px;">${escHtml(q.translation)}</p>`);
-        container.appendChild(trans);
-
-        const optsContainer = el(`<div class="mc-options" style="margin:0 auto;"></div>`);
-        q.opts.forEach((opt, idx) => {
-            const b = el(`<button class="mc-opt" ${ans !== null ? 'disabled' : ''}>${escHtml(opt)}</button>`);
-            if (ans !== null) {
-                if (idx === q.a) b.classList.add('correct');
-                else if (idx === ans.selected) b.classList.add('wrong');
+                wrap.querySelector('#hub').onclick = () => navigate('tests');
+                return wrap;
             }
-            b.onclick = () => {
-                if (ans !== null) return;
-                const correct = idx === q.a;
-                sub.userAnswers[sub.i] = { selected: idx, correct: correct };
-                if (correct) sub.correct = (sub.correct || 0) + 1;
-                const allOpts = optsContainer.querySelectorAll('.mc-opt');
-                allOpts.forEach(o => o.disabled = true);
-                allOpts.forEach((o, oi) => {
-                    if (oi === q.a) o.classList.add('correct');
-                    else if (oi === idx) o.classList.add('wrong');
-                });
-                updateDotsCloze();
-                setTimeout(() => {
-                    let nextIdx = sub.i + 1;
-                    while (nextIdx < sub.qs.length && sub.userAnswers[nextIdx] !== null)
-                        nextIdx++;
-                    if (nextIdx < sub.qs.length) sub.i = nextIdx;
-                    else sub.i = sub.qs.length;
-                    navigate('test-cloze', sub);
-                }, 2000);
-            };
-            optsContainer.appendChild(b);
-        });
-        container.appendChild(optsContainer);
+            if (!sub.userAnswers) sub.userAnswers = new Array(sub.qs.length).fill(null);
+            if (sub.i >= sub.qs.length) sub.i = sub.qs.length - 1;
+            if (sub.i < 0) sub.i = 0;
 
-        const controls = el(`<div class="test-controls">
+            const currentQ = sub.qs[sub.i];
+            const currentAnswer = sub.userAnswers[sub.i];
+
+            const wrap = el(`<div class="view" style="max-width:600px;margin:0 auto;"></div>`);
+            let dotsHtml = '<div class="test-nav">';
+            sub.qs.forEach((_, idx) => {
+                const ans = sub.userAnswers[idx];
+                let cls = 'dot';
+                if (idx === sub.i) cls += ' active';
+                if (ans !== null) cls += ans.correct ? ' correct' : ' wrong';
+                dotsHtml += `<div class="${cls}" data-idx="${idx}">${idx+1}</div>`;
+            });
+            dotsHtml += '</div>';
+            const dotsWrap = el(dotsHtml);
+            wrap.appendChild(dotsWrap);
+
+            const container = el(`<div style="text-align:center;margin:10px 0;"></div>`);
+            wrap.appendChild(container);
+
+            function renderCloze() {
+                container.innerHTML = '';
+                const q = currentQ;
+                const ans = currentAnswer;
+
+                const header = el(`<div class="qcounter">Заповни пропуск · ${sub.i+1} / ${sub.qs.length}</div>`);
+                container.appendChild(header);
+                const progress = el(
+                    `<div class="progress-track" style="margin-bottom:12px;"><div class="progress-fill" style="width:${((sub.i+1)/sub.qs.length)*100}%"></div></div>`
+                    );
+                container.appendChild(progress);
+
+                const sentence = el(`<div class="cloze-sentence">${escHtml(q.sentence)}</div>`);
+                container.appendChild(sentence);
+                const trans = el(
+                    `<p style="color:var(--ink-soft);font-size:.85rem;margin-bottom:12px;">${escHtml(q.translation)}</p>`);
+                container.appendChild(trans);
+
+                const optsContainer = el(`<div class="mc-options" style="margin:0 auto;"></div>`);
+                q.opts.forEach((opt, idx) => {
+                    const b = el(`<button class="mc-opt" ${ans !== null ? 'disabled' : ''}>${escHtml(opt)}</button>`);
+                    if (ans !== null) {
+                        if (idx === q.a) b.classList.add('correct');
+                        else if (idx === ans.selected) b.classList.add('wrong');
+                    }
+                    b.onclick = () => {
+                        if (ans !== null) return;
+                        const correct = idx === q.a;
+                        sub.userAnswers[sub.i] = { selected: idx, correct: correct };
+                        if (correct) sub.correct = (sub.correct || 0) + 1;
+                        const allOpts = optsContainer.querySelectorAll('.mc-opt');
+                        allOpts.forEach(o => o.disabled = true);
+                        allOpts.forEach((o, oi) => {
+                            if (oi === q.a) o.classList.add('correct');
+                            else if (oi === idx) o.classList.add('wrong');
+                        });
+                        updateDotsCloze();
+                        setTimeout(() => {
+                            let nextIdx = sub.i + 1;
+                            while (nextIdx < sub.qs.length && sub.userAnswers[nextIdx] !== null)
+                                nextIdx++;
+                            if (nextIdx < sub.qs.length) sub.i = nextIdx;
+                            else sub.i = sub.qs.length;
+                            navigate('test-cloze', sub);
+                        }, 2000);
+                    };
+                    optsContainer.appendChild(b);
+                });
+                container.appendChild(optsContainer);
+
+                const controls = el(`<div class="test-controls">
               <button class="btn btn-ghost btn-sm" id="prevBtn" ${sub.i===0?'disabled':''}>◀ Назад</button>
               <button class="btn btn-primary btn-sm" id="nextBtn" ${sub.i>=sub.qs.length-1?'disabled':''}>Вперед ▶</button>
             </div>`);
-        container.appendChild(controls);
-        controls.querySelector('#prevBtn').onclick = () => {
-            if (sub.i > 0) { sub.i--;
-                navigate('test-cloze', sub); }
-        };
-        controls.querySelector('#nextBtn').onclick = () => {
-            let nextIdx = sub.i + 1;
-            while (nextIdx < sub.qs.length && sub.userAnswers[nextIdx] !== null) nextIdx++;
-            if (nextIdx < sub.qs.length) sub.i = nextIdx;
-            else sub.i = sub.qs.length;
-            navigate('test-cloze', sub);
-        };
-    }
+                container.appendChild(controls);
+                controls.querySelector('#prevBtn').onclick = () => {
+                    if (sub.i > 0) { sub.i--;
+                        navigate('test-cloze', sub); }
+                };
+                controls.querySelector('#nextBtn').onclick = () => {
+                    let nextIdx = sub.i + 1;
+                    while (nextIdx < sub.qs.length && sub.userAnswers[nextIdx] !== null) nextIdx++;
+                    if (nextIdx < sub.qs.length) sub.i = nextIdx;
+                    else sub.i = sub.qs.length;
+                    navigate('test-cloze', sub);
+                };
+            }
 
-    function updateDotsCloze() {
-        const dots = dotsWrap.querySelectorAll('.dot');
-        dots.forEach((dot, idx) => {
-            const ans = sub.userAnswers[idx];
-            dot.className = 'dot';
-            if (idx === sub.i) dot.classList.add('active');
-            if (ans !== null) dot.classList.add(ans.correct ? 'correct' : 'wrong');
-        });
-    }
-    renderCloze();
-    dotsWrap.querySelectorAll('.dot').forEach(dot => {
-        dot.onclick = () => {
-            const idx = parseInt(dot.dataset.idx);
-            if (idx !== sub.i) { sub.i = idx;
-                navigate('test-cloze', sub); }
-        };
-    });
-    return wrap;
-}
+            function updateDotsCloze() {
+                const dots = dotsWrap.querySelectorAll('.dot');
+                dots.forEach((dot, idx) => {
+                    const ans = sub.userAnswers[idx];
+                    dot.className = 'dot';
+                    if (idx === sub.i) dot.classList.add('active');
+                    if (ans !== null) dot.classList.add(ans.correct ? 'correct' : 'wrong');
+                });
+            }
+            renderCloze();
+            dotsWrap.querySelectorAll('.dot').forEach(dot => {
+                dot.onclick = () => {
+                    const idx = parseInt(dot.dataset.idx);
+                    if (idx !== sub.i) { sub.i = idx;
+                        navigate('test-cloze', sub); }
+                };
+            });
+            return wrap;
+        }
 
-function viewTestOrder() {
-    if (!SUBSTATE.qs) {
-        const words = shuffle(currentLevelWords().filter(w => w.ex_no.split(' ').length >= 3 && w.ex_no.split(' ')
-            .length <= 7)).slice(0, 5);
-        SUBSTATE.qs = words.map(w => {
-            const clean = w.ex_no.replace(/[.,!?]/g, '');
-            const tokens = clean.split(' ');
-            return { original: tokens, translation: w.ex_uk };
-        });
-        SUBSTATE.i = 0;
-        SUBSTATE.correct = 0;
-        SUBSTATE.userAnswers = new Array(SUBSTATE.qs.length).fill(null);
-    }
-    const sub = SUBSTATE;
-    if (sub.i >= sub.qs.length && sub.userAnswers.every(a => a !== null)) {
-        STATE.stats.testsCompleted = (STATE.stats.testsCompleted || 0) + 1;
-        STATE.leaderboardScore = (STATE.leaderboardScore || 0) + sub.correct * 10;
-        markActivityToday();
-        updateState();
-        const pct = Math.round((sub.correct / sub.qs.length) * 100);
-        const wrap = el(`
+        function viewTestOrder() {
+            if (!SUBSTATE.qs) {
+                const words = shuffle(currentLevelWords().filter(w => w.ex_no.split(' ').length >= 3 && w.ex_no.split(' ')
+                    .length <= 7)).slice(0, 5);
+                SUBSTATE.qs = words.map(w => {
+                    const clean = w.ex_no.replace(/[.,!?]/g, '');
+                    const tokens = clean.split(' ');
+                    return { original: tokens, translation: w.ex_uk };
+                });
+                SUBSTATE.i = 0;
+                SUBSTATE.correct = 0;
+                SUBSTATE.userAnswers = new Array(SUBSTATE.qs.length).fill(null);
+            }
+            const sub = SUBSTATE;
+            if (sub.i >= sub.qs.length && sub.userAnswers.every(a => a !== null)) {
+                STATE.stats.testsCompleted = (STATE.stats.testsCompleted || 0) + 1;
+                STATE.leaderboardScore = (STATE.leaderboardScore || 0) + sub.correct * 10;
+                markActivityToday();
+                updateState();
+                const pct = Math.round((sub.correct / sub.qs.length) * 100);
+                const wrap = el(`
               <div class="view session-end card">
                 <h2>Склади речення: завершено</h2>
                 <div class="bignum">${pct}%</div>
@@ -1104,178 +1114,178 @@ function viewTestOrder() {
                 <button class="btn btn-ghost" id="hub">До тестів</button>
               </div>
             `);
-        wrap.querySelector('#hub').onclick = () => navigate('tests');
-        return wrap;
-    }
-    if (sub.i >= sub.qs.length) sub.i = sub.qs.length - 1;
-    if (sub.i < 0) sub.i = 0;
+                wrap.querySelector('#hub').onclick = () => navigate('tests');
+                return wrap;
+            }
+            if (sub.i >= sub.qs.length) sub.i = sub.qs.length - 1;
+            if (sub.i < 0) sub.i = 0;
 
-    const q = sub.qs[sub.i];
-    const ans = sub.userAnswers[sub.i];
+            const q = sub.qs[sub.i];
+            const ans = sub.userAnswers[sub.i];
 
-    const wrap = el(`<div class="view" style="max-width:600px;margin:0 auto;"></div>`);
-    let dotsHtml = '<div class="test-nav">';
-    sub.qs.forEach((_, idx) => {
-        const a = sub.userAnswers[idx];
-        let cls = 'dot';
-        if (idx === sub.i) cls += ' active';
-        if (a !== null) cls += a.correct ? ' correct' : ' wrong';
-        dotsHtml += `<div class="${cls}" data-idx="${idx}">${idx+1}</div>`;
-    });
-    dotsHtml += '</div>';
-    const dotsWrap = el(dotsHtml);
-    wrap.appendChild(dotsWrap);
-
-    const container = el(`<div style="text-align:center;margin:10px 0;"></div>`);
-    wrap.appendChild(container);
-
-    let chosen = ans ? ans.chosen : [];
-
-    function renderOrder() {
-        container.innerHTML = '';
-        const header = el(`<div class="qcounter">Склади речення · ${sub.i+1} / ${sub.qs.length}</div>`);
-        container.appendChild(header);
-        const progress = el(
-            `<div class="progress-track" style="margin-bottom:12px;"><div class="progress-fill" style="width:${((sub.i+1)/sub.qs.length)*100}%"></div></div>`
-            );
-        container.appendChild(progress);
-        const trans = el(
-            `<p style="color:var(--ink-soft);margin-bottom:12px;">${escHtml(q.translation)}</p>`);
-        container.appendChild(trans);
-
-        const target = el(`<div class="order-tokens" id="target"></div>`);
-        container.appendChild(target);
-        const pool = el(`<div class="order-pool" id="pool"></div>`);
-        container.appendChild(pool);
-
-        const checkBtn = el(`<button class="btn btn-primary" id="checkOrder" ${ans!==null?'disabled':''}>Перевірити</button>`);
-        container.appendChild(checkBtn);
-        const fb = el(`<div id="orderFb"></div>`);
-        container.appendChild(fb);
-
-        const shuffled = ans ? ans.shuffled : shuffle(q.original);
-
-        function renderPool() {
-            pool.innerHTML = '';
-            shuffled.forEach((word, idx) => {
-                if (chosen.includes(idx)) return;
-                const tok = el(`<button class="token">${escHtml(word)}</button>`);
-                tok.onclick = () => { if (ans !== null) return;
-                    chosen.push(idx);
-                    renderAll(); };
-                pool.appendChild(tok);
+            const wrap = el(`<div class="view" style="max-width:600px;margin:0 auto;"></div>`);
+            let dotsHtml = '<div class="test-nav">';
+            sub.qs.forEach((_, idx) => {
+                const a = sub.userAnswers[idx];
+                let cls = 'dot';
+                if (idx === sub.i) cls += ' active';
+                if (a !== null) cls += a.correct ? ' correct' : ' wrong';
+                dotsHtml += `<div class="${cls}" data-idx="${idx}">${idx+1}</div>`;
             });
-        }
+            dotsHtml += '</div>';
+            const dotsWrap = el(dotsHtml);
+            wrap.appendChild(dotsWrap);
 
-        function renderTarget() {
-            target.innerHTML = '';
-            if (chosen.length === 0) { target.innerHTML =
-                    '<span style="color:var(--ink-soft);font-size:.8rem;">Натискайте слова знизу</span>'; }
-            chosen.forEach((idx, pos) => {
-                const tok = el(`<button class="token">${shuffled[idx]}</button>`);
-                tok.onclick = () => { if (ans !== null) return;
-                    chosen.splice(pos, 1);
-                    renderAll(); };
-                target.appendChild(tok);
+            const container = el(`<div style="text-align:center;margin:10px 0;"></div>`);
+            wrap.appendChild(container);
+
+            let chosen = ans ? ans.chosen : [];
+
+            function renderOrder() {
+                container.innerHTML = '';
+                const header = el(`<div class="qcounter">Склади речення · ${sub.i+1} / ${sub.qs.length}</div>`);
+                container.appendChild(header);
+                const progress = el(
+                    `<div class="progress-track" style="margin-bottom:12px;"><div class="progress-fill" style="width:${((sub.i+1)/sub.qs.length)*100}%"></div></div>`
+                    );
+                container.appendChild(progress);
+                const trans = el(
+                    `<p style="color:var(--ink-soft);margin-bottom:12px;">${escHtml(q.translation)}</p>`);
+                container.appendChild(trans);
+
+                const target = el(`<div class="order-tokens" id="target"></div>`);
+                container.appendChild(target);
+                const pool = el(`<div class="order-pool" id="pool"></div>`);
+                container.appendChild(pool);
+
+                const checkBtn = el(`<button class="btn btn-primary" id="checkOrder" ${ans!==null?'disabled':''}>Перевірити</button>`);
+                container.appendChild(checkBtn);
+                const fb = el(`<div id="orderFb"></div>`);
+                container.appendChild(fb);
+
+                const shuffled = ans ? ans.shuffled : shuffle(q.original);
+
+                function renderPool() {
+                    pool.innerHTML = '';
+                    shuffled.forEach((word, idx) => {
+                        if (chosen.includes(idx)) return;
+                        const tok = el(`<button class="token">${escHtml(word)}</button>`);
+                        tok.onclick = () => { if (ans !== null) return;
+                            chosen.push(idx);
+                            renderAll(); };
+                        pool.appendChild(tok);
+                    });
+                }
+
+                function renderTarget() {
+                    target.innerHTML = '';
+                    if (chosen.length === 0) { target.innerHTML =
+                            '<span style="color:var(--ink-soft);font-size:.8rem;">Натискайте слова знизу</span>'; }
+                    chosen.forEach((idx, pos) => {
+                        const tok = el(`<button class="token">${shuffled[idx]}</button>`);
+                        tok.onclick = () => { if (ans !== null) return;
+                            chosen.splice(pos, 1);
+                            renderAll(); };
+                        target.appendChild(tok);
+                    });
+                    checkBtn.disabled = chosen.length !== shuffled.length || ans !== null;
+                }
+
+                function renderAll() { renderPool();
+                    renderTarget(); }
+                renderAll();
+
+                checkBtn.onclick = () => {
+                    const answer = chosen.map(idx => shuffled[idx]).join(' ').toLowerCase();
+                    const correct = answer === q.original.join(' ').toLowerCase();
+                    sub.userAnswers[sub.i] = { chosen: chosen.slice(), shuffled: shuffled, correct: correct };
+                    if (correct) sub.correct = (sub.correct || 0) + 1;
+                    fb.innerHTML =
+                        `<div class="feedback-banner ${correct?'ok':'bad'}" style="margin-top:12px;">${correct?'Правильно! 🎉':'Правильний варіант: '+q.original.join(' ')}</div>`;
+                    checkBtn.disabled = true;
+                    updateDotsOrder();
+                    setTimeout(() => {
+                        let nextIdx = sub.i + 1;
+                        while (nextIdx < sub.qs.length && sub.userAnswers[nextIdx] !== null) nextIdx++;
+                        if (nextIdx < sub.qs.length) sub.i = nextIdx;
+                        else sub.i = sub.qs.length;
+                        navigate('test-order', sub);
+                    }, 2000);
+                };
+            }
+
+            function updateDotsOrder() {
+                const dots = dotsWrap.querySelectorAll('.dot');
+                dots.forEach((dot, idx) => {
+                    const a = sub.userAnswers[idx];
+                    dot.className = 'dot';
+                    if (idx === sub.i) dot.classList.add('active');
+                    if (a !== null) dot.classList.add(a.correct ? 'correct' : 'wrong');
+                });
+            }
+
+            renderOrder();
+            dotsWrap.querySelectorAll('.dot').forEach(dot => {
+                dot.onclick = () => {
+                    const idx = parseInt(dot.dataset.idx);
+                    if (idx !== sub.i) { sub.i = idx;
+                        navigate('test-order', sub); }
+                };
             });
-            checkBtn.disabled = chosen.length !== shuffled.length || ans !== null;
-        }
 
-        function renderAll() { renderPool();
-            renderTarget(); }
-        renderAll();
-
-        checkBtn.onclick = () => {
-            const answer = chosen.map(idx => shuffled[idx]).join(' ').toLowerCase();
-            const correct = answer === q.original.join(' ').toLowerCase();
-            sub.userAnswers[sub.i] = { chosen: chosen.slice(), shuffled: shuffled, correct: correct };
-            if (correct) sub.correct = (sub.correct || 0) + 1;
-            fb.innerHTML =
-                `<div class="feedback-banner ${correct?'ok':'bad'}" style="margin-top:12px;">${correct?'Правильно! 🎉':'Правильний варіант: '+q.original.join(' ')}</div>`;
-            checkBtn.disabled = true;
-            updateDotsOrder();
-            setTimeout(() => {
+            const controls = el(`<div class="test-controls">
+            <button class="btn btn-ghost btn-sm" id="prevBtn" ${sub.i===0?'disabled':''}>◀ Назад</button>
+            <button class="btn btn-primary btn-sm" id="nextBtn" ${sub.i>=sub.qs.length-1?'disabled':''}>Вперед ▶</button>
+          </div>`);
+            container.appendChild(controls);
+            controls.querySelector('#prevBtn').onclick = () => {
+                if (sub.i > 0) { sub.i--;
+                    navigate('test-order', sub); }
+            };
+            controls.querySelector('#nextBtn').onclick = () => {
                 let nextIdx = sub.i + 1;
                 while (nextIdx < sub.qs.length && sub.userAnswers[nextIdx] !== null) nextIdx++;
                 if (nextIdx < sub.qs.length) sub.i = nextIdx;
                 else sub.i = sub.qs.length;
                 navigate('test-order', sub);
-            }, 2000);
-        };
-    }
+            };
+            return wrap;
+        }
 
-    function updateDotsOrder() {
-        const dots = dotsWrap.querySelectorAll('.dot');
-        dots.forEach((dot, idx) => {
-            const a = sub.userAnswers[idx];
-            dot.className = 'dot';
-            if (idx === sub.i) dot.classList.add('active');
-            if (a !== null) dot.classList.add(a.correct ? 'correct' : 'wrong');
-        });
-    }
+        function viewTestListen() {
+            if (!SUBSTATE.qs) {
+                const words = shuffle(currentLevelWords()).slice(0, 6);
+                SUBSTATE.qs = words.map(w => {
+                    const distractors = shuffle(currentLevelWords().filter(x => x.no !== w.no)).slice(0, 3).map(x => x
+                        .uk);
+                    const opts = shuffle([w.uk, ...distractors]);
+                    return { no: w.no, opts, a: opts.indexOf(w.uk) };
+                });
+                SUBSTATE.i = 0;
+                SUBSTATE.correct = 0;
+                SUBSTATE.userAnswers = null;
+            }
+            return runQuiz(SUBSTATE, 'test-listen', "Аудіювання");
+        }
 
-    renderOrder();
-    dotsWrap.querySelectorAll('.dot').forEach(dot => {
-        dot.onclick = () => {
-            const idx = parseInt(dot.dataset.idx);
-            if (idx !== sub.i) { sub.i = idx;
-                navigate('test-order', sub); }
-        };
-    });
-
-    const controls = el(`<div class="test-controls">
-            <button class="btn btn-ghost btn-sm" id="prevBtn" ${sub.i===0?'disabled':''}>◀ Назад</button>
-            <button class="btn btn-primary btn-sm" id="nextBtn" ${sub.i>=sub.qs.length-1?'disabled':''}>Вперед ▶</button>
-          </div>`);
-    container.appendChild(controls);
-    controls.querySelector('#prevBtn').onclick = () => {
-        if (sub.i > 0) { sub.i--;
-            navigate('test-order', sub); }
-    };
-    controls.querySelector('#nextBtn').onclick = () => {
-        let nextIdx = sub.i + 1;
-        while (nextIdx < sub.qs.length && sub.userAnswers[nextIdx] !== null) nextIdx++;
-        if (nextIdx < sub.qs.length) sub.i = nextIdx;
-        else sub.i = sub.qs.length;
-        navigate('test-order', sub);
-    };
-    return wrap;
-}
-
-function viewTestListen() {
-    if (!SUBSTATE.qs) {
-        const words = shuffle(currentLevelWords()).slice(0, 6);
-        SUBSTATE.qs = words.map(w => {
-            const distractors = shuffle(currentLevelWords().filter(x => x.no !== w.no)).slice(0, 3).map(x => x
-                .uk);
-            const opts = shuffle([w.uk, ...distractors]);
-            return { no: w.no, opts, a: opts.indexOf(w.uk) };
-        });
-        SUBSTATE.i = 0;
-        SUBSTATE.correct = 0;
-        SUBSTATE.userAnswers = null;
-    }
-    return runQuiz(SUBSTATE, 'test-listen', "Аудіювання");
-}
-
-function viewTestTranslate() {
-    if (!SUBSTATE.qs) {
-        const words = shuffle(currentLevelWords()).slice(0, 6);
-        SUBSTATE.qs = words.map(w => {
-            return { word: w, dirToNo: Math.random() < 0.5 };
-        });
-        SUBSTATE.i = 0;
-        SUBSTATE.correct = 0;
-        SUBSTATE.userAnswers = new Array(SUBSTATE.qs.length).fill(null);
-    }
-    const sub = SUBSTATE;
-    if (sub.i >= sub.qs.length && sub.userAnswers.every(a => a !== null)) {
-        STATE.stats.testsCompleted = (STATE.stats.testsCompleted || 0) + 1;
-        STATE.leaderboardScore = (STATE.leaderboardScore || 0) + sub.correct * 10;
-        markActivityToday();
-        updateState();
-        const pct = Math.round((sub.correct / sub.qs.length) * 100);
-        const wrap = el(`
+        function viewTestTranslate() {
+            if (!SUBSTATE.qs) {
+                const words = shuffle(currentLevelWords()).slice(0, 6);
+                SUBSTATE.qs = words.map(w => {
+                    return { word: w, dirToNo: Math.random() < 0.5 };
+                });
+                SUBSTATE.i = 0;
+                SUBSTATE.correct = 0;
+                SUBSTATE.userAnswers = new Array(SUBSTATE.qs.length).fill(null);
+            }
+            const sub = SUBSTATE;
+            if (sub.i >= sub.qs.length && sub.userAnswers.every(a => a !== null)) {
+                STATE.stats.testsCompleted = (STATE.stats.testsCompleted || 0) + 1;
+                STATE.leaderboardScore = (STATE.leaderboardScore || 0) + sub.correct * 10;
+                markActivityToday();
+                updateState();
+                const pct = Math.round((sub.correct / sub.qs.length) * 100);
+                const wrap = el(`
               <div class="view session-end card">
                 <h2>Переклад: завершено</h2>
                 <div class="bignum">${pct}%</div>
@@ -1283,130 +1293,130 @@ function viewTestTranslate() {
                 <button class="btn btn-ghost" id="hub">До тестів</button>
               </div>
             `);
-        wrap.querySelector('#hub').onclick = () => navigate('tests');
-        return wrap;
-    }
-    if (sub.i >= sub.qs.length) sub.i = sub.qs.length - 1;
-    if (sub.i < 0) sub.i = 0;
+                wrap.querySelector('#hub').onclick = () => navigate('tests');
+                return wrap;
+            }
+            if (sub.i >= sub.qs.length) sub.i = sub.qs.length - 1;
+            if (sub.i < 0) sub.i = 0;
 
-    const q = sub.qs[sub.i];
-    const ans = sub.userAnswers[sub.i];
-    const w = q.word;
-    const dirToNo = q.dirToNo;
+            const q = sub.qs[sub.i];
+            const ans = sub.userAnswers[sub.i];
+            const w = q.word;
+            const dirToNo = q.dirToNo;
 
-    const wrap = el(`<div class="view" style="max-width:600px;margin:0 auto;"></div>`);
-    let dotsHtml = '<div class="test-nav">';
-    sub.qs.forEach((_, idx) => {
-        const a = sub.userAnswers[idx];
-        let cls = 'dot';
-        if (idx === sub.i) cls += ' active';
-        if (a !== null) cls += a.correct ? ' correct' : ' wrong';
-        dotsHtml += `<div class="${cls}" data-idx="${idx}">${idx+1}</div>`;
-    });
-    dotsHtml += '</div>';
-    const dotsWrap = el(dotsHtml);
-    wrap.appendChild(dotsWrap);
+            const wrap = el(`<div class="view" style="max-width:600px;margin:0 auto;"></div>`);
+            let dotsHtml = '<div class="test-nav">';
+            sub.qs.forEach((_, idx) => {
+                const a = sub.userAnswers[idx];
+                let cls = 'dot';
+                if (idx === sub.i) cls += ' active';
+                if (a !== null) cls += a.correct ? ' correct' : ' wrong';
+                dotsHtml += `<div class="${cls}" data-idx="${idx}">${idx+1}</div>`;
+            });
+            dotsHtml += '</div>';
+            const dotsWrap = el(dotsHtml);
+            wrap.appendChild(dotsWrap);
 
-    const container = el(`<div style="text-align:center;margin:10px 0;"></div>`);
-    wrap.appendChild(container);
+            const container = el(`<div style="text-align:center;margin:10px 0;"></div>`);
+            wrap.appendChild(container);
 
-    function renderTranslate() {
-        container.innerHTML = '';
-        const header = el(`<div class="qcounter">Переклад · ${sub.i+1} / ${sub.qs.length}</div>`);
-        container.appendChild(header);
-        const progress = el(
-            `<div class="progress-track" style="margin-bottom:12px;"><div class="progress-fill" style="width:${((sub.i+1)/sub.qs.length)*100}%"></div></div>`
-            );
-        container.appendChild(progress);
+            function renderTranslate() {
+                container.innerHTML = '';
+                const header = el(`<div class="qcounter">Переклад · ${sub.i+1} / ${sub.qs.length}</div>`);
+                container.appendChild(header);
+                const progress = el(
+                    `<div class="progress-track" style="margin-bottom:12px;"><div class="progress-fill" style="width:${((sub.i+1)/sub.qs.length)*100}%"></div></div>`
+                    );
+                container.appendChild(progress);
 
-        const prompt = dirToNo ? `Напишіть норвезькою: «${escHtml(w.uk)}»` :
-            `Напишіть українською: «${escHtml(w.no)}»`;
-        const qText = el(`<div class="question-text" style="font-size:1.1rem;margin-bottom:16px;">${escHtml(prompt)}</div>`);
-        container.appendChild(qText);
+                const prompt = dirToNo ? `Напишіть норвезькою: «${escHtml(w.uk)}»` :
+                    `Напишіть українською: «${escHtml(w.no)}»`;
+                const qText = el(`<div class="question-text" style="font-size:1.1rem;margin-bottom:16px;">${escHtml(prompt)}</div>`);
+                container.appendChild(qText);
 
-        const input = el(`<input class="type-input" id="tIn" placeholder="ваша відповідь" ${ans!==null?'disabled':''}>`);
-        container.appendChild(input);
-        if (ans !== null) input.value = ans.input;
-        const fb = el(`<div id="tFb"></div>`);
-        container.appendChild(fb);
-        const btn = el(`<button class="btn btn-primary" id="tCheck" ${ans!==null?'disabled':''}>Перевірити</button>`);
-        container.appendChild(btn);
+                const input = el(`<input class="type-input" id="tIn" placeholder="ваша відповідь" ${ans!==null?'disabled':''}>`);
+                container.appendChild(input);
+                if (ans !== null) input.value = ans.input;
+                const fb = el(`<div id="tFb"></div>`);
+                container.appendChild(fb);
+                const btn = el(`<button class="btn btn-primary" id="tCheck" ${ans!==null?'disabled':''}>Перевірити</button>`);
+                container.appendChild(btn);
 
-        if (ans !== null) {
-            fb.innerHTML =
-                `<div class="feedback-banner ${ans.correct?'ok':'bad'}">${ans.correct?'Правильно! 🎉':'Правильна відповідь: '+ans.correctAnswer}</div>`;
-        }
+                if (ans !== null) {
+                    fb.innerHTML =
+                        `<div class="feedback-banner ${ans.correct?'ok':'bad'}">${ans.correct?'Правильно! 🎉':'Правильна відповідь: '+ans.correctAnswer}</div>`;
+                }
 
-        btn.onclick = () => {
-            const val = input.value.trim();
-            const target = dirToNo ? w.no : w.uk;
-            const correct = isFuzzyMatch(val, target);
-            sub.userAnswers[sub.i] = { input: val, correct: correct, correctAnswer: target };
-            if (correct) sub.correct = (sub.correct || 0) + 1;
-            fb.innerHTML =
-                `<div class="feedback-banner ${correct?'ok':'bad'}">${correct?'Правильно! 🎉':'Правильна відповідь: '+target}</div>`;
-            btn.disabled = true;
-            input.disabled = true;
-            updateDotsTranslate();
-            setTimeout(() => {
-                let nextIdx = sub.i + 1;
-                while (nextIdx < sub.qs.length && sub.userAnswers[nextIdx] !== null) nextIdx++;
-                if (nextIdx < sub.qs.length) sub.i = nextIdx;
-                else sub.i = sub.qs.length;
-                navigate('test-translate', sub);
-            }, 2000);
-        };
-        input.onkeydown = (e) => { if (e.key === 'Enter') btn.click(); };
+                btn.onclick = () => {
+                    const val = input.value.trim();
+                    const target = dirToNo ? w.no : w.uk;
+                    const correct = isFuzzyMatch(val, target);
+                    sub.userAnswers[sub.i] = { input: val, correct: correct, correctAnswer: target };
+                    if (correct) sub.correct = (sub.correct || 0) + 1;
+                    fb.innerHTML =
+                        `<div class="feedback-banner ${correct?'ok':'bad'}">${correct?'Правильно! 🎉':'Правильна відповідь: '+target}</div>`;
+                    btn.disabled = true;
+                    input.disabled = true;
+                    updateDotsTranslate();
+                    setTimeout(() => {
+                        let nextIdx = sub.i + 1;
+                        while (nextIdx < sub.qs.length && sub.userAnswers[nextIdx] !== null) nextIdx++;
+                        if (nextIdx < sub.qs.length) sub.i = nextIdx;
+                        else sub.i = sub.qs.length;
+                        navigate('test-translate', sub);
+                    }, 2000);
+                };
+                input.onkeydown = (e) => { if (e.key === 'Enter') btn.click(); };
 
-        const controls = el(`<div class="test-controls">
+                const controls = el(`<div class="test-controls">
               <button class="btn btn-ghost btn-sm" id="prevBtn" ${sub.i===0?'disabled':''}>◀ Назад</button>
               <button class="btn btn-primary btn-sm" id="nextBtn" ${sub.i>=sub.qs.length-1?'disabled':''}>Вперед ▶</button>
             </div>`);
-        container.appendChild(controls);
-        controls.querySelector('#prevBtn').onclick = () => {
-            if (sub.i > 0) { sub.i--;
-                navigate('test-translate', sub); }
-        };
-        controls.querySelector('#nextBtn').onclick = () => {
-            let nextIdx = sub.i + 1;
-            while (nextIdx < sub.qs.length && sub.userAnswers[nextIdx] !== null) nextIdx++;
-            if (nextIdx < sub.qs.length) sub.i = nextIdx;
-            else sub.i = sub.qs.length;
-            navigate('test-translate', sub);
-        };
-    }
+                container.appendChild(controls);
+                controls.querySelector('#prevBtn').onclick = () => {
+                    if (sub.i > 0) { sub.i--;
+                        navigate('test-translate', sub); }
+                };
+                controls.querySelector('#nextBtn').onclick = () => {
+                    let nextIdx = sub.i + 1;
+                    while (nextIdx < sub.qs.length && sub.userAnswers[nextIdx] !== null) nextIdx++;
+                    if (nextIdx < sub.qs.length) sub.i = nextIdx;
+                    else sub.i = sub.qs.length;
+                    navigate('test-translate', sub);
+                };
+            }
 
-    function updateDotsTranslate() {
-        const dots = dotsWrap.querySelectorAll('.dot');
-        dots.forEach((dot, idx) => {
-            const a = sub.userAnswers[idx];
-            dot.className = 'dot';
-            if (idx === sub.i) dot.classList.add('active');
-            if (a !== null) dot.classList.add(a.correct ? 'correct' : 'wrong');
-        });
-    }
-    renderTranslate();
-    dotsWrap.querySelectorAll('.dot').forEach(dot => {
-        dot.onclick = () => {
-            const idx = parseInt(dot.dataset.idx);
-            if (idx !== sub.i) { sub.i = idx;
-                navigate('test-translate', sub); }
-        };
-    });
-    return wrap;
-}
+            function updateDotsTranslate() {
+                const dots = dotsWrap.querySelectorAll('.dot');
+                dots.forEach((dot, idx) => {
+                    const a = sub.userAnswers[idx];
+                    dot.className = 'dot';
+                    if (idx === sub.i) dot.classList.add('active');
+                    if (a !== null) dot.classList.add(a.correct ? 'correct' : 'wrong');
+                });
+            }
+            renderTranslate();
+            dotsWrap.querySelectorAll('.dot').forEach(dot => {
+                dot.onclick = () => {
+                    const idx = parseInt(dot.dataset.idx);
+                    if (idx !== sub.i) { sub.i = idx;
+                        navigate('test-translate', sub); }
+                };
+            });
+            return wrap;
+        }
 
-// ---- GRAMMAR ----
-function viewGrammar() {
-    const wrap = el(
-        `<div class="view"><h1>${t('h_grammar')}</h1><input class="type-input" id="gsearch" placeholder="${t('search_placeholder')}" style="max-width:100%;margin-bottom:16px;padding:10px 14px;font-size:.9rem;"><div id="gramlist"></div></div>`
-        );
-    const list = wrap.querySelector('#gramlist');
+        // ---- GRAMMAR ----
+        function viewGrammar() {
+            const wrap = el(
+                `<div class="view"><h1>${t('h_grammar')}</h1><input class="type-input" id="gsearch" placeholder="${t('search_placeholder')}" style="max-width:100%;margin-bottom:16px;padding:10px 14px;font-size:.9rem;"><div id="gramlist"></div></div>`
+                );
+            const list = wrap.querySelector('#gramlist');
 
-    function renderList(filter) {
-        list.innerHTML = "";
-        GRAMMAR.filter(g => !filter || g.title.toLowerCase().includes(filter.toLowerCase())).forEach(g => {
-            const item = el(`
+            function renderList(filter) {
+                list.innerHTML = "";
+                GRAMMAR.filter(g => !filter || g.title.toLowerCase().includes(filter.toLowerCase())).forEach(g => {
+                    const item = el(`
                 <div class="gram-item">
                   <div class="gram-head"><h3>${g.title}</h3><span class="tag level-${g.level}">${g.level}</span></div>
                   <div class="gram-body">
@@ -1417,41 +1427,41 @@ function viewGrammar() {
                   </div>
                 </div>
               `);
-            const head = item.querySelector('.gram-head');
-            const body = item.querySelector('.gram-body');
-            head.onclick = () => body.classList.toggle('open');
-            const mini = item.querySelector('.miniex');
-            const q = g.ex;
-            const qEl = el(
-                `<div><p style="font-weight:600;margin-top:10px;">${escHtml(q.q)}</p><div class="mc-options"></div></div>`
-                );
-            const opts = qEl.querySelector('.mc-options');
-            q.opts.forEach((opt, idx) => {
-                const b = el(`<button class="mc-opt">${escHtml(opt)}</button>`);
-                b.onclick = () => {
-                    opts.querySelectorAll('.mc-opt').forEach((o, oi) => { o.disabled = true; if (oi === q
-                            .a) o.classList.add('correct');
-                        else if (oi === idx) o.classList.add('wrong'); });
-                    markActivityToday();
-                };
-                opts.appendChild(b);
-            });
-            mini.appendChild(qEl);
-            list.appendChild(item);
-        });
-    }
-    renderList('');
-    wrap.querySelector('#gsearch').oninput = (e) => renderList(e.target.value);
-    return wrap;
-}
+                    const head = item.querySelector('.gram-head');
+                    const body = item.querySelector('.gram-body');
+                    head.onclick = () => body.classList.toggle('open');
+                    const mini = item.querySelector('.miniex');
+                    const q = g.ex;
+                    const qEl = el(
+                        `<div><p style="font-weight:600;margin-top:10px;">${escHtml(q.q)}</p><div class="mc-options"></div></div>`
+                        );
+                    const opts = qEl.querySelector('.mc-options');
+                    q.opts.forEach((opt, idx) => {
+                        const b = el(`<button class="mc-opt">${escHtml(opt)}</button>`);
+                        b.onclick = () => {
+                            opts.querySelectorAll('.mc-opt').forEach((o, oi) => { o.disabled = true; if (oi === q
+                                    .a) o.classList.add('correct');
+                                else if (oi === idx) o.classList.add('wrong'); });
+                            markActivityToday();
+                        };
+                        opts.appendChild(b);
+                    });
+                    mini.appendChild(qEl);
+                    list.appendChild(item);
+                });
+            }
+            renderList('');
+            wrap.querySelector('#gsearch').oninput = (e) => renderList(e.target.value);
+            return wrap;
+        }
 
-// ---- TROLL ----
-function viewTroll() {
-    ensureStateDefaults(STATE);
-    checkTrollUnlocks();
-    const xp = STATE.xp || 0;
-    const { lvl, curFloor, nextCeil, pct } = xpProgress(xp);
-    const wrap = el(`
+        // ---- TROLL ----
+        function viewTroll() {
+            ensureStateDefaults(STATE);
+            checkTrollUnlocks();
+            const xp = STATE.xp || 0;
+            const { lvl, curFloor, nextCeil, pct } = xpProgress(xp);
+            const wrap = el(`
             <div class="view">
               <h1>${t('h_troll')}</h1>
               <div class="card" style="margin-bottom:20px;">
@@ -1478,50 +1488,51 @@ function viewTroll() {
             </div>
           `);
 
-    function currentMood() {
-        if (pct >= 80) return 'excited';
-        if (STATE.achievements.length >= 3) return 'happy';
-        return 'idle';
-    }
-
-    function redrawTroll() {
-        const disp = wrap.querySelector('#trollDisplay');
-        const equipped = STATE.trollGear.equipped || { hat: null, glasses: null, bg: null };
-        disp.innerHTML = trollSVG(currentMood(), 96, equipped);
-    }
-    redrawTroll();
-
-    const gearRow = wrap.querySelector('#gearRow');
-
-    function redrawGear() {
-        gearRow.innerHTML = '';
-        TROLL_UNLOCKABLES.forEach(item => {
-            const unlocked = STATE.trollGear.unlocked.includes(item.id);
-            const equipped = STATE.trollGear.equipped[item.type] === item.id;
-            const badge = el(`<div class="gear-badge ${unlocked?'':'locked'} ${equipped?'equipped':''}" title="${gearItemName(item)}${unlocked?'':' ('+t('level_word')+' '+item.unlockLevel+')'}">${gearIconSVG(item, 34)}</div>`);
-            if (unlocked) {
-                badge.onclick = () => {
-                    STATE.trollGear.equipped[item.type] = equipped ? null : item.id;
-                    updateState();
-                    redrawGear();
-                    redrawTroll();
-                };
+            function currentMood() {
+                if (pct >= 80) return 'excited';
+                if (STATE.achievements.length >= 3) return 'happy';
+                return 'idle';
             }
-            gearRow.appendChild(badge);
-        });
-    }
-    redrawGear();
 
-    const achGrid = wrap.querySelector('#achGrid');
-    ACHIEVEMENTS.forEach(a => {
-        const unlocked = STATE.achievements.includes(a.id);
-        achGrid.appendChild(el(`
+            function redrawTroll() {
+    const disp = wrap.querySelector('#trollDisplay');
+    const equipped = STATE.trollGear.equipped || { hat: null, glasses: null, bg: null };
+    disp.innerHTML = trollSVG(currentMood(), 96, equipped);
+}
+            redrawTroll();
+
+            const gearRow = wrap.querySelector('#gearRow');
+
+            function redrawGear() {
+                gearRow.innerHTML = '';
+                TROLL_UNLOCKABLES.forEach(item => {
+                    const unlocked = STATE.trollGear.unlocked.includes(item.id);
+                    const equipped = STATE.trollGear.equipped[item.type] === item.id;
+                    const badge = el(`<div class="gear-badge ${unlocked?'':'locked'} ${equipped?'equipped':''}" title="${gearItemName(item)}${unlocked?'':' ('+t('level_word')+' '+item.unlockLevel+')'}">${gearIconSVG(item, 34)}</div>`);
+                    if (unlocked) {
+                        badge.onclick = () => {
+                            STATE.trollGear.equipped[item.type] = equipped ? null : item.id;
+                            updateState();
+                            redrawGear();
+                            redrawTroll();
+                        };
+                    }
+                    gearRow.appendChild(badge);
+                });
+            }
+            redrawGear();
+
+            const achGrid = wrap.querySelector('#achGrid');
+            ACHIEVEMENTS.forEach(a => {
+                const unlocked = STATE.achievements.includes(a.id);
+                achGrid.appendChild(el(`
               <div class="ach-item ${unlocked?'unlocked':'locked'}">
                 <div class="ach-icon">${unlocked?'🏆':'🔒'}</div>
                 <div style="font-weight:700;">${achievementName(a)}</div>
                 <div style="color:var(--ink-soft);font-size:.72rem;margin-top:2px;">${achievementDesc(a)}</div>
               </div>
             `));
-    });
-    return wrap;
-}
+            });
+            return wrap;
+        }
+

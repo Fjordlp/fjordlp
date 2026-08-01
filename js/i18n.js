@@ -47,7 +47,7 @@ const UI_STRINGS = {
         onb_plan_title: 'Ваш план навчання', onb_goal_chosen: 'Мета обрана', onb_start_learning: '🚀 Почати навчання!',
         onb_change_goal: '🔄 Змінити мету', onb_change_level: '📊 Змінити рівень', onb_change_later: 'Ви завжди зможете змінити мету та рівень у налаштуваннях.',
         onb_welcome_toast: '🎉 Ласкаво просимо! Починаємо навчання!',
-        question_word: 'Питання', of_word: 'з',
+        question_word: 'Питання', of_word: 'з', field_learn_lang: 'Яку мову вивчаєте',
     },
     en: {
         nav_home: 'Home', nav_flashcards: 'Flashcards', nav_vocabulary: 'Vocabulary',
@@ -89,7 +89,7 @@ const UI_STRINGS = {
         onb_plan_title: 'Your study plan', onb_goal_chosen: 'Goal chosen', onb_start_learning: '🚀 Start learning!',
         onb_change_goal: '🔄 Change goal', onb_change_level: '📊 Change level', onb_change_later: 'You can always change your goal and level in settings.',
         onb_welcome_toast: '🎉 Welcome! Let\'s start learning!',
-        question_word: 'Question', of_word: 'of',
+        question_word: 'Question', of_word: 'of', field_learn_lang: 'Language you\'re learning',
     },
     ru: {
         nav_home: 'Главная', nav_flashcards: 'Карточки', nav_vocabulary: 'Словарь',
@@ -131,7 +131,7 @@ const UI_STRINGS = {
         onb_plan_title: 'Ваш план обучения', onb_goal_chosen: 'Цель выбрана', onb_start_learning: '🚀 Начать обучение!',
         onb_change_goal: '🔄 Изменить цель', onb_change_level: '📊 Изменить уровень', onb_change_later: 'Вы всегда сможете изменить цель и уровень в настройках.',
         onb_welcome_toast: '🎉 Добро пожаловать! Начинаем обучение!',
-        question_word: 'Вопрос', of_word: 'из',
+        question_word: 'Вопрос', of_word: 'из', field_learn_lang: 'Какой язык изучаете',
     },
 };
 

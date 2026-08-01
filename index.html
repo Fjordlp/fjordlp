@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
 
+    <!-- ============ PWA ============ -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0A1D2B">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Fjord">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+
     <!-- ============ SEO ============ -->
     <title>FjordLP — вивчай норвезьку з AI-тролем</title>
     <meta name="description" content="Інтерактивна платформа для вивчення норвезької мови. Картки, тести, граматика, AI-помічник та підготовка до Norskprøve. Безкоштовно.">
@@ -227,6 +238,7 @@
     <script src="js/firebase-auth.js"></script>
     <script src="js/state.js"></script>
     <script src="js/i18n.js"></script>
+    <script src="js/languages.js"></script>
     <script src="js/assistant.js"></script>
     <script src="js/data.js"></script>
     <script src="js/helpers.js"></script>
@@ -239,5 +251,19 @@
 <script src="js/views-admin.js"></script>
     <script src="js/auth.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@edge-tts/universal/dist/index.global.js"></script>
+    <script>
+        // Реєстрація service worker — робить сайт встановлюваним застосунком
+        // (кнопка "Додати на головний екран") і дає базовий офлайн-доступ до
+        // самої оболонки застосунку. Якщо реєстрація не вдалась (наприклад,
+        // сайт відкрито не по https), застосунок просто працює як звичайний
+        // сайт — нічого критичного не ламається.
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch((err) => {
+                    console.warn('[PWA] Service worker не зареєструвався:', err);
+                });
+            });
+        }
+    </script>
 </body>
 </html>

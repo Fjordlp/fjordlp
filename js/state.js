@@ -43,6 +43,9 @@
                 state.uiLang = stored;
             }
             if (!state.vocabLang) state.vocabLang = state.uiLang;
+            if (!state.targetLang) state.targetLang = 'no';
+            if (!state.generatedVocab || typeof state.generatedVocab !== 'object') state.generatedVocab = {};
+            if (!state.generatedTasks || typeof state.generatedTasks !== 'object') state.generatedTasks = {};
             if (!state.wordTranslations || typeof state.wordTranslations !== 'object') state.wordTranslations = {};
             return state;
         }

@@ -1,82 +1,101 @@
 // =====================================================================
-//  АДМІН-ПАНЕЛЬ (без onclick, тільки addEventListener)
+//  АДМІН-ПАНЕЛЬ (найпростіша версія)
 // =====================================================================
 
 function viewAdmin() {
+    // Перевіряємо, чи користувач адмін
     if (!STATE || !STATE.admin) {
-        return el(`<div class="view"><div class="empty-state"><h3>⛔ Доступ заборонено</h3><p>Ви не маєте прав адміністратора.</p></div></div>`);
+        return `<div class="view"><div class="empty-state"><h3>⛔ Доступ заборонено</h3><p>Ви не маєте прав адміністратора.</p></div></div>`;
     }
     
-    const container = el(`
+    return `
         <div class="view">
             <h1>⚙️ Адмін-панель</h1>
             <p style="color:var(--ink-soft);margin-bottom:16px;">Швидке керування контентом сайту</p>
+            
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-                <div class="card admin-card" data-route="admin-words" style="cursor:pointer;transition:all .2s;">
+                <div class="card admin-card" onclick="navigate('admin-words')" style="cursor:pointer;transition:all .2s;">
                     <div style="font-size:2rem;margin-bottom:8px;">📚</div>
                     <h3>Слова</h3>
                     <p style="color:var(--ink-soft);font-size:.85rem;">Додати нове слово або редагувати існуючі</p>
                 </div>
-                <div class="card admin-card" data-route="admin-tournaments" style="cursor:pointer;transition:all .2s;">
+                
+                <div class="card admin-card" onclick="navigate('admin-tournaments')" style="cursor:pointer;transition:all .2s;">
                     <div style="font-size:2rem;margin-bottom:8px;">🏆</div>
                     <h3>Турніри</h3>
                     <p style="color:var(--ink-soft);font-size:.85rem;">Створити та керувати турнірами</p>
                 </div>
-                <div class="card admin-card" data-route="admin-daily" style="cursor:pointer;transition:all .2s;">
+                
+                <div class="card admin-card" onclick="navigate('admin-daily')" style="cursor:pointer;transition:all .2s;">
                     <div style="font-size:2rem;margin-bottom:8px;">📅</div>
                     <h3>Завдання дня</h3>
                     <p style="color:var(--ink-soft);font-size:.85rem;">Створити або оновити завдання на сьогодні</p>
                 </div>
-                <div class="card admin-card" data-route="admin-users" style="cursor:pointer;transition:all .2s;">
+                
+                <div class="card admin-card" onclick="navigate('admin-users')" style="cursor:pointer;transition:all .2s;">
                     <div style="font-size:2rem;margin-bottom:8px;">👥</div>
                     <h3>Користувачі</h3>
                     <p style="color:var(--ink-soft);font-size:.85rem;">Список усіх користувачів платформи</p>
                 </div>
+
+                <div class="card admin-card" onclick="navigate('admin-vocab-gen')" style="cursor:pointer;transition:all .2s;">
+                    <div style="font-size:2rem;margin-bottom:8px;">🌐</div>
+                    <h3>Спільні словники</h3>
+                    <p style="color:var(--ink-soft);font-size:.85rem;">Згенерувати й опублікувати словник для будь-якої мови — одразу для всіх користувачів</p>
+                </div>
             </div>
         </div>
-    `);
-    
-    container.querySelectorAll('.admin-card').forEach(card => {
-        card.addEventListener('click', function() {
-            const route = this.dataset.route;
-            if (route) navigate(route);
-        });
-    });
-    
-    return container;
+    `;
 }
 
 // =====================================================================
 //  СТОРІНКА: Управління словами
 // =====================================================================
-
 function viewAdminWords() {
-    if (!STATE || !STATE.admin) {
-        return el(`<div class="view"><div class="empty-state"><h3>⛔ Доступ заборонено</h3></div></div>`);
-    }
+    if (!STATE || !STATE.admin) return errorAccessDenied();
     
-    const container = el(`
+    return `
         <div class="view">
             <h1>📚 Управління словами</h1>
-            
             <div class="card" style="margin-bottom:16px;">
                 <h3>➕ Додати нове слово</h3>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
-                    <div class="field"><label>Норвезьке *</label><input id="wordNo" placeholder="bil"></div>
-                    <div class="field"><label>Переклад (укр) *</label><input id="wordUk" placeholder="машина"></div>
-                    <div class="field"><label>Переклад (англ)</label><input id="wordEn" placeholder="car"></div>
-                    <div class="field"><label>Переклад (рос)</label><input id="wordRu" placeholder="машина"></div>
+                    <div class="field">
+                        <label>Норвезьке слово</label>
+                        <input id="wordNo" placeholder="Наприклад: bil">
+                    </div>
+                    <div class="field">
+                        <label>Переклад (укр)</label>
+                        <input id="wordUk" placeholder="Наприклад: машина">
+                    </div>
+                    <div class="field">
+                        <label>Переклад (англ)</label>
+                        <input id="wordEn" placeholder="Наприклад: car">
+                    </div>
+                    <div class="field">
+                        <label>Переклад (рос)</label>
+                        <input id="wordRu" placeholder="Наприклад: машина">
+                    </div>
                     <div class="field" style="grid-column:1/-1;">
                         <label>Рівень</label>
                         <select id="wordLevel">
                             ${['A1','A2','B1','B2','C1','C2'].map(l => `<option value="${l}">${l}</option>`).join('')}
                         </select>
                     </div>
-                    <div class="field" style="grid-column:1/-1;"><label>Тема</label><input id="wordTopic" placeholder="Транспорт"></div>
-                    <div class="field" style="grid-column:1/-1;"><label>Приклад (норв)</label><input id="wordExNo" placeholder="Jeg har en bil."></div>
-                    <div class="field" style="grid-column:1/-1;"><label>Приклад (укр)</label><input id="wordExUk" placeholder="У мене є машина."></div>
+                    <div class="field" style="grid-column:1/-1;">
+                        <label>Тема</label>
+                        <input id="wordTopic" placeholder="Наприклад: Транспорт">
+                    </div>
+                    <div class="field" style="grid-column:1/-1;">
+                        <label>Приклад речення (норвезькою)</label>
+                        <input id="wordExNo" placeholder="Наприклад: Jeg har en bil.">
+                    </div>
+                    <div class="field" style="grid-column:1/-1;">
+                        <label>Приклад речення (переклад укр)</label>
+                        <input id="wordExUk" placeholder="Наприклад: У мене є машина.">
+                    </div>
                 </div>
-                <button class="btn btn-primary" id="addWordBtn">💾 Додати слово</button>
+                <button class="btn btn-primary" onclick="adminAddWord()">💾 Додати слово</button>
             </div>
             
             <div class="card">
@@ -85,137 +104,89 @@ function viewAdminWords() {
                 <div id="wordList" style="margin-top:12px;max-height:400px;overflow-y:auto;"></div>
             </div>
             
-            <button class="btn btn-ghost btn-sm" id="backFromWords" style="margin-top:12px;">← Назад до панелі</button>
+            <button class="btn btn-ghost btn-sm" onclick="navigate('admin')" style="margin-top:12px;">← Назад до панелі</button>
         </div>
-    `);
-    
-    // Кнопка назад
-    container.querySelector('#backFromWords').addEventListener('click', () => navigate('admin'));
-    
-    // Кнопка додати слово
-    container.querySelector('#addWordBtn').addEventListener('click', adminAddWord);
-    
-    // Пошук
-    const searchInput = container.querySelector('#wordSearch');
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            const q = this.value.trim().toLowerCase();
-            const list = container.querySelector('#wordList');
-            if (!list || q.length < 2) { loadWordList(list); return; }
-            
-            firebaseDb.collection('words')
-                .where('no', '>=', q)
-                .where('no', '<=', q + '\uf8ff')
-                .limit(20)
-                .get()
-                .then(snap => {
-                    if (snap.empty) {
-                        list.innerHTML = '<p style="color:var(--ink-soft);">Нічого не знайдено</p>';
-                        return;
-                    }
-                    let html = '<table class="vocab-table"><thead><tr><th>Слово</th><th>Переклад</th><th>Рівень</th><th>Дія</th></tr></thead><tbody>';
-                    snap.forEach(doc => {
-                        const d = doc.data();
-                        html += `<tr>
-                            <td><strong>${d.no}</strong></td>
-                            <td>${d.uk}</td>
-                            <td><span class="tag level-${d.level}">${d.level}</span></td>
-                            <td><button class="btn btn-danger btn-sm" data-id="${doc.id}">🗑️</button></td>
-                        </tr>`;
-                    });
-                    html += '</tbody></table>';
-                    list.innerHTML = html;
-                    list.querySelectorAll('[data-id]').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            adminDeleteWord(this.dataset.id);
-                        });
-                    });
-                })
-                .catch(() => list.innerHTML = '<p style="color:var(--rose);">Помилка пошуку</p>');
-        });
-    }
-    
-    // Завантаження списку
-    setTimeout(() => {
-        const list = container.querySelector('#wordList');
-        if (list) loadWordList(list);
-    }, 100);
-    
-    return container;
+    `;
 }
 
 // =====================================================================
 //  СТОРІНКА: Турніри
 // =====================================================================
-
 function viewAdminTournaments() {
-    if (!STATE || !STATE.admin) {
-        return el(`<div class="view"><div class="empty-state"><h3>⛔ Доступ заборонено</h3></div></div>`);
-    }
+    if (!STATE || !STATE.admin) return errorAccessDenied();
     
-    const container = el(`
+    return `
         <div class="view">
             <h1>🏆 Турніри</h1>
             <div class="card" style="margin-bottom:16px;">
                 <h3>➕ Створити новий турнір</h3>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
-                    <div class="field" style="grid-column:1/-1;"><label>Назва</label><input id="tournamentName" placeholder="Кубок Fjord"></div>
-                    <div class="field" style="grid-column:1/-1;"><label>Опис</label><input id="tournamentDesc" placeholder="Опис турніру"></div>
-                    <div class="field"><label>Початок</label><input id="tournamentStart" type="datetime-local"></div>
-                    <div class="field"><label>Кінець</label><input id="tournamentEnd" type="datetime-local"></div>
-                    <div class="field"><label>Кількість питань</label><input id="tournamentQuestions" type="number" value="20"></div>
-                    <div class="field"><label>Рівень</label>
+                    <div class="field" style="grid-column:1/-1;">
+                        <label>Назва турніру</label>
+                        <input id="tournamentName" placeholder="Наприклад: Кубок Fjord">
+                    </div>
+                    <div class="field" style="grid-column:1/-1;">
+                        <label>Опис</label>
+                        <input id="tournamentDesc" placeholder="Короткий опис турніру">
+                    </div>
+                    <div class="field">
+                        <label>Дата початку</label>
+                        <input id="tournamentStart" type="datetime-local">
+                    </div>
+                    <div class="field">
+                        <label>Дата закінчення</label>
+                        <input id="tournamentEnd" type="datetime-local">
+                    </div>
+                    <div class="field">
+                        <label>Кількість питань</label>
+                        <input id="tournamentQuestions" type="number" value="20">
+                    </div>
+                    <div class="field">
+                        <label>Рівень</label>
                         <select id="tournamentLevel">
                             ${['A1','A2','B1','B2','C1','C2'].map(l => `<option value="${l}">${l}</option>`).join('')}
                         </select>
                     </div>
                 </div>
-                <button class="btn btn-primary" id="createTournamentBtn">🏆 Створити турнір</button>
+                <button class="btn btn-primary" onclick="adminCreateTournament()">🏆 Створити турнір</button>
             </div>
+            
             <div class="card">
                 <h3>📋 Активні турніри</h3>
                 <div id="tournamentList" style="margin-top:12px;">Завантаження...</div>
             </div>
-            <button class="btn btn-ghost btn-sm" id="backFromTournaments" style="margin-top:12px;">← Назад до панелі</button>
+            
+            <button class="btn btn-ghost btn-sm" onclick="navigate('admin')" style="margin-top:12px;">← Назад до панелі</button>
         </div>
-    `);
-    
-    container.querySelector('#backFromTournaments').addEventListener('click', () => navigate('admin'));
-    container.querySelector('#createTournamentBtn').addEventListener('click', adminCreateTournament);
-    
-    setTimeout(() => {
-        const list = container.querySelector('#tournamentList');
-        if (list) loadTournamentList(list);
-    }, 100);
-    
-    return container;
+    `;
 }
 
 // =====================================================================
 //  СТОРІНКА: Завдання дня
 // =====================================================================
-
 function viewAdminDaily() {
-    if (!STATE || !STATE.admin) {
-        return el(`<div class="view"><div class="empty-state"><h3>⛔ Доступ заборонено</h3></div></div>`);
-    }
+    if (!STATE || !STATE.admin) return errorAccessDenied();
     
-    const container = el(`
+    return `
         <div class="view">
             <h1>📅 Завдання дня</h1>
             <div class="card">
                 <h3>✏️ Створити завдання на сьогодні</h3>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
-                    <div class="field" style="grid-column:1/-1;"><label>Питання</label><input id="dailyQuestion" placeholder="Як перекладається 'bil'?"></div>
-                    <div class="field" style="grid-column:1/-1;"><label>Варіанти (через кому)</label><input id="dailyOptions" placeholder="Машина, Човен, Літак, Велосипед"></div>
-                    <div class="field"><label>Правильна (номер з 0)</label><input id="dailyCorrect" type="number" value="0"></div>
-<div class="field">
-    <label>Рівень</label>
-    <select id="dailyLevel">
-        ${['A1','A2','B1','B2','C1','C2'].map(l => `<option value="${l}">${l}</option>`).join('')}
-    </select>
-</div>
-                    <div class="field"><label>Тип</label>
+                    <div class="field" style="grid-column:1/-1;">
+                        <label>Питання</label>
+                        <input id="dailyQuestion" placeholder="Наприклад: Як перекладається 'bil'?">
+                    </div>
+                    <div class="field" style="grid-column:1/-1;">
+                        <label>Варіанти відповідей (через кому)</label>
+                        <input id="dailyOptions" placeholder="Наприклад: Машина, Човен, Літак, Велосипед">
+                    </div>
+                    <div class="field">
+                        <label>Правильна відповідь (номер, починаючи з 0)</label>
+                        <input id="dailyCorrect" type="number" value="0">
+                    </div>
+                    <div class="field">
+                        <label>Тип завдання</label>
                         <select id="dailyType">
                             <option value="translation">Переклад</option>
                             <option value="grammar">Граматика</option>
@@ -224,179 +195,174 @@ function viewAdminDaily() {
                         </select>
                     </div>
                 </div>
-                <button class="btn btn-primary" id="createDailyBtn">📅 Опублікувати</button>
+                <button class="btn btn-primary" onclick="adminCreateDaily()">📅 Опублікувати завдання дня</button>
             </div>
+            
             <div class="card" style="margin-top:16px;">
                 <h3>📋 Останні завдання</h3>
                 <div id="dailyList" style="margin-top:12px;">Завантаження...</div>
             </div>
-            <button class="btn btn-ghost btn-sm" id="backFromDaily" style="margin-top:12px;">← Назад до панелі</button>
+            
+            <button class="btn btn-ghost btn-sm" onclick="navigate('admin')" style="margin-top:12px;">← Назад до панелі</button>
         </div>
-    `);
-    
-    container.querySelector('#backFromDaily').addEventListener('click', () => navigate('admin'));
-    container.querySelector('#createDailyBtn').addEventListener('click', adminCreateDaily);
-    
-    setTimeout(() => {
-        const list = container.querySelector('#dailyList');
-        if (list) loadDailyList(list);
-    }, 100);
-    
-    return container;
+    `;
 }
 
 // =====================================================================
 //  СТОРІНКА: Користувачі
 // =====================================================================
-
 function viewAdminUsers() {
-    if (!STATE || !STATE.admin) {
-        return el(`<div class="view"><div class="empty-state"><h3>⛔ Доступ заборонено</h3></div></div>`);
-    }
+    if (!STATE || !STATE.admin) return errorAccessDenied();
     
-    const container = el(`
+    return `
         <div class="view">
             <h1>👥 Користувачі</h1>
             <div class="card">
                 <h3>📋 Всі користувачі</h3>
                 <div id="userList" style="margin-top:12px;max-height:500px;overflow-y:auto;">Завантаження...</div>
             </div>
-            <button class="btn btn-ghost btn-sm" id="backFromUsers" style="margin-top:12px;">← Назад до панелі</button>
+            <button class="btn btn-ghost btn-sm" onclick="navigate('admin')" style="margin-top:12px;">← Назад до панелі</button>
         </div>
-    `);
-    
-    container.querySelector('#backFromUsers').addEventListener('click', () => navigate('admin'));
-    
-    setTimeout(() => {
-        const list = container.querySelector('#userList');
-        if (list) loadUserList(list);
-    }, 100);
-    
-    return container;
+    `;
 }
 
 // =====================================================================
-//  АДМІН-ФУНКЦІЇ
+//  АДМІН-ФУНКЦІЇ (для onclick)
 // =====================================================================
 
+// Додати слово
 window.adminAddWord = async function() {
+    const no = document.getElementById('wordNo').value.trim();
+    const uk = document.getElementById('wordUk').value.trim();
+    const en = document.getElementById('wordEn').value.trim();
+    const ru = document.getElementById('wordRu').value.trim();
+    const level = document.getElementById('wordLevel').value;
+    const t = document.getElementById('wordTopic').value.trim() || 'Загальне';
+    const ex_no = document.getElementById('wordExNo').value.trim();
+    const ex_uk = document.getElementById('wordExUk').value.trim();
+    
+    if (!no || !uk) {
+        toast('❌ Будь ласка, заповніть обов\'язкові поля (норвезьке та український переклад)');
+        return;
+    }
+    
     try {
-        const no = document.getElementById('wordNo').value.trim();
-        const uk = document.getElementById('wordUk').value.trim();
-        if (!no || !uk) {
-            toast('❌ Будь ласка, заповніть обов\'язкові поля (норвезьке та український переклад)');
-            return;
-        }
-        const en = document.getElementById('wordEn').value.trim();
-        const ru = document.getElementById('wordRu').value.trim();
-        const level = document.getElementById('wordLevel').value;
-        const t = document.getElementById('wordTopic').value.trim() || 'Загальне';
-        const ex_no = document.getElementById('wordExNo').value.trim();
-        const ex_uk = document.getElementById('wordExUk').value.trim();
-        
-        await firebaseDb.collection('words').add({
+        const docRef = await firebaseDb.collection('words').add({
             no, uk, en, ru, level, t, ex_no, ex_uk,
             fromAdmin: true,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-        
         toast(`✅ Слово "${no}" додано!`);
-        ['wordNo','wordUk','wordEn','wordRu','wordTopic','wordExNo','wordExUk'].forEach(id => {
-            document.getElementById(id).value = '';
-        });
-        const list = document.getElementById('wordList');
-        if (list) loadWordList(list);
+        document.querySelectorAll('#wordNo, #wordUk, #wordEn, #wordRu, #wordTopic, #wordExNo, #wordExUk').forEach(el => el.value = '');
+        loadWordList();
     } catch (e) {
         console.error('Помилка додавання слова:', e);
         toast('❌ Помилка додавання слова');
     }
 };
 
-window.adminDeleteWord = async function(id) {
-    if (!confirm('Ви впевнені?')) return;
+// Створити турнір
+window.adminCreateTournament = async function() {
+    const name = document.getElementById('tournamentName').value.trim();
+    const desc = document.getElementById('tournamentDesc').value.trim();
+    const start = document.getElementById('tournamentStart').value;
+    const end = document.getElementById('tournamentEnd').value;
+    const numQuestions = parseInt(document.getElementById('tournamentQuestions').value) || 20;
+    const level = document.getElementById('tournamentLevel').value;
+    
+    if (!name) {
+        toast('❌ Введіть назву турніру');
+        return;
+    }
+    
     try {
-        await firebaseDb.collection('words').doc(id).delete();
-        toast('🗑️ Слово видалено');
-        const list = document.getElementById('wordList');
-        if (list) loadWordList(list);
+        const words = vocabForLevel(level);
+        const shuffled = shuffle(words).slice(0, numQuestions);
+        const questions = shuffled.map(w => {
+            const distractors = shuffle(words.filter(x => x.no !== w.no)).slice(0, 3).map(x => x.uk);
+            const options = shuffle([w.uk, ...distractors]);
+            return {
+                type: 'translation',
+                question: `Як перекладається "${w.no}"?`,
+                options: options,
+                correct: options.indexOf(w.uk)
+            };
+        });
+        
+        const docRef = await firebaseDb.collection('tournaments').add({
+            name,
+            description: desc,
+            level,
+            questions,
+            status: 'waiting',
+            startTime: start ? new Date(start).toISOString() : null,
+            endTime: end ? new Date(end).toISOString() : null,
+            participants: {},
+            results: {},
+            createdBy: firebaseAuth.currentUser.uid,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        toast(`🏆 Турнір "${name}" створено!`);
+        document.getElementById('tournamentName').value = '';
+        document.getElementById('tournamentDesc').value = '';
+        loadTournamentList();
     } catch (e) {
-        console.error('Помилка видалення:', e);
-        toast('❌ Помилка видалення');
+        console.error('Помилка створення турніру:', e);
+        toast('❌ Помилка створення турніру');
     }
 };
 
-window.adminCreateTournament = async function() {
-    toast('🏆 Функція створення турніру в розробці');
-};
-
-// =====================================================================
-//  АДМІН-ФУНКЦІЯ: СТВОРИТИ ЗАВДАННЯ ДНЯ
-// =====================================================================
+// Створити завдання дня
 window.adminCreateDaily = async function() {
     const question = document.getElementById('dailyQuestion').value.trim();
     const optionsRaw = document.getElementById('dailyOptions').value.trim();
     const correct = parseInt(document.getElementById('dailyCorrect').value) || 0;
     const type = document.getElementById('dailyType').value;
-    const level = document.getElementById('dailyLevel')?.value || STATE.level || 'A1';
-
+    
     if (!question || !optionsRaw) {
         toast('❌ Заповніть питання та варіанти відповідей');
         return;
     }
-
+    
     const options = optionsRaw.split(',').map(s => s.trim());
     if (options.length < 2) {
         toast('❌ Варіантів має бути не менше 2');
         return;
     }
-
-    if (correct < 0 || correct >= options.length) {
-        toast(`❌ Правильна відповідь має бути від 0 до ${options.length - 1}`);
-        return;
-    }
-
+    
     const today = new Date().toISOString().slice(0, 10);
-
+    
     try {
         await firebaseDb.collection('daily_tasks').doc(today).set({
             question,
             options,
             correct,
             type,
-            level,
+            level: STATE.level || 'A1',
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         toast(`✅ Завдання на ${today} створено!`);
         document.getElementById('dailyQuestion').value = '';
         document.getElementById('dailyOptions').value = '';
-        document.getElementById('dailyCorrect').value = '0';
-        // Оновлюємо список
-        const list = document.getElementById('dailyList');
-        if (list) loadDailyList(list);
-        // Оновлюємо головну (якщо вона відкрита)
-        if (ROUTE === 'home') navigate('home');
+        loadDailyList();
     } catch (e) {
         console.error('Помилка створення завдання дня:', e);
-        toast('❌ Помилка створення завдання: ' + e.message);
+        toast('❌ Помилка створення завдання');
     }
 };
 
-window.adminDeleteTournament = async function(id) {
-    if (!confirm('Видалити турнір?')) return;
-    toast('🗑️ Видалення в розробці');
-};
-
-window.adminDeleteDaily = async function(id) {
-    if (!confirm('Видалити завдання?')) return;
-    toast('🗑️ Видалення в розробці');
-};
-
 // =====================================================================
-//  ЗАВАНТАЖЕННЯ СПИСКІВ
+//  ДОПОМІЖНІ ФУНКЦІЇ
 // =====================================================================
 
-async function loadWordList(container) {
-    if (!container) container = document.getElementById('wordList');
+function errorAccessDenied() {
+    return `<div class="view"><div class="empty-state"><h3>⛔ Доступ заборонено</h3><p>Ви не маєте прав адміністратора.</p></div></div>`;
+}
+
+// Завантажити список слів
+async function loadWordList() {
+    const container = document.getElementById('wordList');
     if (!container) return;
     try {
         const snap = await firebaseDb.collection('words').limit(100).get();
@@ -406,29 +372,38 @@ async function loadWordList(container) {
         }
         let html = '<table class="vocab-table"><thead><tr><th>Слово</th><th>Переклад</th><th>Рівень</th><th>Дія</th></tr></thead><tbody>';
         snap.forEach(doc => {
-            const d = doc.data();
+            const data = doc.data();
             html += `<tr>
-                <td><strong>${d.no}</strong></td>
-                <td>${d.uk}</td>
-                <td><span class="tag level-${d.level}">${d.level}</span></td>
-                <td><button class="btn btn-danger btn-sm" data-id="${doc.id}">🗑️</button></td>
+                <td><strong>${data.no}</strong></td>
+                <td>${data.uk}</td>
+                <td><span class="tag level-${data.level}">${data.level}</span></td>
+                <td><button class="btn btn-danger btn-sm" onclick="adminDeleteWord('${doc.id}')">🗑️</button></td>
             </tr>`;
         });
         html += '</tbody></table>';
         container.innerHTML = html;
-        container.querySelectorAll('[data-id]').forEach(btn => {
-            btn.addEventListener('click', function() {
-                adminDeleteWord(this.dataset.id);
-            });
-        });
     } catch (e) {
         console.error('Помилка завантаження слів:', e);
         container.innerHTML = '<p style="color:var(--rose);">Помилка завантаження.</p>';
     }
 }
 
-async function loadTournamentList(container) {
-    if (!container) container = document.getElementById('tournamentList');
+// Видалити слово
+window.adminDeleteWord = async function(docId) {
+    if (!confirm('Ви впевнені?')) return;
+    try {
+        await firebaseDb.collection('words').doc(docId).delete();
+        toast('🗑️ Слово видалено');
+        loadWordList();
+    } catch (e) {
+        console.error('Помилка видалення:', e);
+        toast('❌ Помилка видалення');
+    }
+};
+
+// Завантажити турніри
+async function loadTournamentList() {
+    const container = document.getElementById('tournamentList');
     if (!container) return;
     try {
         const snap = await firebaseDb.collection('tournaments').orderBy('createdAt', 'desc').limit(10).get();
@@ -438,34 +413,43 @@ async function loadTournamentList(container) {
         }
         let html = '';
         snap.forEach(doc => {
-            const d = doc.data();
+            const data = doc.data();
             const statusMap = { waiting: '⏳ Очікує', active: '🔄 Активний', finished: '✅ Завершено' };
             html += `
                 <div class="card" style="margin-bottom:8px;">
                     <div style="display:flex;justify-content:space-between;align-items:center;">
                         <div>
-                            <strong>${d.name}</strong> ${statusMap[d.status] || d.status}
-                            <span style="font-size:.8rem;color:var(--ink-soft);margin-left:12px;">${d.level || 'A1'}</span>
+                            <strong>${data.name}</strong> ${statusMap[data.status] || data.status}
+                            <span style="font-size:.8rem;color:var(--ink-soft);margin-left:12px;">${data.level || 'A1'}</span>
                         </div>
-                        <button class="btn btn-danger btn-sm" data-id="${doc.id}">🗑️</button>
+                        <button class="btn btn-danger btn-sm" onclick="adminDeleteTournament('${doc.id}')">🗑️</button>
                     </div>
                 </div>
             `;
         });
         container.innerHTML = html;
-        container.querySelectorAll('[data-id]').forEach(btn => {
-            btn.addEventListener('click', function() {
-                adminDeleteTournament(this.dataset.id);
-            });
-        });
     } catch (e) {
         console.error('Помилка завантаження турнірів:', e);
         container.innerHTML = '<p style="color:var(--rose);">Помилка завантаження.</p>';
     }
 }
 
-async function loadDailyList(container) {
-    if (!container) container = document.getElementById('dailyList');
+// Видалити турнір
+window.adminDeleteTournament = async function(docId) {
+    if (!confirm('Ви впевнені?')) return;
+    try {
+        await firebaseDb.collection('tournaments').doc(docId).delete();
+        toast('🗑️ Турнір видалено');
+        loadTournamentList();
+    } catch (e) {
+        console.error('Помилка видалення турніру:', e);
+        toast('❌ Помилка видалення');
+    }
+};
+
+// Завантажити завдання дня
+async function loadDailyList() {
+    const container = document.getElementById('dailyList');
     if (!container) return;
     try {
         const snap = await firebaseDb.collection('daily_tasks').orderBy('createdAt', 'desc').limit(10).get();
@@ -475,33 +459,42 @@ async function loadDailyList(container) {
         }
         let html = '';
         snap.forEach(doc => {
-            const d = doc.data();
+            const data = doc.data();
             html += `
                 <div class="card" style="margin-bottom:8px;">
                     <div style="display:flex;justify-content:space-between;align-items:center;">
                         <div>
-                            <strong>${d.question?.slice(0, 60)}...</strong>
+                            <strong>${data.question?.slice(0, 60)}...</strong>
                             <span style="font-size:.8rem;color:var(--ink-soft);margin-left:12px;">${doc.id}</span>
                         </div>
-                        <button class="btn btn-danger btn-sm" data-id="${doc.id}">🗑️</button>
+                        <button class="btn btn-danger btn-sm" onclick="adminDeleteDaily('${doc.id}')">🗑️</button>
                     </div>
                 </div>
             `;
         });
         container.innerHTML = html;
-        container.querySelectorAll('[data-id]').forEach(btn => {
-            btn.addEventListener('click', function() {
-                adminDeleteDaily(this.dataset.id);
-            });
-        });
     } catch (e) {
         console.error('Помилка завантаження завдань:', e);
         container.innerHTML = '<p style="color:var(--rose);">Помилка завантаження.</p>';
     }
 }
 
-async function loadUserList(container) {
-    if (!container) container = document.getElementById('userList');
+// Видалити завдання дня
+window.adminDeleteDaily = async function(docId) {
+    if (!confirm('Ви впевнені?')) return;
+    try {
+        await firebaseDb.collection('daily_tasks').doc(docId).delete();
+        toast('🗑️ Завдання видалено');
+        loadDailyList();
+    } catch (e) {
+        console.error('Помилка видалення завдання:', e);
+        toast('❌ Помилка видалення');
+    }
+};
+
+// Завантажити користувачів
+async function loadUserList() {
+    const container = document.getElementById('userList');
     if (!container) return;
     try {
         const snap = await firebaseDb.collection('users').limit(50).get();
@@ -511,12 +504,12 @@ async function loadUserList(container) {
         }
         let html = '<table class="vocab-table"><thead><tr><th>Ім\'я</th><th>Email</th><th>Рівень</th><th>XP</th></tr></thead><tbody>';
         snap.forEach(doc => {
-            const d = doc.data();
+            const data = doc.data();
             html += `<tr>
-                <td><strong>${d.name || 'Без імені'}</strong></td>
-                <td>${d.email || '—'}</td>
-                <td>${d.level || 'A1'}</td>
-                <td>${d.xp || 0}</td>
+                <td><strong>${data.name || 'Без імені'}</strong></td>
+                <td>${data.email || '—'}</td>
+                <td>${data.level || 'A1'}</td>
+                <td>${data.xp || 0}</td>
             </tr>`;
         });
         html += '</tbody></table>';
@@ -525,4 +518,214 @@ async function loadUserList(container) {
         console.error('Помилка завантаження користувачів:', e);
         container.innerHTML = '<p style="color:var(--rose);">Помилка завантаження.</p>';
     }
+}
+
+// =====================================================================
+//  ПОШУК СЛІВ
+// =====================================================================
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('wordSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', async function() {
+            const q = this.value.trim().toLowerCase();
+            const container = document.getElementById('wordList');
+            if (!container || q.length < 2) {
+                loadWordList();
+                return;
+            }
+            try {
+                const snap = await firebaseDb.collection('words')
+                    .where('no', '>=', q)
+                    .where('no', '<=', q + '\uf8ff')
+                    .limit(20)
+                    .get();
+                if (snap.empty) {
+                    container.innerHTML = '<p style="color:var(--ink-soft);">Нічого не знайдено.</p>';
+                    return;
+                }
+                let html = '<table class="vocab-table"><thead><tr><th>Слово</th><th>Переклад</th><th>Рівень</th><th>Дія</th></tr></thead><tbody>';
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    html += `<tr>
+                        <td><strong>${data.no}</strong></td>
+                        <td>${data.uk}</td>
+                        <td><span class="tag level-${data.level}">${data.level}</span></td>
+                        <td><button class="btn btn-danger btn-sm" onclick="adminDeleteWord('${doc.id}')">🗑️</button></td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            } catch (e) {
+                console.error('Помилка пошуку:', e);
+            }
+        });
+    }
+});
+
+// =====================================================================
+//  СТОРІНКА: Спільні словники (для мов, окрім норвезької)
+// =====================================================================
+// На відміну від "Слова" вище (яка керує лише вбудованим норвезьким
+// словником по одному слову), ця сторінка генерує ВЕЛИКИЙ словник одразу
+// для будь-якої іншої мови+рівня через AI, і публікує його в спільну
+// колекцію Firestore (sharedVocab) — після цього словник одразу бачать
+// УСІ користувачі сайту, без жодної дії з їхнього боку.
+function viewAdminSharedVocab() {
+    if (!STATE || !STATE.admin) return errorAccessDenied();
+
+    const preset = (typeof SUBSTATE !== 'undefined' && SUBSTATE) || {};
+    const otherLangs = LANGUAGES.filter(l => !l.builtin);
+
+    return `
+        <div class="view">
+            <h1>🌐 Спільні словники</h1>
+            <p style="color:var(--ink-soft);margin-bottom:16px;">
+                Згенеруйте словник для мови й рівня, перегляньте результат і опублікуйте —
+                після цього його одразу побачать усі користувачі сайту, які вчать цю мову.
+                Норвезька сюди не входить — у неї свій вбудований словник (розділ «Слова»).
+            </p>
+
+            <div class="card" style="margin-bottom:16px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div class="field">
+                        <label>Мова</label>
+                        <select id="avLang">
+                            ${otherLangs.map(l => `<option value="${l.code}" ${preset.presetLang===l.code?'selected':''}>${l.flag} ${l.name.uk}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Рівень</label>
+                        <select id="avLevel">
+                            ${['A1','A2','B1','B2','C1','C2'].map(l => `<option value="${l}" ${preset.presetLevel===l?'selected':''}>${l}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Кількість пакетів (~60 слів кожен)</label>
+                        <select id="avBatches">
+                            <option value="3">3 (~180 слів)</option>
+                            <option value="5" selected>5 (~300 слів)</option>
+                            <option value="8">8 (~480 слів)</option>
+                        </select>
+                    </div>
+                    <div class="field" style="display:flex;align-items:flex-end;">
+                        <button class="btn btn-primary btn-block" id="avGenerateBtn">✨ Згенерувати</button>
+                    </div>
+                </div>
+                <p id="avStatus" style="color:var(--ink-soft);font-size:.85rem;margin-top:10px;"></p>
+            </div>
+
+            <div class="card" id="avExistingCard" style="margin-bottom:16px;">
+                <h3>📦 Уже опубліковані словники</h3>
+                <div id="avExistingList" style="color:var(--ink-soft);font-size:.85rem;">Завантаження…</div>
+            </div>
+
+            <div class="card" id="avPreviewCard" style="display:none;">
+                <h3>👀 Прев'ю згенерованого набору (<span id="avPreviewCount">0</span> слів)</h3>
+                <div id="avPreviewList" style="max-height:340px;overflow-y:auto;margin:12px 0;"></div>
+                <button class="btn btn-primary" id="avPublishBtn">📤 Опублікувати для всіх користувачів</button>
+                <button class="btn btn-ghost" id="avDiscardBtn">🗑️ Відхилити</button>
+            </div>
+
+            <button class="btn btn-ghost btn-sm" onclick="navigate('admin')" style="margin-top:12px;">← Назад до панелі</button>
+        </div>
+    `;
+}
+
+// Ініціалізація сторінки — прив'язка обробників і завантаження списку вже
+// опублікованих словників. Викликається після рендеру (див. паттерн нижче,
+// такий самий, як initAdminWords тощо).
+function initAdminSharedVocab() {
+    const genBtn = document.getElementById('avGenerateBtn');
+    const statusEl = document.getElementById('avStatus');
+    const previewCard = document.getElementById('avPreviewCard');
+    const previewList = document.getElementById('avPreviewList');
+    const previewCount = document.getElementById('avPreviewCount');
+    const existingList = document.getElementById('avExistingList');
+    if (!genBtn) return; // не та сторінка
+
+    let pendingWords = null;
+    let pendingLang = null;
+    let pendingLevel = null;
+
+    async function refreshExisting() {
+        if (!firebaseReady || !firebaseDb) {
+            existingList.textContent = 'Firestore недоступний.';
+            return;
+        }
+        try {
+            const snap = await firebaseDb.collection('sharedVocab').get();
+            if (snap.empty) {
+                existingList.textContent = 'Ще нічого не опубліковано.';
+                return;
+            }
+            const rows = [];
+            snap.forEach(doc => {
+                const d = doc.data();
+                const lang = getLanguage(d.lang);
+                rows.push(`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line-soft);">
+                    <span>${lang.flag} ${lang.name.uk} — <span class="tag level-${d.level}">${d.level}</span></span>
+                    <span>${d.count || (d.words||[]).length} слів</span>
+                </div>`);
+            });
+            existingList.innerHTML = rows.join('');
+        } catch (e) {
+            console.error('[Адмін] Помилка завантаження списку словників:', e);
+            existingList.textContent = 'Помилка завантаження.';
+        }
+    }
+    refreshExisting();
+
+    genBtn.onclick = async () => {
+        const lang = document.getElementById('avLang').value;
+        const level = document.getElementById('avLevel').value;
+        const batches = parseInt(document.getElementById('avBatches').value, 10);
+        genBtn.disabled = true;
+        const original = genBtn.textContent;
+        try {
+            const words = await generateBulkVocab(lang, level, batches, (done, total, count) => {
+                statusEl.textContent = `Генерую… пакет ${done}/${total}, слів зібрано: ${count}`;
+            });
+            pendingWords = words;
+            pendingLang = lang;
+            pendingLevel = level;
+            previewCount.textContent = words.length;
+            previewList.innerHTML = words.map(w => `
+                <div style="padding:6px 0;border-bottom:1px solid var(--line-soft);font-size:.85rem;">
+                    <strong>${w.no}</strong> — ${w.uk} <span style="color:var(--ink-soft);">(${w.t || ''})</span>
+                </div>
+            `).join('');
+            previewCard.style.display = 'block';
+            statusEl.textContent = `Готово: ${words.length} слів. Перевірте прев'ю нижче й опублікуйте.`;
+        } catch (e) {
+            console.error('[Адмін] Помилка генерації словника:', e);
+            statusEl.textContent = '⚠️ Помилка генерації. Спробуйте ще раз.';
+        } finally {
+            genBtn.disabled = false;
+            genBtn.textContent = original;
+        }
+    };
+
+    const publishBtn = document.getElementById('avPublishBtn');
+    if (publishBtn) publishBtn.onclick = async () => {
+        if (!pendingWords || !pendingWords.length) return;
+        publishBtn.disabled = true;
+        try {
+            await saveSharedVocab(pendingLang, pendingLevel, pendingWords);
+            toast(`✅ Опубліковано ${pendingWords.length} слів для ${getLanguage(pendingLang).name.uk} (${pendingLevel})`);
+            previewCard.style.display = 'none';
+            pendingWords = null;
+            refreshExisting();
+        } catch (e) {
+            console.error('[Адмін] Помилка публікації:', e);
+            toast('⚠️ Не вдалося опублікувати. Перевірте доступ до Firestore.');
+        } finally {
+            publishBtn.disabled = false;
+        }
+    };
+
+    const discardBtn = document.getElementById('avDiscardBtn');
+    if (discardBtn) discardBtn.onclick = () => {
+        pendingWords = null;
+        previewCard.style.display = 'none';
+    };
 }

@@ -17,6 +17,11 @@
                 <div class="card">
                   <h3>${t('settings_title')}</h3>
                   <div class="field"><label>${t('field_name')}</label><input id="setName" value="${STATE.name||''}"></div>
+                  <div class="field"><label>${t('field_learn_lang')}</label>
+                    <select id="setTargetLang">
+                      ${LANGUAGES.map(l => `<option value="${l.code}" ${STATE.targetLang===l.code?'selected':''}>${l.flag} ${l.name[STATE.uiLang]||l.name.uk}</option>`).join('')}
+                    </select>
+                  </div>
                   <div class="field"><label>${t('field_goal')}</label><input id="setGoal" value="${STATE.settings?.goal||''}" placeholder="${t('field_goal_placeholder')}"></div>
                   <div class="field"><label>${t('field_reminder_time')}</label><input type="time" id="setTime" value="${STATE.settings?.reminderTime||'18:00'}"></div>
                   <div class="field"><label>${t('field_pace')}</label>
@@ -70,9 +75,13 @@
                 STATE.settings.goal = wrap.querySelector('#setGoal').value.trim();
                 STATE.settings.reminderTime = wrap.querySelector('#setTime').value;
                 STATE.settings.pace = wrap.querySelector('#setPace').value;
+                const newTargetLang = wrap.querySelector('#setTargetLang').value;
+                const targetLangChanged = newTargetLang !== STATE.targetLang;
+                STATE.targetLang = newTargetLang;
                 updateState();
                 toast(t('settings_saved'));
                 document.getElementById('userNameDisplay').textContent = STATE.name;
+                if (targetLangChanged) navigate('home'); // словник/картки/тести залежать від мови — оновлюємо вкладку
             };
             return wrap;
         }

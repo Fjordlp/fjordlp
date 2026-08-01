@@ -134,9 +134,17 @@ function getLevelRecommendation() {
         function wordKey(w) { return (w.level || '') + "|" + w.no; }
 
         function vocabForLevel(level) {
-            const base = VOCAB[level] || [];
+            const lang = (STATE && STATE.targetLang) || 'no';
+            let base;
+            if (lang === 'no') {
+                base = VOCAB[level] || [];
+            } else {
+                if (!STATE.generatedVocab) STATE.generatedVocab = {};
+                if (!STATE.generatedVocab[lang]) STATE.generatedVocab[lang] = {};
+                base = STATE.generatedVocab[lang][level] || [];
+            }
             const custom = (STATE && Array.isArray(STATE.customWords)) ?
-                STATE.customWords.filter(w => w.level === level) : [];
+                STATE.customWords.filter(w => w.level === level && (w.lang || 'no') === lang) : [];
             return custom.length ? base.concat(custom) : base;
         }
 
@@ -252,29 +260,3 @@ function getLevelRecommendation() {
             return 'due';
         }
 
-window.checkDailyTask = function(selected, correct, taskId, container) {
-    const options = container.querySelectorAll('.mc-opt');
-    const feedback = container.querySelector('#dailyFeedback');
-    const result = container.querySelector('#dailyResult');
-    options.forEach(btn => btn.disabled = true);
-    if (selected === correct) {
-        options.forEach((btn, idx) => { if (idx === correct) btn.classList.add('correct'); });
-        feedback.innerHTML = `<div class="feedback-banner ok">✅ Правильно! 🎉</div>`;
-        addXP(20, 'daily_task');
-        const today = new Date().toISOString().slice(0, 10);
-        if (!STATE.dailyTasksCompleted) STATE.dailyTasksCompleted = {};
-        if (!STATE.dailyTasksCompleted[today]) {
-            STATE.dailyTasksCompleted[today] = true;
-            updateState();
-            checkAchievements({ dailyTaskCompleted: true });
-        }
-        result.textContent = `+20 XP за завдання дня! 🔥`;
-    } else {
-        options.forEach((btn, idx) => {
-            if (idx === correct) btn.classList.add('correct');
-            if (idx === selected) btn.classList.add('wrong');
-        });
-        feedback.innerHTML = `<div class="feedback-banner bad">❌ Неправильно. Правильна відповідь: ${options[correct].textContent}</div>`;
-        result.textContent = `Спробуй завтра знову! 💪`;
-    }
-};
