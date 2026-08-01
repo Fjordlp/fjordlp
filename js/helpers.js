@@ -280,9 +280,17 @@ async function loadWordsForLang(lang) {
     return words;
 }
 
-async function vocabForLevel(level, lang) {
-    lang = lang || STATE.learningLang || 'no';
-    const all = await loadWordsForLang(lang);
-    return all.filter(w => w.level === level);
+function vocabForLevel(level, lang) {
+    lang = lang || (STATE && STATE.targetLang) || 'no';
+    let base;
+    if (lang === 'no') {
+        base = (VOCAB && VOCAB[level]) || [];
+    } else {
+        if (!STATE.generatedVocab) STATE.generatedVocab = {};
+        if (!STATE.generatedVocab[lang]) STATE.generatedVocab[lang] = {};
+        base = STATE.generatedVocab[lang][level] || [];
+    }
+    const custom = (STATE && Array.isArray(STATE.customWords)) ?
+        STATE.customWords.filter(w => w.level === level && (w.lang || 'no') === lang) : [];
+    return custom.length ? base.concat(custom) : base;
 }
-
