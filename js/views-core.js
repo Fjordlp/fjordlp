@@ -6,7 +6,7 @@ function viewHome() {
     ensureStateDefaults(STATE);
     const level = STATE.level || "A1";
     const meta = LEVEL_META[level];
-    const vocab = vocabForLevel(level);
+    const vocab = vocabForLevel(level) || [];
     const total = vocab.length;
 
     // ----- ЛОГІКА ПРОГРЕСУ -----
