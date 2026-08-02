@@ -10,7 +10,8 @@ function initFirebase() {
   try {
     // Перевіряємо, чи firebase глобально доступний
     if (typeof firebase === 'undefined') {
-      console.error('❌ Firebase SDK не завантажився! Перевірте підключення скриптів.');
+      console.warn('⏳ Firebase SDK ще не завантажився, повторна спроба через 500ms...');
+      setTimeout(initFirebase, 500);
       return;
     }
 
@@ -26,7 +27,8 @@ function initFirebase() {
         firebaseUser = user;
         console.log('🔥 Користувач увійшов:', user.email);
         // Якщо сторінка входу ще видима – автоматично входимо
-        if (document.getElementById('authPage').style.display !== 'none') {
+        const authPage = document.getElementById('authPage');
+        if (authPage && authPage.style.display !== 'none') {
           currentUser = user.email;
           isGuest = false;
           await loadFromFirestore(user.uid);
@@ -48,7 +50,7 @@ function initFirebase() {
             });
           }
           saveSession(currentUser, false);
-          document.getElementById('authPage').style.display = 'none';
+          authPage.style.display = 'none';
           document.getElementById('app').classList.add('active');
           initAssistantWidget();
           navigate('home');
@@ -62,16 +64,23 @@ function initFirebase() {
     });
   } catch (e) {
     console.error('❌ Помилка ініціалізації Firebase:', e);
+    // Повторна спроба через 2 секунди
+    setTimeout(initFirebase, 2000);
   }
 }
 
+// Запускаємо ініціалізацію негайно, але вона сама повториться, якщо не готово
+initFirebase();
+
 async function loadFromFirestore(uid) {
-  if (!firebaseReady || !firebaseDb) return null;
+  if (!firebaseReady || !firebaseDb) {
+    console.warn('Firestore не готовий, пропускаємо завантаження');
+    return null;
+  }
   try {
     const docRef = firebaseDb.collection('users').doc(uid);
     const docSnap = await docRef.get();
     if (docSnap.exists) {
-      // Якщо STATE null, створюємо порожній об'єкт
       if (!STATE) STATE = {};
       Object.assign(STATE, docSnap.data());
       if (typeof ensureStateDefaults === 'function') {
@@ -88,7 +97,10 @@ async function loadFromFirestore(uid) {
 }
 
 async function saveToFirestore(uid, data) {
-  if (!firebaseReady || !firebaseDb) return;
+  if (!firebaseReady || !firebaseDb) {
+    console.warn('Firestore не готовий, дані не збережено');
+    return;
+  }
   try {
     const docRef = firebaseDb.collection('users').doc(uid);
     await docRef.set(data, { merge: true });
@@ -99,7 +111,10 @@ async function saveToFirestore(uid, data) {
 }
 
 async function signUpWithFirebase(email, password) {
-  if (!firebaseReady) return { success: false, error: 'Firebase не готовий' };
+  if (!firebaseReady) {
+    toast('⏳ Firebase ще не готовий, зачекайте кілька секунд і спробуйте знову.');
+    return { success: false, error: 'Firebase not ready' };
+  }
   try {
     const userCredential = await firebaseAuth.createUserWithEmailAndPassword(email, password);
     const user = userCredential.user;
@@ -126,7 +141,10 @@ async function signUpWithFirebase(email, password) {
 }
 
 async function signInWithFirebase(email, password) {
-  if (!firebaseReady) return { success: false, error: 'Firebase не готовий' };
+  if (!firebaseReady) {
+    toast('⏳ Firebase ще не готовий, зачекайте кілька секунд і спробуйте знову.');
+    return { success: false, error: 'Firebase not ready' };
+  }
   try {
     const userCredential = await firebaseAuth.signInWithEmailAndPassword(email, password);
     const user = userCredential.user;
@@ -149,8 +167,3 @@ async function signOutFromFirebase() {
     console.error('❌ Помилка виходу:', e);
   }
 }
-
-// Цей inline-скрипт розташований у кінці <body>, DOM вже повністю завантажений
-// на момент його виконання — подія DOMContentLoaded вже відбулась і ніколи не
-// спрацює повторно. Тому викликаємо initFirebase() одразу, напряму.
-initFirebase();
