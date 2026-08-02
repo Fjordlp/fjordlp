@@ -5,78 +5,108 @@ let firebaseReady = false;
 let firebaseAuth = null;
 let firebaseDb = null;
 let firebaseUser = null;
+let firebaseInitPromise = null;
 
-function initFirebase() {
-  try {
-    // Перевіряємо, чи firebase глобально доступний
-    if (typeof firebase === 'undefined') {
-      console.warn('⏳ Firebase SDK ще не завантажився, повторна спроба через 500ms...');
-      setTimeout(initFirebase, 500);
-      return;
-    }
-
-    const app = firebase.initializeApp(firebaseConfig);
-    firebaseAuth = firebase.auth(app);
-    firebaseDb = firebase.firestore(app);
-    firebaseReady = true;
-
-    console.log('🔥 Firebase підключено!');
-
-    firebaseAuth.onAuthStateChanged(async (user) => {
-      if (user) {
-        firebaseUser = user;
-        console.log('🔥 Користувач увійшов:', user.email);
-        // Якщо сторінка входу ще видима – автоматично входимо
-        const authPage = document.getElementById('authPage');
-        if (authPage && authPage.style.display !== 'none') {
-          currentUser = user.email;
-          isGuest = false;
-          await loadFromFirestore(user.uid);
-          if (!STATE) {
-            STATE = ensureStateDefaults({
-              name: user.email.split('@')[0],
-              level: 'A1',
-              levelTestDone: false,
-              srs: {},
-              stats: { wordsSeen: {}, testsCompleted: 0, sessionCount: 0, activityDates: [], bestStreak: 0 },
-              settings: { goal: "", reminderTime: "18:00", pace: "steady" },
-              leaderboardScore: 0,
-              customWords: [],
-              streak: 0,
-              xp: 0,
-              achievements: [],
-              trollGear: { equipped: { hat: null, glasses: null, bg: null }, unlocked: [] },
-              lessonsDone: [],
-            });
-          }
-          saveSession(currentUser, false);
-          authPage.style.display = 'none';
-          document.getElementById('app').classList.add('active');
-          initAssistantWidget();
-          navigate('home');
-        } else if (STATE && !isGuest && currentUser !== 'guest' && currentUser === user.email) {
-          await loadFromFirestore(user.uid);
-        }
-      } else {
-        firebaseUser = null;
-        console.log('🔥 Користувач вийшов');
+// Функція, яка повертає проміс, що резолвиться, коли Firebase готовий
+function waitForFirebase(timeout = 5000) {
+  if (firebaseReady) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+    const check = () => {
+      if (firebaseReady) {
+        resolve();
+        return;
       }
-    });
-  } catch (e) {
-    console.error('❌ Помилка ініціалізації Firebase:', e);
-    // Повторна спроба через 2 секунди
-    setTimeout(initFirebase, 2000);
-  }
+      if (Date.now() - start > timeout) {
+        reject(new Error('Firebase initialization timeout'));
+        return;
+      }
+      setTimeout(check, 100);
+    };
+    check();
+  });
 }
 
-// Запускаємо ініціалізацію негайно, але вона сама повториться, якщо не готово
+function initFirebase() {
+  // Якщо вже ініціалізовано або йде ініціалізація – повертаємо існуючий проміс
+  if (firebaseInitPromise) return firebaseInitPromise;
+
+  firebaseInitPromise = new Promise((resolve, reject) => {
+    const tryInit = () => {
+      try {
+        if (typeof firebase === 'undefined') {
+          console.warn('⏳ Firebase SDK ще не завантажився, повторна спроба через 200ms...');
+          setTimeout(tryInit, 200);
+          return;
+        }
+
+        const app = firebase.initializeApp(firebaseConfig);
+        firebaseAuth = firebase.auth(app);
+        firebaseDb = firebase.firestore(app);
+        firebaseReady = true;
+        console.log('🔥 Firebase підключено!');
+
+        // Налаштовуємо спостерігача авторизації
+        firebaseAuth.onAuthStateChanged(async (user) => {
+          if (user) {
+            firebaseUser = user;
+            console.log('🔥 Користувач увійшов:', user.email);
+            const authPage = document.getElementById('authPage');
+            if (authPage && authPage.style.display !== 'none') {
+              currentUser = user.email;
+              isGuest = false;
+              await loadFromFirestore(user.uid);
+              if (!STATE) {
+                STATE = ensureStateDefaults({
+                  name: user.email.split('@')[0],
+                  level: 'A1',
+                  levelTestDone: false,
+                  srs: {},
+                  stats: { wordsSeen: {}, testsCompleted: 0, sessionCount: 0, activityDates: [], bestStreak: 0 },
+                  settings: { goal: "", reminderTime: "18:00", pace: "steady" },
+                  leaderboardScore: 0,
+                  customWords: [],
+                  streak: 0,
+                  xp: 0,
+                  achievements: [],
+                  trollGear: { equipped: { hat: null, glasses: null, bg: null }, unlocked: [] },
+                  lessonsDone: [],
+                });
+              }
+              saveSession(currentUser, false);
+              authPage.style.display = 'none';
+              document.getElementById('app').classList.add('active');
+              initAssistantWidget();
+              navigate('home');
+            } else if (STATE && !isGuest && currentUser !== 'guest' && currentUser === user.email) {
+              await loadFromFirestore(user.uid);
+            }
+          } else {
+            firebaseUser = null;
+            console.log('🔥 Користувач вийшов');
+          }
+        });
+
+        resolve();
+      } catch (e) {
+        console.error('❌ Помилка ініціалізації Firebase:', e);
+        // Повторна спроба через 1 секунду, якщо помилка
+        setTimeout(tryInit, 1000);
+      }
+    };
+    tryInit();
+  });
+
+  return firebaseInitPromise;
+}
+
+// Запускаємо ініціалізацію відразу, але не блокуємо виконання
 initFirebase();
 
+// Функції для роботи з Firestore – тепер вони чекають на готовність
 async function loadFromFirestore(uid) {
-  if (!firebaseReady || !firebaseDb) {
-    console.warn('Firestore не готовий, пропускаємо завантаження');
-    return null;
-  }
+  await waitForFirebase();
+  if (!firebaseDb) return null;
   try {
     const docRef = firebaseDb.collection('users').doc(uid);
     const docSnap = await docRef.get();
@@ -97,10 +127,8 @@ async function loadFromFirestore(uid) {
 }
 
 async function saveToFirestore(uid, data) {
-  if (!firebaseReady || !firebaseDb) {
-    console.warn('Firestore не готовий, дані не збережено');
-    return;
-  }
+  await waitForFirebase();
+  if (!firebaseDb) return;
   try {
     const docRef = firebaseDb.collection('users').doc(uid);
     await docRef.set(data, { merge: true });
@@ -111,9 +139,15 @@ async function saveToFirestore(uid, data) {
 }
 
 async function signUpWithFirebase(email, password) {
-  if (!firebaseReady) {
+  try {
+    await waitForFirebase(5000);
+  } catch (e) {
     toast('⏳ Firebase ще не готовий, зачекайте кілька секунд і спробуйте знову.');
     return { success: false, error: 'Firebase not ready' };
+  }
+  if (!firebaseAuth) {
+    toast('⏳ Помилка авторизації, спробуйте перезавантажити сторінку.');
+    return { success: false, error: 'Auth not available' };
   }
   try {
     const userCredential = await firebaseAuth.createUserWithEmailAndPassword(email, password);
@@ -141,9 +175,15 @@ async function signUpWithFirebase(email, password) {
 }
 
 async function signInWithFirebase(email, password) {
-  if (!firebaseReady) {
+  try {
+    await waitForFirebase(5000);
+  } catch (e) {
     toast('⏳ Firebase ще не готовий, зачекайте кілька секунд і спробуйте знову.');
     return { success: false, error: 'Firebase not ready' };
+  }
+  if (!firebaseAuth) {
+    toast('⏳ Помилка авторизації, спробуйте перезавантажити сторінку.');
+    return { success: false, error: 'Auth not available' };
   }
   try {
     const userCredential = await firebaseAuth.signInWithEmailAndPassword(email, password);
@@ -157,7 +197,8 @@ async function signInWithFirebase(email, password) {
 }
 
 async function signOutFromFirebase() {
-  if (!firebaseReady) return;
+  await waitForFirebase();
+  if (!firebaseAuth) return;
   try {
     await firebaseAuth.signOut();
     firebaseUser = null;
