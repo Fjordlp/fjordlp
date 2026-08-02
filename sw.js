@@ -1,10 +1,9 @@
 // =====================================================================
 //  SERVICE WORKER — офлайн-доступ до "оболонки" застосунку (Fjord PWA)
 // =====================================================================
-// Стратегія: cache-first для файлів застосунку (HTML/CSS/JS/іконки) — вони
-// рідко змінюються і мають бути доступні миттєво й офлайн; network-first
-// (з відкатом на кеш) для всього іншого (Firebase, AI-проксі, зовнішні
-// шрифти) — щоб дані завжди намагались оновитись, коли є інтернет.
+// Стратегія: cache-first для файлів застосунку (stale-while-revalidate);
+// зовнішні запити (Firebase, CDN, шрифти) НЕ перехоплюються — вони
+// завантажуються безпосередньо з мережі, щоб уникнути помилок.
 const CACHE_NAME = 'fjord-shell-v1';
 
 const APP_SHELL = [
@@ -51,31 +50,27 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const req = event.request;
-  if (req.method !== 'GET') return; // POST-запити (AI-проксі, Firestore) не кешуємо
+  if (req.method !== 'GET') return; // POST-запити не кешуємо
 
   const url = new URL(req.url);
   const isSameOrigin = url.origin === self.location.origin;
 
-  if (isSameOrigin) {
-    // Файли самого застосунку — спочатку кеш, паралельно тихо оновлюємо його
-    // на майбутнє (stale-while-revalidate), щоб офлайн завжди щось показав.
-    event.respondWith(
-      caches.match(req).then((cached) => {
-        const network = fetch(req).then((res) => {
-          if (res && res.ok) {
-            const copy = res.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
-          }
-          return res;
-        }).catch(() => cached);
-        return cached || network;
-      })
-    );
-  } else {
-    // Зовнішнє (Firebase SDK, Google Fonts, AI-проксі GET-запити тощо) —
-    // мережа спочатку, кеш лише як запасний варіант офлайн.
-    event.respondWith(
-      fetch(req).catch(() => caches.match(req))
-    );
+  // Зовнішні запити (Firebase, CDN, шрифти) — пропускаємо, не перехоплюємо
+  if (!isSameOrigin) {
+    return;
   }
+
+  // Для власних файлів застосунку — stale-while-revalidate
+  event.respondWith(
+    caches.match(req).then((cached) => {
+      const network = fetch(req).then((res) => {
+        if (res && res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+        }
+        return res;
+      }).catch(() => cached);
+      return cached || network;
+    })
+  );
 });
