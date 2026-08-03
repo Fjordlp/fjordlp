@@ -16,13 +16,13 @@
                 </div>
                 <div class="card">
                   <h3>${t('settings_title')}</h3>
-                  <div class="field"><label>${t('field_name')}</label><input id="setName" value="${STATE.name||''}"></div>
+                  <div class="field"><label>${t('field_name')}</label><input id="setName" value="${escHtml(STATE.name||'')}"></div>
                   <div class="field"><label>${t('field_learn_lang')}</label>
                     <select id="setTargetLang">
                       ${LANGUAGES.map(l => `<option value="${l.code}" ${STATE.targetLang===l.code?'selected':''}>${l.flag} ${l.name[STATE.uiLang]||l.name.uk}</option>`).join('')}
                     </select>
                   </div>
-                  <div class="field"><label>${t('field_goal')}</label><input id="setGoal" value="${STATE.settings?.goal||''}" placeholder="${t('field_goal_placeholder')}"></div>
+                  <div class="field"><label>${t('field_goal')}</label><input id="setGoal" value="${escHtml(STATE.settings?.goal||'')}" placeholder="${t('field_goal_placeholder')}"></div>
                   <div class="field"><label>${t('field_reminder_time')}</label><input type="time" id="setTime" value="${STATE.settings?.reminderTime||'18:00'}"></div>
                   <div class="field"><label>${t('field_pace')}</label>
                     <select id="setPace">
@@ -66,7 +66,7 @@
             rows.forEach((r, i) => {
                 const isYou = r[0] === (STATE.name || currentUser);
                 lb.appendChild(el(
-                    `<div class="leaderboard-row ${isYou?'you':''}"><span class="rank">${i+1}</span><span class="name">${escHtml(r[0])}${isYou?' (ви)':''}</span><span class="pts">${r[1]}</span></div>`
+                    `<div class="leaderboard-row ${isYou?'you':''}"><span class="rank">${i+1}</span><span class="name">${escHtml(r[0])}${isYou?t('you_label'):''}</span><span class="pts">${r[1]}</span></div>`
                     ));
             });
             wrap.querySelector('#saveSettings').onclick = () => {
@@ -151,7 +151,7 @@ function viewNorskprove() {
 
   const wrap = el(`
     <div class="view">
-      <h1>${t('h_norskprove')}</h1>
+      <h1>${examSectionLabel()}</h1>
       <p style="color:var(--ink-soft);font-size:.95rem;margin-bottom:12px;">${NORSK_INFO_TEXT.intro}</p>
 
       <div class="card" style="margin-bottom:16px;background:var(--cream);">
@@ -179,7 +179,7 @@ function viewNorskprove() {
         ].map(([m, label]) => `<button class="chip ${mode===m?'active':''}" data-mode="${m}">${label}</button>`).join('')}
       </div>
       <div style="margin-bottom:16px;">
-        <button class="btn btn-ghost btn-sm" id="norskGenBtn">🎲 Згенерувати нове завдання (AI)</button>
+        <button class="btn btn-ghost btn-sm" id="norskGenBtn">${t('norsk_gen_task_btn')}</button>
       </div>
 
       <div id="norskTaskContainer"></div>
@@ -210,17 +210,17 @@ function viewNorskprove() {
   genBtn.onclick = async () => {
     genBtn.disabled = true;
     const originalLabel = genBtn.textContent;
-    genBtn.textContent = '🎲 Генерую…';
+    genBtn.textContent = t('norsk_gen_task_loading');
     try {
       const newTask = await generateNorskTaskAI(level, mode);
       addCustomNorskTask(level, mode, newTask);
-      toast('✅ Нове завдання додано!');
+      toast(t('norsk_task_added_toast'));
       SUBSTATE.norskTaskIndex = norskTasksFor(level, mode).length - 1;
       SUBSTATE.norskAnswers = {};
       navigate('norskprove', SUBSTATE);
     } catch (e) {
       console.error('[Norskprøve] Помилка генерації завдання:', e);
-      toast('⚠️ Не вдалося згенерувати завдання. Спробуйте ще раз.');
+      toast(t('norsk_gen_error_toast'));
       genBtn.disabled = false;
       genBtn.textContent = originalLabel;
     }
@@ -229,7 +229,7 @@ function viewNorskprove() {
   // Рендеримо завдання
   const container = wrap.querySelector('#norskTaskContainer');
   if (!task || taskList.length === 0) {
-    container.innerHTML = `<div class="empty-state"><h3>Немає завдань для цього рівня</h3><p>Спробуйте інший рівень або режим.</p></div>`;
+    container.innerHTML = `<div class="empty-state"><h3>${t('norsk_no_tasks_title')}</h3><p>${t('norsk_no_tasks_desc')}</p></div>`;
   } else {
     container.appendChild(renderNorskproveTask(task, mode, taskIndex, taskList.length));
   }
@@ -242,7 +242,7 @@ function renderNorskproveTask(task, mode, index, total) {
   // Заголовок і прогрес
   const header = el(`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <span style="font-weight:700;font-size:1.1rem;">${escHtml(task.title || "Завдання")}</span>
+      <span style="font-weight:700;font-size:1.1rem;">${escHtml(task.title || t('task_default_title'))}</span>
       <span class="mono" style="font-size:.8rem;color:var(--ink-soft);">${index+1}/${total}</span>
     </div>
   `);
@@ -291,8 +291,8 @@ function renderNorskproveTask(task, mode, index, total) {
 
     // Навігація
     const nav = el(`<div class="test-controls">
-      <button class="btn btn-ghost btn-sm" id="norskPrev" ${index===0?'disabled':''}>◀ Попереднє</button>
-      <button class="btn btn-primary btn-sm" id="norskNext" ${index>=total-1?'disabled':''}>Наступне ▶</button>
+      <button class="btn btn-ghost btn-sm" id="norskPrev" ${index===0?'disabled':''}>${t('prev_btn')}</button>
+      <button class="btn btn-primary btn-sm" id="norskNext" ${index>=total-1?'disabled':''}>${t('next_btn2')}</button>
     </div>`);
     nav.querySelector('#norskPrev').onclick = () => {
       SUBSTATE.norskTaskIndex = Math.max(0, index - 1);
@@ -311,7 +311,7 @@ function renderNorskproveTask(task, mode, index, total) {
     if (allAnswered) {
       const correctCount = task.questions.filter((q, qi) => answers[qi] === q.a).length;
       const pct = Math.round((correctCount / task.questions.length) * 100);
-      const fb = el(`<div class="feedback-banner ${pct>=70?'ok':'bad'}" style="margin-top:12px;">${pct}% korrekt (${correctCount}/${task.questions.length})</div>`);
+      const fb = el(`<div class="feedback-banner ${pct>=70?'ok':'bad'}" style="margin-top:12px;">${tf('pct_correct', {pct, count: correctCount, total: task.questions.length})}</div>`);
       wrap.appendChild(fb);
     }
 
@@ -320,12 +320,12 @@ function renderNorskproveTask(task, mode, index, total) {
     const prompt = el(`<p style="color:var(--ink-soft);font-size:.95rem;margin-bottom:12px;">${escHtml(task.prompt)}</p>`);
     wrap.appendChild(prompt);
 
-    const textarea = el(`<textarea class="type-input" style="min-height:120px;resize:vertical;font-family:inherit;" placeholder="Skriv svaret ditt her..." maxlength="3000"></textarea>`);
+    const textarea = el(`<textarea class="type-input" style="min-height:120px;resize:vertical;font-family:inherit;" placeholder="${t('write_answer_placeholder')}" maxlength="3000"></textarea>`);
     wrap.appendChild(textarea);
 
     const btnRow = el(`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;"></div>`);
-    const saveBtn = el(`<button class="btn btn-primary">💾 Lagre svar</button>`);
-    const checkBtn = el(`<button class="btn btn-amber">🧠 Перевір з AI</button>`);
+    const saveBtn = el(`<button class="btn btn-primary">${t('save_answer_btn')}</button>`);
+    const checkBtn = el(`<button class="btn btn-amber">${t('check_ai_btn')}</button>`);
     btnRow.appendChild(saveBtn);
     btnRow.appendChild(checkBtn);
     wrap.appendChild(btnRow);
@@ -340,29 +340,29 @@ function renderNorskproveTask(task, mode, index, total) {
         if (!STATE.norskWriting[level]) STATE.norskWriting[level] = {};
         STATE.norskWriting[level][mode] = (STATE.norskWriting[level][mode] || 0) + 1;
         updateState();
-        toast('✅ Svar lagret! +10 XP');
+        toast(t('answer_saved_toast'));
         addXP(10, 'norskprove_writing');
       } else {
-        toast('⚠️ Vennligst skriv noe før du lagrer.');
+        toast(t('write_before_save_toast'));
       }
     };
 
     checkBtn.onclick = async () => {
       const answer = textarea.value.trim();
       if (!answer) {
-        toast('⚠️ Напиши щось перед перевіркою.');
+        toast(t('write_before_check_toast'));
         return;
       }
       checkBtn.disabled = true;
       const originalLabel = checkBtn.textContent;
-      checkBtn.textContent = '🧠 Тролль перевіряє…';
+      checkBtn.textContent = t('check_ai_loading');
       feedbackSlot.style.display = 'block';
-      feedbackSlot.innerHTML = `<div class="card" style="background:var(--cream);"><p style="color:var(--ink-soft);margin:0;">Зачекайте, тролль читає ваш текст і готує пораду…</p></div>`;
+      feedbackSlot.innerHTML = `<div class="card" style="background:var(--cream);"><p style="color:var(--ink-soft);margin:0;">${t('check_ai_wait')}</p></div>`;
       try {
         const feedback = await checkWritingWithAI(level, task.topic, task.prompt, answer);
         feedbackSlot.innerHTML = '';
         const box = el(`<div class="card" style="border:2px solid var(--teal);"></div>`);
-        const title = el(`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;font-weight:700;">🧌 Порада тролля-сенсора</div>`);
+        const title = el(`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;font-weight:700;">${t('troll_sensor_advice')}</div>`);
         const body = el(`<div style="font-size:.9rem;line-height:1.5;"></div>`);
         body.innerHTML = renderLiteMarkdownGlobal(feedback);
         box.appendChild(title);
@@ -375,7 +375,7 @@ function renderNorskproveTask(task, mode, index, total) {
         updateState();
       } catch (e) {
         console.error('[Norskprøve] Помилка AI-перевірки:', e);
-        feedbackSlot.innerHTML = `<div class="card" style="border:2px solid var(--amber);"><p style="margin:0;">⚠️ Не вдалося отримати перевірку від AI. Перевір з'єднання і спробуй ще раз.</p></div>`;
+        feedbackSlot.innerHTML = `<div class="card" style="border:2px solid var(--amber);"><p style="margin:0;">${t('ai_check_error')}</p></div>`;
       } finally {
         checkBtn.disabled = false;
         checkBtn.textContent = originalLabel;
@@ -384,8 +384,8 @@ function renderNorskproveTask(task, mode, index, total) {
 
     // Навігація
     const nav = el(`<div class="test-controls">
-      <button class="btn btn-ghost btn-sm" id="norskPrev" ${index===0?'disabled':''}>◀ Forrige</button>
-      <button class="btn btn-primary btn-sm" id="norskNext" ${index>=total-1?'disabled':''}>Neste ▶</button>
+      <button class="btn btn-ghost btn-sm" id="norskPrev" ${index===0?'disabled':''}>${t('prev_btn')}</button>
+      <button class="btn btn-primary btn-sm" id="norskNext" ${index>=total-1?'disabled':''}>${t('next_btn2')}</button>
     </div>`);
     nav.querySelector('#norskPrev').onclick = () => {
       SUBSTATE.norskTaskIndex = Math.max(0, index - 1);
@@ -404,11 +404,11 @@ function renderNorskproveTask(task, mode, index, total) {
     const prompt = el(`<p style="color:var(--ink-soft);font-size:.95rem;margin-bottom:12px;">${escHtml(task.prompt)}</p>`);
     wrap.appendChild(prompt);
 
-    const recordBtn = el(`<button class="btn btn-amber" style="margin-bottom:12px;">🎤 Start opptak (simulert)</button>`);
+    const recordBtn = el(`<button class="btn btn-amber" style="margin-bottom:12px;">${t('start_recording_btn')}</button>`);
     recordBtn.onclick = () => {
-      toast('🎙️ Opptak startet... (simulert)');
+      toast(t('recording_started_toast'));
       setTimeout(() => {
-        toast('✅ Opptak ferdig! Du kan øve videre.');
+        toast(t('recording_done_toast'));
         if (!STATE.norskSpeaking) STATE.norskSpeaking = {};
         STATE.norskSpeaking[level] = (STATE.norskSpeaking[level] || 0) + 1;
         updateState();
@@ -419,8 +419,8 @@ function renderNorskproveTask(task, mode, index, total) {
 
     // Навігація
     const nav = el(`<div class="test-controls">
-      <button class="btn btn-ghost btn-sm" id="norskPrev" ${index===0?'disabled':''}>◀ Forrige</button>
-      <button class="btn btn-primary btn-sm" id="norskNext" ${index>=total-1?'disabled':''}>Neste ▶</button>
+      <button class="btn btn-ghost btn-sm" id="norskPrev" ${index===0?'disabled':''}>${t('prev_btn')}</button>
+      <button class="btn btn-primary btn-sm" id="norskNext" ${index>=total-1?'disabled':''}>${t('next_btn2')}</button>
     </div>`);
     nav.querySelector('#norskPrev').onclick = () => {
       SUBSTATE.norskTaskIndex = Math.max(0, index - 1);
@@ -452,16 +452,51 @@ function viewOnboarding() {
     const wrap = el(`
         <div class="view" style="max-width:700px;margin:0 auto;">
             <div id="onbTrollSlot" style="display:flex;justify-content:center;margin-bottom:20px;"></div>
-            <h1 style="text-align:center;">👋 Ласкаво просимо до Fjord!</h1>
+            <h1 style="text-align:center;">${t('onb_welcome_title')}</h1>
             <p style="text-align:center;color:var(--ink-soft);font-size:.95rem;">
-                Давайте визначимо ваш рівень та мету, щоб я міг скласти для вас план навчання.
+                ${t('onb_welcome_desc')}
             </p>
+            <div class="card" style="margin-top:16px;">
+                <div style="display:grid;gap:10px;">
+                    <div>
+                        <div style="font-size:.78rem;color:var(--ink-soft);margin-bottom:6px;">${t('interface_lang')}</div>
+                        <div id="onbUiLangRow" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+                    </div>
+                    <div>
+                        <div style="font-size:.78rem;color:var(--ink-soft);margin-bottom:6px;">${t('field_learn_lang')}</div>
+                        <div id="onbTargetLangRow" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+                    </div>
+                </div>
+            </div>
             <div id="onbContent" style="margin-top:20px;"></div>
             <div style="text-align:center;margin-top:16px;color:var(--ink-soft);font-size:.8rem;">
-                <span id="onbStepIndicator">Крок ${step} з 3</span>
+                <span id="onbStepIndicator">${tf('onb_step_of', {step})}</span>
             </div>
         </div>
     `);
+
+    // ---- Мова інтерфейсу + мова вивчення (видно одразу, на всіх кроках) ----
+    const onbUiLangRow = wrap.querySelector('#onbUiLangRow');
+    [['uk', 'UK'], ['en', 'EN'], ['ru', 'RU']].forEach(([code, label]) => {
+        const b = el(`<button class="chip ${STATE.uiLang === code ? 'active' : ''}">${label}</button>`);
+        b.onclick = () => setUiLang(code); // сама перемальовує екран через render()
+        onbUiLangRow.appendChild(b);
+    });
+    const onbTargetLangRow = wrap.querySelector('#onbTargetLangRow');
+    ['no', 'en', 'de', 'es', 'fr', 'it'].forEach(code => {
+        const l = getLanguage(code);
+        const b = el(`<button class="chip ${STATE.targetLang === code ? 'active' : ''}">${l.flag} ${l.native}</button>`);
+        b.onclick = () => {
+            if (STATE.targetLang === code) return;
+            STATE.targetLang = code;
+            updateState();
+            navigate('onboarding', SUBSTATE); // лишаємось на тому ж кроці, лише оновлюємо мову
+        };
+        onbTargetLangRow.appendChild(b);
+    });
+    const onbMoreLangsBtn = el(`<button class="chip">🌐…</button>`);
+    onbMoreLangsBtn.title = t('onb_more_langs_title');
+    onbTargetLangRow.appendChild(onbMoreLangsBtn);
 
     wrap.querySelector('#onbTrollSlot').appendChild(renderTrollBubble('excited', 'greeting', 72));
 
@@ -471,13 +506,13 @@ function viewOnboarding() {
     if (step === 1) {
         container.innerHTML = `
             <div class="card">
-                <h3>🎯 Яка ваша головна мета?</h3>
-                <p style="color:var(--ink-soft);font-size:.85rem;">Оберіть один варіант, який найкраще описує ваші цілі.</p>
+                <h3>${t('onb_goal_title')}</h3>
+                <p style="color:var(--ink-soft);font-size:.85rem;">${t('onb_goal_desc')}</p>
                 <div style="display:grid;gap:10px;margin-top:14px;">
                     ${GOALS.map(g => `
                         <div class="goal-option" data-goal="${g.id}" style="padding:14px 18px;border:2px solid var(--line);border-radius:12px;cursor:pointer;transition:all .2s;">
-                            <strong>${g.label}</strong>
-                            <p style="color:var(--ink-soft);font-size:.8rem;margin:4px 0 0 0;">${g.desc}</p>
+                            <strong>${localizedField(g, 'label')}</strong>
+                            <p style="color:var(--ink-soft);font-size:.8rem;margin:4px 0 0 0;">${localizedField(g, 'desc')}</p>
                         </div>
                     `).join('')}
                 </div>
@@ -492,7 +527,7 @@ function viewOnboarding() {
                 SUBSTATE.onbGoal = el.dataset.goal;
                 const nextBtn = document.createElement('button');
                 nextBtn.className = 'btn btn-primary btn-block';
-                nextBtn.textContent = 'Продовжити →';
+                nextBtn.textContent = t('onb_continue_btn');
                 nextBtn.style.marginTop = '16px';
                 nextBtn.onclick = () => {
                     if (SUBSTATE.onbGoal) {
@@ -505,7 +540,7 @@ function viewOnboarding() {
                 container.appendChild(nextBtn);
             };
         });
-        wrap.querySelector('#onbStepIndicator').textContent = 'Крок 1 з 3: Оберіть мету';
+        wrap.querySelector('#onbStepIndicator').textContent = t('onb_step1_indicator');
     }
 
     // ---- КРОК 2: ВХІДНИЙ ТЕСТ ----
@@ -518,18 +553,17 @@ function viewOnboarding() {
 
         container.innerHTML = `
             <div class="card">
-                <h3>📝 Вхідний тест на рівень</h3>
+                <h3>${t('onb_test_title')}</h3>
                 <p style="color:var(--ink-soft);font-size:.85rem;">
-                    Це швидкий тест, щоб визначити ваш поточний рівень норвезької.
-                    Якщо ви вже знаєте свій рівень, можете обрати його вручну.
+                    ${t('onb_test_desc')}
                 </p>
                 <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
-                    <button class="btn btn-primary" id="onbStartTest">Почати тест</button>
-                    <button class="btn btn-ghost" id="onbSkipTest">Обрати рівень вручну</button>
+                    <button class="btn btn-primary" id="onbStartTest">${t('onb_start_test_btn')}</button>
+                    <button class="btn btn-ghost" id="onbSkipTest">${t('onb_pick_manual_btn')}</button>
                 </div>
                 <div id="onbTestContainer" style="margin-top:16px;"></div>
                 <div id="onbManualLevel" style="margin-top:16px;display:none;">
-                    <p style="font-weight:600;margin-bottom:8px;">Оберіть рівень:</p>
+                    <p style="font-weight:600;margin-bottom:8px;">${t('onb_pick_level_title')}</p>
                     <div style="display:flex;flex-wrap:wrap;gap:8px;">
                         ${LEVELS.map(lv => `
                             <button class="chip level-${lv}" data-lvl="${lv}">${lv}</button>
@@ -561,7 +595,7 @@ function viewOnboarding() {
             SUBSTATE.answers = [];
             navigate('leveltest', SUBSTATE);
         };
-        wrap.querySelector('#onbStepIndicator').textContent = 'Крок 2 з 3: Визначте рівень';
+        wrap.querySelector('#onbStepIndicator').textContent = t('onb_step2_indicator');
     }
 
     // ---- КРОК 3: ПЛАН НАВЧАННЯ ----
@@ -572,23 +606,23 @@ function viewOnboarding() {
 
         container.innerHTML = `
             <div class="card">
-                <h3>🎓 Ваш план навчання</h3>
+                <h3>${t('onb_plan_title')}</h3>
                 <div style="display:flex;gap:12px;flex-wrap:wrap;margin:12px 0;">
-                    <span class="tag level-${finalLevel}">Рівень: ${finalLevel}</span>
+                    <span class="tag level-${finalLevel}">${tf('onb_level_tag', {level: finalLevel})}</span>
                     <span class="tag" style="background:var(--amber);color:var(--navy);">
-                        ${GOALS.find(g => g.id === finalGoal)?.label || 'Мета обрана'}
+                        ${localizedField(GOALS.find(g => g.id === finalGoal), 'label') || t('onb_goal_chosen')}
                     </span>
                 </div>
                 <div style="padding:14px;background:var(--cream);border-radius:10px;margin:10px 0;">
                     <p style="font-size:.95rem;margin:0;">${planText}</p>
                 </div>
                 <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
-                    <button class="btn btn-primary" id="onbStartLearning">🚀 Почати навчання!</button>
-                    <button class="btn btn-ghost" id="onbChangeGoal">🔄 Змінити мету</button>
-                    <button class="btn btn-ghost" id="onbChangeLevel">📊 Змінити рівень</button>
+                    <button class="btn btn-primary" id="onbStartLearning">${t('onb_start_learning_btn')}</button>
+                    <button class="btn btn-ghost" id="onbChangeGoal">${t('onb_change_goal_btn')}</button>
+                    <button class="btn btn-ghost" id="onbChangeLevel">${t('onb_change_level_btn')}</button>
                 </div>
                 <p style="color:var(--ink-soft);font-size:.8rem;margin-top:12px;">
-                    Ви завжди зможете змінити мету та рівень у налаштуваннях.
+                    ${t('onb_can_change_later')}
                 </p>
             </div>
         `;
@@ -597,7 +631,7 @@ function viewOnboarding() {
             STATE._onboardingDone = true;
             updateState();
             navigate('home');
-            toast('🎉 Ласкаво просимо! Починаємо навчання!');
+            toast(t('onb_welcome_toast'));
         };
 
         container.querySelector('#onbChangeGoal').onclick = () => {
@@ -611,7 +645,7 @@ function viewOnboarding() {
             navigate('onboarding', SUBSTATE);
         };
 
-        wrap.querySelector('#onbStepIndicator').textContent = 'Крок 3 з 3: План готовий!';
+        wrap.querySelector('#onbStepIndicator').textContent = t('onb_step3_indicator');
     }
 
     return wrap;

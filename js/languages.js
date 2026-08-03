@@ -224,3 +224,21 @@ async function ensureVocabAvailable(lang, level) {
     }
 }
 
+// Заголовок/пункт меню для розділу підготовки до іспиту: "Norskprøve
+// Academy" має сенс тільки для норвезької (це справжня офіційна назва
+// іспиту); для решти мов показуємо узагальнену назву "Тренажер завдань".
+function examSectionLabel() {
+    const targetLang = (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
+    const uiLang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+    if (targetLang === 'no') {
+        return { uk: 'Norskprøve Academy', en: 'Norskprøve Academy', ru: 'Norskprøve Academy' }[uiLang];
+    }
+    return { uk: 'Тренажер завдань', en: 'Exam Prep', ru: 'Тренажёр заданий' }[uiLang] || 'Тренажер завдань';
+}
+
+function examSectionNavLabel() {
+    const targetLang = (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
+    const uiLang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+    if (targetLang === 'no') return 'Norskprøve';
+    return { uk: 'Завдання', en: 'Exam Prep', ru: 'Задания' }[uiLang] || 'Завдання';
+}

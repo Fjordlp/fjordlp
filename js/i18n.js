@@ -48,6 +48,50 @@ const UI_STRINGS = {
         onb_change_goal: '🔄 Змінити мету', onb_change_level: '📊 Змінити рівень', onb_change_later: 'Ви завжди зможете змінити мету та рівень у налаштуваннях.',
         onb_welcome_toast: '🎉 Ласкаво просимо! Починаємо навчання!',
         question_word: 'Питання', of_word: 'з', field_learn_lang: 'Яку мову вивчаєте',
+        rec_mastered_title: 'Рівень {level} засвоєно на {pct}%!', rec_mastered_desc: 'Ви вивчили {mastered} із {total} слів. Рекомендуємо перейти на {rec}.',
+        upgrade_level_btn: 'Підвищити рівень', hide_btn: 'Приховати', level_up_toast: 'Рівень підвищено до {level}!',
+        daily_word_title: 'Слово дня', no_words_for_level: 'Немає слів для цього рівня.', activity_title: 'Активність',
+        streak_days_label: 'Серія днів:', detailed_stats_btn: 'Детальна статистика →', level_colon: 'Рівень: {level}',
+        change_level_question: 'Хочете змінити рівень або пройти тест повторно?', pick_level_manually_btn: 'Обрати рівень вручну',
+        retest_btn: 'Пройти тест рівня знову', daily_task_title: '📅 Завдання дня',
+        daily_correct_banner: '✅ Правильно! 🎉', daily_xp_toast: '+20 XP за завдання дня! 🔥',
+        daily_wrong_banner: '❌ Неправильно. Правильна відповідь: {answer}', daily_try_tomorrow: 'Спробуй завтра знову! 💪',
+        level_set_toast: 'Рівень встановлено: {level}', start_learning_btn: 'Почати навчання',
+        flash_pick_desc: 'Оберіть рівень, тему та режим тренування. (Мова: {lang})',
+        srs_mode_btn: '📅 За розкладом (SRS)', all_cards_mode_btn: '📚 Всі картки',
+        mode_flip: "Запам'ятовування", mode_mc: 'Вибір відповіді', mode_type: 'Написання слова',
+        no_words_level_lang: 'Немає слів для цього рівня ({lang})', try_other_level: 'Спробуйте інший рівень або додайте слова через адмін-панель.',
+        deck_count_label: '{count} слів у колоді', due_review_label: '{count} готові до повторення (SRS)',
+        all_cards_label: 'всі картки', start_session_btn: 'Почати сесію (до {n} карток)',
+        empty_no_cards: 'Немає карток', empty_all_scheduled: 'Усі слова заплановані на пізніше.', to_deck_picker_btn: 'До вибору',
+        session_complete_title: 'Сесію завершено!', correct_of_xp: '{correct} із {total} правильно · +{xp} XP', correct_of_total: '{correct} із {total} правильно',
+        again_session_btn: 'Ще одна сесія', to_home_btn: 'На головну',
+        flip_hint: 'натисніть, щоб перевернути', grade_again: 'Не знаю', grade_hard: 'Складно', grade_good: 'Знаю',
+        type_placeholder: 'напишіть тут...', check_correct: 'Правильно! 🎉', check_wrong_prefix: 'Правильна відповідь: {answer}',
+        lang_label: 'Мова: {lang}', gen_words_btn: '🎲 AI: додати нові слова', gen_words_loading: '🎲 Генерую…',
+        gen_words_added_toast: '✅ Додано нових слів: {n}', gen_words_none_toast: '🤔 AI не запропонував нових унікальних слів. Спробуй ще раз.',
+        gen_words_error_toast: '⚠️ Не вдалося згенерувати слова. Спробуй ще раз.',
+        tests_choose_type: 'Оберіть тип вправи для рівня {level}.',
+        test_mc_title: 'Вибір форми', test_mc_desc: 'Оберіть правильний переклад або форму.',
+        test_cloze_title: 'Заповни пропуск', test_cloze_desc: 'Вставте пропущене слово.',
+        test_order_title: 'Склади речення', test_order_desc: 'Розташуйте слова у правильному порядку.',
+        test_listen_title: 'Аудіювання', test_listen_desc: 'Прослухайте слово і оберіть переклад.',
+        test_translate_title: 'Переклад', test_translate_desc: 'Напишіть переклад слова.',
+        start_test_btn: 'Почати', quiz_preparing_title: 'Готуємо слова…',
+        quiz_preparing_desc: 'Для цієї мови й рівня ще немає слів — вони генеруються. Спробуйте оновити за кілька секунд або оберіть інший рівень.',
+        to_tests_btn: 'До тестів', quiz_finished_suffix: ': завершено', prev_btn: '◀ Назад', next_btn2: 'Вперед ▶',
+        write_in_lang_prompt: 'Напишіть переклад слова «{word}» ({lang})', your_answer_placeholder: 'ваша відповідь',
+        click_words_below: 'Натискайте слова знизу', correct_variant_prefix: 'Правильний варіант: {answer}',
+        troll_level_badge: 'Рівень тролля {lvl}', xp_to_next: '{xp} XP (до наступного рівня: {remaining} XP)',
+        gear_title: 'Спорядження', gear_desc: 'Розблоковується з підвищенням рівня тролля. Натисніть, щоб одягнути/зняти.',
+        achievements_title: 'Досягнення ({unlocked}/{total})',
+        home_learn_words_btn: '📇 Вчити слова', home_vocab_btn: '📚 Словник', home_grammar_btn: '📖 Граматика', home_tests_btn: '📝 Тести', home_listen_btn: '🎧 Аудіювання', home_troll_btn: '🧌 Тролль ({lvl} рів.)', more_langs_btn: '🌐 Ще мови…', viewed_mastered_label: '{seen}/{total} переглянуто · {mastered} засвоєно', you_label: ' (ви)',
+        norsk_gen_task_btn: '🎲 Згенерувати нове завдання (AI)', norsk_gen_task_loading: '🎲 Генерую…', norsk_task_added_toast: '✅ Нове завдання додано!', norsk_gen_error_toast: '⚠️ Не вдалося згенерувати завдання. Спробуйте ще раз.', norsk_no_tasks_title: 'Немає завдань для цього рівня', norsk_no_tasks_desc: 'Спробуйте інший рівень або режим.',
+        task_default_title: 'Завдання', pct_correct: '{pct}% правильно ({count}/{total})', write_answer_placeholder: 'Напишіть свою відповідь тут...', save_answer_btn: '💾 Зберегти відповідь', check_ai_btn: '🧠 Перевір з AI', check_ai_loading: '🧠 Тролль перевіряє…', check_ai_wait: 'Зачекайте, тролль читає ваш текст і готує пораду…', troll_sensor_advice: '🧌 Порада тролля-сенсора', answer_saved_toast: '✅ Відповідь збережена! +10 XP', write_before_save_toast: '⚠️ Будь ласка, напишіть щось перед збереженням.', write_before_check_toast: '⚠️ Напиши щось перед перевіркою.', ai_check_error: '⚠️ Не вдалося отримати перевірку від AI. Перевір з\'єднання і спробуй ще раз.', start_recording_btn: '🎤 Почати запис (симуляція)', recording_started_toast: '🎙️ Запис розпочато... (симуляція)', recording_done_toast: '✅ Запис готовий! Можете тренуватись далі.',
+        onb_welcome_title: '👋 Ласкаво просимо до Fjord!', onb_welcome_desc: 'Давайте визначимо ваш рівень та мету, щоб я міг скласти для вас план навчання.', onb_more_langs_title: 'Повний список мов доступний у Налаштуваннях (Кабінет) у будь-який момент', onb_step_of: 'Крок {step} з 3',
+        onb_goal_title: '🎯 Яка ваша головна мета?', onb_goal_desc: 'Оберіть один варіант, який найкраще описує ваші цілі.', onb_continue_btn: 'Продовжити →', onb_step1_indicator: 'Крок 1 з 3: Оберіть мету',
+        onb_test_title: '📝 Вхідний тест на рівень', onb_test_desc: 'Це швидкий тест, щоб визначити ваш поточний рівень норвезької. Якщо ви вже знаєте свій рівень, можете обрати його вручну.', onb_start_test_btn: 'Почати тест', onb_pick_manual_btn: 'Обрати рівень вручну', onb_pick_level_title: 'Оберіть рівень:', onb_step2_indicator: 'Крок 2 з 3: Визначте рівень',
+        onb_plan_title: '🎓 Ваш план навчання', onb_level_tag: 'Рівень: {level}', onb_goal_chosen: 'Мета обрана', onb_start_learning_btn: '🚀 Почати навчання!', onb_change_goal_btn: '🔄 Змінити мету', onb_change_level_btn: '📊 Змінити рівень', onb_can_change_later: 'Ви завжди зможете змінити мету та рівень у налаштуваннях.', onb_step3_indicator: 'Крок 3 з 3: План готовий!', onb_welcome_toast: '🎉 Ласкаво просимо! Починаємо навчання!',
     },
     en: {
         nav_home: 'Home', nav_flashcards: 'Flashcards', nav_vocabulary: 'Vocabulary',
@@ -90,6 +134,50 @@ const UI_STRINGS = {
         onb_change_goal: '🔄 Change goal', onb_change_level: '📊 Change level', onb_change_later: 'You can always change your goal and level in settings.',
         onb_welcome_toast: '🎉 Welcome! Let\'s start learning!',
         question_word: 'Question', of_word: 'of', field_learn_lang: 'Language you\'re learning',
+        rec_mastered_title: 'Level {level} mastered at {pct}%!', rec_mastered_desc: 'You have learned {mastered} of {total} words. We recommend moving to {rec}.',
+        upgrade_level_btn: 'Upgrade level', hide_btn: 'Hide', level_up_toast: 'Level upgraded to {level}!',
+        daily_word_title: 'Word of the day', no_words_for_level: 'No words for this level.', activity_title: 'Activity',
+        streak_days_label: 'Day streak:', detailed_stats_btn: 'Detailed stats →', level_colon: 'Level: {level}',
+        change_level_question: 'Want to change your level or retake the test?', pick_level_manually_btn: 'Pick level manually',
+        retest_btn: 'Retake level test', daily_task_title: '📅 Daily challenge',
+        daily_correct_banner: '✅ Correct! 🎉', daily_xp_toast: '+20 XP for the daily challenge! 🔥',
+        daily_wrong_banner: '❌ Wrong. Correct answer: {answer}', daily_try_tomorrow: 'Try again tomorrow! 💪',
+        level_set_toast: 'Level set to: {level}', start_learning_btn: 'Start learning',
+        flash_pick_desc: 'Choose a level, topic, and practice mode. (Language: {lang})',
+        srs_mode_btn: '📅 Scheduled (SRS)', all_cards_mode_btn: '📚 All cards',
+        mode_flip: 'Memorization', mode_mc: 'Multiple choice', mode_type: 'Type the word',
+        no_words_level_lang: 'No words for this level ({lang})', try_other_level: 'Try another level or add words via the admin panel.',
+        deck_count_label: '{count} words in this deck', due_review_label: '{count} due for review (SRS)',
+        all_cards_label: 'all cards', start_session_btn: 'Start session (up to {n} cards)',
+        empty_no_cards: 'No cards', empty_all_scheduled: 'All words are scheduled for later.', to_deck_picker_btn: 'Back to selection',
+        session_complete_title: 'Session complete!', correct_of_xp: '{correct} of {total} correct · +{xp} XP', correct_of_total: '{correct} of {total} correct',
+        again_session_btn: 'Another session', to_home_btn: 'Go home',
+        flip_hint: 'tap to flip', grade_again: "Don't know", grade_hard: 'Hard', grade_good: 'Know it',
+        type_placeholder: 'type here...', check_correct: 'Correct! 🎉', check_wrong_prefix: 'Correct answer: {answer}',
+        lang_label: 'Language: {lang}', gen_words_btn: '🎲 AI: add new words', gen_words_loading: '🎲 Generating…',
+        gen_words_added_toast: '✅ New words added: {n}', gen_words_none_toast: "🤔 AI didn't suggest any new unique words. Try again.",
+        gen_words_error_toast: '⚠️ Failed to generate words. Please try again.',
+        tests_choose_type: 'Choose an exercise type for level {level}.',
+        test_mc_title: 'Multiple choice', test_mc_desc: 'Pick the correct translation or form.',
+        test_cloze_title: 'Fill in the blank', test_cloze_desc: 'Insert the missing word.',
+        test_order_title: 'Build the sentence', test_order_desc: 'Arrange the words in the correct order.',
+        test_listen_title: 'Listening', test_listen_desc: 'Listen to the word and choose the translation.',
+        test_translate_title: 'Translation', test_translate_desc: 'Write the translation of the word.',
+        start_test_btn: 'Start', quiz_preparing_title: 'Preparing words…',
+        quiz_preparing_desc: 'There are no words for this language and level yet — they are being generated. Try refreshing in a few seconds or pick another level.',
+        to_tests_btn: 'Back to tests', quiz_finished_suffix: ': completed', prev_btn: '◀ Back', next_btn2: 'Next ▶',
+        write_in_lang_prompt: 'Write the translation of the word "{word}" ({lang})', your_answer_placeholder: 'your answer',
+        click_words_below: 'Tap the words below', correct_variant_prefix: 'Correct answer: {answer}',
+        troll_level_badge: 'Troll level {lvl}', xp_to_next: '{xp} XP ({remaining} XP to next level)',
+        gear_title: 'Gear', gear_desc: 'Unlocks as your troll levels up. Click to equip/unequip.',
+        achievements_title: 'Achievements ({unlocked}/{total})',
+        home_learn_words_btn: '📇 Learn words', home_vocab_btn: '📚 Vocabulary', home_grammar_btn: '📖 Grammar', home_tests_btn: '📝 Tests', home_listen_btn: '🎧 Listening', home_troll_btn: '🧌 Troll (lvl {lvl})', more_langs_btn: '🌐 More languages…', viewed_mastered_label: '{seen}/{total} viewed · {mastered} mastered', you_label: ' (you)',
+        norsk_gen_task_btn: '🎲 Generate a new task (AI)', norsk_gen_task_loading: '🎲 Generating…', norsk_task_added_toast: '✅ New task added!', norsk_gen_error_toast: '⚠️ Failed to generate the task. Please try again.', norsk_no_tasks_title: 'No tasks for this level', norsk_no_tasks_desc: 'Try another level or mode.',
+        task_default_title: 'Task', pct_correct: '{pct}% correct ({count}/{total})', write_answer_placeholder: 'Write your answer here...', save_answer_btn: '💾 Save answer', check_ai_btn: '🧠 Check with AI', check_ai_loading: '🧠 Troll is checking…', check_ai_wait: 'Please wait, the troll is reading your text and preparing advice…', troll_sensor_advice: '🧌 Troll examiner\'s feedback', answer_saved_toast: '✅ Answer saved! +10 XP', write_before_save_toast: '⚠️ Please write something before saving.', write_before_check_toast: '⚠️ Write something before checking.', ai_check_error: '⚠️ Failed to get AI feedback. Check your connection and try again.', start_recording_btn: '🎤 Start recording (simulated)', recording_started_toast: '🎙️ Recording started... (simulated)', recording_done_toast: '✅ Recording done! You can keep practicing.',
+        onb_welcome_title: '👋 Welcome to Fjord!', onb_welcome_desc: "Let's figure out your level and goal so I can build a study plan for you.", onb_more_langs_title: 'The full language list is always available in Settings (Profile)', onb_step_of: 'Step {step} of 3',
+        onb_goal_title: '🎯 What is your main goal?', onb_goal_desc: 'Pick the option that best describes your goals.', onb_continue_btn: 'Continue →', onb_step1_indicator: 'Step 1 of 3: Pick a goal',
+        onb_test_title: '📝 Placement test', onb_test_desc: "This is a quick test to determine your current Norwegian level. If you already know your level, you can pick it manually.", onb_start_test_btn: 'Start test', onb_pick_manual_btn: 'Pick level manually', onb_pick_level_title: 'Choose your level:', onb_step2_indicator: 'Step 2 of 3: Determine your level',
+        onb_plan_title: '🎓 Your study plan', onb_level_tag: 'Level: {level}', onb_goal_chosen: 'Goal selected', onb_start_learning_btn: '🚀 Start learning!', onb_change_goal_btn: '🔄 Change goal', onb_change_level_btn: '📊 Change level', onb_can_change_later: 'You can always change your goal and level in Settings.', onb_step3_indicator: 'Step 3 of 3: Plan ready!', onb_welcome_toast: '🎉 Welcome! Let\'s start learning!',
     },
     ru: {
         nav_home: 'Главная', nav_flashcards: 'Карточки', nav_vocabulary: 'Словарь',
@@ -132,6 +220,50 @@ const UI_STRINGS = {
         onb_change_goal: '🔄 Изменить цель', onb_change_level: '📊 Изменить уровень', onb_change_later: 'Вы всегда сможете изменить цель и уровень в настройках.',
         onb_welcome_toast: '🎉 Добро пожаловать! Начинаем обучение!',
         question_word: 'Вопрос', of_word: 'из', field_learn_lang: 'Какой язык изучаете',
+        rec_mastered_title: 'Уровень {level} освоен на {pct}%!', rec_mastered_desc: 'Вы изучили {mastered} из {total} слов. Рекомендуем перейти на {rec}.',
+        upgrade_level_btn: 'Повысить уровень', hide_btn: 'Скрыть', level_up_toast: 'Уровень повышен до {level}!',
+        daily_word_title: 'Слово дня', no_words_for_level: 'Нет слов для этого уровня.', activity_title: 'Активность',
+        streak_days_label: 'Серия дней:', detailed_stats_btn: 'Подробная статистика →', level_colon: 'Уровень: {level}',
+        change_level_question: 'Хотите изменить уровень или пройти тест заново?', pick_level_manually_btn: 'Выбрать уровень вручную',
+        retest_btn: 'Пройти тест уровня снова', daily_task_title: '📅 Задание дня',
+        daily_correct_banner: '✅ Правильно! 🎉', daily_xp_toast: '+20 XP за задание дня! 🔥',
+        daily_wrong_banner: '❌ Неправильно. Правильный ответ: {answer}', daily_try_tomorrow: 'Попробуй завтра снова! 💪',
+        level_set_toast: 'Уровень установлен: {level}', start_learning_btn: 'Начать обучение',
+        flash_pick_desc: 'Выберите уровень, тему и режим тренировки. (Язык: {lang})',
+        srs_mode_btn: '📅 По расписанию (SRS)', all_cards_mode_btn: '📚 Все карточки',
+        mode_flip: 'Запоминание', mode_mc: 'Выбор ответа', mode_type: 'Написание слова',
+        no_words_level_lang: 'Нет слов для этого уровня ({lang})', try_other_level: 'Попробуйте другой уровень или добавьте слова через админ-панель.',
+        deck_count_label: '{count} слов в колоде', due_review_label: '{count} готовы к повторению (SRS)',
+        all_cards_label: 'все карточки', start_session_btn: 'Начать сессию (до {n} карточек)',
+        empty_no_cards: 'Нет карточек', empty_all_scheduled: 'Все слова запланированы на позже.', to_deck_picker_btn: 'К выбору',
+        session_complete_title: 'Сессия завершена!', correct_of_xp: '{correct} из {total} правильно · +{xp} XP', correct_of_total: '{correct} из {total} правильно',
+        again_session_btn: 'Ещё одна сессия', to_home_btn: 'На главную',
+        flip_hint: 'нажмите, чтобы перевернуть', grade_again: 'Не знаю', grade_hard: 'Сложно', grade_good: 'Знаю',
+        type_placeholder: 'напишите здесь...', check_correct: 'Правильно! 🎉', check_wrong_prefix: 'Правильный ответ: {answer}',
+        lang_label: 'Язык: {lang}', gen_words_btn: '🎲 AI: добавить новые слова', gen_words_loading: '🎲 Генерирую…',
+        gen_words_added_toast: '✅ Добавлено новых слов: {n}', gen_words_none_toast: '🤔 AI не предложил новых уникальных слов. Попробуй ещё раз.',
+        gen_words_error_toast: '⚠️ Не удалось сгенерировать слова. Попробуй ещё раз.',
+        tests_choose_type: 'Выберите тип упражнения для уровня {level}.',
+        test_mc_title: 'Выбор формы', test_mc_desc: 'Выберите правильный перевод или форму.',
+        test_cloze_title: 'Заполни пропуск', test_cloze_desc: 'Вставьте пропущенное слово.',
+        test_order_title: 'Составь предложение', test_order_desc: 'Расположите слова в правильном порядке.',
+        test_listen_title: 'Аудирование', test_listen_desc: 'Прослушайте слово и выберите перевод.',
+        test_translate_title: 'Перевод', test_translate_desc: 'Напишите перевод слова.',
+        start_test_btn: 'Начать', quiz_preparing_title: 'Готовим слова…',
+        quiz_preparing_desc: 'Для этого языка и уровня ещё нет слов — они генерируются. Попробуйте обновить через несколько секунд или выберите другой уровень.',
+        to_tests_btn: 'К тестам', quiz_finished_suffix: ': завершено', prev_btn: '◀ Назад', next_btn2: 'Вперёд ▶',
+        write_in_lang_prompt: 'Напишите перевод слова «{word}» ({lang})', your_answer_placeholder: 'ваш ответ',
+        click_words_below: 'Нажимайте слова снизу', correct_variant_prefix: 'Правильный вариант: {answer}',
+        troll_level_badge: 'Уровень тролля {lvl}', xp_to_next: '{xp} XP (до следующего уровня: {remaining} XP)',
+        gear_title: 'Снаряжение', gear_desc: 'Разблокируется с повышением уровня тролля. Нажмите, чтобы надеть/снять.',
+        achievements_title: 'Достижения ({unlocked}/{total})',
+        home_learn_words_btn: '📇 Учить слова', home_vocab_btn: '📚 Словарь', home_grammar_btn: '📖 Грамматика', home_tests_btn: '📝 Тесты', home_listen_btn: '🎧 Аудирование', home_troll_btn: '🧌 Тролль ({lvl} ур.)', more_langs_btn: '🌐 Ещё языки…', viewed_mastered_label: '{seen}/{total} просмотрено · {mastered} освоено', you_label: ' (вы)',
+        norsk_gen_task_btn: '🎲 Сгенерировать новое задание (AI)', norsk_gen_task_loading: '🎲 Генерирую…', norsk_task_added_toast: '✅ Новое задание добавлено!', norsk_gen_error_toast: '⚠️ Не удалось сгенерировать задание. Попробуйте ещё раз.', norsk_no_tasks_title: 'Нет заданий для этого уровня', norsk_no_tasks_desc: 'Попробуйте другой уровень или режим.',
+        task_default_title: 'Задание', pct_correct: '{pct}% правильно ({count}/{total})', write_answer_placeholder: 'Напишите свой ответ здесь...', save_answer_btn: '💾 Сохранить ответ', check_ai_btn: '🧠 Проверить с AI', check_ai_loading: '🧠 Тролль проверяет…', check_ai_wait: 'Подождите, тролль читает ваш текст и готовит совет…', troll_sensor_advice: '🧌 Совет тролля-экзаменатора', answer_saved_toast: '✅ Ответ сохранён! +10 XP', write_before_save_toast: '⚠️ Пожалуйста, напишите что-нибудь перед сохранением.', write_before_check_toast: '⚠️ Напиши что-нибудь перед проверкой.', ai_check_error: '⚠️ Не удалось получить проверку от AI. Проверь соединение и попробуй ещё раз.', start_recording_btn: '🎤 Начать запись (симуляция)', recording_started_toast: '🎙️ Запись начата... (симуляция)', recording_done_toast: '✅ Запись готова! Можешь тренироваться дальше.',
+        onb_welcome_title: '👋 Добро пожаловать в Fjord!', onb_welcome_desc: 'Давайте определим ваш уровень и цель, чтобы я мог составить для вас план обучения.', onb_more_langs_title: 'Полный список языков всегда доступен в Настройках (Кабинет)', onb_step_of: 'Шаг {step} из 3',
+        onb_goal_title: '🎯 Какова ваша главная цель?', onb_goal_desc: 'Выберите один вариант, который лучше всего описывает ваши цели.', onb_continue_btn: 'Продолжить →', onb_step1_indicator: 'Шаг 1 из 3: Выберите цель',
+        onb_test_title: '📝 Вступительный тест на уровень', onb_test_desc: 'Это быстрый тест, чтобы определить ваш текущий уровень норвежского. Если вы уже знаете свой уровень, можете выбрать его вручную.', onb_start_test_btn: 'Начать тест', onb_pick_manual_btn: 'Выбрать уровень вручную', onb_pick_level_title: 'Выберите уровень:', onb_step2_indicator: 'Шаг 2 из 3: Определите уровень',
+        onb_plan_title: '🎓 Ваш план обучения', onb_level_tag: 'Уровень: {level}', onb_goal_chosen: 'Цель выбрана', onb_start_learning_btn: '🚀 Начать обучение!', onb_change_goal_btn: '🔄 Изменить цель', onb_change_level_btn: '📊 Изменить уровень', onb_can_change_later: 'Вы всегда сможете изменить цель и уровень в настройках.', onb_step3_indicator: 'Шаг 3 из 3: План готов!', onb_welcome_toast: '🎉 Добро пожаловать! Начинаем обучение!',
     },
 };
 
@@ -141,6 +273,17 @@ function t(key) {
         try { lang = localStorage.getItem('fjord_ui_lang') || 'uk'; } catch (e) { lang = 'uk'; }
     }
     return (UI_STRINGS[lang] && UI_STRINGS[lang][key]) || UI_STRINGS.uk[key] || key;
+}
+
+// Як t(), але підставляє значення у плейсхолдери виду {ім'я}. Наприклад:
+// tf('correct_of_xp', {correct: 4, total: 6, xp: 12}) при рядку
+// '{correct} із {total} правильно · +{xp} XP' поверне готовий рядок.
+function tf(key, vars) {
+    let s = t(key);
+    if (vars) {
+        Object.keys(vars).forEach(k => { s = s.split('{' + k + '}').join(vars[k]); });
+    }
+    return s;
 }
 
 // Повертає переклад конкретного слова словника мовою STATE.vocabLang.
@@ -243,4 +386,113 @@ function initLangSwitchers() {
             document.querySelectorAll('.lang-chip').forEach(b => b.classList.toggle('active', b.dataset.lang === btn.dataset.lang));
         };
     });
+}
+
+// =====================================================================
+//  ПЕРЕКЛАД ТЕМ СЛІВ ("t" у VOCAB) — раніше завжди показувались
+//  українською незалежно від мови інтерфейсу. Вбудований словник має
+//  закритий список із 63 тем — покриваємо їх мапою тут. Теми, згенеровані
+//  через AI для власних слів користувача, теж часто збігаються з цим
+//  списком (AI генерує теми українською за задумом), а якщо не збігаються
+//  — просто показуються як є (без помилки).
+const TOPIC_TRANSLATIONS = {
+    'Ідіоми': { en: 'Idioms', ru: 'Идиомы' },
+    'Їжа': { en: 'Food', ru: 'Еда' },
+    'Абстрактне': { en: 'Abstract', ru: 'Абстрактное' },
+    'Абстрактні': { en: 'Abstract', ru: 'Абстрактные' },
+    'Академічна': { en: 'Academic', ru: 'Академическая' },
+    'Банк': { en: 'Bank', ru: 'Банк' },
+    'Бізнес': { en: 'Business', ru: 'Бизнес' },
+    'Дискурс': { en: 'Discourse', ru: 'Дискурс' },
+    'Дні тижня': { en: 'Days of the week', ru: 'Дни недели' },
+    'Довкілля': { en: 'Environment', ru: 'Окружающая среда' },
+    'Дозвілля': { en: 'Leisure', ru: 'Досуг' },
+    'Дім': { en: 'Home', ru: 'Дом' },
+    'Дієслова': { en: 'Verbs', ru: 'Глаголы' },
+    'Економіка': { en: 'Economy', ru: 'Экономика' },
+    'Емоції': { en: 'Emotions', ru: 'Эмоции' },
+    "Здоров'я": { en: 'Health', ru: 'Здоровье' },
+    'Кольори': { en: 'Colors', ru: 'Цвета' },
+    'Культура': { en: 'Culture', ru: 'Культура' },
+    'Кухня': { en: 'Cuisine', ru: 'Кухня' },
+    'Лінгвістика': { en: 'Linguistics', ru: 'Лингвистика' },
+    'Літературознавство': { en: 'Literary studies', ru: 'Литературоведение' },
+    'Меблі': { en: 'Furniture', ru: 'Мебель' },
+    'Медицина': { en: 'Medicine', ru: 'Медицина' },
+    'Медіа': { en: 'Media', ru: 'Медиа' },
+    'Місто': { en: 'City', ru: 'Город' },
+    'Місяці': { en: 'Months', ru: 'Месяцы' },
+    'Напрямки': { en: 'Directions', ru: 'Направления' },
+    'Наука': { en: 'Science', ru: 'Наука' },
+    'Нюанси': { en: 'Nuances', ru: 'Нюансы' },
+    'Одяг': { en: 'Clothes', ru: 'Одежда' },
+    'Освіта': { en: 'Education', ru: 'Образование' },
+    'Побут': { en: 'Everyday life', ru: 'Быт' },
+    'Погода': { en: 'Weather', ru: 'Погода' },
+    'Подорожі': { en: 'Travel', ru: 'Путешествия' },
+    'Покупки': { en: 'Shopping', ru: 'Покупки' },
+    'Політика': { en: 'Politics', ru: 'Политика' },
+    'Пошта': { en: 'Post', ru: 'Почта' },
+    'Право': { en: 'Law', ru: 'Право' },
+    'Привітання': { en: 'Greetings', ru: 'Приветствия' },
+    'Прийменники': { en: 'Prepositions', ru: 'Предлоги' },
+    'Прикметники': { en: 'Adjectives', ru: 'Прилагательные' },
+    'Природа': { en: 'Nature', ru: 'Природа' },
+    'Професії': { en: 'Professions', ru: 'Профессии' },
+    'Психологія': { en: 'Psychology', ru: 'Психология' },
+    'Ресторан': { en: 'Restaurant', ru: 'Ресторан' },
+    'Риторика': { en: 'Rhetoric', ru: 'Риторика' },
+    'Робота': { en: 'Work', ru: 'Работа' },
+    'Родина': { en: 'Family', ru: 'Семья' },
+    'Рідкісна лексика': { en: 'Rare vocabulary', ru: 'Редкая лексика' },
+    'Свята': { en: 'Holidays', ru: 'Праздники' },
+    'Соціологія': { en: 'Sociology', ru: 'Социология' },
+    'Спорт': { en: 'Sport', ru: 'Спорт' },
+    'Стилістика': { en: 'Stylistics', ru: 'Стилистика' },
+    'Стосунки': { en: 'Relationships', ru: 'Отношения' },
+    'Тварини': { en: 'Animals', ru: 'Животные' },
+    'Технologiї': { en: 'Technology', ru: 'Технологии' }, // так у вихідних даних (є друкарська помилка — латинська "logi"), лишаємо ключ як є, щоб збігався
+    'Технології': { en: 'Technology', ru: 'Технологии' },
+    'Транспорт': { en: 'Transport', ru: 'Транспорт' },
+    'Тіло': { en: 'Body', ru: 'Тело' },
+    'Філософія': { en: 'Philosophy', ru: 'Философия' },
+    'Хобі': { en: 'Hobbies', ru: 'Хобби' },
+    'Числа': { en: 'Numbers', ru: 'Числа' },
+    'Школа': { en: 'School', ru: 'Школа' },
+};
+function translateTopic(topic, lang) {
+    lang = lang || (typeof STATE !== 'undefined' && STATE && STATE.vocabLang) || 'uk';
+    if (lang === 'uk' || !topic) return topic;
+    const entry = TOPIC_TRANSLATIONS[topic];
+    return (entry && entry[lang]) || topic; // немає перекладу — показуємо як є, а не порожньо
+}
+
+// Назва мови перекладу слів (uk/en/ru) поточною мовою інтерфейсу — потрібна
+// для підказок на кшталт "Напишіть переклад слова (Англійська)".
+const INTERFACE_LANG_NAMES = {
+    uk: { uk: 'Українська', en: 'English', ru: 'Русский' },
+    en: { uk: 'Ukrainian', en: 'English', ru: 'Russian' },
+    ru: { uk: 'Украинский', en: 'Английский', ru: 'Русский' },
+};
+function interfaceLangName(code) {
+    const uiLang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+    return (INTERFACE_LANG_NAMES[uiLang] && INTERFACE_LANG_NAMES[uiLang][code]) || code;
+}
+// Назва мови вивчення (з LANGUAGES у languages.js) поточною мовою інтерфейсу.
+function targetLangDisplayName(code) {
+    const uiLang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+    if (typeof getLanguage !== 'function') return code;
+    const l = getLanguage(code);
+    return (l && l.name && (l.name[uiLang] || l.name.uk)) || code;
+}
+
+// Деякі дані (наприклад GOALS у data.js) зберігають переклад як окремі поля
+// на кшталт label_en/label_ru поруч з базовим (українським) label/desc.
+// localizedField(goal, 'label') поверне label_en/label_ru, якщо мова
+// інтерфейсу не українська і таке поле є, інакше — базове українське.
+function localizedField(obj, base) {
+    if (!obj) return '';
+    const uiLang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+    if (uiLang !== 'uk' && obj[base + '_' + uiLang]) return obj[base + '_' + uiLang];
+    return obj[base] || '';
 }

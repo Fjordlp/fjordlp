@@ -139,9 +139,11 @@ function buildWritingCheckPrompt() {
 
 async function checkWritingWithAI(level, topic, taskPrompt, studentText) {
     const lang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+    const targetLang = (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
+    const targetLangName = typeof getLanguage === 'function' ? getLanguage(targetLang).name.uk : 'норвезької';
     const userMsg =
-        `Рівень: ${level}\nТема завдання: ${topic || ''}\nФормулювання завдання: ${taskPrompt || ''}\n\n` +
-        `Текст студента норвезькою:\n"""${studentText}"""`;
+        `Мова, яку перевіряємо: ${targetLangName}\nРівень: ${level}\nТема завдання: ${topic || ''}\nФормулювання завдання: ${taskPrompt || ''}\n\n` +
+        `Текст студента цією мовою:\n"""${studentText}"""`;
     return callAiRaw('writing_check', buildWritingCheckPrompt(), userMsg, [], lang);
 }
 
@@ -160,37 +162,52 @@ function parseAiJson(raw) {
 
 async function generateNorskTaskAI(level, mode) {
     const lang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+    const targetLang = (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
+    const targetLangName = typeof getLanguage === 'function' ? getLanguage(targetLang).name.uk : 'норвезької';
+    const isNorwegian = targetLang === 'no';
     let schema, desc;
     if (mode === 'reading' || mode === 'listening') {
         desc = mode === 'reading' ?
-            'короткий текст для читання (3-6 речень норвезькою), відповідний рівню' :
-            'короткий діалог або монолог, який імітує аудіо-репліку (3-6 речень норвезькою), відповідний рівню';
-        schema = '{"title": "коротка назва норвезькою", "text": "' + desc + '", "questions": [{"q": "питання норвезькою", "opts": ["варіант1","варіант2","варіант3"], "a": 0}, ...(2-3 питання)]}';
+            `короткий текст для читання (3-6 речень ${targetLangName} мовою), відповідний рівню` :
+            `короткий діалог або монолог, який імітує аудіо-репліку (3-6 речень ${targetLangName} мовою), відповідний рівню`;
+        schema = '{"title": "коротка назва ' + targetLangName + ' мовою", "text": "' + desc + '", "questions": [{"q": "питання ' + targetLangName + ' мовою", "opts": ["варіант1","варіант2","варіант3"], "a": 0}, ...(2-3 питання)]}';
     } else if (mode === 'writing') {
-        schema = '{"topic": "коротка тема українською", "prompt": "формулювання завдання норвезькою, як на іспиті Norskprøve (напр. Skriv 3-7 setninger om ...)"}';
+        schema = '{"topic": "коротка тема українською", "prompt": "формулювання завдання ' + targetLangName + ' мовою' +
+            (isNorwegian ? ', як на іспиті Norskprøve (напр. Skriv 3-7 setninger om ...)' : '') + '"}';
     } else {
-        schema = '{"topic": "коротка тема українською", "prompt": "формулювання усного завдання норвезькою"}';
+        schema = '{"topic": "коротка тема українською", "prompt": "формулювання усного завдання ' + targetLangName + ' мовою"}';
     }
-    const userMsg = `Рівень: ${level}. Режим: ${mode}. Створи одне нове завдання за схемою: ${schema}`;
-    const sys = "Ти генеруєш ОДНЕ нове тренувальне завдання для підготовки до " +
-        "Norskprøve (HK-dir, рівні A1-B2) норвезькою мовою, у форматі, що " +
-        "реально використовується на цьому іспиті. Відповідай ЛИШЕ чистим " +
-        "JSON-об'єктом без жодного тексту навколо, без markdown-огорожі.";
+    const userMsg = `Мова вивчення: ${targetLangName}. Рівень: ${level}. Режим: ${mode}. Створи одне нове завдання за схемою: ${schema}`;
+    const sys = "Ти генеруєш ОДНЕ нове тренувальне завдання для підготовки до іспиту з " + targetLangName + " мови " +
+        (isNorwegian ? "(Norskprøve, HK-dir, рівні A1-B2), у форматі, що реально використовується на цьому іспиті. " : "(рівні CEFR A1-B2). ") +
+        "Відповідай ЛИШЕ чистим JSON-об'єктом без жодного тексту навколо, без markdown-огорожі.";
     const reply = await callAiRaw('gen_task', sys, userMsg, [], lang);
     return parseAiJson(reply);
 }
 
-async function generateVocabWordsAI(level, existingTopics) {
+async function generateVocabWordsAI(level, existingWords) {
     const uiLang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
     const targetLang = (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
     const targetLangName = typeof getLanguage === 'function' ? getLanguage(targetLang).name.uk : 'норвезької';
+    const words = Array.isArray(existingWords) ? existingWords : [];
+    const topics = [...new Set(words.map(w => w.t).filter(Boolean))];
+    // Раніше сюди йшли лише НАЗВИ ТЕМ ("Їжа", "Транспорт") — AI не бачив
+    // самих слів, тому раз у раз пропонував ті самі базові варіанти.
+    // Тепер явно передаємо список уже доданих слів (мовою вивчення), щоб
+    // AI дійсно міг їх уникнути. Обрізаємо до 150, щоб не роздувати
+    // запит для великих словників — цього достатньо, щоб покрити типовий
+    // стартовий набір рівня.
+    const avoidList = words.slice(-150).map(w => w.no).filter(Boolean).join(', ');
     const userMsg =
-        `Рівень: ${level}. Наявні теми у словнику: ${(existingTopics || []).join(', ') || 'немає даних'}. ` +
-        `Згенеруй 5 нових корисних слів мовою "${targetLangName}" для цього рівня (уникай базових слів з рівня A1, якщо рівень вищий). ` +
+        `Рівень: ${level}. Наявні теми у словнику: ${topics.join(', ') || 'немає даних'}. ` +
+        (avoidList ? `Ці слова вже є у словнику користувача, НЕ повторюй їх і не пропонуй їхні прямі синоніми: ${avoidList}. ` : '') +
+        `Згенеруй 8 нових корисних слів мовою "${targetLangName}" для цього рівня, яких ще нема у списку вище (уникай базових слів з рівня A1, якщо рівень вищий). ` +
         `Формат масиву: [{"t": "тема українською (наприклад Їжа, Транспорт)", "no": "слово мовою вивчення", "uk": "переклад українською", "ex_no": "приклад речення мовою вивчення (мінімум 4 слова, містить це слово)", "ex_uk": "переклад прикладу"}, ...]`;
     const sys = `Ти генеруєш нові слова для словника вивчення мови "${targetLangName}" ` +
-        "(рівень CEFR A1-B2). Відповідай ЛИШЕ чистим JSON-масивом без " +
-        "жодного тексту навколо, без markdown-огорожі.";
+        "(рівень CEFR A1-B2). Уважно дотримуйся списку слів, яких треба " +
+        "уникати — це критично важливо, повторення дратують користувача. " +
+        "Відповідай ЛИШЕ чистим JSON-масивом без жодного тексту навколо, " +
+        "без markdown-огорожі.";
     const reply = await callAiRaw('gen_vocab', sys, userMsg, [], uiLang);
     return parseAiJson(reply);
 }

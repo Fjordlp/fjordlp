@@ -49,7 +49,7 @@ function viewHome() {
                 const l = getLanguage(code);
                 return `<button class="chip ${STATE.targetLang === code ? 'active' : ''}" data-lang="${code}">${l.flag} ${l.native}</button>`;
             }).join('')}
-            <button class="chip" id="homeMoreLangsBtn">🌐 Ще мови…</button>
+            <button class="chip" id="homeMoreLangsBtn">${t('more_langs_btn')}</button>
         </div>
     `;
 
@@ -87,14 +87,14 @@ function viewHome() {
                             <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
                                 <span style="font-size:1.8rem;">🚀</span>
                                 <div style="flex:1;">
-                                    <strong>Рівень ${rec.current} засвоєно на ${rec.pct}%!</strong>
+                                    <strong>${tf('rec_mastered_title', {level: rec.current, pct: rec.pct})}</strong>
                                     <p style="font-size:.9rem;color:var(--ink-soft);margin:4px 0 0 0;">
-                                        Ви вивчили ${rec.mastered} із ${rec.total} слів. Рекомендуємо перейти на <strong>${rec.recommended}</strong>.
+                                        ${tf('rec_mastered_desc', {mastered: rec.mastered, total: rec.total, rec: `<strong>${rec.recommended}</strong>`})}
                                     </p>
                                 </div>
                                 <div style="display:flex;gap:8px;">
-                                    <button class="btn btn-primary btn-sm" id="upgradeLevelBtn">Підвищити рівень</button>
-                                    <button class="btn btn-ghost btn-sm" id="dismissRecBtn">Приховати</button>
+                                    <button class="btn btn-primary btn-sm" id="upgradeLevelBtn">${t('upgrade_level_btn')}</button>
+                                    <button class="btn btn-ghost btn-sm" id="dismissRecBtn">${t('hide_btn')}</button>
                                 </div>
                             </div>
                         </div>
@@ -113,16 +113,16 @@ function viewHome() {
                         <div class="progress-fill" style="width:${pct}%"></div>
                     </div>
                     <span style="font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--amber);">
-                        ${seenCount}/${total} переглянуто · ${mastered} засвоєно
+                        ${tf('viewed_mastered_label', {seen: seenCount, total, mastered})}
                     </span>
                 </div>
                 <div class="homepick">
-                    <button class="btn" data-r="flashcards">📇 Вчити слова</button>
-                    <button class="btn" data-r="vocabulary">📚 Словник</button>
-                    <button class="btn" data-r="grammar">📖 Граматика</button>
-                    <button class="btn" data-r="tests">📝 Тести</button>
-                    <button class="btn" data-r="test-listen">🎧 Аудіювання</button>
-                    <button class="btn" data-r="troll">🧌 Тролль (${trollLvl} рів.)</button>
+                    <button class="btn" data-r="flashcards">${t('home_learn_words_btn')}</button>
+                    <button class="btn" data-r="vocabulary">${t('home_vocab_btn')}</button>
+                    <button class="btn" data-r="grammar">${t('home_grammar_btn')}</button>
+                    <button class="btn" data-r="tests">${t('home_tests_btn')}</button>
+                    <button class="btn" data-r="test-listen">${t('home_listen_btn')}</button>
+                    <button class="btn" data-r="troll">${tf('home_troll_btn', {lvl: trollLvl})}</button>
                     <button class="btn" data-r="norskprove">🎓 Norskprøve</button>
                 </div>
             </div>
@@ -133,7 +133,7 @@ function viewHome() {
             <!-- слово дня + активність -->
             <div class="grid cols-2">
                 <div class="card">
-                    <h3>Слово дня</h3>
+                    <h3>${t('daily_word_title')}</h3>
                     ${dw? `
                     <div class="dailyword">
                         <button class="soundbtn" id="dwSound">🔊</button>
@@ -143,24 +143,24 @@ function viewHome() {
                         </div>
                     </div>
                     <p style="color:var(--ink-soft);font-style:italic;margin-top:10px;font-size:.9rem;">${escHtml(dw.ex_no)}<br><span style="font-style:normal;font-size:.8rem;">${escHtml(wordExampleTranslation(dw, level))}</span></p>
-                    ` : `<p>Немає слів для цього рівня.</p>`}
+                    ` : `<p>${t('no_words_for_level')}</p>`}
                 </div>
                 <div class="card">
-                    <h3>Активність</h3>
-                    <p style="color:var(--ink-soft);font-size:.85rem;">Серія днів: <b class="mono">${STATE.streak||0} 🔥</b> · XP: <b class="mono">${STATE.xp||0}</b></p>
+                    <h3>${t('activity_title')}</h3>
+                    <p style="color:var(--ink-soft);font-size:.85rem;">${t('streak_days_label')} <b class="mono">${STATE.streak||0} 🔥</b> · XP: <b class="mono">${STATE.xp||0}</b></p>
                     ${renderWeekStrip()}
                     <div class="xp-bar-track" style="margin-top:10px;"><div class="xp-bar-fill" style="width:${trollPct}%"></div></div>
-                    <button class="btn btn-ghost btn-sm" style="margin-top:12px;" data-r="profile">Детальна статистика →</button>
+                    <button class="btn btn-ghost btn-sm" style="margin-top:12px;" data-r="profile">${t('detailed_stats_btn')}</button>
                 </div>
             </div>
 
             <!-- рівень -->
             <div class="card" style="margin-top:16px;">
-                <h3>Рівень: ${level}</h3>
-                <p style="color:var(--ink-soft);font-size:.85rem;">Хочете змінити рівень або пройти тест повторно?</p>
+                <h3>${tf('level_colon', {level})}</h3>
+                <p style="color:var(--ink-soft);font-size:.85rem;">${t('change_level_question')}</p>
                 <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
-                    <button class="btn btn-ghost btn-sm" data-r="levels">Обрати рівень вручну</button>
-                    <button class="btn btn-ghost btn-sm" id="retest">Пройти тест рівня знову</button>
+                    <button class="btn btn-ghost btn-sm" data-r="levels">${t('pick_level_manually_btn')}</button>
+                    <button class="btn btn-ghost btn-sm" id="retest">${t('retest_btn')}</button>
                 </div>
             </div>
 
@@ -195,7 +195,7 @@ function viewHome() {
                 STATE.level = rec.recommended;
                 STATE.levelTestDone = true;
                 updateState();
-                toast(`Рівень підвищено до ${rec.recommended}!`);
+                toast(tf('level_up_toast', {level: rec.recommended}));
                 navigate('home');
             }
         };
@@ -224,7 +224,7 @@ function viewHome() {
             const html = `
                 <div class="card" style="border:2px solid var(--amber);">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                        <h3 style="margin:0;">📅 Завдання дня</h3>
+                        <h3 style="margin:0;">${t('daily_task_title')}</h3>
                         <span class="tag level-${task.level || 'A1'}">${task.level || 'A1'}</span>
                     </div>
                     <p style="font-size:1.05rem;margin-bottom:12px;">${escHtml(task.question)}</p>
@@ -312,7 +312,7 @@ window.checkDailyTask = function(selected, correct, taskId, container) {
     options.forEach(btn => btn.disabled = true);
     if (selected === correct) {
         options.forEach((btn, idx) => { if (idx === correct) btn.classList.add('correct'); });
-        feedback.innerHTML = `<div class="feedback-banner ok">✅ Правильно! 🎉</div>`;
+        feedback.innerHTML = `<div class="feedback-banner ok">${t('daily_correct_banner')}</div>`;
         addXP(20, 'daily_task');
         const today = new Date().toISOString().slice(0, 10);
         if (!STATE.dailyTasksCompleted) STATE.dailyTasksCompleted = {};
@@ -321,14 +321,14 @@ window.checkDailyTask = function(selected, correct, taskId, container) {
             updateState();
             checkAchievements({ dailyTaskCompleted: true });
         }
-        result.textContent = `+20 XP за завдання дня! 🔥`;
+        result.textContent = t('daily_xp_toast');
     } else {
         options.forEach((btn, idx) => {
             if (idx === correct) btn.classList.add('correct');
             if (idx === selected) btn.classList.add('wrong');
         });
-        feedback.innerHTML = `<div class="feedback-banner bad">❌ Неправильно. Правильна відповідь: ${options[correct].textContent}</div>`;
-        result.textContent = `Спробуй завтра знову! 💪`;
+        feedback.innerHTML = `<div class="feedback-banner bad">${tf('daily_wrong_banner', {answer: options[correct].textContent})}</div>`;
+        result.textContent = t('daily_try_tomorrow');
     }
 };
 
@@ -356,7 +356,7 @@ function viewLevels() {
             STATE.levelTestDone = true;
             markActivityToday();
             updateState();
-            toast(`Рівень встановлено: ${lv}`);
+            toast(tf('level_set_toast', {level: lv}));
             navigate('home');
         };
         grid.appendChild(card);
@@ -380,7 +380,7 @@ function viewLevelTest() {
                 <div class="tag level-${level}" style="font-size:1rem;padding:6px 18px;margin:12px 0;">${level}</div>
                 <p style="color:var(--ink-soft)">${LEVEL_META[level].desc}</p>
                 <div style="display:flex;justify-content:center;margin:16px 0;"></div>
-                <button class="btn btn-primary" id="goHome">Почати навчання</button>
+                <button class="btn btn-primary" id="goHome">${t('start_learning_btn')}</button>
             </div>
         `);
         const trollSlot = resultView.querySelector('div[style*="justify-content:center"]');
@@ -391,7 +391,7 @@ function viewLevelTest() {
     const q = LEVEL_TEST[i];
     const wrap = el(`
         <div class="view" style="max-width:500px;margin:20px auto;text-align:center;">
-            <div class="qcounter">Питання ${i+1} з ${LEVEL_TEST.length}</div>
+            <div class="qcounter">${t('question_word')} ${i+1} ${t('of_word')} ${LEVEL_TEST.length}</div>
             <div class="progress-track" style="margin-bottom:18px;"><div class="progress-fill" style="width:${(i/LEVEL_TEST.length)*100}%"></div></div>
             <div class="question-text" style="font-size:1.15rem;font-family:'Fraunces',serif;margin-bottom:18px;">${escHtml(q.q)}</div>
             <div class="mc-options" style="margin:0 auto;"></div>
@@ -420,20 +420,23 @@ function viewFlashDeckPicker(lang) {
     ensureVocabAvailable(lang, level); // не блокує рендер; підвантажить і сама перемалює, якщо знайде/згенерує слова
     const words = vocabForLevel(level, lang);
     const topics = [...new Set(words.map(w => w.t))];
-    const topic = SUBSTATE.topic || "Усі теми";
+    // Внутрішній ключ "усі теми" — навмисно НЕ україномовний рядок (як
+    //  було раніше), щоб не залежати від мови інтерфейсу для порівнянь.
+    const ALL_TOPICS_SENTINEL = "__ALL__";
+    const topic = SUBSTATE.topic || ALL_TOPICS_SENTINEL;
     const mode = SUBSTATE.mode || "flip";
     const allMode = SUBSTATE.allMode || false;
 
     const wrap = el(`
         <div class="view">
             <h1>${t('h_flashcards')}</h1>
-            <p style="color:var(--ink-soft);font-size:.9rem;">Оберіть рівень, тему та режим тренування. (Мова: ${lang.toUpperCase()})</p>
+            <p style="color:var(--ink-soft);font-size:.9rem;">${tf('flash_pick_desc', {lang: lang.toUpperCase()})}</p>
             <div class="deckpicker" id="lvlpick"></div>
             <div class="deckpicker" id="topicpick"></div>
             <div class="deckpicker" id="modepick"></div>
             <div class="deckpicker" id="allmodepick">
-                <button class="chip ${!allMode?'active':''}" data-all="false">📅 За розкладом (SRS)</button>
-                <button class="chip ${allMode?'active':''}" data-all="true">📚 Всі картки</button>
+                <button class="chip ${!allMode?'active':''}" data-all="false">${t('srs_mode_btn')}</button>
+                <button class="chip ${allMode?'active':''}" data-all="true">${t('all_cards_mode_btn')}</button>
             </div>
             <div class="card" id="deckInfo" style="margin-top:8px;"></div>
         </div>
@@ -447,17 +450,18 @@ function viewFlashDeckPicker(lang) {
     });
 
     const topicpick = wrap.querySelector('#topicpick');
-    ["Усі теми", ...topics].forEach(t => {
-        const c = el(`<button class="chip ${t===topic?'active':''}">${t}</button>`);
-        c.onclick = () => navigate('flashcards', { level, topic: t, mode, allMode, lang });
+    [ALL_TOPICS_SENTINEL, ...topics].forEach(tp => {
+        const label = tp === ALL_TOPICS_SENTINEL ? t('all_topics') : translateTopic(tp);
+        const c = el(`<button class="chip ${tp===topic?'active':''}">${escHtml(label)}</button>`);
+        c.onclick = () => navigate('flashcards', { level, topic: tp, mode, allMode, lang });
         topicpick.appendChild(c);
     });
 
     const modepick = wrap.querySelector('#modepick');
     [
-        ["flip", "Запам'ятовування"],
-        ["mc", "Вибір відповіді"],
-        ["type", "Написання слова"]
+        ["flip", t('mode_flip')],
+        ["mc", t('mode_mc')],
+        ["type", t('mode_type')]
     ].forEach(([m, label]) => {
         const c = el(`<button class="chip ${m===mode?'active':''}">${label}</button>`);
         c.onclick = () => navigate('flashcards', { level, topic, mode: m, allMode, lang });
@@ -471,7 +475,7 @@ function viewFlashDeckPicker(lang) {
         };
     });
 
-    const deckWords = topic === "Усі теми" ? words : words.filter(w => w.t === topic);
+    const deckWords = topic === ALL_TOPICS_SENTINEL ? words : words.filter(w => w.t === topic);
     const dueCount = deckWords.filter(w => {
         const s = getSrs(wordKey(Object.assign({ level }, w)));
         return s.due <= todayStr();
@@ -479,13 +483,13 @@ function viewFlashDeckPicker(lang) {
 
     const info = wrap.querySelector('#deckInfo');
     if (deckWords.length === 0) {
-        info.innerHTML = `<div class="empty-state"><h3>Немає слів для цього рівня (${lang.toUpperCase()})</h3><p>Спробуйте інший рівень або додайте слова через адмін-панель.</p></div>`;
+        info.innerHTML = `<div class="empty-state"><h3>${tf('no_words_level_lang', {lang: lang.toUpperCase()})}</h3><p>${t('try_other_level')}</p></div>`;
     } else {
-        const modeLabel = allMode ? 'всі картки' : `${dueCount} готові до повторення (SRS)`;
+        const modeLabel = allMode ? t('all_cards_label') : tf('due_review_label', {count: dueCount});
         const maxCards = allMode ? deckWords.length : 20;
         info.innerHTML = `
-            <p style="font-size:.9rem;"><b>${deckWords.length}</b> слів у колоді · <b>${modeLabel}</b></p>
-            <button class="btn btn-primary" id="startSession">Почати сесію (до ${maxCards} карток)</button>
+            <p style="font-size:.9rem;">${tf('deck_count_label', {count: `<b>${deckWords.length}</b>`})} · <b>${modeLabel}</b></p>
+            <button class="btn btn-primary" id="startSession">${tf('start_session_btn', {n: maxCards})}</button>
         `;
         info.querySelector('#startSession').onclick = () => {
             navigate('flashsession', { level, topic, mode, deckWords, allMode, lang });
@@ -522,9 +526,11 @@ function viewFlashSession() {
     const { queue, pos, level, mode, allMode } = SUBSTATE;
 
     if (queue.length === 0) {
-        return el(
-            `<div class="view"><div class="empty-state"><h3>Немає карток</h3><p>Усі слова заплановані на пізніше.</p><button class="btn btn-primary" onclick="navigate('flashcards')">До вибору</button></div></div>`
+        const emptyView = el(
+            `<div class="view"><div class="empty-state"><h3>${t('empty_no_cards')}</h3><p>${t('empty_all_scheduled')}</p><button class="btn btn-primary" id="flashEmptyBackBtn">${t('to_deck_picker_btn')}</button></div></div>`
         );
+        emptyView.querySelector('#flashEmptyBackBtn').onclick = () => navigate('flashcards');
+        return emptyView;
     }
     if (pos >= queue.length) {
         markActivityToday();
@@ -539,13 +545,13 @@ function viewFlashSession() {
         const trollMood = pctCorrect >= 70 ? 'happy' : (pctCorrect >= 40 ? 'idle' : 'sad');
         const wrap = el(`
             <div class="view session-end card">
-                <h2>Сесію завершено!</h2>
+                <h2>${t('session_complete_title')}</h2>
                 <div class="bignum">${pctCorrect}%</div>
-                <p style="color:var(--ink-soft)">${SUBSTATE.correct} із ${queue.length} правильно · +${allMode ? Math.max(2, Math.round(SUBSTATE.correct * 1.5)) : Math.max(5, SUBSTATE.correct * 2)} XP</p>
+                <p style="color:var(--ink-soft)">${tf('correct_of_xp', {correct: SUBSTATE.correct, total: queue.length, xp: allMode ? Math.max(2, Math.round(SUBSTATE.correct * 1.5)) : Math.max(5, SUBSTATE.correct * 2)})}</p>
                 <div style="display:flex;justify-content:center;margin:14px 0;"></div>
                 <div style="display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap;">
-                    <button class="btn btn-primary" id="again">Ще одна сесія</button>
-                    <button class="btn btn-ghost" id="toHome">На головну</button>
+                    <button class="btn btn-primary" id="again">${t('again_session_btn')}</button>
+                    <button class="btn btn-ghost" id="toHome">${t('to_home_btn')}</button>
                 </div>
             </div>
         `);
@@ -566,7 +572,7 @@ function viewFlashSession() {
     const wrap = el(`<div class="view flash-stage"></div>`);
     const progWrap = el(`
         <div class="flash-progress">
-            <div class="meta"><span>${pos+1} / ${queue.length}</span><span>${escHtml(item.w.t)}</span></div>
+            <div class="meta"><span>${pos+1} / ${queue.length}</span><span>${escHtml(translateTopic(item.w.t))}</span></div>
             <div class="progress-track"><div class="progress-fill" style="width:${(pos/queue.length)*100}%"></div></div>
         </div>
     `);
@@ -590,7 +596,7 @@ function renderFlipCard(item) {
                 <div class="flip-face flip-front">
                     <div class="no-word">${escHtml(item.w.no)}</div>
                     <button class="soundbtn" id="fSound">🔊</button>
-                    <div class="flip-hint">натисніть, щоб перевернути</div>
+                    <div class="flip-hint">${t('flip_hint')}</div>
                 </div>
                 <div class="flip-face flip-back">
                     <div class="uk-word">${escHtml(wordTranslation(item.w, item.key.split('|')[0]))}</div>
@@ -616,9 +622,9 @@ function renderFlipCard(item) {
         if (!SUBSTATE.flipped) return;
         const row = el(`
             <div class="grade-row">
-                <button class="btn btn-danger" data-g="again">Не знаю</button>
-                <button class="btn btn-amber" data-g="hard">Складно</button>
-                <button class="btn btn-primary" data-g="good">Знаю</button>
+                <button class="btn btn-danger" data-g="again">${t('grade_again')}</button>
+                <button class="btn btn-amber" data-g="hard">${t('grade_hard')}</button>
+                <button class="btn btn-primary" data-g="good">${t('grade_good')}</button>
             </div>
         `);
         row.querySelectorAll('[data-g]').forEach(b => b.onclick = () => {
@@ -680,11 +686,11 @@ function renderTypeCard(item) {
             </div>
         </div>
     `));
-    const input = el(`<input class="type-input" placeholder="напишіть тут..." autocomplete="off">`);
+    const input = el(`<input class="type-input" placeholder="${t('type_placeholder')}" autocomplete="off">`);
     holder.appendChild(input);
     const fb = el(`<div></div>`);
     holder.appendChild(fb);
-    const btn = el(`<button class="btn btn-primary">Перевірити</button>`);
+    const btn = el(`<button class="btn btn-primary">${t('check_btn')}</button>`);
     holder.appendChild(btn);
 
     function check() {
@@ -692,7 +698,7 @@ function renderTypeCard(item) {
         const target = item.w.no;
         const correct = isFuzzyMatch(val, target);
         fb.innerHTML =
-            `<div class="feedback-banner ${correct?'ok':'bad'}">${correct? 'Правильно! 🎉' : 'Правильна відповідь: '+target}</div>`;
+            `<div class="feedback-banner ${correct?'ok':'bad'}">${correct? t('check_correct') : tf('check_wrong_prefix', {answer: target})}</div>`;
         input.disabled = true;
         btn.disabled = true;
         gradeWord(item.key, correct ? 'good' : 'again');
@@ -722,14 +728,14 @@ function viewVocabulary() {
     const wrap = el(`
         <div class="view">
             <h1>${t('h_vocabulary')}</h1>
-            <p style="color:var(--ink-soft);margin-bottom:12px;font-size:.85rem;">${t('all_level_words')} (${level}) · Мова: ${lang.toUpperCase()}. ${t('status_label')}: <span class="status new">${statusLabels.new}</span> <span class="status due">${statusLabels.due}</span> <span class="status mastered">${statusLabels.mastered}</span></p>
+            <p style="color:var(--ink-soft);margin-bottom:12px;font-size:.85rem;">${t('all_level_words')} (${level}) · ${tf('lang_label', {lang: lang.toUpperCase()})}. ${t('status_label')}: <span class="status new">${statusLabels.new}</span> <span class="status due">${statusLabels.due}</span> <span class="status mastered">${statusLabels.mastered}</span></p>
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
                 <input class="type-input" id="vocabSearch" placeholder="${t('search_placeholder')}" style="flex:1;max-width:280px;padding:8px 14px;font-size:.85rem;">
                 <select id="vocabTopic" class="chip" style="border-radius:999px;padding:6px 14px;font-size:.8rem;">
                     <option value="all">${t('all_topics')}</option>
-                    ${[...new Set(words.map(w=>w.t))].map(t=>`<option value="${t}">${t}</option>`).join('')}
+                    ${[...new Set(words.map(w=>w.t))].map(tp=>`<option value="${escHtml(tp)}">${escHtml(translateTopic(tp))}</option>`).join('')}
                 </select>
-                <button class="btn btn-ghost btn-sm" id="vocabGenBtn" style="white-space:nowrap;">🎲 AI: додати нові слова</button>
+                <button class="btn btn-ghost btn-sm" id="vocabGenBtn" style="white-space:nowrap;">${t('gen_words_btn')}</button>
             </div>
             <div class="card" style="padding:0;overflow-x:auto;">
                 <table class="vocab-table">
@@ -757,7 +763,7 @@ function viewVocabulary() {
             return `<tr>
                 <td><strong>${escHtml(w.no)}</strong></td>
                 <td>${escHtml(translated)}</td>
-                <td><span style="font-size:.7rem;background:var(--line-soft);padding:2px 8px;border-radius:999px;">${escHtml(w.t)}</span></td>
+                <td><span style="font-size:.7rem;background:var(--line-soft);padding:2px 8px;border-radius:999px;">${escHtml(translateTopic(w.t))}</span></td>
                 <td><span class="status ${status}">${statusLabels[status]}</span></td>
             </tr>`;
         }).join('');
@@ -775,22 +781,26 @@ function viewVocabulary() {
     genBtn.onclick = async () => {
         genBtn.disabled = true;
         const originalLabel = genBtn.textContent;
-        genBtn.textContent = '🎲 Генерую…';
+        genBtn.textContent = t('gen_words_loading');
         try {
-            const existingTopics = [...new Set(words.map(w => w.t))];
-            const newWords = await generateVocabWordsAI(level, existingTopics);
+            // Беремо актуальний список слів саме зараз (а не той, що був
+            // на момент відкриття екрана) — важливо, якщо це вже не перше
+            // натискання кнопки поспіль: щойно додані слова теж мають
+            // потрапити у список "уникати".
+            const freshWords = vocabForLevel(level, lang);
+            const newWords = await generateVocabWordsAI(level, freshWords);
             const added = addCustomWords(level, Array.isArray(newWords) ? newWords : []);
             if (added > 0) {
-                toast(`✅ Додано нових слів: ${added}`);
+                toast(tf('gen_words_added_toast', {n: added}));
                 navigate('vocabulary');
             } else {
-                toast('🤔 AI не запропонував нових унікальних слів. Спробуй ще раз.');
+                toast(t('gen_words_none_toast'));
                 genBtn.disabled = false;
                 genBtn.textContent = originalLabel;
             }
         } catch (e) {
             console.error('[Словник] Помилка генерації слів:', e);
-            toast('⚠️ Не вдалося згенерувати слова. Спробуй ще раз.');
+            toast(t('gen_words_error_toast'));
             genBtn.disabled = false;
             genBtn.textContent = originalLabel;
         }
@@ -807,21 +817,21 @@ function viewTestsHub() {
     const wrap = el(`
         <div class="view">
             <h1>${t('h_tests')}</h1>
-            <p style="color:var(--ink-soft);margin-bottom:16px;">Оберіть тип вправи для рівня ${STATE.level||'A1'}.</p>
+            <p style="color:var(--ink-soft);margin-bottom:16px;">${tf('tests_choose_type', {level: STATE.level||'A1'})}</p>
             <div class="grid cols-3" id="thub"></div>
         </div>
     `);
     const items = [
-        ["test-mc", "🔤", "Вибір форми", "Оберіть правильний переклад або форму."],
-        ["test-cloze", "✏️", "Заповни пропуск", "Вставте пропущене слово."],
-        ["test-order", "🧩", "Склади речення", "Розташуйте слова у правильному порядку."],
-        ["test-listen", "🎧", "Аудіювання", "Прослухайте слово і оберіть переклад."],
-        ["test-translate", "🌐", "Переклад", "Напишіть переклад слова."],
+        ["test-mc", "🔤", t('test_mc_title'), t('test_mc_desc')],
+        ["test-cloze", "✏️", t('test_cloze_title'), t('test_cloze_desc')],
+        ["test-order", "🧩", t('test_order_title'), t('test_order_desc')],
+        ["test-listen", "🎧", t('test_listen_title'), t('test_listen_desc')],
+        ["test-translate", "🌐", t('test_translate_title'), t('test_translate_desc')],
     ];
     const grid = wrap.querySelector('#thub');
     items.forEach(([r, icon, title, desc]) => {
         const c = el(
-            `<div class="card test-type-card"><div class="icon">${icon}</div><h3>${title}</h3><p>${desc}</p><button class="btn btn-primary btn-sm">Почати</button></div>`
+            `<div class="card test-type-card"><div class="icon">${icon}</div><h3>${title}</h3><p>${desc}</p><button class="btn btn-primary btn-sm">${t('start_test_btn')}</button></div>`
         );
         c.querySelector('button').onclick = () => navigate(r);
         grid.appendChild(c);
@@ -852,10 +862,9 @@ function runQuiz(sub, route, title) {
         // currentLevelWords()) саме зараз намагається їх підвантажити чи
         // згенерувати; коли це станеться, render() перемалює екран.
         const v = el(
-            `<div class="view"><div class="empty-state"><h3>Готуємо слова…</h3>` +
-            `<p>Для цієї мови й рівня ще немає слів — вони генеруються. ` +
-            `Спробуйте оновити за кілька секунд або оберіть інший рівень.</p>` +
-            `<button class="btn btn-ghost" id="quizEmptyBack">До тестів</button></div></div>`
+            `<div class="view"><div class="empty-state"><h3>${t('quiz_preparing_title')}</h3>` +
+            `<p>${t('quiz_preparing_desc')}</p>` +
+            `<button class="btn btn-ghost" id="quizEmptyBack">${t('to_tests_btn')}</button></div></div>`
         );
         v.querySelector('#quizEmptyBack').onclick = () => navigate('tests');
         return v;
@@ -877,11 +886,11 @@ function runQuiz(sub, route, title) {
         const trollMood = pct >= 70 ? 'happy' : (pct >= 40 ? 'idle' : 'sad');
         const wrap = el(`
             <div class="view session-end card">
-                <h2>${title}: завершено</h2>
+                <h2>${title}${t('quiz_finished_suffix')}</h2>
                 <div class="bignum">${pct}%</div>
-                <p style="color:var(--ink-soft)">${sub.correct} із ${sub.qs.length} правильно · +100 XP</p>
+                <p style="color:var(--ink-soft)">${tf('correct_of_xp', {correct: sub.correct, total: sub.qs.length, xp: 100})}</p>
                 <div style="display:flex;justify-content:center;margin:16px 0;"></div>
-                <button class="btn btn-ghost" id="hub">До тестів</button>
+                <button class="btn btn-ghost" id="hub">${t('to_tests_btn')}</button>
             </div>
         `);
         const trollSlot = wrap.querySelector('div[style*="justify-content:center"]');
@@ -910,9 +919,9 @@ function runQuiz(sub, route, title) {
 
     function renderControls() {
         let html = '<div class="test-controls">';
-        html += `<button class="btn btn-ghost btn-sm" id="prevBtn" ${sub.i===0?'disabled':''}>◀ Назад</button>`;
+        html += `<button class="btn btn-ghost btn-sm" id="prevBtn" ${sub.i===0?'disabled':''}>${t('prev_btn')}</button>`;
         html +=
-            `<button class="btn btn-primary btn-sm" id="nextBtn" ${sub.i>=sub.qs.length-1?'disabled':''}>Вперед ▶</button>`;
+            `<button class="btn btn-primary btn-sm" id="nextBtn" ${sub.i>=sub.qs.length-1?'disabled':''}>${t('next_btn2')}</button>`;
         html += '</div>';
         return html;
     }
@@ -1032,7 +1041,7 @@ function viewTestMC() {
         SUBSTATE.correct = 0;
         SUBSTATE.userAnswers = null;
     }
-    return runQuiz(SUBSTATE, 'test-mc', "Вибір форми");
+    return runQuiz(SUBSTATE, 'test-mc', t('test_mc_title'));
 }
 
 function escapeRegex(s) {
@@ -1078,10 +1087,10 @@ function viewTestCloze() {
         const pct = Math.round((sub.correct / sub.qs.length) * 100);
         const wrap = el(`
             <div class="view session-end card">
-                <h2>Заповни пропуск: завершено</h2>
+                <h2>${t('test_cloze_title')}${t('quiz_finished_suffix')}</h2>
                 <div class="bignum">${pct}%</div>
-                <p style="color:var(--ink-soft)">${sub.correct} із ${sub.qs.length} правильно</p>
-                <button class="btn btn-ghost" id="hub">До тестів</button>
+                <p style="color:var(--ink-soft)">${tf('correct_of_total', {correct: sub.correct, total: sub.qs.length})}</p>
+                <button class="btn btn-ghost" id="hub">${t('to_tests_btn')}</button>
             </div>
         `);
         wrap.querySelector('#hub').onclick = () => navigate('tests');
@@ -1115,7 +1124,7 @@ function viewTestCloze() {
         const q = currentQ;
         const ans = currentAnswer;
 
-        const header = el(`<div class="qcounter">Заповни пропуск · ${sub.i+1} / ${sub.qs.length}</div>`);
+        const header = el(`<div class="qcounter">${t('test_cloze_title')} · ${sub.i+1} / ${sub.qs.length}</div>`);
         container.appendChild(header);
         const progress = el(
             `<div class="progress-track" style="margin-bottom:12px;"><div class="progress-fill" style="width:${((sub.i+1)/sub.qs.length)*100}%"></div></div>`
@@ -1161,8 +1170,8 @@ function viewTestCloze() {
         container.appendChild(optsContainer);
 
         const controls = el(`<div class="test-controls">
-            <button class="btn btn-ghost btn-sm" id="prevBtn" ${sub.i===0?'disabled':''}>◀ Назад</button>
-            <button class="btn btn-primary btn-sm" id="nextBtn" ${sub.i>=sub.qs.length-1?'disabled':''}>Вперед ▶</button>
+            <button class="btn btn-ghost btn-sm" id="prevBtn" ${sub.i===0?'disabled':''}>${t('prev_btn')}</button>
+            <button class="btn btn-primary btn-sm" id="nextBtn" ${sub.i>=sub.qs.length-1?'disabled':''}>${t('next_btn2')}</button>
         </div>`);
         container.appendChild(controls);
         controls.querySelector('#prevBtn').onclick = () => {
@@ -1220,10 +1229,10 @@ function viewTestOrder() {
         const pct = Math.round((sub.correct / sub.qs.length) * 100);
         const wrap = el(`
             <div class="view session-end card">
-                <h2>Склади речення: завершено</h2>
+                <h2>${t('test_order_title')}${t('quiz_finished_suffix')}</h2>
                 <div class="bignum">${pct}%</div>
-                <p style="color:var(--ink-soft)">${sub.correct} із ${sub.qs.length} правильно</p>
-                <button class="btn btn-ghost" id="hub">До тестів</button>
+                <p style="color:var(--ink-soft)">${tf('correct_of_total', {correct: sub.correct, total: sub.qs.length})}</p>
+                <button class="btn btn-ghost" id="hub">${t('to_tests_btn')}</button>
             </div>
         `);
         wrap.querySelector('#hub').onclick = () => navigate('tests');
@@ -1255,7 +1264,7 @@ function viewTestOrder() {
 
     function renderOrder() {
         container.innerHTML = '';
-        const header = el(`<div class="qcounter">Склади речення · ${sub.i+1} / ${sub.qs.length}</div>`);
+        const header = el(`<div class="qcounter">${t('test_order_title')} · ${sub.i+1} / ${sub.qs.length}</div>`);
         container.appendChild(header);
         const progress = el(
             `<div class="progress-track" style="margin-bottom:12px;"><div class="progress-fill" style="width:${((sub.i+1)/sub.qs.length)*100}%"></div></div>`
@@ -1270,7 +1279,7 @@ function viewTestOrder() {
         const pool = el(`<div class="order-pool" id="pool"></div>`);
         container.appendChild(pool);
 
-        const checkBtn = el(`<button class="btn btn-primary" id="checkOrder" ${ans!==null?'disabled':''}>Перевірити</button>`);
+        const checkBtn = el(`<button class="btn btn-primary" id="checkOrder" ${ans!==null?'disabled':''}>${t('check_btn')}</button>`);
         container.appendChild(checkBtn);
         const fb = el(`<div id="orderFb"></div>`);
         container.appendChild(fb);
@@ -1292,7 +1301,7 @@ function viewTestOrder() {
         function renderTarget() {
             target.innerHTML = '';
             if (chosen.length === 0) { target.innerHTML =
-                    '<span style="color:var(--ink-soft);font-size:.8rem;">Натискайте слова знизу</span>'; }
+                    '<span style="color:var(--ink-soft);font-size:.8rem;">' + t('click_words_below') + '</span>'; }
             chosen.forEach((idx, pos) => {
                 const tok = el(`<button class="token">${shuffled[idx]}</button>`);
                 tok.onclick = () => { if (ans !== null) return;
@@ -1313,7 +1322,7 @@ function viewTestOrder() {
             sub.userAnswers[sub.i] = { chosen: chosen.slice(), shuffled: shuffled, correct: correct };
             if (correct) sub.correct = (sub.correct || 0) + 1;
             fb.innerHTML =
-                `<div class="feedback-banner ${correct?'ok':'bad'}" style="margin-top:12px;">${correct?'Правильно! 🎉':'Правильний варіант: '+q.original.join(' ')}</div>`;
+                `<div class="feedback-banner ${correct?'ok':'bad'}" style="margin-top:12px;">${correct? t('check_correct') : tf('correct_variant_prefix', {answer: q.original.join(' ')})}</div>`;
             checkBtn.disabled = true;
             updateDotsOrder();
             setTimeout(() => {
@@ -1346,8 +1355,8 @@ function viewTestOrder() {
     });
 
     const controls = el(`<div class="test-controls">
-        <button class="btn btn-ghost btn-sm" id="prevBtn" ${sub.i===0?'disabled':''}>◀ Назад</button>
-        <button class="btn btn-primary btn-sm" id="nextBtn" ${sub.i>=sub.qs.length-1?'disabled':''}>Вперед ▶</button>
+        <button class="btn btn-ghost btn-sm" id="prevBtn" ${sub.i===0?'disabled':''}>${t('prev_btn')}</button>
+        <button class="btn btn-primary btn-sm" id="nextBtn" ${sub.i>=sub.qs.length-1?'disabled':''}>${t('next_btn2')}</button>
     </div>`);
     container.appendChild(controls);
     controls.querySelector('#prevBtn').onclick = () => {
@@ -1377,7 +1386,7 @@ function viewTestListen() {
         SUBSTATE.correct = 0;
         SUBSTATE.userAnswers = null;
     }
-    return runQuiz(SUBSTATE, 'test-listen', "Аудіювання");
+    return runQuiz(SUBSTATE, 'test-listen', t('test_listen_title'));
 }
 
 function viewTestTranslate() {
@@ -1399,10 +1408,10 @@ function viewTestTranslate() {
         const pct = Math.round((sub.correct / sub.qs.length) * 100);
         const wrap = el(`
             <div class="view session-end card">
-                <h2>Переклад: завершено</h2>
+                <h2>${t('test_translate_title')}${t('quiz_finished_suffix')}</h2>
                 <div class="bignum">${pct}%</div>
-                <p style="color:var(--ink-soft)">${sub.correct} із ${sub.qs.length} правильно</p>
-                <button class="btn btn-ghost" id="hub">До тестів</button>
+                <p style="color:var(--ink-soft)">${tf('correct_of_total', {correct: sub.correct, total: sub.qs.length})}</p>
+                <button class="btn btn-ghost" id="hub">${t('to_tests_btn')}</button>
             </div>
         `);
         wrap.querySelector('#hub').onclick = () => navigate('tests');
@@ -1434,29 +1443,33 @@ function viewTestTranslate() {
 
     function renderTranslate() {
         container.innerHTML = '';
-        const header = el(`<div class="qcounter">Переклад · ${sub.i+1} / ${sub.qs.length}</div>`);
+        const header = el(`<div class="qcounter">${t('test_translate_title')} · ${sub.i+1} / ${sub.qs.length}</div>`);
         container.appendChild(header);
         const progress = el(
             `<div class="progress-track" style="margin-bottom:12px;"><div class="progress-fill" style="width:${((sub.i+1)/sub.qs.length)*100}%"></div></div>`
         );
         container.appendChild(progress);
 
-        const prompt = dirToNo ? `Напишіть норвезькою: «${escHtml(w.uk)}»` :
-            `Напишіть українською: «${escHtml(w.no)}»`;
-        const qText = el(`<div class="question-text" style="font-size:1.1rem;margin-bottom:16px;">${escHtml(prompt)}</div>`);
+        // Раніше тут було жорстко закодовано "норвезькою"/"українською" —
+        // тобто напрямок перекладу завжди називався норвезьким, навіть
+        // якщо STATE.targetLang був іспанською чи будь-якою іншою мовою.
+        const promptLangName = dirToNo ? targetLangDisplayName(STATE.targetLang || 'no') : interfaceLangName(STATE.vocabLang || 'uk');
+        const promptWord = dirToNo ? w.uk : w.no;
+        const prompt = tf('write_in_lang_prompt', { word: escHtml(promptWord), lang: promptLangName });
+        const qText = el(`<div class="question-text" style="font-size:1.1rem;margin-bottom:16px;">${prompt}</div>`);
         container.appendChild(qText);
 
-        const input = el(`<input class="type-input" id="tIn" placeholder="ваша відповідь" ${ans!==null?'disabled':''}>`);
+        const input = el(`<input class="type-input" id="tIn" placeholder="${t('your_answer_placeholder')}" ${ans!==null?'disabled':''}>`);
         container.appendChild(input);
         if (ans !== null) input.value = ans.input;
         const fb = el(`<div id="tFb"></div>`);
         container.appendChild(fb);
-        const btn = el(`<button class="btn btn-primary" id="tCheck" ${ans!==null?'disabled':''}>Перевірити</button>`);
+        const btn = el(`<button class="btn btn-primary" id="tCheck" ${ans!==null?'disabled':''}>${t('check_btn')}</button>`);
         container.appendChild(btn);
 
         if (ans !== null) {
             fb.innerHTML =
-                `<div class="feedback-banner ${ans.correct?'ok':'bad'}">${ans.correct?'Правильно! 🎉':'Правильна відповідь: '+ans.correctAnswer}</div>`;
+                `<div class="feedback-banner ${ans.correct?'ok':'bad'}">${ans.correct? t('check_correct') : tf('check_wrong_prefix', {answer: ans.correctAnswer})}</div>`;
         }
 
         btn.onclick = () => {
@@ -1466,7 +1479,7 @@ function viewTestTranslate() {
             sub.userAnswers[sub.i] = { input: val, correct: correct, correctAnswer: target };
             if (correct) sub.correct = (sub.correct || 0) + 1;
             fb.innerHTML =
-                `<div class="feedback-banner ${correct?'ok':'bad'}">${correct?'Правильно! 🎉':'Правильна відповідь: '+target}</div>`;
+                `<div class="feedback-banner ${correct?'ok':'bad'}">${correct? t('check_correct') : tf('check_wrong_prefix', {answer: target})}</div>`;
             btn.disabled = true;
             input.disabled = true;
             updateDotsTranslate();
@@ -1481,8 +1494,8 @@ function viewTestTranslate() {
         input.onkeydown = (e) => { if (e.key === 'Enter') btn.click(); };
 
         const controls = el(`<div class="test-controls">
-            <button class="btn btn-ghost btn-sm" id="prevBtn" ${sub.i===0?'disabled':''}>◀ Назад</button>
-            <button class="btn btn-primary btn-sm" id="nextBtn" ${sub.i>=sub.qs.length-1?'disabled':''}>Вперед ▶</button>
+            <button class="btn btn-ghost btn-sm" id="prevBtn" ${sub.i===0?'disabled':''}>${t('prev_btn')}</button>
+            <button class="btn btn-primary btn-sm" id="nextBtn" ${sub.i>=sub.qs.length-1?'disabled':''}>${t('next_btn2')}</button>
         </div>`);
         container.appendChild(controls);
         controls.querySelector('#prevBtn').onclick = () => {
@@ -1586,21 +1599,21 @@ function viewTroll() {
                 <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
                     <div id="trollDisplay"></div>
                     <div style="flex:1;min-width:220px;">
-                        <span class="troll-level-badge">Рівень тролля ${lvl}</span>
+                        <span class="troll-level-badge">${tf('troll_level_badge', {lvl})}</span>
                         <div style="margin-top:10px;">
                             <div class="xp-bar-track"><div class="xp-bar-fill" style="width:${pct}%"></div></div>
-                            <p style="font-size:.78rem;color:var(--ink-soft);margin-top:6px;font-family:'JetBrains Mono',monospace;">${xp} XP (до наступного рівня: ${nextCeil - xp} XP)</p>
+                            <p style="font-size:.78rem;color:var(--ink-soft);margin-top:6px;font-family:'JetBrains Mono',monospace;">${tf('xp_to_next', {xp, remaining: nextCeil - xp})}</p>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="card" style="margin-bottom:20px;">
-                <h3>Спорядження</h3>
-                <p style="color:var(--ink-soft);font-size:.85rem;margin-bottom:12px;">Розблоковується з підвищенням рівня тролля. Натисніть, щоб одягнути/зняти.</p>
+                <h3>${t('gear_title')}</h3>
+                <p style="color:var(--ink-soft);font-size:.85rem;margin-bottom:12px;">${t('gear_desc')}</p>
                 <div class="gear-row" id="gearRow"></div>
             </div>
             <div class="card">
-                <h3>Досягнення (${STATE.achievements.length}/${ACHIEVEMENTS.length})</h3>
+                <h3>${tf('achievements_title', {unlocked: STATE.achievements.length, total: ACHIEVEMENTS.length})}</h3>
                 <div class="ach-grid" id="achGrid" style="margin-top:12px;"></div>
             </div>
         </div>

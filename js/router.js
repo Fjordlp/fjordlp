@@ -45,7 +45,7 @@ function updateNav() {
         ["troll", t('nav_troll')],
         ["profile", t('nav_profile')],
         ["onboarding", t('nav_onboarding')],
-        ["norskprove", t('nav_norskprove')],
+        ["norskprove", examSectionNavLabel()],
     ];
 
     // Якщо користувач адмін – додаємо адмін-панель
