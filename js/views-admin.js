@@ -414,12 +414,19 @@ async function loadTournamentList() {
         let html = '';
         snap.forEach(doc => {
             const data = doc.data();
+            // Поле status у документі ніколи не оновлюється після
+            // створення (лишається "waiting" назавжди) — рахуємо
+            // актуальний статус з startTime/endTime замість нього.
+            const now = Date.now();
+            const start = data.startTime ? new Date(data.startTime).getTime() : null;
+            const end = data.endTime ? new Date(data.endTime).getTime() : null;
+            const liveStatus = (start && now < start) ? 'waiting' : (end && now > end) ? 'finished' : 'active';
             const statusMap = { waiting: '⏳ Очікує', active: '🔄 Активний', finished: '✅ Завершено' };
             html += `
                 <div class="card" style="margin-bottom:8px;">
                     <div style="display:flex;justify-content:space-between;align-items:center;">
                         <div>
-                            <strong>${data.name}</strong> ${statusMap[data.status] || data.status}
+                            <strong>${data.name}</strong> ${statusMap[liveStatus]}
                             <span style="font-size:.8rem;color:var(--ink-soft);margin-left:12px;">${data.level || 'A1'}</span>
                         </div>
                         <button class="btn btn-danger btn-sm" onclick="adminDeleteTournament('${doc.id}')">🗑️</button>
@@ -521,46 +528,56 @@ async function loadUserList() {
 }
 
 // =====================================================================
-//  ПОШУК СЛІВ
+//  ПОШУК СЛІВ + ПОЧАТКОВЕ ЗАВАНТАЖЕННЯ СПИСКУ
 // =====================================================================
-document.addEventListener('DOMContentLoaded', () => {
+// Раніше пошук був прив'язаний через document.addEventListener('DOMContentLoaded', ...)
+// — це подія, яка спрацьовує РІВНО ОДИН РАЗ при першому завантаженні
+// сторінки. У цьому застосунку сторінки рендеряться динамічно через
+// navigate()/render() вже ПІСЛЯ того, як DOMContentLoaded давно
+// спрацював — тобто поле #wordSearch у той момент ще навіть не існувало
+// в DOM, і обробник ніколи не встановлювався. Пошук був повністю мертвий.
+// Так само initAdminWords() тепер і вантажить список слів одразу при
+// відкритті сторінки (раніше цього не робилося взагалі — саме тому
+// список був порожнім, доки не додаси нове слово).
+function initAdminWords() {
     const searchInput = document.getElementById('wordSearch');
-    if (searchInput) {
-        searchInput.addEventListener('input', async function() {
-            const q = this.value.trim().toLowerCase();
-            const container = document.getElementById('wordList');
-            if (!container || q.length < 2) {
-                loadWordList();
+    if (!searchInput) return; // не та сторінка
+    loadWordList(); // початкове завантаження — раніше не викликалось
+    searchInput.value = '';
+    searchInput.addEventListener('input', async function() {
+        const q = this.value.trim().toLowerCase();
+        const container = document.getElementById('wordList');
+        if (!container || q.length < 2) {
+            loadWordList();
+            return;
+        }
+        try {
+            const snap = await firebaseDb.collection('words')
+                .where('no', '>=', q)
+                .where('no', '<=', q + '\uf8ff')
+                .limit(20)
+                .get();
+            if (snap.empty) {
+                container.innerHTML = '<p style="color:var(--ink-soft);">Нічого не знайдено.</p>';
                 return;
             }
-            try {
-                const snap = await firebaseDb.collection('words')
-                    .where('no', '>=', q)
-                    .where('no', '<=', q + '\uf8ff')
-                    .limit(20)
-                    .get();
-                if (snap.empty) {
-                    container.innerHTML = '<p style="color:var(--ink-soft);">Нічого не знайдено.</p>';
-                    return;
-                }
-                let html = '<table class="vocab-table"><thead><tr><th>Слово</th><th>Переклад</th><th>Рівень</th><th>Дія</th></tr></thead><tbody>';
-                snap.forEach(doc => {
-                    const data = doc.data();
-                    html += `<tr>
-                        <td><strong>${data.no}</strong></td>
-                        <td>${data.uk}</td>
-                        <td><span class="tag level-${data.level}">${data.level}</span></td>
-                        <td><button class="btn btn-danger btn-sm" onclick="adminDeleteWord('${doc.id}')">🗑️</button></td>
-                    </tr>`;
-                });
-                html += '</tbody></table>';
-                container.innerHTML = html;
-            } catch (e) {
-                console.error('Помилка пошуку:', e);
-            }
-        });
-    }
-});
+            let html = '<table class="vocab-table"><thead><tr><th>Слово</th><th>Переклад</th><th>Рівень</th><th>Дія</th></tr></thead><tbody>';
+            snap.forEach(doc => {
+                const data = doc.data();
+                html += `<tr>
+                    <td><strong>${data.no}</strong></td>
+                    <td>${data.uk}</td>
+                    <td><span class="tag level-${data.level}">${data.level}</span></td>
+                    <td><button class="btn btn-danger btn-sm" onclick="adminDeleteWord('${doc.id}')">🗑️</button></td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        } catch (e) {
+            console.error('Помилка пошуку:', e);
+        }
+    });
+}
 
 // =====================================================================
 //  СТОРІНКА: Спільні словники (для мов, окрім норвезької)
@@ -574,7 +591,6 @@ function viewAdminSharedVocab() {
     if (!STATE || !STATE.admin) return errorAccessDenied();
 
     const preset = (typeof SUBSTATE !== 'undefined' && SUBSTATE) || {};
-    const otherLangs = LANGUAGES.filter(l => !l.builtin);
 
     return `
         <div class="view">
@@ -582,7 +598,7 @@ function viewAdminSharedVocab() {
             <p style="color:var(--ink-soft);margin-bottom:16px;">
                 Згенеруйте словник для мови й рівня, перегляньте результат і опублікуйте —
                 після цього його одразу побачать усі користувачі сайту, які вчать цю мову.
-                Норвезька сюди не входить — у неї свій вбудований словник (розділ «Слова»).
+                Для норвезької це ДОДАЄ слова до вбудованого словника (не замінює його).
             </p>
 
             <div class="card" style="margin-bottom:16px;">
@@ -590,7 +606,7 @@ function viewAdminSharedVocab() {
                     <div class="field">
                         <label>Мова</label>
                         <select id="avLang">
-                            ${otherLangs.map(l => `<option value="${l.code}" ${preset.presetLang===l.code?'selected':''}>${l.flag} ${l.name.uk}</option>`).join('')}
+                            ${LANGUAGES.map(l => `<option value="${l.code}" ${preset.presetLang===l.code?'selected':''}>${l.flag} ${l.name.uk}</option>`).join('')}
                         </select>
                     </div>
                     <div class="field">

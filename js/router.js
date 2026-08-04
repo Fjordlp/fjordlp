@@ -29,8 +29,23 @@ function render() {
     document.getElementById('userNameDisplay').textContent = STATE.name || currentUser;
     
     // Деякі адмін-сторінки потребують ініціалізації після рендерингу
+    // (їхні view-функції повертають рядок HTML, а не DOM-елемент із вже
+    // прив'язаними обробниками, тож завантаження списків і кнопки
+    // прив'язуються тут, коли розмітка вже реально в DOM).
     if (ROUTE === 'admin-vocab-gen' && typeof initAdminSharedVocab === 'function') {
         initAdminSharedVocab();
+    }
+    if (ROUTE === 'admin-words' && typeof initAdminWords === 'function') {
+        initAdminWords();
+    }
+    if (ROUTE === 'admin-tournaments' && typeof loadTournamentList === 'function') {
+        loadTournamentList();
+    }
+    if (ROUTE === 'admin-daily' && typeof loadDailyList === 'function') {
+        loadDailyList();
+    }
+    if (ROUTE === 'admin-users' && typeof loadUserList === 'function') {
+        loadUserList();
     }
 }
 
@@ -46,6 +61,7 @@ function updateNav() {
         ["profile", t('nav_profile')],
         ["onboarding", t('nav_onboarding')],
         ["norskprove", examSectionNavLabel()],
+        ["tournaments", t('nav_tournaments')],
     ];
 
     // Якщо користувач адмін – додаємо адмін-панель
@@ -111,6 +127,10 @@ function renderView() {
             return viewOnboarding();
         case 'norskprove':
             return viewNorskprove();
+        case 'tournaments':
+            return viewTournaments();
+        case 'tournament-play':
+            return viewTournamentPlay();
         case 'admin':
             return el(viewAdmin());
         case 'admin-words':

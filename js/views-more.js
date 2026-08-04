@@ -650,3 +650,261 @@ function viewOnboarding() {
 
     return wrap;
 }
+
+// =====================================================================
+//  ТУРНІРИ (гравецька частина)
+// =====================================================================
+// Раніше в адмін-панелі можна було СТВОРИТИ турнір, але жодного способу
+// його зіграти чи побачити не існувало — ні пункту меню, ні екрана.
+// Результати гравця пишемо в окремий документ
+// tournaments/{id}/participants/{uid} (не в сам турнір) — так Firestore-
+// правила можуть просто перевірити "це твій документ", без ризику для
+// чужих результатів. Рахунок усе одно рахує клієнт (чесно попереджено і
+// в firestore.rules, і в описі нижче) — прийнятно для навчального
+// застосунку без реальних призів.
+
+function tournamentLiveStatus(tr) {
+    const now = Date.now();
+    const start = tr.startTime ? new Date(tr.startTime).getTime() : null;
+    const end = tr.endTime ? new Date(tr.endTime).getTime() : null;
+    if (start && now < start) return 'upcoming';
+    if (end && now > end) return 'ended';
+    return 'active';
+}
+
+function viewTournaments() {
+    const wrap = el(`
+        <div class="view">
+            <h1>${t('h_tournaments')}</h1>
+            <div id="tournListContainer" class="grid" style="gap:12px;">
+                <p style="color:var(--ink-soft);">…</p>
+            </div>
+        </div>
+    `);
+
+    async function load() {
+        const container = wrap.querySelector('#tournListContainer');
+        if (!container) return;
+        try {
+            const snap = await firebaseDb.collection('tournaments').orderBy('createdAt', 'desc').limit(20).get();
+            if (snap.empty) {
+                container.innerHTML = `<p style="color:var(--ink-soft);">${t('tourn_no_tournaments')}</p>`;
+                return;
+            }
+            container.innerHTML = '';
+            const uid = firebaseAuth && firebaseAuth.currentUser ? firebaseAuth.currentUser.uid : null;
+            for (const doc of snap.docs) {
+                const tr = { id: doc.id, ...doc.data() };
+                const status = tournamentLiveStatus(tr);
+                const statusLabel = { upcoming: t('tourn_status_upcoming'), active: t('tourn_status_active'), ended: t('tourn_status_ended') }[status];
+                let myResult = null;
+                if (uid) {
+                    try {
+                        const pDoc = await firebaseDb.collection('tournaments').doc(tr.id).collection('participants').doc(uid).get();
+                        if (pDoc.exists) myResult = pDoc.data();
+                    } catch (e) { /* ігноруємо — просто не покажемо свій результат */ }
+                }
+                const card = el(`
+                    <div class="card">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+                            <div>
+                                <strong>${escHtml(tr.name || '')}</strong>
+                                <span class="tag" style="margin-left:8px;">${statusLabel}</span>
+                                <span class="tag level-${tr.level||'A1'}" style="margin-left:4px;">${tr.level||'A1'}</span>
+                                ${tr.description ? `<p style="color:var(--ink-soft);font-size:.85rem;margin:6px 0 0 0;">${escHtml(tr.description)}</p>` : ''}
+                                <p style="color:var(--ink-soft);font-size:.78rem;margin:6px 0 0 0;">
+                                    ${tf('tourn_questions_count', {n: (tr.questions||[]).length})}
+                                    ${tr.startTime ? ' · ' + tf('tourn_starts_at', {date: new Date(tr.startTime).toLocaleString()}) : ''}
+                                    ${tr.endTime ? ' · ' + tf('tourn_ends_at', {date: new Date(tr.endTime).toLocaleString()}) : ''}
+                                </p>
+                                ${myResult ? `<p style="color:var(--teal);font-size:.85rem;margin-top:6px;font-weight:600;">${tf('tourn_your_score', {score: myResult.correct, total: myResult.total})}</p>` : ''}
+                            </div>
+                            <button class="btn ${myResult ? 'btn-ghost' : 'btn-primary'} btn-sm" data-tid="${tr.id}" ${status==='upcoming'?'disabled':''}>
+                                ${myResult ? t('tourn_view_results_btn') : (status==='ended' ? t('tourn_view_results_btn') : t('tourn_join_btn'))}
+                            </button>
+                        </div>
+                    </div>
+                `);
+                const btn = card.querySelector('button[data-tid]');
+                if (btn) btn.onclick = () => navigate('tournament-play', { tournamentId: tr.id });
+                container.appendChild(card);
+            }
+        } catch (e) {
+            console.error('[Турніри] Помилка завантаження списку:', e);
+            container.innerHTML = `<p style="color:var(--rose);">${t('tourn_submit_error')}</p>`;
+        }
+    }
+    load();
+
+    return wrap;
+}
+
+function viewTournamentPlay() {
+    const tournamentId = SUBSTATE.tournamentId;
+    const wrap = el(`
+        <div class="view" style="max-width:600px;margin:0 auto;">
+            <div id="tournPlayContainer"><p style="color:var(--ink-soft);">…</p></div>
+        </div>
+    `);
+    if (!tournamentId) {
+        wrap.querySelector('#tournPlayContainer').innerHTML =
+            `<div class="empty-state"><h3>${t('tourn_no_tournaments')}</h3><button class="btn btn-ghost" id="tpBack">${t('tourn_back_to_list')}</button></div>`;
+        wrap.querySelector('#tpBack').onclick = () => navigate('tournaments');
+        return wrap;
+    }
+
+    function renderLeaderboard(container, tournamentDoc, highlightUid) {
+        firebaseDb.collection('tournaments').doc(tournamentDoc.id).collection('participants')
+            .orderBy('score', 'desc').limit(50).get().then(snap => {
+                if (snap.empty) {
+                    container.innerHTML = `<p style="color:var(--ink-soft);font-size:.85rem;">${t('tourn_no_participants')}</p>`;
+                    return;
+                }
+                let html = `<h3 style="margin-top:20px;">${t('tourn_leaderboard_title')}</h3><div class="leaderboard">`;
+                let rank = 0;
+                snap.forEach(doc => {
+                    rank++;
+                    const d = doc.data();
+                    const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank + '.';
+                    const isYou = doc.id === highlightUid;
+                    html += `<div class="leaderboard-row ${isYou?'you':''}"><span class="rank">${medal}</span><span class="name">${escHtml(d.name||'—')}${isYou?t('tourn_you_marker'):''}</span><span class="pts">${d.correct}/${d.total}</span></div>`;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            }).catch(e => console.error('[Турніри] Помилка завантаження таблиці результатів:', e));
+    }
+
+    async function init() {
+        const container = wrap.querySelector('#tournPlayContainer');
+        const uid = firebaseAuth && firebaseAuth.currentUser ? firebaseAuth.currentUser.uid : null;
+        let trDoc;
+        try {
+            trDoc = await firebaseDb.collection('tournaments').doc(tournamentId).get();
+        } catch (e) {
+            console.error('[Турніри] Помилка завантаження турніру:', e);
+            container.innerHTML = `<p style="color:var(--rose);">${t('tourn_submit_error')}</p>`;
+            return;
+        }
+        if (!trDoc.exists) {
+            container.innerHTML = `<div class="empty-state"><h3>${t('tourn_no_tournaments')}</h3></div>`;
+            return;
+        }
+        const tr = { id: trDoc.id, ...trDoc.data() };
+        const status = tournamentLiveStatus(tr);
+
+        // Чи вже грав(-ла) цей користувач?
+        let existing = null;
+        if (uid) {
+            try {
+                const pDoc = await firebaseDb.collection('tournaments').doc(tr.id).collection('participants').doc(uid).get();
+                if (pDoc.exists) existing = pDoc.data();
+            } catch (e) { /* ігноруємо */ }
+        }
+
+        if (existing || status === 'ended') {
+            // Показуємо результат (свій, якщо є) + таблицю результатів
+            container.innerHTML = `
+                <div class="card session-end">
+                    <h2>${escHtml(tr.name||'')}</h2>
+                    ${existing ? `<div class="bignum">${Math.round((existing.correct/existing.total)*100)}%</div>
+                    <p style="color:var(--ink-soft);">${tf('correct_of_total', {correct: existing.correct, total: existing.total})}</p>` :
+                    `<p style="color:var(--ink-soft);">${status==='ended' ? t('tourn_already_ended') : ''}</p>`}
+                    <button class="btn btn-ghost" id="tpBack" style="margin-top:12px;">${t('tourn_back_to_list')}</button>
+                    <div id="tpLeaderboard"></div>
+                </div>
+            `;
+            container.querySelector('#tpBack').onclick = () => navigate('tournaments');
+            renderLeaderboard(container.querySelector('#tpLeaderboard'), tr, uid);
+            return;
+        }
+
+        if (status === 'upcoming') {
+            container.innerHTML = `<div class="empty-state"><h3>${escHtml(tr.name||'')}</h3><p>${t('tourn_not_started')}</p><button class="btn btn-ghost" id="tpBack">${t('tourn_back_to_list')}</button></div>`;
+            container.querySelector('#tpBack').onclick = () => navigate('tournaments');
+            return;
+        }
+
+        // Гра: проходимо questions по черзі (той самий фіксований набір
+        // для всіх учасників — чесно, ніхто не отримує легших питань).
+        const questions = tr.questions || [];
+        if (!questions.length) {
+            container.innerHTML = `<div class="empty-state"><h3>${t('tourn_no_tournaments')}</h3></div>`;
+            return;
+        }
+        SUBSTATE.tpIndex = SUBSTATE.tpIndex || 0;
+        SUBSTATE.tpCorrect = SUBSTATE.tpCorrect || 0;
+        SUBSTATE.tpAnswered = SUBSTATE.tpAnswered || false;
+
+        function renderQuestion() {
+            const q = questions[SUBSTATE.tpIndex];
+            container.innerHTML = `
+                <div class="qcounter">${escHtml(tr.name||'')} · ${SUBSTATE.tpIndex+1} / ${questions.length}</div>
+                <div class="progress-track" style="margin-bottom:12px;"><div class="progress-fill" style="width:${((SUBSTATE.tpIndex+1)/questions.length)*100}%"></div></div>
+                <div class="question-text" style="font-size:1.1rem;margin-bottom:16px;">${escHtml(q.question)}</div>
+                <div class="mc-options" id="tpOpts"></div>
+            `;
+            const opts = container.querySelector('#tpOpts');
+            (q.options||[]).forEach((opt, idx) => {
+                const b = el(`<button class="mc-opt" data-idx="${idx}">${escHtml(opt)}</button>`);
+                b.onclick = () => {
+                    if (SUBSTATE.tpAnswered) return;
+                    SUBSTATE.tpAnswered = true;
+                    const correct = idx === q.correct;
+                    if (correct) SUBSTATE.tpCorrect++;
+                    opts.querySelectorAll('.mc-opt').forEach((btn2, idx2) => {
+                        if (idx2 === q.correct) btn2.classList.add('correct');
+                        else if (idx2 === idx) btn2.classList.add('wrong');
+                    });
+                    setTimeout(() => {
+                        SUBSTATE.tpAnswered = false;
+                        if (SUBSTATE.tpIndex < questions.length - 1) {
+                            SUBSTATE.tpIndex++;
+                            renderQuestion();
+                        } else {
+                            finish();
+                        }
+                    }, 700);
+                };
+                opts.appendChild(b);
+            });
+        }
+
+        async function finish() {
+            const total = questions.length;
+            const correct = SUBSTATE.tpCorrect;
+            container.innerHTML = `
+                <div class="card session-end">
+                    <h2>${t('tourn_finish_title')}</h2>
+                    <div class="bignum">${Math.round((correct/total)*100)}%</div>
+                    <p style="color:var(--ink-soft);">${tf('tourn_finish_desc', {correct, total})}</p>
+                    <button class="btn btn-ghost" id="tpBack" style="margin-top:12px;">${t('tourn_back_to_list')}</button>
+                    <div id="tpLeaderboard"></div>
+                </div>
+            `;
+            container.querySelector('#tpBack').onclick = () => navigate('tournaments');
+            if (uid) {
+                try {
+                    await firebaseDb.collection('tournaments').doc(tr.id).collection('participants').doc(uid).set({
+                        name: STATE.name || 'Гравець',
+                        score: correct, // для сортування таблиці (Firestore не вміє сортувати за "correct/total" напряму)
+                        correct,
+                        total,
+                        completedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    });
+                    addXP(50, 'tournament_participation');
+                    updateState();
+                } catch (e) {
+                    console.error('[Турніри] Не вдалося зберегти результат:', e);
+                    toast(t('tourn_submit_error'));
+                }
+            }
+            renderLeaderboard(container.querySelector('#tpLeaderboard'), tr, uid);
+            SUBSTATE.tpIndex = 0; SUBSTATE.tpCorrect = 0; SUBSTATE.tpAnswered = false;
+        }
+
+        renderQuestion();
+    }
+    init();
+
+    return wrap;
+}

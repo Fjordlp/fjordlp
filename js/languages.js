@@ -163,7 +163,12 @@ async function saveSharedVocab(lang, level, words) {
 // другий — уже з даними).
 let _sharedVocabLoading = {};
 async function ensureSharedVocabLoaded(lang, level) {
-    if (lang === 'no') return; // норвезька — вбудований словник, спільний не потрібен
+    // Раніше норвезька тут повністю пропускалась ("є вбудований словник,
+    // спільний не потрібен") — але тепер адмін може публікувати ДОДАТКОВІ
+    // норвезькі слова через "Спільні словники", тож пропускати завантаження
+    // для 'no' більше не можна: інакше опубліковані слова ніколи не
+    // потраплять користувачам. vocabForLevel() у helpers.js додає їх до
+    // вбудованого VOCAB, а не замінює його.
     ensureGeneratedVocabStore();
     if (STATE.generatedVocab[lang][level] && STATE.generatedVocab[lang][level].length) return; // вже є (з кешу чи попереднього фетчу)
     const key = lang + '|' + level;
@@ -197,7 +202,7 @@ async function ensureSharedVocabLoaded(lang, level) {
 // вже покаже слова.
 let _vocabAutoGenLoading = {};
 async function ensureVocabAvailable(lang, level) {
-    if (!lang || lang === 'no') return; // вбудований словник — нічого підвантажувати не треба
+    if (!lang) return;
     ensureGeneratedVocabStore();
     const already = STATE.generatedVocab[lang] && STATE.generatedVocab[lang][level];
     if (already && already.length) return;
@@ -205,9 +210,16 @@ async function ensureVocabAvailable(lang, level) {
     if (_vocabAutoGenLoading[key]) return; // вже в процесі — не дублюємо запити
     _vocabAutoGenLoading[key] = true;
     try {
+        // Норвезька теж підвантажує опубліковане адміном (сторінка
+        // "Спільні словники" тепер дозволяє публікувати й норвезькі
+        // набори) — vocabForLevel() у helpers.js додає їх до вбудованого
+        // VOCAB. А от особисту AI-генерацію "про запас" для норвезької
+        // НЕ запускаємо — вбудованого словника й так достатньо, і не
+        // варто змушувати кожного користувача чекати на зайвий AI-запит.
         await ensureSharedVocabLoaded(lang, level);
         const afterShared = STATE.generatedVocab[lang] && STATE.generatedVocab[lang][level];
         if (afterShared && afterShared.length) return;
+        if (lang === 'no') return;
         if (typeof generateBulkVocab !== 'function' || typeof callAiRaw !== 'function') return; // AI недоступна (наприклад, AI_PROXY_URL не налаштований)
         // Невеликий пакет (2 запити ≈ до 120 слів) — досить, щоб одразу
         // можна було почати вчитись, не чекаючи на адміна.

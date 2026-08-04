@@ -271,7 +271,14 @@ function vocabForLevel(level, lang) {
     lang = lang || (STATE && STATE.targetLang) || 'no';
     let base;
     if (lang === 'no') {
-        base = (VOCAB && VOCAB[level]) || [];
+        // Раніше тут було ЛИШЕ вбудоване VOCAB[level] — опубліковані
+        // адміном через "Спільні словники" норвезькі слова (STATE.
+        // generatedVocab.no[level]) ніколи не потрапляли користувачам,
+        // навіть якщо адмін їх щойно опублікував. Тепер додаємо їх до
+        // вбудованого словника (а не замінюємо).
+        const builtin = (VOCAB && VOCAB[level]) || [];
+        const extra = (STATE && STATE.generatedVocab && STATE.generatedVocab.no && STATE.generatedVocab.no[level]) || [];
+        base = extra.length ? builtin.concat(extra) : builtin;
     } else {
         if (!STATE.generatedVocab) STATE.generatedVocab = {};
         if (!STATE.generatedVocab[lang]) STATE.generatedVocab[lang] = {};
