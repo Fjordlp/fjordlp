@@ -1664,10 +1664,16 @@ const STUDY_PLANS = {
         const TEST_TIERS = ["A1", "A2", "B1", "B2", "C1", "C2"];
         const TIER_PASS_THRESHOLD = { A1: 0.4, A2: 0.5, B1: 0.55, B2: 0.6, C1: 0.65, C2: 0.7 };
 
-        function computeTestLevel(answers) {
+        // questions: набір питань тесту (необов'язковий). За замовчуванням —
+        // вбудований норвезький LEVEL_TEST, але приймає й інший масив (той
+        // самий формат {lvl, ...}), що будується динамічно для мов, відмінних
+        // від норвезької — див. buildDynamicLevelTest() у views-core.js та
+        // buildLevelTestForLang() у languages.js.
+        function computeTestLevel(answers, questions) {
+            questions = questions || LEVEL_TEST;
             let achieved = "A1";
             for (const tier of TEST_TIERS) {
-                const idxs = LEVEL_TEST.map((q, i) => q.lvl === tier ? i : -1).filter(i => i >= 0);
+                const idxs = questions.map((q, i) => q.lvl === tier ? i : -1).filter(i => i >= 0);
                 const correct = idxs.filter(i => answers[i]).length;
                 const ratio = idxs.length ? correct / idxs.length : 0;
                 if (ratio >= TIER_PASS_THRESHOLD[tier]) { achieved = tier; } else break;

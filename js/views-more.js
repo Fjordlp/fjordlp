@@ -555,7 +555,7 @@ function viewOnboarding() {
             <div class="card">
                 <h3>${t('onb_test_title')}</h3>
                 <p style="color:var(--ink-soft);font-size:.85rem;">
-                    ${t('onb_test_desc')}
+                    ${tf('onb_test_desc', {lang: targetLangDisplayName(STATE.targetLang || 'no')})}
                 </p>
                 <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
                     <button class="btn btn-primary" id="onbStartTest">${t('onb_start_test_btn')}</button>

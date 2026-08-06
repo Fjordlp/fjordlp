@@ -219,12 +219,91 @@ function viewAdminUsers() {
             <h1>👥 Користувачі</h1>
             <div class="card">
                 <h3>📋 Всі користувачі</h3>
+                <input id="userSearch" placeholder="Пошук за ім'ям або email..." style="width:100%;padding:8px 12px;margin-top:10px;border-radius:10px;border:1px solid var(--line);font-size:.9rem;">
                 <div id="userList" style="margin-top:12px;max-height:500px;overflow-y:auto;">Завантаження...</div>
             </div>
             <button class="btn btn-ghost btn-sm" onclick="navigate('admin')" style="margin-top:12px;">← Назад до панелі</button>
         </div>
     `;
 }
+
+// Завантажити список користувачів з Firestore. Раніше ця функція взагалі
+// не існувала — сторінка просто назавжди показувала "Завантаження...".
+async function loadUserList(query) {
+    const container = document.getElementById('userList');
+    if (!container) return;
+    query = (query || '').trim().toLowerCase();
+    if (!firebaseReady || !firebaseDb) {
+        container.innerHTML = '<p style="color:var(--rose);">Firestore недоступний.</p>';
+        return;
+    }
+    try {
+        const snap = await firebaseDb.collection('users').limit(300).get();
+        if (snap.empty) {
+            container.innerHTML = '<p style="color:var(--ink-soft);">Користувачів ще немає.</p>';
+            return;
+        }
+        const rows = [];
+        snap.forEach(doc => {
+            const d = doc.data();
+            const name = d.name || doc.id;
+            const email = d.email || '';
+            if (query && !name.toLowerCase().includes(query) && !email.toLowerCase().includes(query) && !doc.id.toLowerCase().includes(query)) {
+                return; // не збігається з пошуком — пропускаємо
+            }
+            rows.push({ id: doc.id, name, email, level: d.level || '—', xp: d.xp || 0, admin: !!d.admin, targetLang: d.targetLang || 'no' });
+        });
+        if (!rows.length) {
+            container.innerHTML = '<p style="color:var(--ink-soft);">Нічого не знайдено.</p>';
+            return;
+        }
+        let html = `<p style="color:var(--ink-soft);font-size:.8rem;margin-bottom:8px;">Знайдено: ${rows.length}</p>`;
+        html += '<table class="vocab-table"><thead><tr><th>Ім\'я</th><th>Рівень</th><th>Мова</th><th>XP</th><th>Адмін</th><th>Дія</th></tr></thead><tbody>';
+        rows.forEach(u => {
+            const lang = (typeof getLanguage === 'function') ? getLanguage(u.targetLang) : null;
+            html += `<tr>
+                <td><strong>${u.name}</strong>${u.email ? `<br><span style="font-size:.72rem;color:var(--ink-soft);">${u.email}</span>` : ''}</td>
+                <td><span class="tag level-${u.level}">${u.level}</span></td>
+                <td>${lang ? lang.flag + ' ' + lang.name.uk : u.targetLang}</td>
+                <td>${u.xp}</td>
+                <td>${u.admin ? '✅' : '—'}</td>
+                <td><button class="btn btn-ghost btn-sm" onclick="adminToggleUserAdmin('${u.id}', ${!u.admin})">${u.admin ? 'Прибрати адміна' : 'Зробити адміном'}</button></td>
+            </tr>`;
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
+    } catch (e) {
+        console.error('[Адмін] Помилка завантаження користувачів:', e);
+        container.innerHTML = '<p style="color:var(--rose);">Помилка завантаження. Перевірте правила доступу Firestore.</p>';
+    }
+}
+
+// Прив'язка пошуку користувачів — так само, як initAdminWords, викликається
+// одразу після реального рендеру сторінки (не через DOMContentLoaded).
+function initAdminUsers() {
+    const searchInput = document.getElementById('userSearch');
+    if (!searchInput) return; // не та сторінка
+    loadUserList();
+    let debounceTimer;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        const q = this.value;
+        debounceTimer = setTimeout(() => loadUserList(q), 250);
+    });
+}
+
+// Надати/забрати права адміністратора іншому користувачу.
+window.adminToggleUserAdmin = async function(uid, makeAdmin) {
+    if (!firebaseReady || !firebaseDb) return;
+    try {
+        await firebaseDb.collection('users').doc(uid).set({ admin: makeAdmin }, { merge: true });
+        toast(makeAdmin ? '✅ Права адміністратора надано' : '✅ Права адміністратора прибрано');
+        loadUserList(document.getElementById('userSearch') ? document.getElementById('userSearch').value : '');
+    } catch (e) {
+        console.error('[Адмін] Помилка зміни прав:', e);
+        toast('⚠️ Не вдалося змінити права. Перевірте правила доступу Firestore.');
+    }
+};
 
 // =====================================================================
 //  АДМІН-ФУНКЦІЇ (для onclick)
@@ -360,24 +439,52 @@ function errorAccessDenied() {
     return `<div class="view"><div class="empty-state"><h3>⛔ Доступ заборонено</h3><p>Ви не маєте прав адміністратора.</p></div></div>`;
 }
 
-// Завантажити список слів
-async function loadWordList() {
+// Завантажити список слів — тепер шукає і серед 731 вбудованого норвезького
+// слова (VOCAB з data.js), і серед слів, які адмін додав вручну через
+// Firestore. Раніше перевірялась ТІЛЬКИ колекція Firestore 'words', тому
+// жодне з вбудованих слів узагалі не можна було знайти чи побачити тут.
+async function loadWordList(query) {
     const container = document.getElementById('wordList');
     if (!container) return;
+    query = (query || '').trim().toLowerCase();
     try {
-        const snap = await firebaseDb.collection('words').limit(100).get();
-        if (snap.empty) {
-            container.innerHTML = '<p style="color:var(--ink-soft);">Немає слів у словнику.</p>';
+        // 1) Вбудовані слова з data.js (усі рівні одразу)
+        const builtin = [];
+        if (typeof VOCAB === 'object' && VOCAB) {
+            Object.keys(VOCAB).forEach(level => {
+                (VOCAB[level] || []).forEach(w => {
+                    if (!query || w.no.toLowerCase().includes(query) || w.uk.toLowerCase().includes(query)) {
+                        builtin.push({ ...w, level, _builtin: true });
+                    }
+                });
+            });
+        }
+        // 2) Слова, додані адміном через Firestore
+        let adminWords = [];
+        if (firebaseReady && firebaseDb) {
+            const snap = await firebaseDb.collection('words').limit(200).get();
+            snap.forEach(doc => {
+                const data = doc.data();
+                if (!query || (data.no||'').toLowerCase().includes(query) || (data.uk||'').toLowerCase().includes(query)) {
+                    adminWords.push({ ...data, _docId: doc.id });
+                }
+            });
+        }
+
+        const all = [...adminWords, ...builtin].slice(0, 300); // адмінські — першими (їх можна редагувати/видаляти)
+        if (!all.length) {
+            container.innerHTML = '<p style="color:var(--ink-soft);">' + (query ? 'Нічого не знайдено.' : 'Немає слів у словнику.') + '</p>';
             return;
         }
-        let html = '<table class="vocab-table"><thead><tr><th>Слово</th><th>Переклад</th><th>Рівень</th><th>Дія</th></tr></thead><tbody>';
-        snap.forEach(doc => {
-            const data = doc.data();
+        let html = `<p style="color:var(--ink-soft);font-size:.8rem;margin-bottom:8px;">Знайдено: ${all.length} (${builtin.length} вбудованих, ${adminWords.length} доданих вручну)</p>`;
+        html += '<table class="vocab-table"><thead><tr><th>Слово</th><th>Переклад</th><th>Рівень</th><th>Джерело</th><th>Дія</th></tr></thead><tbody>';
+        all.forEach(data => {
             html += `<tr>
                 <td><strong>${data.no}</strong></td>
                 <td>${data.uk}</td>
                 <td><span class="tag level-${data.level}">${data.level}</span></td>
-                <td><button class="btn btn-danger btn-sm" onclick="adminDeleteWord('${doc.id}')">🗑️</button></td>
+                <td style="font-size:.75rem;color:var(--ink-soft);">${data._builtin ? 'Вбудоване' : 'Додано вручну'}</td>
+                <td>${data._builtin ? '<span style="color:var(--ink-soft);font-size:.75rem;">—</span>' : `<button class="btn btn-danger btn-sm" onclick="adminDeleteWord('${data._docId}')">🗑️</button>`}</td>
             </tr>`;
         });
         html += '</tbody></table>';
@@ -402,6 +509,10 @@ window.adminDeleteWord = async function(docId) {
 };
 
 // Завантажити турніри
+// Кількість учасників рахуємо з підколекції tournaments/{id}/participants —
+// саме туди пишуться реальні результати гравців. Поле participants у
+// самому документі турніру ніколи не заповнюється, тож рахувати з нього
+// людей не можна.
 async function loadTournamentList() {
     const container = document.getElementById('tournamentList');
     if (!container) return;
@@ -412,34 +523,58 @@ async function loadTournamentList() {
             return;
         }
         let html = '';
-        snap.forEach(doc => {
+        for (const doc of snap.docs) {
             const data = doc.data();
-            // Поле status у документі ніколи не оновлюється після
-            // створення (лишається "waiting" назавжди) — рахуємо
-            // актуальний статус з startTime/endTime замість нього.
-            const now = Date.now();
-            const start = data.startTime ? new Date(data.startTime).getTime() : null;
-            const end = data.endTime ? new Date(data.endTime).getTime() : null;
-            const liveStatus = (start && now < start) ? 'waiting' : (end && now > end) ? 'finished' : 'active';
             const statusMap = { waiting: '⏳ Очікує', active: '🔄 Активний', finished: '✅ Завершено' };
+
+            let participantsCount = 0;
+            let participantsHtml = '<p style="color:var(--ink-soft);font-size:.85rem;">Ще ніхто не приєднався.</p>';
+            try {
+                const pSnap = await firebaseDb.collection('tournaments').doc(doc.id).collection('participants').get();
+                participantsCount = pSnap.size;
+                if (!pSnap.empty) {
+                    const rows = pSnap.docs
+                        .map(p => ({ id: p.id, ...p.data() }))
+                        .sort((a, b) => (b.correct || 0) - (a.correct || 0));
+                    participantsHtml = '<table class="vocab-table"><thead><tr><th>Ім\'я</th><th>Результат</th></tr></thead><tbody>' +
+                        rows.map(p => `<tr><td>${escHtml(p.name || p.id)}</td><td>${(p.correct ?? '—')}/${(p.total ?? '—')}</td></tr>`).join('') +
+                        '</tbody></table>';
+                }
+            } catch (e) {
+                console.error('Помилка завантаження учасників турніру:', e);
+                participantsHtml = '<p style="color:var(--rose);">Не вдалося завантажити список учасників.</p>';
+            }
+
             html += `
                 <div class="card" style="margin-bottom:8px;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
                         <div>
-                            <strong>${data.name}</strong> ${statusMap[liveStatus]}
+                            <strong>${escHtml(data.name || '')}</strong> ${statusMap[data.status] || data.status}
                             <span style="font-size:.8rem;color:var(--ink-soft);margin-left:12px;">${data.level || 'A1'}</span>
+                            <span class="tag" style="margin-left:8px;" title="Кількість учасників">👥 ${participantsCount}</span>
                         </div>
-                        <button class="btn btn-danger btn-sm" onclick="adminDeleteTournament('${doc.id}')">🗑️</button>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn btn-ghost btn-sm" onclick="toggleTournamentParticipants('${doc.id}')">👥 Учасники</button>
+                            <button class="btn btn-danger btn-sm" onclick="adminDeleteTournament('${doc.id}')">🗑️</button>
+                        </div>
                     </div>
+                    <div id="tournParticipants-${doc.id}" style="display:none;margin-top:10px;max-height:300px;overflow-y:auto;">${participantsHtml}</div>
                 </div>
             `;
-        });
+        }
         container.innerHTML = html;
     } catch (e) {
         console.error('Помилка завантаження турнірів:', e);
         container.innerHTML = '<p style="color:var(--rose);">Помилка завантаження.</p>';
+
     }
 }
+
+// Показати/сховати список учасників конкретного турніру
+window.toggleTournamentParticipants = function(docId) {
+    const box = document.getElementById(`tournParticipants-${docId}`);
+    if (box) box.style.display = box.style.display === 'none' ? 'block' : 'none';
+};
 
 // Видалити турнір
 window.adminDeleteTournament = async function(docId) {
@@ -499,83 +634,25 @@ window.adminDeleteDaily = async function(docId) {
     }
 };
 
-// Завантажити користувачів
-async function loadUserList() {
-    const container = document.getElementById('userList');
-    if (!container) return;
-    try {
-        const snap = await firebaseDb.collection('users').limit(50).get();
-        if (snap.empty) {
-            container.innerHTML = '<p style="color:var(--ink-soft);">Немає користувачів.</p>';
-            return;
-        }
-        let html = '<table class="vocab-table"><thead><tr><th>Ім\'я</th><th>Email</th><th>Рівень</th><th>XP</th></tr></thead><tbody>';
-        snap.forEach(doc => {
-            const data = doc.data();
-            html += `<tr>
-                <td><strong>${data.name || 'Без імені'}</strong></td>
-                <td>${data.email || '—'}</td>
-                <td>${data.level || 'A1'}</td>
-                <td>${data.xp || 0}</td>
-            </tr>`;
-        });
-        html += '</tbody></table>';
-        container.innerHTML = html;
-    } catch (e) {
-        console.error('Помилка завантаження користувачів:', e);
-        container.innerHTML = '<p style="color:var(--rose);">Помилка завантаження.</p>';
-    }
-}
-
 // =====================================================================
-//  ПОШУК СЛІВ + ПОЧАТКОВЕ ЗАВАНТАЖЕННЯ СПИСКУ
+//  ПОШУК СЛІВ
 // =====================================================================
-// Раніше пошук був прив'язаний через document.addEventListener('DOMContentLoaded', ...)
-// — це подія, яка спрацьовує РІВНО ОДИН РАЗ при першому завантаженні
-// сторінки. У цьому застосунку сторінки рендеряться динамічно через
-// navigate()/render() вже ПІСЛЯ того, як DOMContentLoaded давно
-// спрацював — тобто поле #wordSearch у той момент ще навіть не існувало
-// в DOM, і обробник ніколи не встановлювався. Пошук був повністю мертвий.
-// Так само initAdminWords() тепер і вантажить список слів одразу при
-// відкритті сторінки (раніше цього не робилося взагалі — саме тому
-// список був порожнім, доки не додаси нове слово).
+// Раніше це було прив'язано через document.addEventListener('DOMContentLoaded', ...),
+// яка спрацьовує ОДИН РАЗ при першому завантаженні сторінки — а оскільки
+// сторінка "Слова" рендериться пізніше через navigate() (SPA-навігація, без
+// повного перезавантаження), DOMContentLoaded вже давно відбувся і ніколи
+// не спрацює повторно. Тому пошук у полі #wordSearch просто ніколи не
+// прив'язувався. initAdminWords() тепер викликається одразу після того, як
+// розмітка сторінки реально в DOM (див. router.js).
 function initAdminWords() {
     const searchInput = document.getElementById('wordSearch');
     if (!searchInput) return; // не та сторінка
-    loadWordList(); // початкове завантаження — раніше не викликалось
-    searchInput.value = '';
-    searchInput.addEventListener('input', async function() {
-        const q = this.value.trim().toLowerCase();
-        const container = document.getElementById('wordList');
-        if (!container || q.length < 2) {
-            loadWordList();
-            return;
-        }
-        try {
-            const snap = await firebaseDb.collection('words')
-                .where('no', '>=', q)
-                .where('no', '<=', q + '\uf8ff')
-                .limit(20)
-                .get();
-            if (snap.empty) {
-                container.innerHTML = '<p style="color:var(--ink-soft);">Нічого не знайдено.</p>';
-                return;
-            }
-            let html = '<table class="vocab-table"><thead><tr><th>Слово</th><th>Переклад</th><th>Рівень</th><th>Дія</th></tr></thead><tbody>';
-            snap.forEach(doc => {
-                const data = doc.data();
-                html += `<tr>
-                    <td><strong>${data.no}</strong></td>
-                    <td>${data.uk}</td>
-                    <td><span class="tag level-${data.level}">${data.level}</span></td>
-                    <td><button class="btn btn-danger btn-sm" onclick="adminDeleteWord('${doc.id}')">🗑️</button></td>
-                </tr>`;
-            });
-            html += '</tbody></table>';
-            container.innerHTML = html;
-        } catch (e) {
-            console.error('Помилка пошуку:', e);
-        }
+    loadWordList(); // початкове завантаження (усі слова)
+    let debounceTimer;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        const q = this.value;
+        debounceTimer = setTimeout(() => loadWordList(q), 250);
     });
 }
 
@@ -591,6 +668,7 @@ function viewAdminSharedVocab() {
     if (!STATE || !STATE.admin) return errorAccessDenied();
 
     const preset = (typeof SUBSTATE !== 'undefined' && SUBSTATE) || {};
+    const allLangs = LANGUAGES; // тепер включно з норвезькою — можна доповнювати вбудований словник
 
     return `
         <div class="view">
@@ -598,7 +676,8 @@ function viewAdminSharedVocab() {
             <p style="color:var(--ink-soft);margin-bottom:16px;">
                 Згенеруйте словник для мови й рівня, перегляньте результат і опублікуйте —
                 після цього його одразу побачать усі користувачі сайту, які вчать цю мову.
-                Для норвезької це ДОДАЄ слова до вбудованого словника (не замінює його).
+                Для норвезької це ДОДАЄ слова поверх уже наявного вбудованого словника
+                (не замінює його) — зручно, щоб розширити конкретну тему чи рівень.
             </p>
 
             <div class="card" style="margin-bottom:16px;">
@@ -606,7 +685,7 @@ function viewAdminSharedVocab() {
                     <div class="field">
                         <label>Мова</label>
                         <select id="avLang">
-                            ${LANGUAGES.map(l => `<option value="${l.code}" ${preset.presetLang===l.code?'selected':''}>${l.flag} ${l.name.uk}</option>`).join('')}
+                            ${allLangs.map(l => `<option value="${l.code}" ${preset.presetLang===l.code?'selected':''}>${l.flag} ${l.name.uk}</option>`).join('')}
                         </select>
                     </div>
                     <div class="field">

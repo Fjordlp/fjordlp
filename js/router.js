@@ -44,10 +44,24 @@ function render() {
     if (ROUTE === 'admin-daily' && typeof loadDailyList === 'function') {
         loadDailyList();
     }
-    if (ROUTE === 'admin-users' && typeof loadUserList === 'function') {
-        loadUserList();
+    if (ROUTE === 'admin-users' && typeof initAdminUsers === 'function') {
+        initAdminUsers();
     }
 }
+
+// Явне групування маршрутів для підсвітки активного пункту меню.
+// Раніше активний пункт визначався через ROUTE.startsWith(r), що
+// працювало лише випадково: наприклад, 'test-mc'.startsWith('tests')
+// === false, тож меню "гасло" щоразу, коли користувач проходив тест
+// чи сесію карток. Тепер кожен пункт меню явно перелічує всі
+// сторінки/під-сторінки, які до нього належать.
+const NAV_ROUTE_GROUPS = {
+    flashcards: ['flashcards', 'flashsession'],
+    tests: ['tests', 'test-mc', 'test-cloze', 'test-order', 'test-listen', 'test-translate'],
+    profile: ['profile', 'levels', 'leveltest'],
+    tournaments: ['tournaments', 'tournament-play'],
+    admin: ['admin', 'admin-words', 'admin-tournaments', 'admin-daily', 'admin-users', 'admin-vocab-gen'],
+};
 
 function updateNav() {
     const nav = document.getElementById('mainnav');
@@ -72,7 +86,8 @@ function updateNav() {
     nav.innerHTML = '';
     items.forEach(([r, label]) => {
         const b = el(`<button>${label}</button>`);
-        if (ROUTE === r || (ROUTE.startsWith(r))) b.classList.add('active');
+        const group = NAV_ROUTE_GROUPS[r] || [r];
+        if (group.includes(ROUTE)) b.classList.add('active');
         b.onclick = () => { navigate(r);
             nav.classList.remove('open'); };
         nav.appendChild(b);

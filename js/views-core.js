@@ -169,6 +169,28 @@ function viewHome() {
         </div>
     `);
 
+    // "🩹 Складні слова" — теж показуємо на головній, якщо такі є, щоб
+    // людина не забувала повертатись і закріплювати саме те, що не йде.
+    const leechWords = collectLeechWords(STATE.targetLang || 'no');
+    if (leechWords.length > 0) {
+        const leechTeaser = el(`
+            <div class="card" style="margin-top:16px;border:2px solid var(--rose);">
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                    <span style="font-size:1.6rem;">🩹</span>
+                    <div style="flex:1;min-width:180px;">
+                        <strong>${t('leech_deck_label')}</strong>
+                        <p style="color:var(--ink-soft);font-size:.85rem;margin:2px 0 0;">${tf('leech_deck_count', {n: leechWords.length})}</p>
+                    </div>
+                    <button class="btn btn-danger btn-sm" id="homeLeechBtn">${t('start_btn')}</button>
+                </div>
+            </div>
+        `);
+        leechTeaser.querySelector('#homeLeechBtn').onclick = () => {
+            navigate('flashsession', { level, topic: '__ALL__', mode: 'flip', deckWords: leechWords, allMode: true, lang: STATE.targetLang || 'no', leechMode: true });
+        };
+        wrap.appendChild(leechTeaser);
+    }
+
     // ---- Обробники ----
     wrap.querySelector('#trollGreetSlot').appendChild(renderTrollBubble('idle', 'greeting', 64));
     wrap.querySelectorAll('[data-r]').forEach(b => b.onclick = () => navigate(b.dataset.r));
@@ -364,11 +386,86 @@ function viewLevels() {
     return wrap;
 }
 
+// Раніше вхідний тест на рівень для БУДЬ-ЯКОЇ мови навчання показував
+// один і той самий вбудований LEVEL_TEST — а це набір питань про
+// НОРВЕЗЬКІ слова. Людина, що вчить іспанську чи японську, отримувала
+// тест про норвезьку. Для норвезької (STATE.targetLang === 'no')
+// лишаємо цей вручну складений тест (найкраща якість, включно з
+// граматикою). Для решти мов питання тепер генеруються "на льоту" з
+// реального словника обраної мови (той самий пул слів, що й у
+// картках/тестах: currentLevelWords()/vocabForLevel()) — той самий
+// принцип перекладних питань, що й у viewTestMC().
+async function buildDynamicLevelTest(lang) {
+    // Готуємо словник одразу для всіх рівнів ПАРАЛЕЛЬНО (а не по черзі) —
+    // якщо для мови ще нема спільного словника й доводиться генерувати
+    // через AI, послідовне очікування 6 рівнів підряд могло б тривати
+    // хвилину й довше.
+    await Promise.all(LEVELS.map(level =>
+        ensureVocabAvailable(lang, level).catch(e =>
+            console.error('[Тест на рівень] Не вдалося підготувати словник для', lang, level, e))
+    ));
+    const groups = [];
+    for (const level of LEVELS) {
+        const words = vocabForLevel(level, lang);
+        if (!words || words.length < 4) continue; // замало слів для рівня — пропускаємо, а не показуємо порожні/непарні питання
+        const pool = shuffle(words).slice(0, 5);
+        pool.forEach(w => {
+            const correct = wordTranslation(w, level, STATE.vocabLang);
+            const distractors = shuffle(words.filter(x => x.no !== w.no)).slice(0, 2).map(x => wordTranslation(x, level, STATE.vocabLang));
+            if (distractors.length < 2 || !correct) return;
+            const opts = shuffle([correct, ...distractors]);
+            groups.push({ lvl: level, q: `${t('how_translate')} «${w.no}»?`, opts, a: opts.indexOf(correct) });
+        });
+    }
+    return groups;
+}
+
 function viewLevelTest() {
+    const lang = STATE.targetLang || 'no';
+
+    if (lang !== 'no') {
+        // Питання ще не готові — запускаємо (один раз) асинхронну
+        // побудову й показуємо заглушку, доки вона не завершиться.
+        if (!SUBSTATE.testQuestions && !SUBSTATE.testLoading) {
+            SUBSTATE.testLoading = true;
+            buildDynamicLevelTest(lang).then(qs => {
+                SUBSTATE.testQuestions = qs;
+                SUBSTATE.testLoading = false;
+                if (ROUTE === 'leveltest') render();
+            }).catch(e => {
+                console.error('[Тест на рівень] Помилка побудови тесту:', e);
+                SUBSTATE.testQuestions = [];
+                SUBSTATE.testLoading = false;
+                if (ROUTE === 'leveltest') render();
+            });
+        }
+        if (SUBSTATE.testLoading || !SUBSTATE.testQuestions) {
+            return el(`
+                <div class="view onb-wrap" style="max-width:500px;margin:30px auto;text-align:center;">
+                    <h1>${t('onb_test_title')}</h1>
+                    <p style="color:var(--ink-soft);">${t('level_test_preparing')}</p>
+                </div>
+            `);
+        }
+        if (SUBSTATE.testQuestions.length === 0) {
+            const wrap = el(`
+                <div class="view onb-wrap" style="max-width:500px;margin:30px auto;text-align:center;">
+                    <h1>${t('onb_test_title')}</h1>
+                    <p style="color:var(--ink-soft);">${t('level_test_no_words')}</p>
+                    <button class="btn btn-primary" id="goLevels" style="margin-top:12px;">${t('pick_level_manually_btn')}</button>
+                </div>
+            `);
+            wrap.querySelector('#goLevels').onclick = () => navigate('levels');
+            return wrap;
+        }
+    }
+
+    const questions = lang === 'no' ? LEVEL_TEST : SUBSTATE.testQuestions;
+
     if (!SUBSTATE.i) { SUBSTATE.i = 0; SUBSTATE.answers = []; }
     const i = SUBSTATE.i;
-    if (i >= LEVEL_TEST.length) {
-        const level = computeTestLevel(SUBSTATE.answers);
+    if (i >= questions.length) {
+        const level = computeTestLevel(SUBSTATE.answers, questions);
         STATE.level = level;
         STATE.levelTestDone = true;
         markActivityToday();
@@ -388,11 +485,21 @@ function viewLevelTest() {
         resultView.querySelector('#goHome').onclick = () => navigate('home');
         return resultView;
     }
-    const q = LEVEL_TEST[i];
+    // Для норвезької в LEVEL_TEST є ручні переклади питання/варіантів
+    // (q_en/opts_en, q_ru/opts_ru) — раніше вони взагалі не
+    // застосовувались, і тест завжди показувався українською незалежно
+    // від мови інтерфейсу. Для згенерованих (не норвезьких) питань
+    // текст уже будується мовою інтерфейсу на етапі генерації, тож
+    // localizedField тут просто поверне q.q/q.opts як є.
+    const q = lang === 'no' ? {
+        ...questions[i],
+        q: localizedField(questions[i], 'q'),
+        opts: (STATE.uiLang !== 'uk' && questions[i]['opts_' + STATE.uiLang]) || questions[i].opts,
+    } : questions[i];
     const wrap = el(`
         <div class="view" style="max-width:500px;margin:20px auto;text-align:center;">
-            <div class="qcounter">${t('question_word')} ${i+1} ${t('of_word')} ${LEVEL_TEST.length}</div>
-            <div class="progress-track" style="margin-bottom:18px;"><div class="progress-fill" style="width:${(i/LEVEL_TEST.length)*100}%"></div></div>
+            <div class="qcounter">${t('question_word')} ${i+1} ${t('of_word')} ${questions.length}</div>
+            <div class="progress-track" style="margin-bottom:18px;"><div class="progress-fill" style="width:${(i/questions.length)*100}%"></div></div>
             <div class="question-text" style="font-size:1.15rem;font-family:'Fraunces',serif;margin-bottom:18px;">${escHtml(q.q)}</div>
             <div class="mc-options" style="margin:0 auto;"></div>
         </div>
@@ -431,6 +538,7 @@ function viewFlashDeckPicker(lang) {
         <div class="view">
             <h1>${t('h_flashcards')}</h1>
             <p style="color:var(--ink-soft);font-size:.9rem;">${tf('flash_pick_desc', {lang: lang.toUpperCase()})}</p>
+            <div id="leechDeckSlot"></div>
             <div class="deckpicker" id="lvlpick"></div>
             <div class="deckpicker" id="topicpick"></div>
             <div class="deckpicker" id="modepick"></div>
@@ -441,6 +549,25 @@ function viewFlashDeckPicker(lang) {
             <div class="card" id="deckInfo" style="margin-top:8px;"></div>
         </div>
     `);
+
+    // "🩹 Складні слова" — окрема тренувальна колода зі слів, які
+    // користувач провалював 4+ рази поспіль (isLeech). Показуємо лише
+    // коли такі слова реально є, і незалежно від обраного рівня/теми,
+    // бо складне слово могло лишитись ще з A1, поки людина вже на B1.
+    const leechWords = collectLeechWords(lang);
+    if (leechWords.length > 0) {
+        const leechCard = el(`
+            <div class="card" style="margin-bottom:16px;border:2px solid var(--rose);">
+                <p style="font-weight:700;margin-bottom:4px;">${t('leech_deck_label')}</p>
+                <p style="color:var(--ink-soft);font-size:.85rem;margin-bottom:10px;">${t('leech_deck_desc')}</p>
+                <button class="btn btn-danger" id="startLeechBtn">${tf('leech_deck_count', {n: leechWords.length})}</button>
+            </div>
+        `);
+        leechCard.querySelector('#startLeechBtn').onclick = () => {
+            navigate('flashsession', { level, topic, mode: 'flip', deckWords: leechWords, allMode: true, lang, leechMode: true });
+        };
+        wrap.querySelector('#leechDeckSlot').appendChild(leechCard);
+    }
 
     const lvlpick = wrap.querySelector('#lvlpick');
     LEVELS.forEach(lv => {
@@ -516,9 +643,36 @@ function buildQueue(deckWords, level, allMode) {
     return shuffle(due).concat(shuffle(fresh)).slice(0, 20);
 }
 
+// Одразу після провалу ("Ще раз") SRS відкладає слово на завтра — це
+// правильно для довгострокової пам'яті, але психологічно погано: людина
+// провалила слово і більше його в цій сесії не бачить, тобто не встигає
+// одразу закріпити правильну відповідь. Тому, як в Anki/Duolingo, провалене
+// слово повертається в ЦЮ Ж чергу трохи пізніше (через кілька карток) —
+// для негайного повторного закріплення. Робимо це не більше одного разу
+// на слово за сесію, щоб не зациклити чергу.
+function requeueIfMissed(item) {
+    if (item._requeued) return;
+    item._requeued = true;
+    const queue = SUBSTATE.queue;
+    const aheadMin = 3, aheadMax = 6;
+    const insertAt = Math.min(queue.length, SUBSTATE.pos + 1 + aheadMin + Math.floor(Math.random() * (aheadMax - aheadMin + 1)));
+    queue.splice(insertAt, 0, item);
+}
+
 function viewFlashSession() {
     if (!SUBSTATE.queue) {
-        SUBSTATE.queue = buildQueue(SUBSTATE.deckWords, SUBSTATE.level, SUBSTATE.allMode || false);
+        if (SUBSTATE.leechMode) {
+            // Слова "🩹 Складні слова" можуть належати різним рівням —
+            // тому для кожного слова беремо саме його власний рівень
+            // (записаний у collectLeechWords), а не SUBSTATE.level.
+            SUBSTATE.queue = shuffle(SUBSTATE.deckWords.map(w => {
+                const lvl = w._leechLevel || SUBSTATE.level;
+                const key = wordKey(Object.assign({ level: lvl }, w));
+                return { w, key, s: getSrs(key) };
+            }));
+        } else {
+            SUBSTATE.queue = buildQueue(SUBSTATE.deckWords, SUBSTATE.level, SUBSTATE.allMode || false);
+        }
         SUBSTATE.pos = 0;
         SUBSTATE.correct = 0;
         SUBSTATE.flipped = false;
@@ -562,7 +716,9 @@ function viewFlashSession() {
             topic: SUBSTATE.topic,
             mode,
             deckWords: SUBSTATE.deckWords,
-            allMode: SUBSTATE.allMode
+            allMode: SUBSTATE.allMode,
+            lang: SUBSTATE.lang,
+            leechMode: SUBSTATE.leechMode
         });
         wrap.querySelector('#toHome').onclick = () => navigate('home');
         return wrap;
@@ -630,6 +786,7 @@ function renderFlipCard(item) {
         row.querySelectorAll('[data-g]').forEach(b => b.onclick = () => {
             gradeWord(item.key, b.dataset.g);
             if (b.dataset.g !== 'again') SUBSTATE.correct++;
+            else requeueIfMissed(item);
             SUBSTATE.pos++;
             SUBSTATE.flipped = false;
             navigate('flashsession', SUBSTATE);
@@ -667,6 +824,7 @@ function renderMCCard(item, deckWords, level) {
             });
             gradeWord(item.key, correct ? 'good' : 'again');
             if (correct) SUBSTATE.correct++;
+            else requeueIfMissed(item);
             setTimeout(() => { SUBSTATE.pos++;
                 navigate('flashsession', SUBSTATE); }, 750);
         };
@@ -703,6 +861,7 @@ function renderTypeCard(item) {
         btn.disabled = true;
         gradeWord(item.key, correct ? 'good' : 'again');
         if (correct) SUBSTATE.correct++;
+        else requeueIfMissed(item);
         setTimeout(() => { SUBSTATE.pos++;
             navigate('flashsession', SUBSTATE); }, 1200);
     }

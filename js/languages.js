@@ -204,6 +204,12 @@ let _vocabAutoGenLoading = {};
 async function ensureVocabAvailable(lang, level) {
     if (!lang) return;
     ensureGeneratedVocabStore();
+    // Для норвезької лише перевіряємо, чи адмін щось додатково опублікував —
+    // AI-самогенерацію нижче пропускаємо, вона тут не потрібна.
+    if (lang === 'no') {
+        await ensureSharedVocabLoaded(lang, level);
+        return;
+    }
     const already = STATE.generatedVocab[lang] && STATE.generatedVocab[lang][level];
     if (already && already.length) return;
     const key = lang + '|' + level;
@@ -234,6 +240,45 @@ async function ensureVocabAvailable(lang, level) {
     } finally {
         _vocabAutoGenLoading[key] = false;
     }
+}
+
+// =====================================================================
+//  ВХІДНИЙ ТЕСТ НА РІВЕНЬ ДЛЯ НЕ-НОРВЕЗЬКИХ МОВ
+// =====================================================================
+// LEVEL_TEST у data.js — вручну складений тест (слова + граматика) лише
+// для норвезької. Для решти мов такого тесту не існувало взагалі — і
+// вхідний тест при виборі, наприклад, іспанської чи німецької, все одно
+// показував норвезькі питання. Ця функція будує еквівалентний тест "на
+// льоту" зі слів, доступних для мови+рівня (спільний словник, опублікований
+// адміном, або особисто згенерований через AI — те саме джерело, що й
+// картки/словник/тести для цієї мови), тож формат питань той самий:
+// переклад слова з варіантами відповіді.
+const LEVEL_TEST_QUESTIONS_PER_TIER = 5;
+
+async function buildLevelTestForLang(lang) {
+    const questions = [];
+    for (const tier of TEST_TIERS) {
+        try {
+            await ensureVocabAvailable(lang, tier);
+        } catch (e) {
+            console.error('[Тест на рівень] Не вдалося підготувати слова для', lang, tier, e);
+        }
+        const words = vocabForLevel(tier, lang);
+        if (words.length < 3) continue; // недостатньо слів для рівня — пропускаємо його в тесті
+        const pool = shuffle(words.slice()).slice(0, LEVEL_TEST_QUESTIONS_PER_TIER);
+        pool.forEach(w => {
+            const distractors = shuffle(words.filter(x => x.no !== w.no)).slice(0, 2).map(x => x.uk);
+            if (distractors.length < 2) return;
+            const opts = shuffle([w.uk, ...distractors]);
+            questions.push({
+                lvl: tier,
+                q: tf('leveltest_translate_q', { word: w.no }),
+                opts,
+                a: opts.indexOf(w.uk)
+            });
+        });
+    }
+    return questions;
 }
 
 // Заголовок/пункт меню для розділу підготовки до іспиту: "Norskprøve

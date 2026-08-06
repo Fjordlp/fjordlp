@@ -16,13 +16,13 @@
     <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 
     <!-- ============ SEO ============ -->
-    <title>FjordLP — вивчай норвезьку з AI-тролем</title>
-    <meta name="description" content="Інтерактивна платформа для вивчення норвезької мови. Картки, тести, граматика, AI-помічник та підготовка до Norskprøve. Безкоштовно.">
+    <title>FjordLP — підготовка до Norskprøve для українців у Норвегії</title>
+    <meta name="description" content="Картки, тести, граматика та AI-помічник для підготовки до іспиту Norskprøve. Створено для українців у Норвегії. Безкоштовно.">
     <link rel="canonical" href="https://fjordlp.com/">
 
     <!-- ============ Open Graph (Facebook, LinkedIn, Telegram) ============ -->
-    <meta property="og:title" content="FjordLP — вивчай норвезьку з AI-тролем">
-    <meta property="og:description" content="Гейміфікований застосунок для вивчення норвезької з AI-помічником та підготовкою до іспитів.">
+    <meta property="og:title" content="FjordLP — підготовка до Norskprøve для українців у Норвегії">
+    <meta property="og:description" content="Картки, тести, граматика та AI-помічник для підготовки до іспиту Norskprøve.">
     <meta property="og:url" content="https://fjordlp.com/">
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://fjordlp.com/og-image.jpg">
@@ -31,13 +31,12 @@
 
     <!-- ============ Twitter Card ============ -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="FjordLP — вивчай норвезьку з AI-тролем">
-    <meta name="twitter:description" content="Інтерактивна платформа для вивчення норвезької мови з AI-помічником.">
+    <meta name="twitter:title" content="FjordLP — підготовка до Norskprøve для українців у Норвегії">
+    <meta name="twitter:description" content="Картки, тести, граматика та AI-помічник для підготовки до іспиту Norskprøve.">
     <meta name="twitter:image" content="https://fjordlp.com/og-image.jpg">
 
-    <!-- ============ Favicon (бажано додати) ============ -->
-    <link rel="icon" type="image/png" href="favicon.png">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <!-- ============ Favicon ============ -->
+    <link rel="icon" type="image/png" href="icons/icon-192.png">
 
     <!-- ============ Шрифти ============ -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -48,9 +47,9 @@
     <link rel="stylesheet" href="css/style.css">
 
     <!-- ============ Firebase SDK ============ -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
 
     <!-- ============ Структуровані дані (JSON-LD) ============ -->
     <script type="application/ld+json">
@@ -132,7 +131,7 @@
             <button class="chip lang-chip" data-lang="ru">RU</button>
         </div>
         <h2 id="authTitle">Вхід</h2>
-        <div class="field"><label>Логін</label><input type="text" id="authLogin" placeholder="Ваш логін"></div>
+        <div class="field"><label>Email</label><input type="email" id="authLogin" placeholder="you@example.com" autocomplete="email"></div>
         <div class="field"><label>Пароль</label><input type="password" id="authPassword" placeholder="Пароль"></div>
  <div style="text-align:right;margin-top:-4px;margin-bottom:12px;">
             <span id="forgotPasswordLink" style="color:var(--teal);cursor:pointer;font-size:.8rem;text-decoration:underline;">Забули пароль?</span>
@@ -173,7 +172,7 @@
             </div>
         </div>
         <main id="mainContent"></main>
-        <footer class="appfoot">Fjord · ваш прогрес зберігається локально під вашим логіном</footer>
+        <footer class="appfoot">Fjord · ваш прогрес зберігається під вашим акаунтом</footer>
 
         <!-- =====================================================================
              AI-ПОМІЧНИК: ПЛАВАЮЧА КНОПКА + БІЧНА ПАНЕЛЬ
@@ -234,23 +233,23 @@
        11. auth.js             – логіка входу/реєстрації/гостя + запуск застосунку
         =====================================================================
     -->
-    <script src="js/firebase-config.js"></script>
-    <script src="js/firebase-auth.js"></script>
-    <script src="js/state.js"></script>
-    <script src="js/i18n.js"></script>
-    <script src="js/languages.js"></script>
-    <script src="js/assistant.js"></script>
-    <script src="js/data.js"></script>
-    <script src="js/helpers.js"></script>
-    <script src="js/gear-i18n.js"></script>
-    <script src="js/bust-accessories.js"></script>
-    <script src="js/troll.js"></script>
-    <script src="js/router.js"></script>
-    <script src="js/views-core.js"></script>
-    <script src="js/views-more.js"></script>
-<script src="js/views-admin.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@edge-tts/universal/dist/index.global.js"></script>
+    <script defer src="js/firebase-config.js"></script>
+    <script defer src="js/firebase-auth.js"></script>
+    <script defer src="js/state.js"></script>
+    <script defer src="js/i18n.js"></script>
+    <script defer src="js/languages.js"></script>
+    <script defer src="js/assistant.js"></script>
+    <script defer src="js/data.js"></script>
+    <script defer src="js/helpers.js"></script>
+    <script defer src="js/gear-i18n.js"></script>
+    <script defer src="js/bust-accessories.js"></script>
+    <script defer src="js/troll.js"></script>
+    <script defer src="js/router.js"></script>
+    <script defer src="js/views-core.js"></script>
+    <script defer src="js/views-more.js"></script>
+<script defer src="js/views-admin.js"></script>
+    <script defer src="js/auth.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@edge-tts/universal/dist/index.global.js"></script>
     <script>
         // Реєстрація service worker — робить сайт встановлюваним застосунком
         // (кнопка "Додати на головний екран") і дає базовий офлайн-доступ до

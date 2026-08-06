@@ -190,7 +190,32 @@ function getLevelRecommendation() {
 
         function getSrs(key) {
             if (!STATE.srs) STATE.srs = {};
-            return STATE.srs[key] || { ease: 2.5, interval: 0, due: todayStr(), reps: 0 };
+            return STATE.srs[key] || { ease: 2.5, interval: 0, due: todayStr(), reps: 0, lapses: 0 };
+        }
+
+        // Поріг, після якого слово вважається "складним" (leech, як у Anki):
+        // якщо користувач поспіль кілька разів натискає "Ще раз" на одному й
+        // тому ж слові — просте очікування наступного дня SRS не допомагає,
+        // слово треба відпрацювати окремо, зосереджено.
+        const LEECH_THRESHOLD = 4;
+
+        function isLeech(key) {
+            return (getSrs(key).lapses || 0) >= LEECH_THRESHOLD;
+        }
+
+        // Знаходить усі "складні" слова користувача на вказаній мові
+        // (незалежно від того, на якому рівні/темі вони вивчались) —
+        // використовується для окремої тренувальної колоди "🩹 Складні слова".
+        function collectLeechWords(lang) {
+            lang = lang || (STATE && STATE.targetLang) || 'no';
+            const out = [];
+            LEVELS.forEach(level => {
+                vocabForLevel(level, lang).forEach(w => {
+                    const key = wordKey(Object.assign({ level }, w));
+                    if (isLeech(key)) out.push(Object.assign({}, w, { _leechLevel: level }));
+                });
+            });
+            return out;
         }
 
         function gradeWord(key, grade) {
@@ -198,11 +223,15 @@ function getLevelRecommendation() {
             const wasNew = s.reps === 0 && !STATE.stats.wordsSeen[key];
             if (grade === 'again') { s.reps = 0;
                 s.interval = 1;
-                s.ease = Math.max(1.3, s.ease - 0.2); } else if (grade === 'hard') { s.interval = Math.max(1, Math.round(s
+                s.ease = Math.max(1.3, s.ease - 0.2);
+                s.lapses = (s.lapses || 0) + 1; } else if (grade === 'hard') { s.interval = Math.max(1, Math.round(s
                     .interval * 1.2));
                 s.ease = Math.max(1.3, s.ease - 0.05); } else { s.reps++;
                 s.interval = s.reps === 1 ? 1 : (s.reps === 2 ? 3 : Math.round(s.interval * s.ease));
-                s.ease += 0.05; }
+                s.ease += 0.05;
+                // Слово нарешті "засвоєне" стабільно (3+ вдалих повторення поспіль
+                // після провалів) — знімаємо з нього мітку "складного".
+                if (s.reps >= 3) s.lapses = 0; }
             const due = new Date();
             due.setDate(due.getDate() + s.interval);
             s.due = todayStr(due);

@@ -194,7 +194,7 @@
         function bgLayerSVG(bgId) {
             if (bgId === 'bg_forest') {
                 return `<rect x="0" y="0" width="120" height="120" fill="#DCEEDB"/>
-                      <circle cx="60" cy="60" rx="60" r="62" fill="#E4EFE2"/>
+                      <circle cx="60" cy="60" r="62" fill="#E4EFE2"/>
                       <path d="M6 118 L20 84 L34 118 Z" fill="#5C8A5F"/>
                       <path d="M26 122 L42 78 L58 122 Z" fill="#4C7A4F"/>
                       <path d="M64 122 L80 78 L96 122 Z" fill="#4C7A4F"/>

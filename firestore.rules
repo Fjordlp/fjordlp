@@ -32,13 +32,15 @@ service cloud.firestore {
       // виставити собі admin: true.
       allow create: if request.auth != null && request.auth.uid == uid &&
         (!('admin' in request.resource.data) || request.resource.data.admin == false);
-      // При оновленні поле admin повинно залишатись ТАКИМ САМИМ, яким було
-      // (тобто користувач не може сам собі його змінити через клієнт —
-      // ані виставити true, ані змінити вже виставлене адміністратором
-      // значення). Змінити admin можна лише вручну через Firebase Console
-      // або довірений бекенд (Cloud Function), не через клієнтський SDK.
-      allow update: if request.auth != null && request.auth.uid == uid &&
-        request.resource.data.admin == resource.data.admin;
+      // Оновлення: звичайний користувач може оновлювати СВІЙ документ, але
+      // не може сам собі змінити admin. Адміністратор (isAdmin()) може
+      // оновлювати БУДЬ-чий документ, включно з зміною поля admin —
+      // це потрібно для кнопки "Зробити адміном/Прибрати адміна" у
+      // розділі "Користувачі" адмін-панелі.
+      allow update: if request.auth != null && (
+        (request.auth.uid == uid && request.resource.data.admin == resource.data.admin) ||
+        isAdmin()
+      );
     }
     // Спільні словники (генеруються в адмін-панелі): читати може будь-хто
     // (навіть гості — це просто навчальний контент, не приватні дані), а
