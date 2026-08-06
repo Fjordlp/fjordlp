@@ -47,6 +47,7 @@
             if (!state.generatedVocab || typeof state.generatedVocab !== 'object') state.generatedVocab = {};
             if (!state.generatedTasks || typeof state.generatedTasks !== 'object') state.generatedTasks = {};
             if (!state.wordTranslations || typeof state.wordTranslations !== 'object') state.wordTranslations = {};
+            if (typeof state.admin !== 'boolean') state.admin = false;
             return state;
         }
 

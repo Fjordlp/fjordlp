@@ -840,6 +840,7 @@ function viewTournamentPlay() {
             container.innerHTML = `
                 <div class="qcounter">${escHtml(tr.name||'')} · ${SUBSTATE.tpIndex+1} / ${questions.length}</div>
                 <div class="progress-track" style="margin-bottom:12px;"><div class="progress-fill" style="width:${((SUBSTATE.tpIndex+1)/questions.length)*100}%"></div></div>
+                ${!uid ? `<p style="color:var(--ink-soft);font-size:.78rem;margin-bottom:10px;">${t('tourn_guest_not_saved')}</p>` : ''}
                 <div class="question-text" style="font-size:1.1rem;margin-bottom:16px;">${escHtml(q.question)}</div>
                 <div class="mc-options" id="tpOpts"></div>
             `;
@@ -894,9 +895,23 @@ function viewTournamentPlay() {
                     addXP(50, 'tournament_participation');
                     updateState();
                 } catch (e) {
+                    // Найчастіша причина: правила Firestore (firestore.rules) не
+                    // опубліковані в Firebase Console або документ users/{uid}
+                    // ще не встиг створитись. Показуємо помилку явно, а не
+                    // ковтаємо її мовчки — інакше людина бачить "% результату"
+                    // на екрані, а сам результат ніде насправді не зберігся.
                     console.error('[Турніри] Не вдалося зберегти результат:', e);
                     toast(t('tourn_submit_error'));
                 }
+            } else {
+                // Гість (без входу в акаунт) не має власного uid, а правила
+                // Firestore навмисно дозволяють писати результат лише в
+                // документ із id === свій uid (щоб ніхто не міг підробити
+                // чужий результат) — тож для гостя результат технічно
+                // нікуди зберігати. Раніше про це просто мовчали: гість
+                // проходив увесь турнір, бачив свій відсоток, а результат
+                // безслідно зникав. Тепер попереджаємо одразу.
+                toast(t('tourn_guest_not_saved'));
             }
             renderLeaderboard(container.querySelector('#tpLeaderboard'), tr, uid);
             SUBSTATE.tpIndex = 0; SUBSTATE.tpCorrect = 0; SUBSTATE.tpAnswered = false;

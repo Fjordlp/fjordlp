@@ -786,7 +786,7 @@ function initAdminSharedVocab() {
             previewCount.textContent = words.length;
             previewList.innerHTML = words.map(w => `
                 <div style="padding:6px 0;border-bottom:1px solid var(--line-soft);font-size:.85rem;">
-                    <strong>${w.no}</strong> — ${w.uk} <span style="color:var(--ink-soft);">(${w.t || ''})</span>
+                    <strong>${w.no}</strong> — ${w.uk}${w.en ? ` · en: ${w.en}` : ''}${w.ru ? ` · ru: ${w.ru}` : ''} <span style="color:var(--ink-soft);">(${w.t || ''})</span>
                 </div>
             `).join('');
             previewCard.style.display = 'block';

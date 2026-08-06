@@ -156,6 +156,7 @@ async function signUpWithFirebase(email, password) {
       name: email.split('@')[0],
       level: 'A1',
       levelTestDone: false,
+      admin: false,
       srs: {},
       stats: { wordsSeen: {}, testsCompleted: 0, sessionCount: 0, activityDates: [], bestStreak: 0 },
       settings: { goal: "", reminderTime: "18:00", pace: "steady" },

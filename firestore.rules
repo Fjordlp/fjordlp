@@ -19,7 +19,7 @@ service cloud.firestore {
     // (дивиться його ж власний документ users/{uid}).
     function isAdmin() {
       return request.auth != null &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.admin == true;
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('admin', false) == true;
     }
 
     match /users/{uid} {
@@ -37,8 +37,19 @@ service cloud.firestore {
       // оновлювати БУДЬ-чий документ, включно з зміною поля admin —
       // це потрібно для кнопки "Зробити адміном/Прибрати адміна" у
       // розділі "Користувачі" адмін-панелі.
+      // ВАЖЛИВО: порівнюємо через .get('admin', false), а НЕ напряму
+      // .data.admin — якщо в документі взагалі немає поля admin (а так
+      // було з усіма, хто зареєструвався до цього фіксу), пряме звернення
+      // resource.data.admin падає з помилкою "undefined property" і
+      // Firestore трактує це як permission-denied. Тобто буквально КОЖЕН
+      // виклик updateState()/saveToFirestore() для звичайного користувача
+      // без явного поля admin у документі — відхилявся мовчки. Це і була
+      // причина "результати й користувачі не зберігаються": не лише
+      // прогрес користувача, а й усе, що з ним пов'язано, просто ніколи
+      // не записувалось у Firestore.
       allow update: if request.auth != null && (
-        (request.auth.uid == uid && request.resource.data.admin == resource.data.admin) ||
+        (request.auth.uid == uid &&
+          request.resource.data.get('admin', false) == resource.data.get('admin', false)) ||
         isAdmin()
       );
     }

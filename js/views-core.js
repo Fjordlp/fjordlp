@@ -810,16 +810,22 @@ function renderMCCard(item, deckWords, level) {
     holder.appendChild(head);
     head.querySelector('#mcSound').onclick = () => speak(item.w.no);
 
-    const distractors = shuffle(deckWords.filter(w => w.no !== item.w.no)).slice(0, 3).map(w => w.uk);
-    const options = shuffle([item.w.uk, ...distractors]);
+    // Раніше варіанти відповіді завжди показувались українською (w.uk)
+    // незалежно від мови інтерфейсу — тепер, як і решта картки,
+    // враховують STATE.vocabLang через wordTranslation() (другий
+    // аргумент — рівень, той самий патерн, що й у renderFlipCard вище).
+    const lvl = item.key.split('|')[0];
+    const correctTranslation = wordTranslation(item.w, lvl);
+    const distractors = shuffle(deckWords.filter(w => w.no !== item.w.no)).slice(0, 3).map(w => wordTranslation(w, lvl));
+    const options = shuffle([correctTranslation, ...distractors]);
     const opts = el(`<div class="mc-options"></div>`);
     options.forEach(opt => {
         const b = el(`<button class="mc-opt">${escHtml(opt)}</button>`);
         b.onclick = () => {
-            const correct = opt === item.w.uk;
+            const correct = opt === correctTranslation;
             opts.querySelectorAll('.mc-opt').forEach(o => {
                 o.disabled = true;
-                if (o.textContent === item.w.uk) o.classList.add('correct');
+                if (o.textContent === correctTranslation) o.classList.add('correct');
                 else if (o === b) o.classList.add('wrong');
             });
             gradeWord(item.key, correct ? 'good' : 'again');
@@ -1535,11 +1541,13 @@ function viewTestOrder() {
 function viewTestListen() {
     if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
         const words = shuffle(currentLevelWords()).slice(0, 6);
+        // Раніше варіанти відповіді завжди були українською (w.uk) —
+        // тепер локалізуються через wordTranslation(), як і решта тестів.
         SUBSTATE.qs = words.map(w => {
-            const distractors = shuffle(currentLevelWords().filter(x => x.no !== w.no)).slice(0, 3).map(x => x
-                .uk);
-            const opts = shuffle([w.uk, ...distractors]);
-            return { no: w.no, opts, a: opts.indexOf(w.uk) };
+            const correctTranslation = wordTranslation(w, STATE.level);
+            const distractors = shuffle(currentLevelWords().filter(x => x.no !== w.no)).slice(0, 3).map(x => wordTranslation(x, STATE.level));
+            const opts = shuffle([correctTranslation, ...distractors]);
+            return { no: w.no, opts, a: opts.indexOf(correctTranslation) };
         });
         SUBSTATE.i = 0;
         SUBSTATE.correct = 0;
@@ -1612,8 +1620,12 @@ function viewTestTranslate() {
         // Раніше тут було жорстко закодовано "норвезькою"/"українською" —
         // тобто напрямок перекладу завжди називався норвезьким, навіть
         // якщо STATE.targetLang був іспанською чи будь-якою іншою мовою.
+        // Раніше підказка й очікувана відповідь завжди були українською
+        // (w.uk) — тепер локалізуються через wordTranslation(), як і
+        // решта тестів.
+        const translated = wordTranslation(w, STATE.level);
         const promptLangName = dirToNo ? targetLangDisplayName(STATE.targetLang || 'no') : interfaceLangName(STATE.vocabLang || 'uk');
-        const promptWord = dirToNo ? w.uk : w.no;
+        const promptWord = dirToNo ? translated : w.no;
         const prompt = tf('write_in_lang_prompt', { word: escHtml(promptWord), lang: promptLangName });
         const qText = el(`<div class="question-text" style="font-size:1.1rem;margin-bottom:16px;">${prompt}</div>`);
         container.appendChild(qText);
@@ -1633,7 +1645,7 @@ function viewTestTranslate() {
 
         btn.onclick = () => {
             const val = input.value.trim();
-            const target = dirToNo ? w.no : w.uk;
+            const target = dirToNo ? w.no : translated;
             const correct = isFuzzyMatch(val, target);
             sub.userAnswers[sub.i] = { input: val, correct: correct, correctAnswer: target };
             if (correct) sub.correct = (sub.correct || 0) + 1;
