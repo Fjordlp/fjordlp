@@ -194,10 +194,17 @@ function getLevelRecommendation() {
             updateState();
         }
 
-        function allVocabUpTo(level) {
+        function allVocabUpTo(level, lang) {
+            // Раніше тут було ЛИШЕ вбудоване VOCAB (норвезьке) незалежно від
+            // мови — той самий баг, що й був у currentLevelWords() (див.
+            // коментар там): хто вчить англійську/іспанську/т.д., бачив
+            // норвезькі картки у віджеті "Слово дня". Тепер, як і в
+            // vocabForLevel(), для не-норвезької мови беремо
+            // STATE.generatedVocab[lang], а не вбудований норвезький VOCAB.
+            lang = lang || (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
             const idx = LEVELS.indexOf(level);
             let out = [];
-            for (let i = 0; i <= idx; i++) out = out.concat(VOCAB[LEVELS[i]]);
+            for (let i = 0; i <= idx; i++) out = out.concat(vocabForLevel(LEVELS[i], lang));
             return out;
         }
 

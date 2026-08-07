@@ -283,7 +283,7 @@ function viewHome() {
 // =====================================================================
 
 function pickDailyWord() {
-    const pool = allVocabUpTo(LD().level || "A1");
+    const pool = allVocabUpTo(LD().level || "A1", STATE.targetLang);
     if (pool.length === 0) return null;
     const dayIndex = Math.floor(Date.now() / 86400000);
     return pool[dayIndex % pool.length];
