@@ -4,13 +4,13 @@
 
 function viewHome() {
     ensureStateDefaults(STATE);
-    const level = STATE.level || "A1";
+    const level = LD().level || "A1";
     const meta = LEVEL_META[level];
     const vocab = vocabForLevel(level) || [];
     const total = vocab.length;
 
     // ----- ЛОГІКА ПРОГРЕСУ -----
-    const seenKeys = Object.keys(STATE.stats.wordsSeen || {});
+    const seenKeys = Object.keys(LD().stats.wordsSeen || {});
     const seenCount = vocab.filter(w => {
         const key = wordKey(Object.assign({ level }, w));
         return seenKeys.includes(key);
@@ -23,10 +23,10 @@ function viewHome() {
     // ----- КІНЕЦЬ ЛОГІКИ -----
 
     const dw = pickDailyWord();
-    const { lvl: trollLvl, pct: trollPct } = xpProgress(STATE.xp || 0);
+    const { lvl: trollLvl, pct: trollPct } = xpProgress(LD().xp || 0);
     const metaLoc = levelMetaLocalized(level);
     const dg = getDailyGoal();
-    const freezes = STATE.streakFreezes || 0;
+    const freezes = LD().streakFreezes || 0;
     const ringR = 26, ringC = 2 * Math.PI * ringR;
     const dgLang = STATE.uiLang || 'uk';
     const dgTexts = {
@@ -147,7 +147,7 @@ function viewHome() {
                 </div>
                 <div class="card">
                     <h3>${t('activity_title')}</h3>
-                    <p style="color:var(--ink-soft);font-size:.85rem;">${t('streak_days_label')} <b class="mono">${STATE.streak||0} 🔥</b> · XP: <b class="mono">${STATE.xp||0}</b></p>
+                    <p style="color:var(--ink-soft);font-size:.85rem;">${t('streak_days_label')} <b class="mono">${LD().streak||0} 🔥</b> · XP: <b class="mono">${LD().xp||0}</b></p>
                     ${renderWeekStrip()}
                     <div class="xp-bar-track" style="margin-top:10px;"><div class="xp-bar-fill" style="width:${trollPct}%"></div></div>
                     <button class="btn btn-ghost btn-sm" style="margin-top:12px;" data-r="profile">${t('detailed_stats_btn')}</button>
@@ -214,8 +214,8 @@ function viewHome() {
         upgradeBtn.onclick = () => {
             const rec = getLevelRecommendation();
             if (rec) {
-                STATE.level = rec.recommended;
-                STATE.levelTestDone = true;
+                LD().level = rec.recommended;
+                LD().levelTestDone = true;
                 updateState();
                 toast(tf('level_up_toast', {level: rec.recommended}));
                 navigate('home');
@@ -283,7 +283,7 @@ function viewHome() {
 // =====================================================================
 
 function pickDailyWord() {
-    const pool = allVocabUpTo(STATE.level || "A1");
+    const pool = allVocabUpTo(LD().level || "A1");
     if (pool.length === 0) return null;
     const dayIndex = Math.floor(Date.now() / 86400000);
     return pool[dayIndex % pool.length];
@@ -301,7 +301,7 @@ function sunArcSvg(pct) {
 }
 
 function renderWeekStrip() {
-    const dates = STATE.stats?.activityDates || [];
+    const dates = LD().stats?.activityDates || [];
     const set = new Set(dates);
     let html = '<div class="calendar-strip">';
     for (let i = 6; i >= 0; i--) {
@@ -366,7 +366,7 @@ function viewLevels() {
     LEVELS.forEach(lv => {
         const meta = levelMetaLocalized(lv);
         const card = el(`
-            <div class="card level-card ${STATE.level===lv?'current':''}">
+            <div class="card level-card ${LD().level===lv?'current':''}">
                 <span class="tag level-${lv}">${lv}</span>
                 <h3 style="margin-top:8px;">${meta.name}</h3>
                 <div class="lname">${meta.desc}</div>
@@ -374,8 +374,8 @@ function viewLevels() {
             </div>
         `);
         card.onclick = () => {
-            STATE.level = lv;
-            STATE.levelTestDone = true;
+            LD().level = lv;
+            LD().levelTestDone = true;
             markActivityToday();
             updateState();
             toast(tf('level_set_toast', {level: lv}));
@@ -396,14 +396,26 @@ function viewLevels() {
 // картках/тестах: currentLevelWords()/vocabForLevel()) — той самий
 // принцип перекладних питань, що й у viewTestMC().
 async function buildDynamicLevelTest(lang) {
-    // Готуємо словник одразу для всіх рівнів ПАРАЛЕЛЬНО (а не по черзі) —
-    // якщо для мови ще нема спільного словника й доводиться генерувати
-    // через AI, послідовне очікування 6 рівнів підряд могло б тривати
-    // хвилину й довше.
+    // Крок 1: спершу ДЕШЕВО перевіряємо спільний словник (просте читання з
+    // Firestore, без AI) для всіх рівнів одразу — паралельно, це швидко і
+    // ліміту запитів до Worker'а не займає.
     await Promise.all(LEVELS.map(level =>
-        ensureVocabAvailable(lang, level).catch(e =>
-            console.error('[Тест на рівень] Не вдалося підготувати словник для', lang, level, e))
+        ensureSharedVocabLoaded(lang, level).catch(e =>
+            console.error('[Тест на рівень] Спільний словник недоступний для', lang, level, e))
     ));
+    // Крок 2: лише рівні, для яких спільного словника не знайшлось,
+    // довантажуємо через AI-генерацію (ensureVocabAvailable) — ПОСЛІДОВНО,
+    // а не паралельно. Кожен такий рівень сам по собі шле 2 запити до
+    // Worker'а; якщо запускати всі 6 рівнів одночасно (як було раніше), це
+    // до 12 запитів за одну мить — і Worker миттєво впирався у ліміт
+    // запитів/хв (RATE_LIMIT_PER_MIN), через що генерація слів мовчки
+    // провалювалась, і мова лишалась без жодного слова для тесту.
+    for (const level of LEVELS) {
+        const already = STATE.generatedVocab[lang] && STATE.generatedVocab[lang][level];
+        if (already && already.length) continue;
+        await ensureVocabAvailable(lang, level).catch(e =>
+            console.error('[Тест на рівень] Не вдалося підготувати словник для', lang, level, e));
+    }
     const groups = [];
     for (const level of LEVELS) {
         const words = vocabForLevel(level, lang);
@@ -466,8 +478,8 @@ function viewLevelTest() {
     const i = SUBSTATE.i;
     if (i >= questions.length) {
         const level = computeTestLevel(SUBSTATE.answers, questions);
-        STATE.level = level;
-        STATE.levelTestDone = true;
+        LD().level = level;
+        LD().levelTestDone = true;
         markActivityToday();
         checkAchievements();
         updateState();
@@ -523,7 +535,7 @@ function viewLevelTest() {
 
 function viewFlashDeckPicker(lang) {
     lang = lang || STATE.targetLang || 'no';
-    const level = SUBSTATE.level || STATE.level || "A1";
+    const level = SUBSTATE.level || LD().level || "A1";
     ensureVocabAvailable(lang, level); // не блокує рендер; підвантажить і сама перемалює, якщо знайде/згенерує слова
     const words = vocabForLevel(level, lang);
     const topics = [...new Set(words.map(w => w.t))];
@@ -688,7 +700,7 @@ function viewFlashSession() {
     }
     if (pos >= queue.length) {
         markActivityToday();
-        STATE.stats.sessionCount = (STATE.stats.sessionCount || 0) + 1;
+        LD().stats.sessionCount = (LD().stats.sessionCount || 0) + 1;
         const pctCorrect = Math.round((SUBSTATE.correct / queue.length) * 100);
         if (!SUBSTATE._xpGranted) {
             SUBSTATE._xpGranted = true;
@@ -882,7 +894,7 @@ function renderTypeCard(item) {
 
 function viewVocabulary() {
     const lang = STATE.targetLang || 'no';
-    const level = STATE.level || "A1";
+    const level = LD().level || "A1";
     ensureVocabAvailable(lang, level);
     const words = vocabForLevel(level, lang);
     const statusLabels = {
@@ -982,7 +994,7 @@ function viewTestsHub() {
     const wrap = el(`
         <div class="view">
             <h1>${t('h_tests')}</h1>
-            <p style="color:var(--ink-soft);margin-bottom:16px;">${tf('tests_choose_type', {level: STATE.level||'A1'})}</p>
+            <p style="color:var(--ink-soft);margin-bottom:16px;">${tf('tests_choose_type', {level: LD().level||'A1'})}</p>
             <div class="grid cols-3" id="thub"></div>
         </div>
     `);
@@ -1006,7 +1018,7 @@ function viewTestsHub() {
 
 function currentLevelWords() {
     const lang = STATE.targetLang || 'no';
-    const level = STATE.level || "A1";
+    const level = LD().level || "A1";
     ensureVocabAvailable(lang, level);
     const words = vocabForLevel(level, lang);
     // Раніше тут був фолбек на VOCAB.A1 (норвезькі слова) для БУДЬ-ЯКОЇ
@@ -1038,8 +1050,8 @@ function runQuiz(sub, route, title) {
         sub.userAnswers = new Array(sub.qs.length).fill(null);
     }
     if (sub.i >= sub.qs.length && sub.userAnswers.every(a => a !== null)) {
-        STATE.stats.testsCompleted = (STATE.stats.testsCompleted || 0) + 1;
-        STATE.leaderboardScore = (STATE.leaderboardScore || 0) + sub.correct * 10;
+        LD().stats.testsCompleted = (LD().stats.testsCompleted || 0) + 1;
+        LD().leaderboardScore = (LD().leaderboardScore || 0) + sub.correct * 10;
         markActivityToday();
         const pct = Math.round((sub.correct / sub.qs.length) * 100);
         if (!sub._xpGranted) {
@@ -1191,9 +1203,9 @@ function runQuiz(sub, route, title) {
 
 function viewTestMC() {
     if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
-        const level = STATE.level || "A1";
+        const level = LD().level || "A1";
         const words = shuffle(currentLevelWords()).slice(0, 6);
-        const gramQs = GRAMMAR.filter(g => g.level === (STATE.level || "A1")).map(g => ({ q: g.ex.q, opts: g.ex
+        const gramQs = GRAMMAR.filter(g => g.level === (LD().level || "A1")).map(g => ({ q: g.ex.q, opts: g.ex
                 .opts, a: g.ex.a }));
         const wordQs = words.map(w => {
             const correctTranslation = wordTranslation(w, level, STATE.vocabLang);
@@ -1245,8 +1257,8 @@ function viewTestCloze() {
     }
     const sub = SUBSTATE;
     if (sub.i >= sub.qs.length && sub.userAnswers && sub.userAnswers.every(a => a !== null)) {
-        STATE.stats.testsCompleted = (STATE.stats.testsCompleted || 0) + 1;
-        STATE.leaderboardScore = (STATE.leaderboardScore || 0) + sub.correct * 10;
+        LD().stats.testsCompleted = (LD().stats.testsCompleted || 0) + 1;
+        LD().leaderboardScore = (LD().leaderboardScore || 0) + sub.correct * 10;
         markActivityToday();
         updateState();
         const pct = Math.round((sub.correct / sub.qs.length) * 100);
@@ -1387,8 +1399,8 @@ function viewTestOrder() {
     }
     const sub = SUBSTATE;
     if (sub.i >= sub.qs.length && sub.userAnswers.every(a => a !== null)) {
-        STATE.stats.testsCompleted = (STATE.stats.testsCompleted || 0) + 1;
-        STATE.leaderboardScore = (STATE.leaderboardScore || 0) + sub.correct * 10;
+        LD().stats.testsCompleted = (LD().stats.testsCompleted || 0) + 1;
+        LD().leaderboardScore = (LD().leaderboardScore || 0) + sub.correct * 10;
         markActivityToday();
         updateState();
         const pct = Math.round((sub.correct / sub.qs.length) * 100);
@@ -1544,8 +1556,8 @@ function viewTestListen() {
         // Раніше варіанти відповіді завжди були українською (w.uk) —
         // тепер локалізуються через wordTranslation(), як і решта тестів.
         SUBSTATE.qs = words.map(w => {
-            const correctTranslation = wordTranslation(w, STATE.level);
-            const distractors = shuffle(currentLevelWords().filter(x => x.no !== w.no)).slice(0, 3).map(x => wordTranslation(x, STATE.level));
+            const correctTranslation = wordTranslation(w, LD().level);
+            const distractors = shuffle(currentLevelWords().filter(x => x.no !== w.no)).slice(0, 3).map(x => wordTranslation(x, LD().level));
             const opts = shuffle([correctTranslation, ...distractors]);
             return { no: w.no, opts, a: opts.indexOf(correctTranslation) };
         });
@@ -1568,8 +1580,8 @@ function viewTestTranslate() {
     }
     const sub = SUBSTATE;
     if (sub.i >= sub.qs.length && sub.userAnswers.every(a => a !== null)) {
-        STATE.stats.testsCompleted = (STATE.stats.testsCompleted || 0) + 1;
-        STATE.leaderboardScore = (STATE.leaderboardScore || 0) + sub.correct * 10;
+        LD().stats.testsCompleted = (LD().stats.testsCompleted || 0) + 1;
+        LD().leaderboardScore = (LD().leaderboardScore || 0) + sub.correct * 10;
         markActivityToday();
         updateState();
         const pct = Math.round((sub.correct / sub.qs.length) * 100);
@@ -1623,7 +1635,7 @@ function viewTestTranslate() {
         // Раніше підказка й очікувана відповідь завжди були українською
         // (w.uk) — тепер локалізуються через wordTranslation(), як і
         // решта тестів.
-        const translated = wordTranslation(w, STATE.level);
+        const translated = wordTranslation(w, LD().level);
         const promptLangName = dirToNo ? targetLangDisplayName(STATE.targetLang || 'no') : interfaceLangName(STATE.vocabLang || 'uk');
         const promptWord = dirToNo ? translated : w.no;
         const prompt = tf('write_in_lang_prompt', { word: escHtml(promptWord), lang: promptLangName });
@@ -1761,7 +1773,7 @@ function viewGrammar() {
 function viewTroll() {
     ensureStateDefaults(STATE);
     checkTrollUnlocks();
-    const xp = STATE.xp || 0;
+    const xp = LD().xp || 0;
     const { lvl, curFloor, nextCeil, pct } = xpProgress(xp);
     const wrap = el(`
         <div class="view">
@@ -1784,7 +1796,7 @@ function viewTroll() {
                 <div class="gear-row" id="gearRow"></div>
             </div>
             <div class="card">
-                <h3>${tf('achievements_title', {unlocked: STATE.achievements.length, total: ACHIEVEMENTS.length})}</h3>
+                <h3>${tf('achievements_title', {unlocked: LD().achievements.length, total: ACHIEVEMENTS.length})}</h3>
                 <div class="ach-grid" id="achGrid" style="margin-top:12px;"></div>
             </div>
         </div>
@@ -1792,7 +1804,7 @@ function viewTroll() {
 
     function currentMood() {
         if (pct >= 80) return 'excited';
-        if (STATE.achievements.length >= 3) return 'happy';
+        if (LD().achievements.length >= 3) return 'happy';
         return 'idle';
     }
 
@@ -1826,7 +1838,7 @@ function viewTroll() {
 
     const achGrid = wrap.querySelector('#achGrid');
     ACHIEVEMENTS.forEach(a => {
-        const unlocked = STATE.achievements.includes(a.id);
+        const unlocked = LD().achievements.includes(a.id);
         achGrid.appendChild(el(`
             <div class="ach-item ${unlocked?'unlocked':'locked'}">
                 <div class="ach-icon">${unlocked?'🏆':'🔒'}</div>

@@ -251,7 +251,14 @@ async function loadUserList(query) {
             if (query && !name.toLowerCase().includes(query) && !email.toLowerCase().includes(query) && !doc.id.toLowerCase().includes(query)) {
                 return; // не збігається з пошуком — пропускаємо
             }
-            rows.push({ id: doc.id, name, email, level: d.level || '—', xp: d.xp || 0, admin: !!d.admin, targetLang: d.targetLang || 'no' });
+            // xp/level тепер зберігаються ізольовано по мові в
+            // langData[targetLang] — читаємо саме той запис, що відповідає
+            // мові, яку ця людина зараз вивчає. Старі, ще не мігровані
+            // документи (без langData) підстраховані фолбеком на плоскі
+            // d.xp/d.level.
+            const uLang = d.targetLang || 'no';
+            const uLD = (d.langData && d.langData[uLang]) || {};
+            rows.push({ id: doc.id, name, email, level: uLD.level || d.level || '—', xp: uLD.xp || d.xp || 0, admin: !!d.admin, targetLang: uLang });
         });
         if (!rows.length) {
             container.innerHTML = '<p style="color:var(--ink-soft);">Нічого не знайдено.</p>';
@@ -418,7 +425,7 @@ window.adminCreateDaily = async function() {
             options,
             correct,
             type,
-            level: STATE.level || 'A1',
+            level: LD().level || 'A1',
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         toast(`✅ Завдання на ${today} створено!`);
@@ -793,7 +800,21 @@ function initAdminSharedVocab() {
             statusEl.textContent = `Готово: ${words.length} слів. Перевірте прев'ю нижче й опублікуйте.`;
         } catch (e) {
             console.error('[Адмін] Помилка генерації словника:', e);
-            statusEl.textContent = '⚠️ Помилка генерації. Спробуйте ще раз.';
+            // Раніше показувався лише загальний текст без причини — не було
+            // видно, чи це ліміт запитів (429), заблокований origin (403),
+            // мережева помилка, чи AI повернув не-JSON. Тепер показуємо код і
+            // деталь помилки, щоб можна було одразу зрозуміти причину.
+            let reason = e && e.message || 'невідома помилка';
+            if (e && e.code === 'PROXY_ERROR') {
+                reason = `код ${e.status}` + (e.detail ? `: ${String(e.detail).slice(0, 200)}` : '');
+                if (e.status === 429) reason += ' (забагато запитів підряд — зачекайте хвилину й спробуйте знову)';
+                if (e.status === 403) reason += ' (Worker не дозволяє цей сайт як джерело запиту — перевірте ALLOWED_ORIGINS)';
+            } else if (e && e.code === 'NETWORK_ERROR') {
+                reason = 'не вдалось з'+"'"+'єднатися з AI-проксі (мережа/CORS/URL Worker'+"'"+'а)';
+            } else if (e && e.code === 'NOT_CONFIGURED') {
+                reason = 'адреса AI-проксі (AI_PROXY_URL) не налаштована на сайті';
+            }
+            statusEl.textContent = `⚠️ Помилка генерації: ${reason}`;
         } finally {
             genBtn.disabled = false;
             genBtn.textContent = original;

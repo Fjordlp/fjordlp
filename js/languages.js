@@ -106,16 +106,27 @@ async function generateStarterVocab(langCode, level, batchIndex, existingWords) 
 // словами, а не обмежуватись одним десятком.
 // onProgress(doneBatches, totalBatches, wordsSoFar) викликається після
 // кожного пакету, щоб інтерфейс міг показати прогрес.
+// Невелика пауза між пакетами — Worker обмежує ~12 запитів/хв на IP
+// (RATE_LIMIT_PER_MIN), а генерація одразу кількох мов/рівнів підряд
+// (по 5-8 запитів кожна) реально в цей ліміт впиралась: перші пакети
+// проходили, а наступні мовчки відсіювались через isTransientBatchError.
+function sleep(ms) { return new Promise(res => setTimeout(res, ms)); }
+
 async function generateBulkVocab(langCode, level, batches, onProgress) {
     batches = batches || 5;
     const collected = [];
     const seen = new Set();
+    let lastError = null;
+    let failedBatches = 0;
     for (let i = 0; i < batches; i++) {
+        if (i > 0) await sleep(600); // пауза між запитами, щоб не впертись у RATE_LIMIT_PER_MIN
         let batch;
         try {
             batch = await generateStarterVocab(langCode, level, i, collected);
         } catch (e) {
             console.error('[Словник] Помилка пакету генерації', i, e);
+            lastError = e;
+            failedBatches++;
             continue; // одна невдала спроба не повинна зупиняти весь процес
         }
         (Array.isArray(batch) ? batch : []).forEach(w => {
@@ -126,6 +137,15 @@ async function generateBulkVocab(langCode, level, batches, onProgress) {
             collected.push(w);
         });
         if (typeof onProgress === 'function') onProgress(i + 1, batches, collected.length);
+    }
+    // Раніше помилки кожного пакету лише логувались у консоль і губились —
+    // якщо провалювались УСІ пакети (наприклад, AI-проксі впав або
+    // заблокував запит), функція мовчки повертала порожній масив, і
+    // адмінка показувала "Готово: 0 слів" без жодного натяку на причину.
+    // Тепер, якщо жодного слова не зібрано і хоч один пакет впав —
+    // прокидаємо реальну помилку далі, щоб інтерфейс міг показати її текст.
+    if (collected.length === 0 && failedBatches > 0 && lastError) {
+        throw lastError;
     }
     return collected;
 }
@@ -188,7 +208,7 @@ async function ensureSharedVocabLoaded(lang, level) {
     _sharedVocabLoading[key] = false;
     if (words && words.length) {
         STATE.generatedVocab[lang][level] = words;
-        if (typeof render === 'function' && STATE.targetLang === lang && STATE.level === level) render();
+        if (typeof render === 'function' && STATE.targetLang === lang && LD().level === level) render();
     }
 }
 
@@ -243,7 +263,7 @@ async function ensureVocabAvailable(lang, level) {
         if (words && words.length) {
             STATE.generatedVocab[lang][level] = words;
             updateState();
-            if (typeof render === 'function' && STATE.targetLang === lang && (STATE.level || 'A1') === level) render();
+            if (typeof render === 'function' && STATE.targetLang === lang && (LD().level || 'A1') === level) render();
         }
     } catch (e) {
         console.error('[Словник] Не вдалося підготувати слова для', lang, level, e);

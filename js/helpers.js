@@ -31,7 +31,7 @@ function getLevelDisplay(level) {
 // Рекомендація підвищення рівня (з головної)
 function getLevelRecommendation() {
     if (STATE._dismissedRec) return null;
-    const current = STATE.level || "A1";
+    const current = LD().level || "A1";
     const idx = LEVELS.indexOf(current);
     if (idx === LEVELS.length - 1) return null;
 
@@ -131,13 +131,26 @@ function getLevelRecommendation() {
             return levenshtein(a, b) <= threshold;
         }
 
-        function wordKey(w) { return (w.level || '') + "|" + w.no; }
+        // ВАЖЛИВО: ключ обов'язково включає мову. Раніше ключ був лише
+        // "рівень|слово" — а w.no це просто текст слова цільовою мовою (те саме
+        // поле "no" історично перевикористовується для будь-якої мови, див.
+        // generateBulkVocab). Слова, які однаково пишуться в різних мовах
+        // (інтернаціоналізми на кшталт "taxi", "hotel", "internet", "chocolate"),
+        // на одному й тому ж рівні ділили один SRS-запис і один рахунок
+        // "переглянуто" — прогрес з іспанської міг позначити слово вивченим і в
+        // норвезькій, і навпаки. Тепер кожна мова має власний ізольований набір
+        // ключів (LD().srs / LD().stats.wordsSeen), навіть якщо однакове слово
+        // трапляється в кількох мовах.
+        function wordKey(w, lang) {
+            lang = lang || (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
+            return lang + "|" + (w.level || '') + "|" + w.no;
+        }
 
         // Додає нові слова (згенеровані AI або введені вручну) до словника
         // користувача. Слова одразу стають доступними у словнику, картках,
         // тестах і SRS — бо всі вони йдуть через vocabForLevel().
         function addCustomWords(level, words) {
-            if (!Array.isArray(STATE.customWords)) STATE.customWords = [];
+            if (!Array.isArray(LD().customWords)) LD().customWords = [];
             const lang = STATE.targetLang || 'no';
             const existing = new Set(
                 vocabForLevel(level, lang).map(w => normalize(w.no))
@@ -148,7 +161,7 @@ function getLevelRecommendation() {
                 const key = normalize(w.no);
                 if (existing.has(key)) return;
                 existing.add(key);
-                STATE.customWords.push({
+                LD().customWords.push({
                     level,
                     lang,
                     t: w.t || 'Додано AI',
@@ -164,20 +177,20 @@ function getLevelRecommendation() {
         }
 
         // Об'єднує вбудовані завдання Norskprøve з тими, що згенерував AI
-        // і які збережені у STATE.customNorskTasks[level][mode].
+        // і які збережені у LD().customNorskTasks[level][mode].
         function norskTasksFor(level, mode) {
             const base = (NORSKPROVE_TASKS[level] && NORSKPROVE_TASKS[level][mode]) || [];
-            const custom = (STATE.customNorskTasks && STATE.customNorskTasks[level] && STATE.customNorskTasks[level][mode]) || [];
+            const custom = (LD().customNorskTasks && LD().customNorskTasks[level] && LD().customNorskTasks[level][mode]) || [];
             return base.concat(custom);
         }
 
         // Додає нове AI-згенероване завдання Norskprøve і зберігає його
         // в STATE, щоб воно залишалось на сайті між сесіями.
         function addCustomNorskTask(level, mode, task) {
-            if (!STATE.customNorskTasks) STATE.customNorskTasks = {};
-            if (!STATE.customNorskTasks[level]) STATE.customNorskTasks[level] = {};
-            if (!Array.isArray(STATE.customNorskTasks[level][mode])) STATE.customNorskTasks[level][mode] = [];
-            STATE.customNorskTasks[level][mode].push(task);
+            if (!LD().customNorskTasks) LD().customNorskTasks = {};
+            if (!LD().customNorskTasks[level]) LD().customNorskTasks[level] = {};
+            if (!Array.isArray(LD().customNorskTasks[level][mode])) LD().customNorskTasks[level][mode] = [];
+            LD().customNorskTasks[level][mode].push(task);
             updateState();
         }
 
@@ -189,8 +202,8 @@ function getLevelRecommendation() {
         }
 
         function getSrs(key) {
-            if (!STATE.srs) STATE.srs = {};
-            return STATE.srs[key] || { ease: 2.5, interval: 0, due: todayStr(), reps: 0, lapses: 0 };
+            if (!LD().srs) LD().srs = {};
+            return LD().srs[key] || { ease: 2.5, interval: 0, due: todayStr(), reps: 0, lapses: 0 };
         }
 
         // Поріг, після якого слово вважається "складним" (leech, як у Anki):
@@ -211,7 +224,7 @@ function getLevelRecommendation() {
             const out = [];
             LEVELS.forEach(level => {
                 vocabForLevel(level, lang).forEach(w => {
-                    const key = wordKey(Object.assign({ level }, w));
+                    const key = wordKey(Object.assign({ level }, w), lang);
                     if (isLeech(key)) out.push(Object.assign({}, w, { _leechLevel: level }));
                 });
             });
@@ -220,7 +233,7 @@ function getLevelRecommendation() {
 
         function gradeWord(key, grade) {
             const s = getSrs(key);
-            const wasNew = s.reps === 0 && !STATE.stats.wordsSeen[key];
+            const wasNew = s.reps === 0 && !LD().stats.wordsSeen[key];
             if (grade === 'again') { s.reps = 0;
                 s.interval = 1;
                 s.ease = Math.max(1.3, s.ease - 0.2);
@@ -235,9 +248,9 @@ function getLevelRecommendation() {
             const due = new Date();
             due.setDate(due.getDate() + s.interval);
             s.due = todayStr(due);
-            STATE.srs[key] = s;
-            if (!STATE.stats.wordsSeen) STATE.stats.wordsSeen = {};
-            STATE.stats.wordsSeen[key] = (STATE.stats.wordsSeen[key] || 0) + 1;
+            LD().srs[key] = s;
+            if (!LD().stats.wordsSeen) LD().stats.wordsSeen = {};
+            LD().stats.wordsSeen[key] = (LD().stats.wordsSeen[key] || 0) + 1;
             bumpDailyGoal(1);
             updateState();
             if (wasNew && grade !== 'again') { addXP(10, 'new_word'); } // +10 XP за нове вивчене слово
@@ -313,7 +326,7 @@ function vocabForLevel(level, lang) {
         if (!STATE.generatedVocab[lang]) STATE.generatedVocab[lang] = {};
         base = STATE.generatedVocab[lang][level] || [];
     }
-    const custom = (STATE && Array.isArray(STATE.customWords)) ?
-        STATE.customWords.filter(w => w.level === level && (w.lang || 'no') === lang) : [];
+    const custom = (STATE && Array.isArray(LD().customWords)) ?
+        LD().customWords.filter(w => w.level === level && (w.lang || 'no') === lang) : [];
     return custom.length ? base.concat(custom) : base;
 }

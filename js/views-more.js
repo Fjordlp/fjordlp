@@ -4,10 +4,10 @@
             <div class="view">
               <h1>${t('h_profile')}</h1>
               <div class="grid cols-4" style="margin-bottom:16px;">
-                <div class="card stat-box"><div class="num">${Object.keys(STATE.stats?.wordsSeen||{}).length}</div><div class="label">${t('stat_words_studied')}</div></div>
-                <div class="card stat-box"><div class="num">${STATE.stats?.testsCompleted||0}</div><div class="label">${t('stat_tests')}</div></div>
-                <div class="card stat-box"><div class="num">${STATE.streak||0}</div><div class="label">${t('stat_streak_days')}</div></div>
-                <div class="card stat-box"><div class="num">${STATE.stats?.bestStreak||0}</div><div class="label">${t('stat_best_streak')}</div></div>
+                <div class="card stat-box"><div class="num">${Object.keys(LD().stats?.wordsSeen||{}).length}</div><div class="label">${t('stat_words_studied')}</div></div>
+                <div class="card stat-box"><div class="num">${LD().stats?.testsCompleted||0}</div><div class="label">${t('stat_tests')}</div></div>
+                <div class="card stat-box"><div class="num">${LD().streak||0}</div><div class="label">${t('stat_streak_days')}</div></div>
+                <div class="card stat-box"><div class="num">${LD().stats?.bestStreak||0}</div><div class="label">${t('stat_best_streak')}</div></div>
               </div>
               <div class="grid cols-2">
                 <div class="card">
@@ -45,7 +45,7 @@
             </div>
           `);
             const cal = wrap.querySelector('#calgrid');
-            const dates = STATE.stats?.activityDates || [];
+            const dates = LD().stats?.activityDates || [];
             const set = new Set(dates);
             for (let i = 44; i >= 0; i--) {
                 const d = new Date();
@@ -61,7 +61,7 @@
                 ["Lars", 640]
             ];
             const rows = bots.concat([
-                [STATE.name || currentUser, STATE.leaderboardScore || 0]
+                [STATE.name || currentUser, LD().leaderboardScore || 0]
             ]).sort((a, b) => b[1] - a[1]);
             rows.forEach((r, i) => {
                 const isYou = r[0] === (STATE.name || currentUser);
@@ -89,7 +89,7 @@
         // ---- NORSKPRØVE ----
 function viewNorskprove() {
   // Стан для навігації всередині розділу
-  if (!SUBSTATE.norskLevel) SUBSTATE.norskLevel = STATE.level || "A1";
+  if (!SUBSTATE.norskLevel) SUBSTATE.norskLevel = LD().level || "A1";
   if (!SUBSTATE.norskMode) SUBSTATE.norskMode = "reading";
   if (!SUBSTATE.norskTaskIndex) SUBSTATE.norskTaskIndex = 0;
   if (!SUBSTATE.norskAnswers) SUBSTATE.norskAnswers = {};
@@ -204,7 +204,7 @@ function viewNorskprove() {
     };
   });
 
-  // AI-генерація нового завдання: додає його в STATE.customNorskTasks,
+  // AI-генерація нового завдання: додає його в LD().customNorskTasks,
   // тож воно одразу зʼявляється в списку і залишається на сайті надалі.
   const genBtn = wrap.querySelector('#norskGenBtn');
   genBtn.onclick = async () => {
@@ -447,7 +447,7 @@ function viewOnboarding() {
 
     const step = SUBSTATE.onbStep;
     const goal = SUBSTATE.onbGoal;
-    const level = SUBSTATE.onbLevel || STATE.level || 'A1';
+    const level = SUBSTATE.onbLevel || LD().level || 'A1';
 
     const wrap = el(`
         <div class="view" style="max-width:700px;margin:0 auto;">
@@ -582,8 +582,8 @@ function viewOnboarding() {
         manualDiv.querySelectorAll('.chip').forEach(btn => {
             btn.onclick = () => {
                 SUBSTATE.onbLevel = btn.dataset.lvl;
-                STATE.level = btn.dataset.lvl;
-                STATE.levelTestDone = true;
+                LD().level = btn.dataset.lvl;
+                LD().levelTestDone = true;
                 updateState();
                 SUBSTATE.onbStep = 3;
                 navigate('onboarding', SUBSTATE);
@@ -600,7 +600,7 @@ function viewOnboarding() {
 
     // ---- КРОК 3: ПЛАН НАВЧАННЯ ----
     else if (step === 3) {
-        const finalLevel = SUBSTATE.onbLevel || STATE.level || 'A1';
+        const finalLevel = SUBSTATE.onbLevel || LD().level || 'A1';
         const finalGoal = SUBSTATE.onbGoal || 'travel';
         const planText = getStudyPlan(finalLevel, finalGoal);
 

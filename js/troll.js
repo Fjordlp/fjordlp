@@ -255,11 +255,11 @@
         // заморозка — тихо "затуляє" цей день, зберігаючи серію. Викликається
         // раз при вході в застосунок (не на кожен рендер).
         function checkAndApplyStreakFreeze() {
-            if (!STATE.stats) STATE.stats = { activityDates: [], bestStreak: 0 };
-            if (typeof STATE.streakFreezes !== 'number') STATE.streakFreezes = 0;
-            if (STATE.streakFreezes <= 0) return false;
+            if (!LD().stats) LD().stats = { activityDates: [], bestStreak: 0 };
+            if (typeof LD().streakFreezes !== 'number') LD().streakFreezes = 0;
+            if (LD().streakFreezes <= 0) return false;
 
-            const dates = new Set(STATE.stats.activityDates || []);
+            const dates = new Set(LD().stats.activityDates || []);
             const today = todayStr();
             const y = new Date(); y.setDate(y.getDate() - 1);
             const twoAgo = new Date(); twoAgo.setDate(twoAgo.getDate() - 2);
@@ -270,22 +270,22 @@
             // сьогодні ще нічого не позначено. Це і є момент, коли серія
             // щойно готова обнулитись — рятуємо її заморозкою.
             if (dates.has(dayBefore) && !dates.has(yesterday) && !dates.has(today)) {
-                STATE.stats.activityDates.push(yesterday);
-                STATE.stats.activityDates.sort();
-                STATE.streakFreezes--;
+                LD().stats.activityDates.push(yesterday);
+                LD().stats.activityDates.sort();
+                LD().streakFreezes--;
                 recomputeStreak();
                 updateState();
                 const lang2 = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
                 const usedMsg = { uk: 'Заморозку використано — серія', en: 'Freeze used — your streak of', ru: 'Заморозка использована — серия' }[lang2];
                 const savedMsg = { uk: 'врятована!', en: 'is saved!', ru: 'спасена!' }[lang2];
-                toast(`🧊 ${usedMsg} ${STATE.streak} 🔥 ${savedMsg}`);
+                toast(`🧊 ${usedMsg} ${LD().streak} 🔥 ${savedMsg}`);
                 return true;
             }
             return false;
         }
 
         function checkTrollUnlocks() {
-            const { lvl } = xpProgress(STATE.xp || 0);
+            const { lvl } = xpProgress(LD().xp || 0);
             const justUnlocked = [];
             TROLL_UNLOCKABLES.forEach(item => {
                 if (lvl >= item.unlockLevel && !STATE.trollGear.unlocked.includes(item.id)) {
@@ -307,9 +307,9 @@
         }
 
         function addXP(amount, reason) {
-            const before = trollLevelFromXp(STATE.xp || 0);
-            STATE.xp = (STATE.xp || 0) + amount;
-            const after = trollLevelFromXp(STATE.xp);
+            const before = trollLevelFromXp(LD().xp || 0);
+            LD().xp = (LD().xp || 0) + amount;
+            const after = trollLevelFromXp(LD().xp);
             checkTrollUnlocks();
             checkAchievements();
             if (after > before) {
@@ -319,11 +319,11 @@
                 // Заморозка стріку — нагорода за кожні 5 рівнів тролля, макс. 3 про запас.
                 // Рятує серію автоматично, якщо пропущено рівно один день.
                 if (after % 5 === 0) {
-                    if (typeof STATE.streakFreezes !== 'number') STATE.streakFreezes = 0;
-                    if (STATE.streakFreezes < 3) {
-                        STATE.streakFreezes++;
+                    if (typeof LD().streakFreezes !== 'number') LD().streakFreezes = 0;
+                    if (LD().streakFreezes < 3) {
+                        LD().streakFreezes++;
                         const freezeMsg = { uk: 'Отримано заморозку серії! Тепер їх у вас', en: "Streak freeze earned! You now have", ru: 'Получена заморозка серии! Теперь у вас' }[lang1];
-                        toast(`🧊 ${freezeMsg}: ${STATE.streakFreezes}`);
+                        toast(`🧊 ${freezeMsg}: ${LD().streakFreezes}`);
                     }
                 }
             }
@@ -364,8 +364,8 @@
         function checkAchievements(ctx) {
             let unlockedSomething = false;
             ACHIEVEMENTS.forEach(a => {
-                if (!STATE.achievements.includes(a.id) && a.check(STATE, ctx)) {
-                    STATE.achievements.push(a.id);
+                if (!LD().achievements.includes(a.id) && a.check(LD(), ctx)) {
+                    LD().achievements.push(a.id);
                     const lang2 = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
                     const msg2 = { uk: 'Досягнення', en: 'Achievement', ru: 'Достижение' }[lang2];
                     toast(`🏆 ${msg2}: ${achievementName(a)}!`);
@@ -377,9 +377,9 @@
         }
 
         function recomputeStreak() {
-            if (!STATE.stats) STATE.stats = { activityDates: [], bestStreak: 0 };
-            const dates = STATE.stats.activityDates || [];
-            if (dates.length === 0) { STATE.streak = 0; return; }
+            if (!LD().stats) LD().stats = { activityDates: [], bestStreak: 0 };
+            const dates = LD().stats.activityDates || [];
+            if (dates.length === 0) { LD().streak = 0; return; }
             let streak = 0;
             let cursor = new Date();
             const set = new Set(dates);
@@ -387,16 +387,16 @@
                 const ds = todayStr(cursor);
                 if (set.has(ds)) { streak++; cursor.setDate(cursor.getDate() - 1); } else break;
             }
-            STATE.streak = streak;
-            if (streak > (STATE.stats.bestStreak || 0)) STATE.stats.bestStreak = streak;
+            LD().streak = streak;
+            if (streak > (LD().stats.bestStreak || 0)) LD().stats.bestStreak = streak;
         }
 
         function markActivityToday() {
-            if (!STATE.stats) STATE.stats = { activityDates: [], bestStreak: 0 };
+            if (!LD().stats) LD().stats = { activityDates: [], bestStreak: 0 };
             const t = todayStr();
-            if (!STATE.stats.activityDates.includes(t)) {
-                STATE.stats.activityDates.push(t);
-                STATE.stats.activityDates.sort();
+            if (!LD().stats.activityDates.includes(t)) {
+                LD().stats.activityDates.push(t);
+                LD().stats.activityDates.sort();
             }
             recomputeStreak();
             updateState();

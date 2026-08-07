@@ -31,7 +31,11 @@ const SYSTEM_PROMPTS = {
 
 const MAX_MESSAGE_LEN = 4000;
 const MAX_HISTORY_ITEMS = 12;
-const RATE_LIMIT_PER_MIN = 12;
+// Було 12/хв — це майже гарантовано впиралось у ліміт, якщо адмін генерував
+// словник у кілька пакетів (5-8 запитів) для однієї мови, а тим паче для
+// кількох мов підряд в одній сесії. Піднято до 30/хв; клієнт (generateBulkVocab)
+// також тепер сам витримує паузу ~600мс між пакетами.
+const RATE_LIMIT_PER_MIN = 30;
 
 // Список моделей для fallback (перша робоча буде використана)
 const MODEL_CANDIDATES = [
