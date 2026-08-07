@@ -330,3 +330,48 @@ function vocabForLevel(level, lang) {
         LD().customWords.filter(w => w.level === level && (w.lang || 'no') === lang) : [];
     return custom.length ? base.concat(custom) : base;
 }
+
+// Дзеркало vocabForLevel(), тільки для граматичних правил. Для норвезької
+// повертає зріз вбудованого GRAMMAR по рівню (як і раніше робив test-mc
+// напряму); для решти мов — те, що встигла підготувати
+// ensureGrammarAvailable() (адмінська публікація або особиста AI-генерація).
+// Якщо на цей момент ще нічого нема — повертає порожній масив, а не
+// норвезькі правила за замовчуванням (саме цей "тихий" фолбек і був
+// причиною, чому люди, які вчать іспанську/німецьку/т.д., бачили питання
+// про артиклі en/ei/et: GRAMMAR використовували напряму, без фільтра мови).
+function grammarForLevel(level, lang) {
+    lang = lang || (STATE && STATE.targetLang) || 'no';
+    if (lang === 'no') {
+        return (typeof GRAMMAR !== 'undefined' ? GRAMMAR : []).filter(g => g.level === level);
+    }
+    if (!STATE.generatedGrammar) STATE.generatedGrammar = {};
+    if (!STATE.generatedGrammar[lang]) STATE.generatedGrammar[lang] = {};
+    return STATE.generatedGrammar[lang][level] || [];
+}
+
+// Обирає правильномовний варіант поля граматичного правила залежно від
+// STATE.uiLang (title/exp/q мають варіанти title_en/title_ru тощо — і у
+// вбудованих норвезьких правилах, і у згенерованих AI). Раніше viewGrammar
+// завжди показував лише українську версію (g.title), навіть коли інтерфейс
+// був англійською чи російською — ці поля збирались, але не
+// застосовувались.
+function grammarLocalized(g, field) {
+    const uiLang = (STATE && STATE.uiLang) || 'uk';
+    if (uiLang === 'en' && g[field + '_en']) return g[field + '_en'];
+    if (uiLang === 'ru' && g[field + '_ru']) return g[field + '_ru'];
+    return g[field];
+}
+
+function grammarLocalizedHead(g) {
+    const uiLang = (STATE && STATE.uiLang) || 'uk';
+    if (uiLang === 'en' && g.head_en) return g.head_en;
+    if (uiLang === 'ru' && g.head_ru) return g.head_ru;
+    return g.table.head;
+}
+
+function grammarLocalizedQ(g) {
+    const uiLang = (STATE && STATE.uiLang) || 'uk';
+    if (uiLang === 'en' && g.q_en) return g.q_en;
+    if (uiLang === 'ru' && g.q_ru) return g.q_ru;
+    return g.ex.q;
+}

@@ -43,6 +43,12 @@ function viewAdmin() {
                     <h3>Спільні словники</h3>
                     <p style="color:var(--ink-soft);font-size:.85rem;">Згенерувати й опублікувати словник для будь-якої мови — одразу для всіх користувачів</p>
                 </div>
+
+                <div class="card admin-card" onclick="navigate('admin-grammar-gen')" style="cursor:pointer;transition:all .2s;">
+                    <div style="font-size:2rem;margin-bottom:8px;">📖</div>
+                    <h3>Спільна граматика</h3>
+                    <p style="color:var(--ink-soft);font-size:.85rem;">Згенерувати й опублікувати граматичні правила для будь-якої мови й рівня</p>
+                </div>
             </div>
         </div>
     `;
@@ -842,6 +848,180 @@ function initAdminSharedVocab() {
     const discardBtn = document.getElementById('avDiscardBtn');
     if (discardBtn) discardBtn.onclick = () => {
         pendingWords = null;
+        previewCard.style.display = 'none';
+    };
+}
+
+// =====================================================================
+//  СТОРІНКА: Спільна граматика (адмін генерує й публікує для всіх)
+// =====================================================================
+function viewAdminSharedGrammar() {
+    if (!STATE || !STATE.admin) return errorAccessDenied();
+
+    const nonNorwegian = LANGUAGES.filter(l => l.code !== 'no');
+
+    return `
+        <div class="view">
+            <h1>📖 Спільна граматика</h1>
+            <p style="color:var(--ink-soft);margin-bottom:16px;">
+                Згенеруйте граматичні правила для мови й рівня, перегляньте результат і
+                опублікуйте — після цього їх одразу побачать усі користувачі, які вчать цю
+                мову, і у вкладці "Граматика", і серед питань тесту "Multiple Choice".
+                Норвезька тут не потрібна — в неї вже є вбудований набір із 27 правил.
+            </p>
+
+            <div class="card" style="margin-bottom:16px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div class="field">
+                        <label>Мова</label>
+                        <select id="agLang">
+                            ${nonNorwegian.map(l => `<option value="${l.code}">${l.flag} ${l.name.uk}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Рівень</label>
+                        <select id="agLevel">
+                            ${['A1','A2','B1','B2','C1','C2'].map(l => `<option value="${l}">${l}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Кількість пакетів (~4 правила кожен)</label>
+                        <select id="agBatches">
+                            <option value="2" selected>2 (~8 правил)</option>
+                            <option value="4">4 (~16 правил)</option>
+                            <option value="6">6 (~24 правила)</option>
+                        </select>
+                    </div>
+                    <div class="field" style="display:flex;align-items:flex-end;">
+                        <button class="btn btn-primary btn-block" id="agGenerateBtn">✨ Згенерувати</button>
+                    </div>
+                </div>
+                <p id="agStatus" style="color:var(--ink-soft);font-size:.85rem;margin-top:10px;"></p>
+            </div>
+
+            <div class="card" id="agExistingCard" style="margin-bottom:16px;">
+                <h3>📦 Уже опубліковано</h3>
+                <div id="agExistingList" style="color:var(--ink-soft);font-size:.85rem;">Завантаження…</div>
+            </div>
+
+            <div class="card" id="agPreviewCard" style="display:none;">
+                <h3>👀 Прев'ю (<span id="agPreviewCount">0</span> правил)</h3>
+                <div id="agPreviewList" style="max-height:340px;overflow-y:auto;margin:12px 0;"></div>
+                <button class="btn btn-primary" id="agPublishBtn">📤 Опублікувати для всіх користувачів</button>
+                <button class="btn btn-ghost" id="agDiscardBtn">🗑️ Відхилити</button>
+            </div>
+
+            <button class="btn btn-ghost btn-sm" onclick="navigate('admin')" style="margin-top:12px;">← Назад до панелі</button>
+        </div>
+    `;
+}
+
+function initAdminSharedGrammar() {
+    const genBtn = document.getElementById('agGenerateBtn');
+    const statusEl = document.getElementById('agStatus');
+    const previewCard = document.getElementById('agPreviewCard');
+    const previewList = document.getElementById('agPreviewList');
+    const previewCount = document.getElementById('agPreviewCount');
+    const existingList = document.getElementById('agExistingList');
+    if (!genBtn) return; // не та сторінка
+
+    let pendingRules = null;
+    let pendingLang = null;
+    let pendingLevel = null;
+
+    async function refreshExisting() {
+        if (!firebaseReady || !firebaseDb) {
+            existingList.textContent = 'Firestore недоступний.';
+            return;
+        }
+        try {
+            const snap = await firebaseDb.collection('sharedGrammar').get();
+            if (snap.empty) {
+                existingList.textContent = 'Ще нічого не опубліковано.';
+                return;
+            }
+            const rows = [];
+            snap.forEach(doc => {
+                const d = doc.data();
+                const lang = getLanguage(d.lang);
+                rows.push(`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line-soft);">
+                    <span>${lang.flag} ${lang.name.uk} — <span class="tag level-${d.level}">${d.level}</span></span>
+                    <span>${d.count || (d.rules||[]).length} правил</span>
+                </div>`);
+            });
+            existingList.innerHTML = rows.join('');
+        } catch (e) {
+            console.error('[Адмін] Помилка завантаження списку граматики:', e);
+            existingList.textContent = 'Помилка завантаження.';
+        }
+    }
+    refreshExisting();
+
+    genBtn.onclick = async () => {
+        const lang = document.getElementById('agLang').value;
+        const level = document.getElementById('agLevel').value;
+        const batches = parseInt(document.getElementById('agBatches').value, 10);
+        genBtn.disabled = true;
+        const original = genBtn.textContent;
+        try {
+            const rules = await generateBulkGrammar(lang, level, batches, (done, total, count) => {
+                statusEl.textContent = `Генерую… пакет ${done}/${total}, правил зібрано: ${count}`;
+            });
+            pendingRules = rules;
+            pendingLang = lang;
+            pendingLevel = level;
+            previewCount.textContent = rules.length;
+            previewList.innerHTML = rules.map(g => `
+                <div style="padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:.85rem;">
+                    <strong>${g.title}</strong>
+                    <div style="color:var(--ink-soft);">${g.exp}</div>
+                </div>
+            `).join('');
+            previewCard.style.display = 'block';
+            statusEl.textContent = `Готово: ${rules.length} правил. Перевірте прев'ю нижче й опублікуйте.`;
+        } catch (e) {
+            console.error('[Адмін] Помилка генерації граматики:', e);
+            // Той самий діагностичний фікс, що й для генерації словника —
+            // конкретна причина (rate-limit, CORS, не налаштовано) замість
+            // загального "спробуйте ще раз".
+            let reason = e && e.message || 'невідома помилка';
+            if (e && e.code === 'PROXY_ERROR') {
+                reason = `код ${e.status}` + (e.detail ? `: ${String(e.detail).slice(0, 200)}` : '');
+                if (e.status === 429) reason += ' (забагато запитів підряд — зачекайте хвилину й спробуйте знову)';
+                if (e.status === 403) reason += ' (Worker не дозволяє цей сайт як джерело запиту — перевірте ALLOWED_ORIGINS)';
+            } else if (e && e.code === 'NETWORK_ERROR') {
+                reason = 'не вдалось з'+"'"+'єднатися з AI-проксі (мережа/CORS/URL Worker'+"'"+'а)';
+            } else if (e && e.code === 'NOT_CONFIGURED') {
+                reason = 'адреса AI-проксі (AI_PROXY_URL) не налаштована на сайті';
+            }
+            statusEl.textContent = `⚠️ Помилка генерації: ${reason}`;
+        } finally {
+            genBtn.disabled = false;
+            genBtn.textContent = original;
+        }
+    };
+
+    const publishBtn = document.getElementById('agPublishBtn');
+    if (publishBtn) publishBtn.onclick = async () => {
+        if (!pendingRules || !pendingRules.length) return;
+        publishBtn.disabled = true;
+        try {
+            await saveSharedGrammar(pendingLang, pendingLevel, pendingRules);
+            toast(`✅ Опубліковано ${pendingRules.length} правил для ${getLanguage(pendingLang).name.uk} (${pendingLevel})`);
+            previewCard.style.display = 'none';
+            pendingRules = null;
+            refreshExisting();
+        } catch (e) {
+            console.error('[Адмін] Помилка публікації:', e);
+            toast('⚠️ Не вдалося опублікувати. Перевірте доступ до Firestore.');
+        } finally {
+            publishBtn.disabled = false;
+        }
+    };
+
+    const discardBtn = document.getElementById('agDiscardBtn');
+    if (discardBtn) discardBtn.onclick = () => {
+        pendingRules = null;
         previewCard.style.display = 'none';
     };
 }

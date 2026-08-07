@@ -35,6 +35,9 @@ function render() {
     if (ROUTE === 'admin-vocab-gen' && typeof initAdminSharedVocab === 'function') {
         initAdminSharedVocab();
     }
+    if (ROUTE === 'admin-grammar-gen' && typeof initAdminSharedGrammar === 'function') {
+        initAdminSharedGrammar();
+    }
     if (ROUTE === 'admin-words' && typeof initAdminWords === 'function') {
         initAdminWords();
     }
@@ -60,7 +63,7 @@ const NAV_ROUTE_GROUPS = {
     tests: ['tests', 'test-mc', 'test-cloze', 'test-order', 'test-listen', 'test-translate'],
     profile: ['profile', 'levels', 'leveltest'],
     tournaments: ['tournaments', 'tournament-play'],
-    admin: ['admin', 'admin-words', 'admin-tournaments', 'admin-daily', 'admin-users', 'admin-vocab-gen'],
+    admin: ['admin', 'admin-words', 'admin-tournaments', 'admin-daily', 'admin-users', 'admin-vocab-gen', 'admin-grammar-gen'],
 };
 
 function updateNav() {
@@ -158,6 +161,8 @@ function renderView() {
             return el(viewAdminUsers());
         case 'admin-vocab-gen':
             return el(viewAdminSharedVocab());
+        case 'admin-grammar-gen':
+            return el(viewAdminSharedGrammar());
         default:
             return el('<div class="view"><p>Сторінку не знайдено.</p></div>');
     }

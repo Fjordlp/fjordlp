@@ -157,6 +157,166 @@ function ensureGeneratedVocabStore() {
 }
 
 // =====================================================================
+//  AI-ГЕНЕРАЦІЯ ГРАМАТИКИ ДЛЯ НЕ ВБУДОВАНОЇ МОВИ
+// =====================================================================
+// Вбудований масив GRAMMAR (data.js) — це 27 правил, повністю захардко-
+// джених під норвезьку (приклади "en bil", "et hus" тощо). Раніше вкладка
+// "Граматика" й питання граматики в тесті test-mc показували ЦІ норвезькі
+// правила АБСОЛЮТНО ВСІМ користувачам незалежно від STATE.targetLang —
+// людина, що вчить іспанську, бачила питання про артиклі en/ei/et.
+// Нижче — та сама схема генерації, що й для словника (generateStarterVocab
+// вище): AI генерує компактні граматичні картки МОВОЮ ВИВЧЕННЯ, з перекладом
+// пояснень одразу на 3 мови інтерфейсу (uk/en/ru), у тій самій "плоскій"
+// формі полів (title/title_en/title_ru...), що й вбудовані норвезькі
+// правила — це дозволяє рендерити обидва джерела однаковим кодом.
+const GRAMMAR_TOPIC_HINTS = {
+    A1: ['рід і означеність іменників, теперішній час дієслова "бути", особові займенники', 'базові питальні слова, заперечення, множина іменників', 'найпростіші дієслова руху й дії, прийменники місця'],
+    A2: ['минулий час, майбутній час', 'модальні дієслова (могти/мусити/хотіти), прийменники часу', 'ступені порівняння прикметників, присвійні займенники'],
+    B1: ['умовний спосіб, підрядні речення причини й часу', 'пасивний стан, непряма мова', 'зворотні дієслова, сполучникові звороти'],
+    B2: ['складні часові конструкції, узгодження часів', 'герундій та інфінітив, модальні відтінки значення', 'складнопідрядні речення, сполучники контрасту'],
+    C1: ['складна підрядність, стилістичні інверсії', 'ідіоматичні граматичні конструкції, номіналізація', 'відтінки модальності у формальному мовленні'],
+    C2: ['рідкісні синтаксичні конструкції, літературний реєстр', 'розмовні еліпси та скорочення', 'тонкі відмінності між синонімічними конструкціями'],
+};
+
+async function generateGrammarBatch(langCode, level, batchIndex, existingTitles) {
+    const langName = getLanguage(langCode).name.uk;
+    const sys = "Ти — досвідчений викладач іноземних мов, який готує стислі граматичні " +
+        "картки для рівня CEFR. Відповідай ЛИШЕ чистим JSON-масивом без жодного тексту " +
+        "навколо, без markdown-огорожі.";
+    const hints = GRAMMAR_TOPIC_HINTS[level] || GRAMMAR_TOPIC_HINTS.A1;
+    const topicHint = hints[(batchIndex || 0) % hints.length];
+    const avoidList = (existingTitles || []).slice(-30).join(', ');
+    const userMsg =
+        `Мова вивчення: ${langName}. Рівень CEFR: ${level}. ` +
+        `Згенеруй 4 граматичні правила цієї мови для цього рівня на тему: ${topicHint}. ` +
+        (avoidList ? `НЕ повторюй ці вже описані правила: ${avoidList}. ` : '') +
+        `Кожне правило — компактна картка: коротке пояснення, таблиця-приклад (2-3 рядки, ` +
+        `2 колонки) і одне питання з 3 варіантами відповіді. Приклади в таблиці й варіанти ` +
+        `відповіді пиши МОВОЮ ВИВЧЕННЯ (${langName}), пояснення й назву правила — трьома мовами. ` +
+        `Формат масиву: [{"title":"назва правила українською","title_en":"назва англійською",` +
+        `"title_ru":"назва російською","exp":"пояснення українською (1-2 речення)",` +
+        `"exp_en":"пояснення англійською","exp_ru":"пояснення російською",` +
+        `"table":{"head":["Колонка1 укр","Колонка2 укр"],"rows":[["приклад мовою вивчення","приклад2"],["...","..."]]},` +
+        `"head_en":["Колонка1 англ","Колонка2 англ"],"head_ru":["Колонка1 рос","Колонка2 рос"],` +
+        `"ex":{"q":"питання українською (може містити приклад мовою вивчення)","opts":["варіант1 мовою вивчення","варіант2","варіант3"],"a":0},` +
+        `"q_en":"те саме питання англійською","q_ru":"те саме питання російською"}, ...]`;
+    const reply = await callAiRaw('gen_grammar', sys, userMsg, []);
+    return parseAiJson(reply);
+}
+
+// Мультипакетна генерація (як generateBulkVocab) — кілька менших запитів
+// надійніші за один величезний, і дають прогрес користувачу/адміну. Так само
+// витримує паузу між пакетами й прокидає помилку, якщо провалились усі —
+// той самий фікс rate-limit, що й для словника.
+async function generateBulkGrammar(langCode, level, batches, onProgress) {
+    batches = batches || 3;
+    const collected = [];
+    const seen = new Set();
+    let lastError = null;
+    let failedBatches = 0;
+    for (let i = 0; i < batches; i++) {
+        if (i > 0) await sleep(600); // пауза між запитами, щоб не впертись у RATE_LIMIT_PER_MIN
+        let batch;
+        try {
+            batch = await generateGrammarBatch(langCode, level, i, collected.map(g => g.title));
+        } catch (e) {
+            console.error('[Граматика] Помилка пакету генерації', i, e);
+            lastError = e;
+            failedBatches++;
+            continue;
+        }
+        (Array.isArray(batch) ? batch : []).forEach(g => {
+            if (!g || !g.title || !g.ex || !g.table) return;
+            const key = g.title.trim().toLowerCase();
+            if (seen.has(key)) return;
+            seen.add(key);
+            g.id = `${langCode}_${level}_${collected.length}`;
+            g.level = level;
+            collected.push(g);
+        });
+        if (typeof onProgress === 'function') onProgress(i + 1, batches, collected.length);
+    }
+    if (collected.length === 0 && failedBatches > 0 && lastError) {
+        throw lastError;
+    }
+    return collected;
+}
+
+// =====================================================================
+//  СПІЛЬНА (ГЛОБАЛЬНА) ГРАМАТИКА У FIRESTORE — той самий принцип, що й
+//  sharedVocab: адмін один раз генерує й публікує граматику для мови+рівня
+//  у Firestore, і після цього всі користувачі бачать її одразу, без
+//  власних AI-запитів.
+// =====================================================================
+function sharedGrammarDocId(lang, level) { return `${lang}_${level}`; }
+
+async function loadSharedGrammar(lang, level) {
+    if (!firebaseReady || !firebaseDb) return null;
+    try {
+        const doc = await firebaseDb.collection('sharedGrammar').doc(sharedGrammarDocId(lang, level)).get();
+        if (doc.exists && Array.isArray(doc.data().rules)) return doc.data().rules;
+        return null;
+    } catch (e) {
+        console.error('[Спільна граматика] Помилка завантаження:', e);
+        return null;
+    }
+}
+
+async function saveSharedGrammar(lang, level, rules) {
+    if (!firebaseReady || !firebaseDb) throw new Error('Firestore недоступний');
+    await firebaseDb.collection('sharedGrammar').doc(sharedGrammarDocId(lang, level)).set({
+        rules, lang, level, updatedAt: new Date().toISOString(), count: rules.length,
+    });
+}
+
+// =====================================================================
+//  АВТОМАТИЧНА ПІДГОТОВКА ГРАМАТИКИ ДЛЯ ОБРАНОЇ МОВИ (self-serve)
+// =====================================================================
+// Дзеркало ensureVocabAvailable() вище, тільки для граматики. Для
+// норвезької нічого не робимо — вбудований GRAMMAR і так покриває всі
+// рівні. Для решти мов: спершу пробуємо взяти вже опубліковане адміном
+// (швидко, безкоштовно для користувача), і лише якщо нічого нема —
+// генеруємо особисто через AI, кешуючи в STATE.generatedGrammar[lang][level].
+// Кеш словника й граматики лишаються спільними (не per-мова-ізольованими
+// через LD()) — так само, як STATE.generatedVocab: це технічний кеш уже
+// завантажених даних, а не особистий прогрес користувача, тож ізолювати
+// його по LD() немає сенсу.
+let _grammarAutoGenLoading = {};
+async function ensureGrammarAvailable(lang, level) {
+    if (!lang || lang === 'no') return; // вбудована граматика вже покриває норвезьку
+    if (!STATE.generatedGrammar) STATE.generatedGrammar = {};
+    if (!STATE.generatedGrammar[lang]) STATE.generatedGrammar[lang] = {};
+    const already = STATE.generatedGrammar[lang][level];
+    if (already && already.length) return;
+    const key = lang + '|' + level;
+    if (_grammarAutoGenLoading[key]) return;
+    _grammarAutoGenLoading[key] = true;
+    try {
+        const shared = await loadSharedGrammar(lang, level);
+        if (shared && shared.length) {
+            STATE.generatedGrammar[lang][level] = shared;
+            if (typeof render === 'function' && STATE.targetLang === lang && (LD().level || 'A1') === level) render();
+            return;
+        }
+        if (typeof generateBulkGrammar !== 'function' || typeof callAiRaw !== 'function') return; // AI недоступна
+        const rules = await generateBulkGrammar(lang, level, 2, null);
+        if (rules && rules.length) {
+            STATE.generatedGrammar[lang][level] = rules;
+            updateState();
+            if (typeof render === 'function' && STATE.targetLang === lang && (LD().level || 'A1') === level) render();
+        }
+    } catch (e) {
+        console.error('[Граматика] Не вдалося підготувати правила для', lang, level, e);
+    } finally {
+        _grammarAutoGenLoading[key] = false;
+    }
+}
+
+function isGrammarLoading(lang, level) {
+    return !!_grammarAutoGenLoading[lang + '|' + level];
+}
+
+// =====================================================================
 //  СПІЛЬНИЙ (ГЛОБАЛЬНИЙ) СЛОВНИК У FIRESTORE
 // =====================================================================
 // На відміну від STATE.generatedVocab (кеш лише для ОДНОГО користувача),

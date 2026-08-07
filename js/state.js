@@ -112,6 +112,7 @@
             if (!state.vocabLang) state.vocabLang = state.uiLang;
             if (!state.targetLang) state.targetLang = 'no';
             if (!state.generatedVocab || typeof state.generatedVocab !== 'object') state.generatedVocab = {};
+            if (!state.generatedGrammar || typeof state.generatedGrammar !== 'object') state.generatedGrammar = {};
             if (!state.generatedTasks || typeof state.generatedTasks !== 'object') state.generatedTasks = {};
             if (!state.wordTranslations || typeof state.wordTranslations !== 'object') state.wordTranslations = {};
             if (typeof state.admin !== 'boolean') state.admin = false;

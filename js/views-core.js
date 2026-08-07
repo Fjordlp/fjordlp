@@ -1204,8 +1204,10 @@ function runQuiz(sub, route, title) {
 function viewTestMC() {
     if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
         const level = LD().level || "A1";
+        const lang = STATE.targetLang || 'no';
+        if (lang !== 'no') ensureGrammarAvailable(lang, level); // тихо; якщо не встигне — цього разу просто без граматичних питань
         const words = shuffle(currentLevelWords()).slice(0, 6);
-        const gramQs = GRAMMAR.filter(g => g.level === (LD().level || "A1")).map(g => ({ q: g.ex.q, opts: g.ex
+        const gramQs = grammarForLevel(level, lang).map(g => ({ q: grammarLocalizedQ(g), opts: g.ex
                 .opts, a: g.ex.a }));
         const wordQs = words.map(w => {
             const correctTranslation = wordTranslation(w, level, STATE.vocabLang);
@@ -1719,30 +1721,60 @@ function viewTestTranslate() {
 // =====================================================================
 
 function viewGrammar() {
+    const lang = STATE.targetLang || 'no';
+    const level = LD().level || 'A1';
+
+    // Для будь-якої мови, крім норвезької, вбудованого GRAMMAR немає (це
+    // 27 захардкоджених норвезьких правил) — тож підвантажуємо/генеруємо
+    // граматику для поточного рівня. Викликаємо "тихо": перший рендер може
+    // показати порожньо/спінер, ensureGrammarAvailable сам перемалює
+    // екран, коли правила будуть готові (той самий патерн, що й
+    // ensureVocabAvailable для словника).
+    if (lang !== 'no') ensureGrammarAvailable(lang, level);
+
+    const rules = lang === 'no' ? GRAMMAR : grammarForLevel(level, lang);
+
     const wrap = el(
-        `<div class="view"><h1>${t('h_grammar')}</h1><input class="type-input" id="gsearch" placeholder="${t('search_placeholder')}" style="max-width:100%;margin-bottom:16px;padding:10px 14px;font-size:.9rem;"><div id="gramlist"></div></div>`
+        `<div class="view"><h1>${t('h_grammar')}</h1><input class="type-input" id="gsearch" placeholder="${t('search_placeholder')}" style="max-width:100%;margin-bottom:16px;padding:10px 14px;font-size:.9rem;"><div id="gramNotice"></div><div id="gramlist"></div></div>`
     );
     const list = wrap.querySelector('#gramlist');
 
+    if (lang !== 'no') {
+        const langName = targetLangName(lang);
+        const notice = el(rules.length === 0 ? `
+            <div class="card" style="margin-bottom:16px;color:var(--ink-soft);font-size:.9rem;">
+                🤖 ${tf('grammar_generating_notice', {lang: langName, level})}
+            </div>
+        ` : `
+            <div class="card" style="margin-bottom:16px;color:var(--ink-soft);font-size:.85rem;">
+                🤖 ${tf('grammar_ai_generated_notice', {lang: langName, level})}
+            </div>
+        `);
+        wrap.querySelector('#gramNotice').appendChild(notice);
+    }
+
     function renderList(filter) {
         list.innerHTML = "";
-        GRAMMAR.filter(g => !filter || g.title.toLowerCase().includes(filter.toLowerCase())).forEach(g => {
+        rules.filter(g => !filter || grammarLocalized(g, 'title').toLowerCase().includes(filter.toLowerCase())).forEach(g => {
+            const title = grammarLocalized(g, 'title');
+            const exp = grammarLocalized(g, 'exp');
+            const head = grammarLocalizedHead(g);
+            const q = { q: grammarLocalizedQ(g), opts: g.ex.opts, a: g.ex.a };
             const item = el(`
                 <div class="gram-item">
-                    <div class="gram-head"><h3>${g.title}</h3><span class="tag level-${g.level}">${g.level}</span></div>
+                    <div class="gram-head"><h3>${escHtml(title)}</h3><span class="tag level-${g.level}">${g.level}</span></div>
                     <div class="gram-body">
-                        <p>${g.exp}</p>
-                        <table><thead><tr>${g.table.head.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
-                        <tbody>${g.table.rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>
+                        <p>${escHtml(exp)}</p>
+                        <table><thead><tr>${head.map(h=>`<th>${escHtml(h)}</th>`).join('')}</tr></thead>
+                        <tbody>${g.table.rows.map(r=>`<tr>${r.map(c=>`<td>${escHtml(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>
                         <div class="miniex"></div>
                     </div>
                 </div>
             `);
-            const head = item.querySelector('.gram-head');
+            const headEl = item.querySelector('.gram-head');
             const body = item.querySelector('.gram-body');
-            head.onclick = () => body.classList.toggle('open');
+            headEl.onclick = () => body.classList.toggle('open');
             const mini = item.querySelector('.miniex');
-            const q = g.ex;
             const qEl = el(
                 `<div><p style="font-weight:600;margin-top:10px;">${escHtml(q.q)}</p><div class="mc-options"></div></div>`
             );

@@ -61,6 +61,12 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+    // Спільна граматика (генерується в адмін-панелі, той самий принцип, що
+    // й sharedVocab вище): читати може будь-хто, публікувати — лише адмін.
+    match /sharedGrammar/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
     // Слова (окрема колекція, яку читає й наповнює адмін-панель) — той
     // самий принцип: читати може будь-хто, писати лише адмін.
     match /words/{docId} {
