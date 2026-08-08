@@ -489,6 +489,20 @@
         .gram-body th,.gram-body td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; }
         .gram-body th { background: var(--cream); font-family: 'JetBrains Mono', monospace; font-size: .72rem; text-transform: uppercase; }
 
+        /* ===== BOOKS (reading + click-to-translate) ===== */
+        .book-word { cursor: pointer; border-radius: 4px; transition: background .12s; }
+        .book-word:hover { background: var(--cream); }
+        .book-word-popup {
+            position: absolute; z-index: 200; background: var(--navy, var(--ink));
+            color: #fff; padding: 8px 12px; border-radius: 10px; font-size: .85rem;
+            box-shadow: var(--shadow-lg); max-width: 260px;
+        }
+        .mc-opt.book-selected { border-color: var(--teal); background: var(--cream); }
+
+        /* ===== ADMIN: books editor ===== */
+        .book-chapter-editor { border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; background: var(--frost); }
+        .book-chapter-editor textarea { width: 100%; min-height: 160px; font-family: inherit; font-size: .88rem; padding: 8px; border: 1px solid var(--line); border-radius: 8px; resize: vertical; }
+
         /* ===== VOCABULARY ===== */
         .vocab-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
         .vocab-table th { text-align: left; padding: 8px 6px; border-bottom: 2px solid var(--line); font-family: 'JetBrains Mono', monospace; font-size: .7rem; text-transform: uppercase; color: var(--ink-soft); }

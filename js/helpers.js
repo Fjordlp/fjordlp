@@ -167,8 +167,16 @@ function getLevelRecommendation() {
                     t: w.t || 'Додано AI',
                     no: String(w.no).trim(),
                     uk: String(w.uk).trim(),
+                    // Раніше ці 4 поля тут просто ігнорувались навіть якщо AI
+                    // їх повернув — слово зберігалось лише з українським
+                    // перекладом, і хтось з англійським/російським
+                    // інтерфейсом бачив український переклад замість свого.
+                    en: w.en ? String(w.en).trim() : undefined,
+                    ru: w.ru ? String(w.ru).trim() : undefined,
                     ex_no: w.ex_no || w.no,
                     ex_uk: w.ex_uk || w.uk,
+                    en_ex: w.en_ex ? String(w.en_ex).trim() : undefined,
+                    ru_ex: w.ru_ex ? String(w.ru_ex).trim() : undefined,
                 });
                 added++;
             });
@@ -178,8 +186,19 @@ function getLevelRecommendation() {
 
         // Об'єднує вбудовані завдання Norskprøve з тими, що згенерував AI
         // і які збережені у LD().customNorskTasks[level][mode].
+        // Раніше norskTasksFor() завжди додавав NORSKPROVE_TASKS[level][mode]
+        // до результату — а це повністю НОРВЕЗЬКОМОВНИЙ банк завдань
+        // (тексти для читання, репліки для аудіювання, теми письма — все
+        // норвезькою). Через це той, хто вчить іспанську чи німецьку,
+        // відкривши "Тренажер завдань", бачив ті самі норвезькі тексти
+        // "Hei! Jeg heter Anna…" — цілком незрозумілі й нерелевантні його
+        // мові. Вбудований банк тепер лишається лише для норвезької; для
+        // решти мов джерело завдань — виключно AI-згенеровані
+        // LD().customNorskTasks (кнопка "Згенерувати завдання" на сторінці),
+        // які generateNorskTaskAI() і так генерує цільовою мовою.
         function norskTasksFor(level, mode) {
-            const base = (NORSKPROVE_TASKS[level] && NORSKPROVE_TASKS[level][mode]) || [];
+            const lang = (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
+            const base = lang === 'no' ? ((NORSKPROVE_TASKS[level] && NORSKPROVE_TASKS[level][mode]) || []) : [];
             const custom = (LD().customNorskTasks && LD().customNorskTasks[level] && LD().customNorskTasks[level][mode]) || [];
             return base.concat(custom);
         }

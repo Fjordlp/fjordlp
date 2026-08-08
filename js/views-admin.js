@@ -49,6 +49,12 @@ function viewAdmin() {
                     <h3>Спільна граматика</h3>
                     <p style="color:var(--ink-soft);font-size:.85rem;">Згенерувати й опублікувати граматичні правила для будь-якої мови й рівня</p>
                 </div>
+
+                <div class="card admin-card" onclick="navigate('admin-books')" style="cursor:pointer;transition:all .2s;">
+                    <div style="font-size:2rem;margin-bottom:8px;">📚</div>
+                    <h3>Книги</h3>
+                    <p style="color:var(--ink-soft);font-size:.85rem;">Додати книгу суспільного надбання для читання (текст вставляється вручну)</p>
+                </div>
             </div>
         </div>
     `;
@@ -136,6 +142,18 @@ function viewAdminTournaments() {
                         <input id="tournamentDesc" placeholder="Короткий опис турніру">
                     </div>
                     <div class="field">
+                        <label>Мова</label>
+                        <select id="tournamentLang">
+                            ${LANGUAGES.map(l => `<option value="${l.code}">${l.flag} ${l.name.uk}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Рівень</label>
+                        <select id="tournamentLevel">
+                            ${['A1','A2','B1','B2','C1','C2'].map(l => `<option value="${l}">${l}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="field">
                         <label>Дата початку</label>
                         <input id="tournamentStart" type="datetime-local">
                     </div>
@@ -146,12 +164,6 @@ function viewAdminTournaments() {
                     <div class="field">
                         <label>Кількість питань</label>
                         <input id="tournamentQuestions" type="number" value="20">
-                    </div>
-                    <div class="field">
-                        <label>Рівень</label>
-                        <select id="tournamentLevel">
-                            ${['A1','A2','B1','B2','C1','C2'].map(l => `<option value="${l}">${l}</option>`).join('')}
-                        </select>
                     </div>
                 </div>
                 <button class="btn btn-primary" onclick="adminCreateTournament()">🏆 Створити турнір</button>
@@ -361,14 +373,25 @@ window.adminCreateTournament = async function() {
     const end = document.getElementById('tournamentEnd').value;
     const numQuestions = parseInt(document.getElementById('tournamentQuestions').value) || 20;
     const level = document.getElementById('tournamentLevel').value;
-    
+    // Раніше мова турніру не обиралась явно — vocabForLevel(level) без
+    // другого аргументу мовчки брав STATE.targetLang АДМІНА на момент
+    // створення (яку мову він сам зараз вчить), а не свідомо обрану мову
+    // турніру. Хтось, хто вчить іспанську, міг побачити в списку турнір,
+    // складений з норвезьких слів — просто тому, що адмін у той момент
+    // сам вчив норвезьку.
+    const lang = document.getElementById('tournamentLang').value;
+
     if (!name) {
         toast('❌ Введіть назву турніру');
         return;
     }
-    
+
     try {
-        const words = vocabForLevel(level);
+        const words = vocabForLevel(level, lang);
+        if (!words.length) {
+            toast(`❌ Немає слів для ${getLanguage(lang).name.uk} (${level}). Спершу опублікуйте словник для цієї мови й рівня.`);
+            return;
+        }
         const shuffled = shuffle(words).slice(0, numQuestions);
         const questions = shuffled.map(w => {
             const distractors = shuffle(words.filter(x => x.no !== w.no)).slice(0, 3).map(x => x.uk);
@@ -380,10 +403,11 @@ window.adminCreateTournament = async function() {
                 correct: options.indexOf(w.uk)
             };
         });
-        
+
         const docRef = await firebaseDb.collection('tournaments').add({
             name,
             description: desc,
+            lang,
             level,
             questions,
             status: 'waiting',
@@ -394,7 +418,7 @@ window.adminCreateTournament = async function() {
             createdBy: firebaseAuth.currentUser.uid,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-        
+
         toast(`🏆 Турнір "${name}" створено!`);
         document.getElementById('tournamentName').value = '';
         document.getElementById('tournamentDesc').value = '';
@@ -1023,5 +1047,273 @@ function initAdminSharedGrammar() {
     if (discardBtn) discardBtn.onclick = () => {
         pendingRules = null;
         previewCard.style.display = 'none';
+    };
+}
+
+// =====================================================================
+//  СТОРІНКА: Книги (адмін вручну вставляє текст суспільного надбання)
+// =====================================================================
+// НАГАДУВАННЯ ПРО АВТОРСЬКЕ ПРАВО: на відміну від словника й граматики,
+// текст книги AI НЕ генерує — його вставляє сюди сам адмін. Публікуй лише
+// тексти, які точно є суспільним надбанням (автор помер >70 років тому —
+// залежно від юрисдикції; Project Gutenberg, nb.no/bokhylla з позначкою
+// вільного доступу тощо) або на які в тебе є права. AI тут лише допомагає
+// з двома речами ПІСЛЯ того, як текст уже вставлено: переклад слів по
+// кліку під час читання і завдання на розуміння прочитаного.
+let _abEditingBookId = null;
+
+function viewAdminBooks() {
+    if (!STATE || !STATE.admin) return errorAccessDenied();
+    const nonNorwegian = LANGUAGES; // книги можна додавати й норвезькою (це не GRAMMAR-конфлікт, окрема колекція)
+
+    return `
+        <div class="view">
+            <h1>📚 Книги</h1>
+            <p style="color:var(--ink-soft);margin-bottom:16px;">
+                Встав текст книги суспільного надбання по розділах. Для кожного розділу можна
+                одразу згенерувати завдання на розуміння прочитаного (AI спирається САМЕ на цей
+                текст, а не вигадує від себе).
+            </p>
+
+            <div class="card" style="margin-bottom:16px;">
+                <h3 id="abFormTitle" style="margin-top:0;">➕ Нова книга</h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div class="field">
+                        <label>Мова</label>
+                        <select id="abLang">
+                            ${nonNorwegian.map(l => `<option value="${l.code}">${l.flag} ${l.name.uk}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Рівень</label>
+                        <select id="abLevel">
+                            ${['A1','A2','B1','B2','C1','C2'].map(l => `<option value="${l}">${l}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Назва книги</label>
+                        <input type="text" id="abTitle" placeholder="напр. Peter Pan">
+                    </div>
+                    <div class="field">
+                        <label>Автор</label>
+                        <input type="text" id="abAuthor" placeholder="напр. J. M. Barrie">
+                    </div>
+                </div>
+                <div class="field" style="margin-top:10px;">
+                    <label>Джерело / підтвердження суспільного надбання</label>
+                    <input type="text" id="abSource" placeholder="напр. Project Gutenberg, gutenberg.org/ebooks/16">
+                </div>
+
+                <h4 style="margin:18px 0 8px;">Розділи</h4>
+                <div id="abChapters"></div>
+                <button class="btn btn-ghost btn-sm" id="abAddChapterBtn">+ Додати розділ</button>
+
+                <div style="display:flex;gap:10px;margin-top:18px;">
+                    <button class="btn btn-primary" id="abPublishBtn">📤 Опублікувати книгу</button>
+                    <button class="btn btn-ghost" id="abResetBtn" style="display:none;">Скасувати редагування</button>
+                </div>
+                <p id="abStatus" style="color:var(--ink-soft);font-size:.85rem;margin-top:10px;"></p>
+            </div>
+
+            <div class="card" id="abExistingCard">
+                <h3>📦 Опубліковані книги</h3>
+                <div id="abExistingList" style="color:var(--ink-soft);font-size:.85rem;">Завантаження…</div>
+            </div>
+
+            <button class="btn btn-ghost btn-sm" onclick="navigate('admin')" style="margin-top:12px;">← Назад до панелі</button>
+        </div>
+    `;
+}
+
+function _abChapterEditorHtml(idx, chapter) {
+    chapter = chapter || {};
+    const tasksCount = (chapter.tasks || []).length;
+    return `
+        <div class="book-chapter-editor" data-chapter-idx="${idx}">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <strong>Розділ ${idx + 1}</strong>
+                <button class="btn btn-ghost btn-sm ab-remove-chapter" data-idx="${idx}" type="button">🗑️ Прибрати</button>
+            </div>
+            <div class="field" style="margin-bottom:8px;">
+                <label>Назва розділу</label>
+                <input type="text" class="ab-chapter-title" data-idx="${idx}" value="${escHtml(chapter.title || '')}" placeholder="напр. Розділ 1: Пітер порушує домашній спокій">
+            </div>
+            <div class="field">
+                <label>Текст розділу (порожній рядок = новий абзац)</label>
+                <textarea class="ab-chapter-text" data-idx="${idx}">${escHtml(chapter.text || '')}</textarea>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;margin-top:8px;">
+                <button class="btn btn-ghost btn-sm ab-gen-tasks" data-idx="${idx}" type="button">🎯 Згенерувати завдання</button>
+                <span class="ab-tasks-status" data-idx="${idx}" style="font-size:.8rem;color:var(--ink-soft);">${tasksCount ? `✅ ${tasksCount} завдань` : 'Завдань ще нема'}</span>
+            </div>
+        </div>
+    `;
+}
+
+function initAdminBooks() {
+    const chaptersEl = document.getElementById('abChapters');
+    const addBtn = document.getElementById('abAddChapterBtn');
+    const publishBtn = document.getElementById('abPublishBtn');
+    const resetBtn = document.getElementById('abResetBtn');
+    const statusEl = document.getElementById('abStatus');
+    const existingList = document.getElementById('abExistingList');
+    if (!chaptersEl) return; // не та сторінка
+
+    // Локальна модель розділів поточної форми (тримаємо тут, а не тільки в
+    // DOM, щоб зберегти tasks[] між рендерами — вони не мають свого поля вводу).
+    let chapters = [];
+
+    function renderChapters() {
+        chaptersEl.innerHTML = chapters.map((c, i) => _abChapterEditorHtml(i, c)).join('');
+        chaptersEl.querySelectorAll('.ab-remove-chapter').forEach(btn => {
+            btn.onclick = () => { chapters.splice(parseInt(btn.dataset.idx, 10), 1); renderChapters(); };
+        });
+        chaptersEl.querySelectorAll('.ab-chapter-title').forEach(inp => {
+            inp.oninput = () => { chapters[parseInt(inp.dataset.idx, 10)].title = inp.value; };
+        });
+        chaptersEl.querySelectorAll('.ab-chapter-text').forEach(ta => {
+            ta.oninput = () => { chapters[parseInt(ta.dataset.idx, 10)].text = ta.value; };
+        });
+        chaptersEl.querySelectorAll('.ab-gen-tasks').forEach(btn => {
+            btn.onclick = async () => {
+                const idx = parseInt(btn.dataset.idx, 10);
+                const ch = chapters[idx];
+                if (!ch.text || ch.text.trim().length < 200) {
+                    toast('⚠️ Спершу встав текст розділу (щонайменше кілька абзаців) — на його основі AI складе завдання.');
+                    return;
+                }
+                const statusSpan = chaptersEl.querySelector(`.ab-tasks-status[data-idx="${idx}"]`);
+                const lang = document.getElementById('abLang').value;
+                const level = document.getElementById('abLevel').value;
+                btn.disabled = true;
+                statusSpan.textContent = 'Генерую…';
+                try {
+                    const tasks = await generateChapterTasksAI(lang, level, ch.title || `Розділ ${idx + 1}`, ch.text);
+                    ch.tasks = tasks;
+                    statusSpan.textContent = tasks.length ? `✅ ${tasks.length} завдань` : '⚠️ AI не повернув завдань, спробуй ще раз';
+                } catch (e) {
+                    console.error('[Адмін] Помилка генерації завдань для розділу:', e);
+                    let reason = e && e.message || 'невідома помилка';
+                    if (e && e.code === 'PROXY_ERROR') {
+                        reason = `код ${e.status}` + (e.status === 429 ? ' (забагато запитів підряд — зачекай хвилину)' : '');
+                    } else if (e && e.code === 'NETWORK_ERROR') {
+                        reason = 'мережа/CORS/URL Worker\'а';
+                    } else if (e && e.code === 'NOT_CONFIGURED') {
+                        reason = 'AI_PROXY_URL не налаштований';
+                    }
+                    statusSpan.textContent = `⚠️ Помилка: ${reason}`;
+                } finally {
+                    btn.disabled = false;
+                }
+            };
+        });
+    }
+
+    function resetForm() {
+        _abEditingBookId = null;
+        chapters = [];
+        document.getElementById('abFormTitle').textContent = '➕ Нова книга';
+        document.getElementById('abLang').value = document.getElementById('abLang').options[0].value;
+        document.getElementById('abLevel').value = 'A1';
+        document.getElementById('abTitle').value = '';
+        document.getElementById('abAuthor').value = '';
+        document.getElementById('abSource').value = '';
+        resetBtn.style.display = 'none';
+        statusEl.textContent = '';
+        renderChapters();
+    }
+
+    addBtn.onclick = () => { chapters.push({ title: '', text: '', tasks: [] }); renderChapters(); };
+    resetBtn.onclick = resetForm;
+    renderChapters(); // порожня форма при першому відкритті
+
+    async function refreshExisting() {
+        if (!firebaseReady || !firebaseDb) { existingList.textContent = 'Firestore недоступний.'; return; }
+        try {
+            const snap = await firebaseDb.collection('sharedBooks').get();
+            if (snap.empty) { existingList.textContent = 'Ще нічого не опубліковано.'; return; }
+            existingList.innerHTML = '';
+            snap.forEach(doc => {
+                const d = doc.data();
+                const lang = getLanguage(d.lang);
+                const row = el(`
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line-soft);">
+                        <span>${lang.flag} ${escHtml(d.title)} — <span class="tag level-${d.level}">${d.level}</span> · ${(d.chapters||[]).length} розд.</span>
+                        <span>
+                            <button class="btn btn-ghost btn-sm ab-edit-book" data-id="${doc.id}">✏️</button>
+                            <button class="btn btn-ghost btn-sm ab-delete-book" data-id="${doc.id}">🗑️</button>
+                        </span>
+                    </div>
+                `);
+                row.querySelector('.ab-edit-book').onclick = () => loadBookIntoForm(doc.id, d);
+                row.querySelector('.ab-delete-book').onclick = async () => {
+                    if (!confirm(`Видалити книгу "${d.title}"? Це незворотно.`)) return;
+                    try {
+                        await deleteSharedBook(doc.id, d.lang);
+                        toast('🗑️ Книгу видалено');
+                        refreshExisting();
+                        if (_abEditingBookId === doc.id) resetForm();
+                    } catch (e) {
+                        console.error('[Адмін] Помилка видалення книги:', e);
+                        toast('⚠️ Не вдалося видалити.');
+                    }
+                };
+                existingList.appendChild(row);
+            });
+        } catch (e) {
+            console.error('[Адмін] Помилка завантаження списку книг:', e);
+            existingList.textContent = 'Помилка завантаження.';
+        }
+    }
+
+    function loadBookIntoForm(id, data) {
+        _abEditingBookId = id;
+        document.getElementById('abFormTitle').textContent = `✏️ Редагування: ${data.title}`;
+        document.getElementById('abLang').value = data.lang;
+        document.getElementById('abLevel').value = data.level;
+        document.getElementById('abTitle').value = data.title || '';
+        document.getElementById('abAuthor').value = data.author || '';
+        document.getElementById('abSource').value = data.sourceNote || '';
+        chapters = (data.chapters || []).map(c => Object.assign({}, c));
+        resetBtn.style.display = 'inline-block';
+        renderChapters();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    refreshExisting();
+
+    publishBtn.onclick = async () => {
+        const lang = document.getElementById('abLang').value;
+        const level = document.getElementById('abLevel').value;
+        const title = document.getElementById('abTitle').value.trim();
+        const author = document.getElementById('abAuthor').value.trim();
+        const sourceNote = document.getElementById('abSource').value.trim();
+        if (!title) { toast('⚠️ Введи назву книги.'); return; }
+        if (!chapters.length || !chapters.some(c => c.text && c.text.trim().length > 0)) {
+            toast('⚠️ Додай хоча б один розділ із текстом.');
+            return;
+        }
+        if (!sourceNote) {
+            toast('⚠️ Вкажи джерело/підтвердження, що це суспільне надбання — це важливо з юридичної точки зору.');
+            return;
+        }
+        publishBtn.disabled = true;
+        statusEl.textContent = 'Публікую…';
+        try {
+            const cleanChapters = chapters
+                .filter(c => c.text && c.text.trim())
+                .map(c => ({ title: c.title || '', text: c.text, tasks: c.tasks || [] }));
+            const id = await saveSharedBook(_abEditingBookId, { lang, level, title, author, sourceNote, chapters: cleanChapters });
+            _abEditingBookId = id;
+            toast(`✅ Опубліковано "${title}"`);
+            statusEl.textContent = `Опубліковано (${cleanChapters.length} розділів).`;
+            resetBtn.style.display = 'inline-block';
+            refreshExisting();
+        } catch (e) {
+            console.error('[Адмін] Помилка публікації книги:', e);
+            statusEl.textContent = '⚠️ Не вдалося опублікувати. Перевірте доступ до Firestore.';
+        } finally {
+            publishBtn.disabled = false;
+        }
     };
 }

@@ -38,6 +38,9 @@ function render() {
     if (ROUTE === 'admin-grammar-gen' && typeof initAdminSharedGrammar === 'function') {
         initAdminSharedGrammar();
     }
+    if (ROUTE === 'admin-books' && typeof initAdminBooks === 'function') {
+        initAdminBooks();
+    }
     if (ROUTE === 'admin-words' && typeof initAdminWords === 'function') {
         initAdminWords();
     }
@@ -63,7 +66,8 @@ const NAV_ROUTE_GROUPS = {
     tests: ['tests', 'test-mc', 'test-cloze', 'test-order', 'test-listen', 'test-translate'],
     profile: ['profile', 'levels', 'leveltest'],
     tournaments: ['tournaments', 'tournament-play'],
-    admin: ['admin', 'admin-words', 'admin-tournaments', 'admin-daily', 'admin-users', 'admin-vocab-gen', 'admin-grammar-gen'],
+    books: ['books', 'book-read'],
+    admin: ['admin', 'admin-words', 'admin-tournaments', 'admin-daily', 'admin-users', 'admin-vocab-gen', 'admin-grammar-gen', 'admin-books'],
 };
 
 function updateNav() {
@@ -74,12 +78,24 @@ function updateNav() {
         ["vocabulary", t('nav_vocabulary')],
         ["tests", t('nav_tests')],
         ["grammar", t('nav_grammar')],
+        ["books", t('nav_books')],
         ["troll", t('nav_troll')],
         ["profile", t('nav_profile')],
         ["onboarding", t('nav_onboarding')],
-        ["norskprove", examSectionNavLabel()],
         ["tournaments", t('nav_tournaments')],
     ];
+    // Вкладку "Norskprøve" в шапці показуємо лише для тих, хто вчить
+    // норвезьку — це підготовка до конкретного норвезького іспиту, для
+    // решти мов вона нерелевантна (раніше замінювалась на узагальнений
+    // пункт "Завдання", але й це не мало сенсу — прибираємо повністю).
+    const targetLang = (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
+    if (targetLang === 'no') {
+        // Вставляємо перед "Турнірами" за назвою пункту, а не за фіксованим
+        // індексом — індекс "поплив" після того, як з'явився пункт "Книги",
+        // і Norskprøve вискакував не на своєму місці в меню.
+        const tournamentsIdx = items.findIndex(([r]) => r === 'tournaments');
+        items.splice(tournamentsIdx === -1 ? items.length : tournamentsIdx, 0, ["norskprove", examSectionNavLabel()]);
+    }
 
     // Якщо користувач адмін – додаємо адмін-панель
     if (STATE && STATE.admin) {
@@ -135,6 +151,10 @@ function renderView() {
             return viewTestTranslate();
         case 'grammar':
             return viewGrammar();
+        case 'books':
+            return viewBooksLibrary();
+        case 'book-read':
+            return viewBookReader();
         case 'profile':
             return viewProfile();
         case 'levels':
@@ -163,6 +183,8 @@ function renderView() {
             return el(viewAdminSharedVocab());
         case 'admin-grammar-gen':
             return el(viewAdminSharedGrammar());
+        case 'admin-books':
+            return el(viewAdminBooks());
         default:
             return el('<div class="view"><p>Сторінку не знайдено.</p></div>');
     }

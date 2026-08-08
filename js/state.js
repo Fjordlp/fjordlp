@@ -31,6 +31,12 @@
                 // різних мов могли б перезаписувати одне одного. Тепер кожна
                 // мова має власний, окремий об'єкт srs.
                 srs: {},
+                // booksProgress: прогрес читання книг для ЦІЄЇ мови навчання —
+                // { [bookId]: { chaptersRead: [idx,...], taskScores: { [chapterIdx]: {correct,total} } } }.
+                // Ізольовано по мові з тієї ж причини, що й усе інше тут:
+                // прочитана норвезька книга не повинна позначатись як
+                // "прочитана" для іспанської.
+                booksProgress: {},
             };
         }
 
@@ -43,6 +49,13 @@
             lang = lang || STATE.targetLang || 'no';
             if (!STATE.langData || typeof STATE.langData !== 'object') STATE.langData = {};
             if (!STATE.langData[lang]) STATE.langData[lang] = defaultLangData();
+            // Захист для користувачів, чиї дані для цієї мови вже існували ДО
+            // появи booksProgress (чи будь-якого іншого нового поля в
+            // майбутньому) — без цього LD().booksProgress[bookId] впав би з
+            // "Cannot read properties of undefined".
+            if (!STATE.langData[lang].booksProgress || typeof STATE.langData[lang].booksProgress !== 'object') {
+                STATE.langData[lang].booksProgress = {};
+            }
             return STATE.langData[lang];
         }
 

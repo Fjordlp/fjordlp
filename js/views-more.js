@@ -100,6 +100,15 @@ function viewNorskprove() {
   const taskIndex = SUBSTATE.norskTaskIndex;
   const task = taskList[taskIndex] || null;
 
+  const isNorwegianExam = (STATE.targetLang || 'no') === 'no';
+  const learnLangName = targetLangName(STATE.targetLang || 'no');
+
+  // MODE_INFO: "official" (leseprøve/lytteprøve/skriveprøve/muntlig prøve) —
+  // це офіційні норвезькі назви частин ІМЕННО іспиту Norskprøve, тож мають
+  // сенс лише для норвезької. Раніше вони показувались УСІМ мовам поспіль —
+  // той, хто вчить іспанську, бачив приписку "(leseprøve)" під вправою на
+  // читання іспанською, що не мало жодного стосунку до жодного реального
+  // іспанського іспиту.
   const MODE_INFO_ALL = {
     uk: {
       reading: { label: "📖 Читання", official: "leseprøve", note: "Автоматично перевіряється комп'ютером — оцінка не залежить від сенсора." },
@@ -122,7 +131,13 @@ function viewNorskprove() {
   };
   const MODE_INFO = MODE_INFO_ALL[STATE.uiLang] || MODE_INFO_ALL.uk;
 
-  const NORSK_INFO_TEXT = {
+  // Для норвезької лишаємо детальний опис справжнього іспиту Norskprøve
+  // (HK-dir). Для решти мов — узагальнений опис розділу тренажера
+  // завдань, без вигаданих подробиць про неіснуючий "іспит" — на відміну
+  // від норвезької, для більшості з 30 мов застосунку немає єдиного
+  // уніфікованого державного мовного іспиту, тож видавати конкретну назву
+  // й організацію було б просто неправдою.
+  const NORSK_INFO_TEXT_NO = {
     uk: {
       intro: "Тренувальні завдання для підготовки до норвезького мовного іспиту (Norskprøve, HK-dir). Практикуйте читання, аудіювання, письмо та усне мовлення.",
       how_title: "ℹ️ Як влаштований справжній іспит",
@@ -141,7 +156,29 @@ function viewNorskprove() {
       p1: "По официальным данным HK-dir (Directoratet for høyere utdanning og kompetanse — организатора Norskprøve), экзамен состоит из четырёх отдельных частей: leseprøve (чтение), lytteprøve (аудирование), skriveprøve (письмо) и muntlig prøve (устная часть). Чтение, аудирование и письмо сдаются на компьютере, обычно в один день; устную часть принимают очно. Можно регистрироваться на все четыре части или только на отдельные — и пересдавать именно ту часть, где хотите улучшить результат.",
       p2: "На письменную и устную части регистрируются на конкретный уровень — A1–A2, A2–B1 или B1–B2 (самый сложный), а результат чтения и аудирования определяется автоматически во время самого теста. Отдельной программы или учебника для экзамена нет: проверяют практическое владение языком в повседневных ситуациях, поэтому лучше готовиться, тренируя все четыре навыка параллельно.",
     },
-  }[STATE.uiLang] || {};
+  };
+  const NORSK_INFO_TEXT_GENERIC = {
+    uk: {
+      intro: `Тренувальні завдання для практики ${learnLangName.toLowerCase()}ої мови: читання, аудіювання, письмо та усне мовлення.`,
+      how_title: "ℹ️ Як користуватись цим розділом",
+      p1: `Це не підготовка до конкретного офіційного іспиту (на відміну від норвезької, де є Norskprøve) — просто тренажер чотирьох мовних навичок ${learnLangName.toLowerCase()}ою мовою на твоєму рівні. Завдання генерує AI: натисни "Згенерувати нове завдання", щоб отримати текст, діалог або тему письма під обраний рівень і режим.`,
+      p2: "Читання й аудіювання перевіряються автоматично одразу після відповіді. Письмо перевіряє AI-репетитор і дає розгорнутий фідбек з виправленнями. Усна частина — це формулювання теми для самостійної практики (наприклад, запиши голосове повідомлення собі й прослухай ще раз).",
+    },
+    en: {
+      intro: `Practice tasks for ${learnLangName}: reading, listening, writing, and speaking.`,
+      how_title: "ℹ️ How this section works",
+      p1: `This isn't prep for a specific official exam (unlike Norwegian, which has Norskprøve) — it's simply a practice trainer for the four language skills in ${learnLangName}, at your level. Tasks are AI-generated: tap "Generate a new task" to get a text, dialogue, or writing prompt for the chosen level and mode.`,
+      p2: "Reading and listening are checked automatically right after you answer. Writing is reviewed by the AI tutor with detailed feedback and corrections. The speaking part gives you a topic prompt to practice on your own (e.g. record yourself and listen back).",
+    },
+    ru: {
+      intro: `Тренировочные задания для практики ${learnLangName.toLowerCase()} языка: чтение, аудирование, письмо и устная речь.`,
+      how_title: "ℹ️ Как пользоваться этим разделом",
+      p1: `Это не подготовка к конкретному официальному экзамену (в отличие от норвежского, где есть Norskprøve) — просто тренажёр четырёх языковых навыков на ${learnLangName.toLowerCase()} языке твоего уровня. Задания генерирует AI: нажми «Сгенерировать новое задание», чтобы получить текст, диалог или тему для письма под выбранный уровень и режим.`,
+      p2: "Чтение и аудирование проверяются автоматически сразу после ответа. Письмо проверяет AI-репетитор и даёт развёрнутый фидбек с исправлениями. Устная часть — это тема для самостоятельной практики (например, запиши голосовое сообщение себе и прослушай ещё раз).",
+    },
+  };
+  const NORSK_INFO_TEXT = (isNorwegianExam ? NORSK_INFO_TEXT_NO : NORSK_INFO_TEXT_GENERIC)[STATE.uiLang] ||
+      (isNorwegianExam ? NORSK_INFO_TEXT_NO.uk : NORSK_INFO_TEXT_GENERIC.uk);
 
   const MODE_LABELS = {
     uk: { reading: "📖 Читання", listening: "🎧 Аудіювання", writing: "✍️ Письмо", speaking: "🗣️ Усна частина" },
@@ -162,9 +199,9 @@ function viewNorskprove() {
         <p style="font-size:.85rem;color:var(--ink-soft);margin-bottom:8px;">
           ${NORSK_INFO_TEXT.p2}
         </p>
-        <p style="font-size:.8rem;color:var(--ink-soft);margin:0;">
+        ${isNorwegianExam ? `<p style="font-size:.8rem;color:var(--ink-soft);margin:0;">
           <strong>${MODE_INFO[mode].label}</strong> (${MODE_INFO[mode].official}): ${MODE_INFO[mode].note}
-        </p>
+        </p>` : ''}
       </div>
 
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
@@ -254,8 +291,8 @@ function renderNorskproveTask(task, mode, index, total) {
     wrap.appendChild(textEl);
 
     if (mode === 'listening') {
-      const soundBtn = el(`<button class="soundbtn" style="margin-bottom:12px;">🔊 Lytt</button>`);
-      soundBtn.onclick = () => speak(task.text);
+      const soundBtn = el(`<button class="soundbtn" style="margin-bottom:12px;">🔊 ${t('btn_listen')}</button>`);
+      soundBtn.onclick = () => speak(task.text, STATE.targetLang);
       wrap.appendChild(soundBtn);
     }
 
@@ -336,9 +373,9 @@ function renderNorskproveTask(task, mode, index, total) {
     saveBtn.onclick = () => {
       const answer = textarea.value.trim();
       if (answer) {
-        if (!STATE.norskWriting) STATE.norskWriting = {};
-        if (!STATE.norskWriting[level]) STATE.norskWriting[level] = {};
-        STATE.norskWriting[level][mode] = (STATE.norskWriting[level][mode] || 0) + 1;
+        if (!LD().norskWriting) LD().norskWriting = {};
+        if (!LD().norskWriting[level]) LD().norskWriting[level] = {};
+        LD().norskWriting[level][mode] = (LD().norskWriting[level][mode] || 0) + 1;
         updateState();
         toast(t('answer_saved_toast'));
         addXP(10, 'norskprove_writing');
@@ -368,9 +405,9 @@ function renderNorskproveTask(task, mode, index, total) {
         box.appendChild(title);
         box.appendChild(body);
         feedbackSlot.appendChild(box);
-        if (!STATE.norskWriting) STATE.norskWriting = {};
-        if (!STATE.norskWriting[level]) STATE.norskWriting[level] = {};
-        STATE.norskWriting[level][mode] = (STATE.norskWriting[level][mode] || 0) + 1;
+        if (!LD().norskWriting) LD().norskWriting = {};
+        if (!LD().norskWriting[level]) LD().norskWriting[level] = {};
+        LD().norskWriting[level][mode] = (LD().norskWriting[level][mode] || 0) + 1;
         addXP(15, 'norskprove_ai_check');
         updateState();
       } catch (e) {
@@ -409,8 +446,8 @@ function renderNorskproveTask(task, mode, index, total) {
       toast(t('recording_started_toast'));
       setTimeout(() => {
         toast(t('recording_done_toast'));
-        if (!STATE.norskSpeaking) STATE.norskSpeaking = {};
-        STATE.norskSpeaking[level] = (STATE.norskSpeaking[level] || 0) + 1;
+        if (!LD().norskSpeaking) LD().norskSpeaking = {};
+        LD().norskSpeaking[level] = (LD().norskSpeaking[level] || 0) + 1;
         updateState();
         addXP(10, 'norskprove_speaking');
       }, 2000);
@@ -686,15 +723,23 @@ function viewTournaments() {
         const container = wrap.querySelector('#tournListContainer');
         if (!container) return;
         try {
-            const snap = await firebaseDb.collection('tournaments').orderBy('createdAt', 'desc').limit(20).get();
-            if (snap.empty) {
+            const targetLang = STATE.targetLang || 'no';
+            // Раніше показувались УСІ турніри поспіль, незалежно від мови,
+            // яку вивчає користувач, — бо турніри самі по собі до нещодавна
+            // взагалі не мали поля lang. Турніри, створені до цього фіксу,
+            // не мають lang — трактуємо відсутнє поле як норвезьку (це й
+            // була єдина мова, якою можна було їх створити раніше).
+            const snap = await firebaseDb.collection('tournaments').orderBy('createdAt', 'desc').limit(50).get();
+            const relevant = snap.docs.filter(doc => (doc.data().lang || 'no') === targetLang);
+            if (relevant.length === 0) {
                 container.innerHTML = `<p style="color:var(--ink-soft);">${t('tourn_no_tournaments')}</p>`;
                 return;
             }
             container.innerHTML = '';
             const uid = firebaseAuth && firebaseAuth.currentUser ? firebaseAuth.currentUser.uid : null;
-            for (const doc of snap.docs) {
+            for (const doc of relevant.slice(0, 20)) {
                 const tr = { id: doc.id, ...doc.data() };
+                const trLang = getLanguage(tr.lang || 'no');
                 const status = tournamentLiveStatus(tr);
                 const statusLabel = { upcoming: t('tourn_status_upcoming'), active: t('tourn_status_active'), ended: t('tourn_status_ended') }[status];
                 let myResult = null;
@@ -708,7 +753,7 @@ function viewTournaments() {
                     <div class="card">
                         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
                             <div>
-                                <strong>${escHtml(tr.name || '')}</strong>
+                                <strong>${trLang.flag} ${escHtml(tr.name || '')}</strong>
                                 <span class="tag" style="margin-left:8px;">${statusLabel}</span>
                                 <span class="tag level-${tr.level||'A1'}" style="margin-left:4px;">${tr.level||'A1'}</span>
                                 ${tr.description ? `<p style="color:var(--ink-soft);font-size:.85rem;margin:6px 0 0 0;">${escHtml(tr.description)}</p>` : ''}

@@ -123,7 +123,7 @@ function viewHome() {
                     <button class="btn" data-r="tests">${t('home_tests_btn')}</button>
                     <button class="btn" data-r="test-listen">${t('home_listen_btn')}</button>
                     <button class="btn" data-r="troll">${tf('home_troll_btn', {lvl: trollLvl})}</button>
-                    <button class="btn" data-r="norskprove">🎓 Norskprøve</button>
+                    ${(STATE.targetLang || 'no') === 'no' ? `<button class="btn" data-r="norskprove">🎓 Norskprøve</button>` : ''}
                 </div>
             </div>
 
@@ -206,7 +206,7 @@ function viewHome() {
     const moreLangsBtn = wrap.querySelector('#homeMoreLangsBtn');
     if (moreLangsBtn) moreLangsBtn.onclick = () => navigate('profile');
     const snd = wrap.querySelector('#dwSound');
-    if (snd && dw) snd.onclick = () => speak(dw.no);
+    if (snd && dw) snd.onclick = () => speak(dw.no, STATE.targetLang);
     const rt = wrap.querySelector('#retest');
     if (rt) rt.onclick = () => navigate('leveltest');
     const upgradeBtn = wrap.querySelector('#upgradeLevelBtn');
@@ -779,7 +779,7 @@ function renderFlipCard(item) {
         SUBSTATE.flipped = inner.classList.contains('flipped');
         renderGrades(); };
     cardWrap.querySelector('#fSound').onclick = (e) => { e.stopPropagation();
-        speak(item.w.no); };
+        speak(item.w.no, STATE.targetLang); };
     holder.appendChild(cardWrap);
 
     const gradeHolder = el(`<div></div>`);
@@ -820,7 +820,7 @@ function renderMCCard(item, deckWords, level) {
         </div>
     `);
     holder.appendChild(head);
-    head.querySelector('#mcSound').onclick = () => speak(item.w.no);
+    head.querySelector('#mcSound').onclick = () => speak(item.w.no, STATE.targetLang);
 
     // Раніше варіанти відповіді завжди показувались українською (w.uk)
     // незалежно від мови інтерфейсу — тепер, як і решта картки,
@@ -1123,8 +1123,24 @@ function runQuiz(sub, route, title) {
         );
         questionContainer.appendChild(progress);
 
-        const qText = el(`<div class="question-text" style="font-size:1.1rem;margin-bottom:16px;">${escHtml(q.q)}</div>`);
-        questionContainer.appendChild(qText);
+        if (q.audio) {
+            // Аудіо-питання (test-listen): замість тексту показуємо кнопку
+            // прослуховування й автоматично програємо слово одразу при
+            // відкритті питання — так це справді перевіряє аудіювання, а
+            // не читання (раніше тут не було НІЧОГО — ні тексту, ні звуку).
+            const audioBox = el(`
+                <div style="margin-bottom:16px;">
+                    <button class="soundbtn" id="quizListenBtn" style="font-size:1.3rem;padding:14px 22px;">🔊 ${t('btn_listen')}</button>
+                </div>
+            `);
+            questionContainer.appendChild(audioBox);
+            const playAudio = () => speak(q.audio, STATE.targetLang);
+            audioBox.querySelector('#quizListenBtn').onclick = playAudio;
+            setTimeout(playAudio, 300); // невелика затримка, щоб голоси встигли підвантажитись
+        } else {
+            const qText = el(`<div class="question-text" style="font-size:1.1rem;margin-bottom:16px;">${escHtml(q.q)}</div>`);
+            questionContainer.appendChild(qText);
+        }
 
         if (q.opts) {
             const optsContainer = el(`<div class="mc-options" style="margin:0 auto;"></div>`);
@@ -1557,11 +1573,19 @@ function viewTestListen() {
         const words = shuffle(currentLevelWords()).slice(0, 6);
         // Раніше варіанти відповіді завжди були українською (w.uk) —
         // тепер локалізуються через wordTranslation(), як і решта тестів.
+        // КРИТИЧНО: об'єкт питання раніше не мав поля "q" (текст питання),
+        // яке runQuiz() показує через escHtml(q.q) — а escHtml(undefined)
+        // повертає порожній рядок. Тобто "тест на аудіювання" показував
+        // ПОРОЖНЄ питання без жодного звуку чи тексту: просто 4 варіанти
+        // відповіді без жодного контексту, що вгадувати. Тепер question
+        // явно позначений як аудіо-питання (audio: слово, яке треба
+        // прослухати) — runQuiz() рендерить для нього кнопку "🔊 Слухати"
+        // замість тексту питання.
         SUBSTATE.qs = words.map(w => {
             const correctTranslation = wordTranslation(w, LD().level);
             const distractors = shuffle(currentLevelWords().filter(x => x.no !== w.no)).slice(0, 3).map(x => wordTranslation(x, LD().level));
             const opts = shuffle([correctTranslation, ...distractors]);
-            return { no: w.no, opts, a: opts.indexOf(correctTranslation) };
+            return { no: w.no, audio: w.no, opts, a: opts.indexOf(correctTranslation) };
         });
         SUBSTATE.i = 0;
         SUBSTATE.correct = 0;

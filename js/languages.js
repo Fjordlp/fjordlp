@@ -44,6 +44,57 @@ function getLanguage(code) {
     return LANGUAGES.find(l => l.code === code) || LANGUAGES[0];
 }
 
+// =====================================================================
+//  ГОЛОСИ ДЛЯ ОЗВУЧЕННЯ (TTS) — ПО КОЖНІЙ МОВІ ОКРЕМО
+// =====================================================================
+// Раніше speak() у troll.js був жорстко прив'язаний ЛИШЕ до норвезького
+// голосу (nb-NO-FridaNeural / пошук voices, що починаються з "nb"/"no") —
+// незалежно від того, яку мову користувач насправді вивчає. Це означало,
+// що будь-хто, хто вчить іспанську, німецьку, японську тощо, чув слова й
+// речення озвученими З НОРВЕЗЬКИМ ГОЛОСОМ (для SpeechSynthesis-фолбека
+// браузер це або взагалі не вимовляв нормально, або вимовляв із
+// неправильною вимовою мови тексту). Тепер кожна мова має власний голос
+// Edge TTS (природні Neural-голоси Microsoft) і власний BCP-47 код мови
+// для пошуку системного голосу браузера як запасного варіанту.
+const TTS_VOICES = {
+    no: { edge: 'nb-NO-FridaNeural', bcp47: 'nb' },
+    en: { edge: 'en-US-AriaNeural', bcp47: 'en' },
+    de: { edge: 'de-DE-KatjaNeural', bcp47: 'de' },
+    es: { edge: 'es-ES-ElviraNeural', bcp47: 'es' },
+    fr: { edge: 'fr-FR-DeniseNeural', bcp47: 'fr' },
+    it: { edge: 'it-IT-ElsaNeural', bcp47: 'it' },
+    pt: { edge: 'pt-PT-RaquelNeural', bcp47: 'pt' },
+    pl: { edge: 'pl-PL-ZofiaNeural', bcp47: 'pl' },
+    sv: { edge: 'sv-SE-SofieNeural', bcp47: 'sv' },
+    nl: { edge: 'nl-NL-ColetteNeural', bcp47: 'nl' },
+    ja: { edge: 'ja-JP-NanamiNeural', bcp47: 'ja' },
+    tr: { edge: 'tr-TR-EmelNeural', bcp47: 'tr' },
+    da: { edge: 'da-DK-ChristelNeural', bcp47: 'da' },
+    fi: { edge: 'fi-FI-NooraNeural', bcp47: 'fi' },
+    is: { edge: 'is-IS-GudrunNeural', bcp47: 'is' },
+    el: { edge: 'el-GR-AthinaNeural', bcp47: 'el' },
+    cs: { edge: 'cs-CZ-VlastaNeural', bcp47: 'cs' },
+    sk: { edge: 'sk-SK-ViktoriaNeural', bcp47: 'sk' },
+    ro: { edge: 'ro-RO-AlinaNeural', bcp47: 'ro' },
+    hu: { edge: 'hu-HU-NoemiNeural', bcp47: 'hu' },
+    bg: { edge: 'bg-BG-KalinaNeural', bcp47: 'bg' },
+    hr: { edge: 'hr-HR-GabrijelaNeural', bcp47: 'hr' },
+    uk: { edge: 'uk-UA-PolinaNeural', bcp47: 'uk' },
+    ru: { edge: 'ru-RU-SvetlanaNeural', bcp47: 'ru' },
+    zh: { edge: 'zh-CN-XiaoxiaoNeural', bcp47: 'zh' },
+    ko: { edge: 'ko-KR-SunHiNeural', bcp47: 'ko' },
+    ar: { edge: 'ar-SA-ZariyahNeural', bcp47: 'ar' },
+    he: { edge: 'he-IL-HilaNeural', bcp47: 'he' },
+    hi: { edge: 'hi-IN-SwaraNeural', bcp47: 'hi' },
+    vi: { edge: 'vi-VN-HoaiMyNeural', bcp47: 'vi' },
+    th: { edge: 'th-TH-PremwadeeNeural', bcp47: 'th' },
+    id: { edge: 'id-ID-GadisNeural', bcp47: 'id' },
+};
+
+function getTtsVoice(lang) {
+    return TTS_VOICES[lang] || TTS_VOICES.no;
+}
+
 function targetLangName(code) {
     const lang = getLanguage(code || (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no');
     const uiLang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';

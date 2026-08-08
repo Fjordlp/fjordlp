@@ -70,27 +70,27 @@
 
         const TROLL_PHRASES = {
             uk: {
-                greeting: ["Hei! Готовий вивчати норвезьку сьогодні?", "Привіт! Радий тебе бачити знову 🧌", "Hei hei! Продовжимо?"],
+                greeting: ["Hei! Готовий вивчати {lang} сьогодні?", "Привіт! Радий тебе бачити знову 🧌", "Hei hei! Продовжимо?"],
                 correct: ["Riktig! Так тримати!", "Супер, правильно!", "Bra jobbet! (Гарна робота!)", "Точно! Ти молодець."],
-                wrong: ["Не страшно, навіть тролі плутають en і et спочатку!", "Майже! Спробуй ще раз наступного разу.", "Помилка — це теж крок уперед.", "Feil svar, але не здавайся!"],
+                wrong: ["Не страшно, навіть тролі плутають слова спочатку!", "Майже! Спробуй ще раз наступного разу.", "Помилка — це теж крок уперед.", "Feil svar, але не здавайся!"],
                 sessionComplete: ["Готово! Ти чудово попрацював.", "Сесію завершено — я пишаюсь тобою!", "Flott! (Чудово!) До наступного разу."],
                 testComplete: ["Тест завершено! +100 XP у скарбничку.", "Ще один тест позаду. Så bra!"],
                 streak: ["Ти на хвилі! Серія триває.", "Дні поспіль — це справжня дисципліна!"],
                 levelUp: ["Новий рівень тролля! Дещо розблоковано 🎉", "Ти виріс! І я теж, здається."],
             },
             en: {
-                greeting: ["Hei! Ready to study Norwegian today?", "Hi! Good to see you again 🧌", "Hei hei! Shall we continue?"],
+                greeting: ["Hei! Ready to study {lang} today?", "Hi! Good to see you again 🧌", "Hei hei! Shall we continue?"],
                 correct: ["Riktig! Keep it up!", "Great, that's correct!", "Bra jobbet! (Good job!)", "Exactly! Well done."],
-                wrong: ["No worries, even trolls mix up en and et at first!", "Almost! Try again next time.", "A mistake is a step forward too.", "Feil svar, but don't give up!"],
+                wrong: ["No worries, even trolls mix up words at first!", "Almost! Try again next time.", "A mistake is a step forward too.", "Feil svar, but don't give up!"],
                 sessionComplete: ["Done! You worked great.", "Session complete — I'm proud of you!", "Flott! (Great!) See you next time."],
                 testComplete: ["Test complete! +100 XP in the piggy bank.", "Another test behind you. Så bra!"],
                 streak: ["You're on a roll! The streak continues.", "Days in a row — that's real discipline!"],
                 levelUp: ["New troll level! Something's been unlocked 🎉", "You've grown! And so have I, it seems."],
             },
             ru: {
-                greeting: ["Hei! Готов изучать норвежский сегодня?", "Привет! Рад видеть тебя снова 🧌", "Hei hei! Продолжим?"],
+                greeting: ["Hei! Готов изучать {lang} сегодня?", "Привет! Рад видеть тебя снова 🧌", "Hei hei! Продолжим?"],
                 correct: ["Riktig! Так держать!", "Супер, правильно!", "Bra jobbet! (Отличная работа!)", "Точно! Молодец."],
-                wrong: ["Не страшно, даже тролли путают en и et поначалу!", "Почти! Попробуй ещё раз в следующий раз.", "Ошибка — это тоже шаг вперёд.", "Feil svar, но не сдавайся!"],
+                wrong: ["Не страшно, даже тролли путают слова поначалу!", "Почти! Попробуй ещё раз в следующий раз.", "Ошибка — это тоже шаг вперёд.", "Feil svar, но не сдавайся!"],
                 sessionComplete: ["Готово! Ты отлично поработал.", "Сессия завершена — я горжусь тобой!", "Flott! (Отлично!) До следующего раза."],
                 testComplete: ["Тест завершён! +100 XP в копилку.", "Ещё один тест позади. Så bra!"],
                 streak: ["Ты на волне! Серия продолжается.", "Дни подряд — это настоящая дисциплина!"],
@@ -98,11 +98,24 @@
             },
         };
 
+        // Раніше грінтінг завжди буквально писав "вивчати норвезьку" /
+        // "study Norwegian" / "изучать норвежский" — НАЗВОЮ КОНКРЕТНОЇ МОВИ
+        // текстом, а не просто стилістичними норвезькими вигуками (ті —
+        // навмисна фішка персонажа-тролля, лишили як є). Це буквально
+        // неправдива інформація для будь-кого, хто вчить іспанську,
+        // японську тощо: тролль вітав його словами "готовий вивчати
+        // норвезьку?", хоча людина відкрила застосунок для геть іншої мови.
         function trollSay(context) {
             const lang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
             const dict = TROLL_PHRASES[lang] || TROLL_PHRASES.uk;
             const arr = dict[context] || dict.greeting;
-            return arr[Math.floor(Math.random() * arr.length)];
+            let phrase = arr[Math.floor(Math.random() * arr.length)];
+            if (phrase.indexOf('{lang}') !== -1) {
+                const targetLang = (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
+                const langName = (typeof targetLangName === 'function' ? targetLangName(targetLang) : 'норвезьку');
+                phrase = phrase.replace('{lang}', langName);
+            }
+            return phrase;
         }
 
         function renderTrollBubble(mood, context, size, equipped) {
@@ -405,24 +418,34 @@
         // =====================================================================
 //  SPEECH (TTS) – покращена версія з Edge TTS
 // =====================================================================
-let NB_VOICE = null;
-
-function pickVoice() {
+// pickVoiceFor(bcp47) шукає системний голос браузера на льоту (а не один
+// раз кешує норвезький, як робив старий pickVoice()) — так фолбек теж
+// коректно підбирає голос для будь-якої з 30 мов.
+function pickVoiceFor(bcp47) {
+    if (!('speechSynthesis' in window)) return null;
     const voices = speechSynthesis.getVoices();
-    NB_VOICE = voices.find(v => v.lang && v.lang.toLowerCase().startsWith("nb")) ||
-        voices.find(v => v.lang && v.lang.toLowerCase().startsWith("no")) || null;
+    const lower = bcp47.toLowerCase();
+    return voices.find(v => v.lang && v.lang.toLowerCase().startsWith(lower)) || null;
 }
 if ('speechSynthesis' in window) {
-    speechSynthesis.onvoiceschanged = pickVoice;
-    pickVoice();
+    // Прогріваємо список голосів заздалегідь (у деяких браузерах він
+    // з'являється асинхронно лише після цієї події) — самого вибору голосу
+    // тут більше не робимо, це тепер відповідальність pickVoiceFor().
+    speechSynthesis.onvoiceschanged = () => {};
 }
 
-async function speak(text) {
+// text — що озвучити; lang — код мови ЦЬОГО тексту (не обов'язково
+// STATE.targetLang, хоча зазвичай так і є — явний параметр безпечніший,
+// ніж мовчазне читання глобального стану всередині функції озвучення).
+async function speak(text, lang) {
+    lang = lang || (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
+    const voiceCfg = getTtsVoice(lang);
+
     // Спроба Edge TTS (якщо бібліотека завантажена)
     if (typeof edgeTTS !== 'undefined' && edgeTTS.synthesize) {
         try {
             const audioData = await edgeTTS.synthesize(text, {
-                voice: 'nb-NO-FridaNeural',   // Норвезький голос
+                voice: voiceCfg.edge,
                 rate: 0.95,
                 pitch: 0
             });
@@ -443,8 +466,9 @@ async function speak(text) {
     }
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = "nb-NO";
-    if (NB_VOICE) u.voice = NB_VOICE;
+    u.lang = voiceCfg.bcp47;
+    const sysVoice = pickVoiceFor(voiceCfg.bcp47);
+    if (sysVoice) u.voice = sysVoice;
     u.rate = 0.9;
     u.pitch = 1.0;
     speechSynthesis.speak(u);
