@@ -6,6 +6,12 @@ function viewHome() {
     ensureStateDefaults(STATE);
     const level = LD().level || "A1";
     const meta = LEVEL_META[level];
+    // Раніше слова для головної (прогрес + "Слово дня") підвантажувались
+    // лише як побічний ефект відвідування Карток/Словника/Тестів — якщо
+    // людина щойно обрала нову мову і одразу лишилась на головній, для неї
+    // просто не було з чого взяти слово дня (порожній стан, хоча мова вже
+    // обрана). Той самий "тихий" self-serve виклик, що й в інших розділах.
+    ensureVocabAvailable(STATE.targetLang || 'no', level);
     const vocab = vocabForLevel(level) || [];
     const total = vocab.length;
 

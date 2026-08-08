@@ -4,7 +4,12 @@
 // Стратегія: cache-first для файлів застосунку (stale-while-revalidate);
 // зовнішні запити (Firebase, CDN, шрифти) НЕ перехоплюються — вони
 // завантажуються безпосередньо з мережі, щоб уникнути помилок.
-const CACHE_NAME = 'fjord-shell-v1';
+//
+// CACHE_NAME треба бампати щоразу, коли міняється JS/CSS/HTML застосунку —
+// activate() видаляє лише кеші з ІНШОЮ назвою, тож поки назва не зміниться,
+// стара версія файлів (у т.ч. вже полагоджені баги) може роками "застрягати"
+// в кеші користувача, і stale-while-revalidate віддаватиме її першою.
+const CACHE_NAME = 'fjord-shell-v2';
 
 const APP_SHELL = [
   './',
@@ -15,15 +20,18 @@ const APP_SHELL = [
   './js/firebase-auth.js',
   './js/state.js',
   './js/i18n.js',
+  './js/languages.js',
   './js/assistant.js',
   './js/data.js',
   './js/helpers.js',
   './js/gear-i18n.js',
   './js/bust-accessories.js',
   './js/troll.js',
+  './js/books.js',
   './js/router.js',
   './js/views-core.js',
   './js/views-more.js',
+  './js/views-books.js',
   './js/views-admin.js',
   './js/auth.js',
   './icons/icon-192.png',
