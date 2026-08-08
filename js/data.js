@@ -1624,45 +1624,101 @@ const STUDY_PLANS = {
                 ] }, ex: { q: "Формальне слово для «купити»", opts: ["kjøpe", "anskaffe", "handle"], a: 1 }, title_en: "Stylistic registers", title_ru: "Стилистические регистры", exp_en: "Formal vs. colloquial vocabulary.", exp_ru: "Формальная и разговорная лексика.", head_en: ["Formal", "Colloquial"], head_ru: ["Формально", "Разговорно"], q_en: "The formal word for \"to buy\"", q_ru: "Формальное слово для «купить»" },
         ];
 
-        // =====================================================================
-        //  LEVEL TEST (ПОКРАЩЕНИЙ – 30 питань)
+               // =====================================================================
+        //  РОЗШИРЕНИЙ ТЕСТ НА РІВЕНЬ НОРВЕЗЬКОЇ (60+ питань)
         // =====================================================================
         const LEVEL_TEST = [
-            { lvl: "A1", q: "«Привіт» норвезькою", opts: ["Hei", "Ha det", "Takk"], a: 0, q_en: "\"Hi\" in Norwegian", opts_en: ["Hei", "Ha det", "Takk"], q_ru: "«Привет» по-норвежски", opts_ru: ["Hei", "Ha det", "Takk"] },
-            { lvl: "A1", q: "«Дякую» — це", opts: ["Takk", "Unnskyld", "Vær så snill"], a: 0, q_en: "\"Thanks\" is", opts_en: ["Takk", "Unnskyld", "Vær så snill"], q_ru: "«Спасибо» — это", opts_ru: ["Takk", "Unnskyld", "Vær så snill"] },
-            { lvl: "A1", q: "«En» означає", opts: ["один", "два", "три"], a: 0, q_en: "\"En\" means", opts_en: ["one", "two", "three"], q_ru: "«En» означает", opts_ru: ["один", "два", "три"] },
-            { lvl: "A1", q: "«Mor» — це", opts: ["мати", "батько", "сестра"], a: 0, q_en: "\"Mor\" is", opts_en: ["mother", "father", "sister"], q_ru: "«Mor» — это", opts_ru: ["мать", "отец", "сестра"] },
-            { lvl: "A1", q: "«Rød» — це колір", opts: ["червоний", "синій", "жовтий"], a: 0, q_en: "\"Rød\" is the color", opts_en: ["red", "blue", "yellow"], q_ru: "«Rød» — это цвет", opts_ru: ["красный", "синий", "жёлтый"] },
-            { lvl: "A2", q: "«Butikk» означає", opts: ["магазин", "школа", "лікарня"], a: 0, q_en: "\"Butikk\" means", opts_en: ["shop", "school", "hospital"], q_ru: "«Butikk» означает", opts_ru: ["магазин", "школа", "больница"] },
-            { lvl: "A2", q: "«Jobb» — це", opts: ["робота", "хобі", "відпустка"], a: 0, q_en: "\"Jobb\" is", opts_en: ["job", "hobby", "vacation"], q_ru: "«Jobb» — это", opts_ru: ["работа", "хобби", "отпуск"] },
-            { lvl: "A2", q: "Минулий час від «å gå»", opts: ["går", "gikk", "gått"], a: 1, q_en: "Past tense of \"å gå\"", opts_en: ["går", "gikk", "gått"], q_ru: "Прошедшее время от «å gå»", opts_ru: ["går", "gikk", "gått"] },
-            { lvl: "A2", q: "Оберіть правильний порядок слів", opts: ["I dag jeg går.", "I dag går jeg."], a: 1, q_en: "Choose the correct word order", opts_en: ["I dag jeg går.", "I dag går jeg."], q_ru: "Выберите правильный порядок слов", opts_ru: ["I dag jeg går.", "I dag går jeg."] },
-            { lvl: "A2", q: "Як сказати «я хочу»?", opts: ["Jeg vil", "Jeg må", "Jeg kan"], a: 0, q_en: "How do you say \"I want\"?", opts_en: ["Jeg vil", "Jeg må", "Jeg kan"], q_ru: "Как сказать «я хочу»?", opts_ru: ["Jeg vil", "Jeg må", "Jeg kan"] },
-            { lvl: "A2", q: "Оберіть правильний артикль для 'hus'", opts: ["en", "ei", "et"], a: 2, q_en: "Choose the correct article for 'hus'", opts_en: ["en", "ei", "et"], q_ru: "Выберите правильный артикль для 'hus'", opts_ru: ["en", "ei", "et"] },
-            { lvl: "B1", q: "«Flyplass» — це", opts: ["аеропорт", "вокзал", "порт"], a: 0, q_en: "\"Flyplass\" is", opts_en: ["airport", "train station", "port"], q_ru: "«Flyplass» — это", opts_ru: ["аэропорт", "вокзал", "порт"] },
-            { lvl: "B1", q: "«Sykehus» — це", opts: ["лікарня", "аптека", "поліклініка"], a: 0, q_en: "\"Sykehus\" is", opts_en: ["hospital", "pharmacy", "clinic"], q_ru: "«Sykehus» — это", opts_ru: ["больница", "аптека", "поликлиника"] },
-            { lvl: "B1", q: "Перфект від «å spise»", opts: ["har spist", "har spise", "spiste"], a: 0, q_en: "Perfect tense of \"å spise\"", opts_en: ["har spist", "har spise", "spiste"], q_ru: "Перфект от «å spise»", opts_ru: ["har spist", "har spise", "spiste"] },
-            { lvl: "B1", q: "Найвищий ступінь від «god»", opts: ["best", "bedre", "godest"], a: 0, q_en: "Superlative of \"god\"", opts_en: ["best", "bedre", "godest"], q_ru: "Превосходная степень от «god»", opts_ru: ["best", "bedre", "godest"] },
-            { lvl: "B1", q: "«Å forstå» означає", opts: ["розуміти", "говорити", "писати"], a: 0, q_en: "\"Å forstå\" means", opts_en: ["to understand", "to speak", "to write"], q_ru: "«Å forstå» означает", opts_ru: ["понимать", "говорить", "писать"] },
-            { lvl: "B1", q: "«Miljø» — це", opts: ["довкілля", "економіка", "політика"], a: 0, q_en: "\"Miljø\" is", opts_en: ["environment", "economy", "politics"], q_ru: "«Miljø» — это", opts_ru: ["окружающая среда", "экономика", "политика"] },
-            { lvl: "B2", q: "«Regjering» означає", opts: ["уряд", "парламент", "міністр"], a: 0, q_en: "\"Regjering\" means", opts_en: ["government", "parliament", "minister"], q_ru: "«Regjering» означает", opts_ru: ["правительство", "парламент", "министр"] },
-            { lvl: "B2", q: "«Økonomi» — це", opts: ["економіка", "політика", "культура"], a: 0, q_en: "\"Økonomi\" is", opts_en: ["economy", "politics", "culture"], q_ru: "«Økonomi» — это", opts_ru: ["экономика", "политика", "культура"] },
-            { lvl: "B2", q: "Пасив від «Han skriver brevet.»", opts: ["Brevet blir skrevet.", "Brevet skrives."], a: 0, q_en: "Passive of \"Han skriver brevet.\"", opts_en: ["Brevet blir skrevet.", "Brevet skrives."], q_ru: "Пассив от «Han skriver brevet.»", opts_ru: ["Brevet blir skrevet.", "Brevet skrives."] },
-            { lvl: "B2", q: "Умовний спосіб: Hvis jeg ___ tid...", opts: ["har", "hadde", "hadde hatt"], a: 1, q_en: "Conditional: Hvis jeg ___ tid...", opts_en: ["har", "hadde", "hadde hatt"], q_ru: "Условное наклонение: Hvis jeg ___ tid...", opts_ru: ["har", "hadde", "hadde hatt"] },
-            { lvl: "B2", q: "«Forskning» означає", opts: ["дослідження", "освіта", "культура"], a: 0, q_en: "\"Forskning\" means", opts_en: ["research", "education", "culture"], q_ru: "«Forskning» означает", opts_ru: ["исследование", "образование", "культура"] },
-            { lvl: "C1", q: "«Imidlertid» означає", opts: ["однак", "крім того", "отже"], a: 0, q_en: "\"Imidlertid\" means", opts_en: ["however", "besides", "therefore"], q_ru: "«Imidlertid» означает", opts_ru: ["однако", "кроме того", "следовательно"] },
-            { lvl: "C1", q: "«Å antyde» — це", opts: ["натякати", "стверджувати", "заперечувати"], a: 0, q_en: "\"Å antyde\" is", opts_en: ["to imply", "to assert", "to deny"], q_ru: "«Å antyde» — это", opts_ru: ["намекать", "утверждать", "отрицать"] },
-            { lvl: "C1", q: "Іменник від «å analysere»", opts: ["analyse", "analysering", "analysjon"], a: 0, q_en: "Noun form of \"å analysere\"", opts_en: ["analyse", "analysering", "analysjon"], q_ru: "Существительное от «å analysere»", opts_ru: ["analyse", "analysering", "analysjon"] },
-            { lvl: "C1", q: "Як буде «я» у nynorsk?", opts: ["jeg", "eg", "meg"], a: 1, q_en: "How is \"I\" said in Nynorsk?", opts_en: ["jeg", "eg", "meg"], q_ru: "Как будет «я» в nynorsk?", opts_ru: ["jeg", "eg", "meg"] },
-            { lvl: "C1", q: "«Eksistens» — це", opts: ["існування", "свідомість", "етика"], a: 0, q_en: "\"Eksistens\" is", opts_en: ["existence", "consciousness", "ethics"], q_ru: "«Eksistens» — это", opts_ru: ["существование", "сознание", "этика"] },
-            { lvl: "C2", q: "«Å ta beina på nakken» означає", opts: ["втекти", "бігти", "впасти"], a: 0, q_en: "\"Å ta beina på nakken\" means", opts_en: ["to flee", "to run", "to fall"], q_ru: "«Å ta beina på nakken» означает", opts_ru: ["сбежать", "бежать", "упасть"] },
-            { lvl: "C2", q: "«Nok» — це частинка зі значенням", opts: ["напевно", "адже", "мабуть"], a: 0, q_en: "\"Nok\" is a particle meaning", opts_en: ["probably", "after all", "I suppose"], q_ru: "«Nok» — это частица со значением", opts_ru: ["наверное", "ведь", "пожалуй"] },
-            { lvl: "C2", q: "Формальне слово для «купити»", opts: ["kjøpe", "anskaffe", "handle"], a: 1, q_en: "The formal word for \"to buy\"", opts_en: ["kjøpe", "anskaffe", "handle"], q_ru: "Формальное слово для «купить»", opts_ru: ["kjøpe", "anskaffe", "handle"] }
-        
+            // ---- A1 (10 питань) ----
+            { lvl: "A1", q: "Hvordan sier du «hei» på norsk?", opts: ["Hei", "Ha det", "Takk", "Unnskyld"], a: 0 },
+            { lvl: "A1", q: "Hva betyr «takk»?", opts: ["Takk", "Vær så snill", "Unnskyld", "Ja"], a: 0 },
+            { lvl: "A1", q: "Hvilket ord er et tall?", opts: ["en", "bil", "hus", "katt"], a: 0 },
+            { lvl: "A1", q: "Hva er riktig artikkel for «hus»?", opts: ["en", "ei", "et", "–"], a: 2 },
+            { lvl: "A1", q: "Hva er flertall av «bil»?", opts: ["bil", "biler", "bilene", "bils"], a: 1 },
+            { lvl: "A1", q: "Hva heter «mother» på norsk?", opts: ["mor", "far", "søster", "bror"], a: 0 },
+            { lvl: "A1", q: "Hvordan sier du «good morning»?", opts: ["God morgen", "God dag", "God kveld", "God natt"], a: 0 },
+            { lvl: "A1", q: "Hva er riktig setning?", opts: ["Jeg er student", "Jeg student er", "Er jeg student", "Student jeg er"], a: 0 },
+            { lvl: "A1", q: "Hva betyr «vann»?", opts: ["vann", "melk", "kaffe", "te"], a: 0 },
+            { lvl: "A1", q: "Hvilken farge er «rød»?", opts: ["rød", "blå", "grønn", "gul"], a: 0 },
+
+            // ---- A2 (10 питань) ----
+            { lvl: "A2", q: "Hva er preteritum av «å gå»?", opts: ["går", "gikk", "gått", "gå"], a: 1 },
+            { lvl: "A2", q: "Hvilket ord er et møbel?", opts: ["stol", "bil", "fisk", "hus"], a: 0 },
+            { lvl: "A2", q: "Hva heter «to buy» på norsk?", opts: ["å kjøpe", "å selge", "å gi", "å ta"], a: 0 },
+            { lvl: "A2", q: "Hva er riktig setning med V2-regelen?", opts: ["I dag går jeg på jobb.", "I dag jeg går på jobb.", "Jeg i dag går på jobb.", "Går jeg i dag på jobb."], a: 0 },
+            { lvl: "A2", q: "Hva betyr «butikk»?", opts: ["butikk", "skole", "sykehus", "bibliotek"], a: 0 },
+            { lvl: "A2", q: "Hvilken setning er riktig i futurum?", opts: ["Jeg skal reise i morgen.", "Jeg reise skal i morgen.", "Skal jeg reise i morgen.", "Jeg reiser i morgen skal."], a: 0 },
+            { lvl: "A2", q: "Hva er riktig form av «å like» i preteritum?", opts: ["likte", "liker", "likt", "lik"], a: 0 },
+            { lvl: "A2", q: "Hva betyr «venstre»?", opts: ["venstre", "høyre", "rett fram", "tilbake"], a: 0 },
+            { lvl: "A2", q: "Hvilket ord er et yrke?", opts: ["lærer", "bil", "hus", "fisk"], a: 0 },
+            { lvl: "A2", q: "Hva er riktig bestemt form av «en bok»?", opts: ["boka", "boken", "bok", "bøker"], a: 0 },
+
+            // ---- B1 (10 питань) ----
+            { lvl: "B1", q: "Hva er perfektum av «å spise»?", opts: ["har spist", "spiste", "spis", "har spise"], a: 0 },
+            { lvl: "B1", q: "Hva betyr «miljø»?", opts: ["miljø", "økonomi", "politikk", "kultur"], a: 0 },
+            { lvl: "B1", q: "Hvilken setning er i passiv?", opts: ["Boken blir lest av eleven.", "Eleven leser boken.", "Boken ble lest.", "Eleven har lest boken."], a: 0 },
+            { lvl: "B1", q: "Hva er riktig bøying av «stor» i superlativ?", opts: ["størst", "større", "stor", "største"], a: 0 },
+            { lvl: "B1", q: "Hva betyr «å forstå»?", opts: ["å forstå", "å snakke", "å skrive", "å lese"], a: 0 },
+            { lvl: "B1", q: "Hvilken setning er riktig med «hvis»?", opts: ["Hvis jeg hadde tid, ville jeg reist.", "Hvis jeg har tid, vil jeg reise.", "Hvis jeg vil ha tid, reiser jeg.", "Hvis jeg reiser, vil jeg ha tid."], a: 0 },
+            { lvl: "B1", q: "Hva heter «debt» på norsk?", opts: ["gjeld", "penger", "lån", "konto"], a: 0 },
+            { lvl: "B1", q: "Hva er riktig form av «å skrive» i imperativ?", opts: ["Skriv!", "Skriver!", "Skrev!", "Skrive!"], a: 0 },
+            { lvl: "B1", q: "Hva betyr «søknad»?", opts: ["søknad", "intervju", "jobb", "karriere"], a: 0 },
+            { lvl: "B1", q: "Hvilken setning inneholder en bisetning?", opts: ["Jeg vet at han kommer.", "Han kommer i morgen.", "Jeg liker ham.", "Han er snill."], a: 0 },
+
+            // ---- B2 (10 питань) ----
+            { lvl: "B2", q: "Hva er riktig bruk av «selv om»?", opts: ["Selv om det regnet, gikk vi tur.", "Selv om det regner, vi går tur.", "Selv om vi går tur, det regnet.", "Selv om regnet, gikk vi tur."], a: 0 },
+            { lvl: "B2", q: "Hva betyr «å påvirke»?", opts: ["å påvirke", "å forandre", "å bestemme", "å hindre"], a: 0 },
+            { lvl: "B2", q: "Hvilken form er riktig av «å be» i preteritum?", opts: ["ba", "bade", "ber", "bedde"], a: 0 },
+            { lvl: "B2", q: "Hva er en «arkiv»?", opts: ["arkiv", "bibliotek", "museum", "teater"], a: 0 },
+            { lvl: "B2", q: "Hvilken setning er indirekte tale?", opts: ["Hun sa at hun var trøtt.", "Hun sa: «Jeg er trøtt».", "Hun var trøtt.", "Hun er trøtt."], a: 0 },
+            { lvl: "B2", q: "Hva betyr «bærekraftig»?", opts: ["bærekraftig", "midlertidig", "fornybar", "økologisk"], a: 0 },
+            { lvl: "B2", q: "Hvilket ord er et synonym til «ansvarlig»?", opts: ["ansvarlig", "skyldig", "pliktig", "rettmessig"], a: 0 },
+            { lvl: "B2", q: "Hva er riktig passiv med s-form?", opts: ["Boken leses av eleven.", "Boken blir lest av eleven.", "Eleven leser boken.", "Boken har lest."], a: 0 },
+            { lvl: "B2", q: "Hva betyr «gjennomgå»?", opts: ["gjennomgå", "gjennomføre", "gjennomtenke", "gjennomlese"], a: 0 },
+            { lvl: "B2", q: "Hvilken setning viser en årsak?", opts: ["Fordi det regnet, ble vi hjemme.", "Det regnet, men vi gikk ut.", "Vi ble hjemme, og det regnet.", "Det regnet, derfor tok vi paraply."], a: 0 },
+
+            // ---- C1 (10 питань) ----
+            { lvl: "C1", q: "Hva er riktig form av «å anskaffe» i presens?", opts: ["anskaffer", "anskaff", "anskaffes", "anskaffet"], a: 0 },
+            { lvl: "C1", q: "Hva betyr «nyansert»?", opts: ["nyansert", "mangfoldig", "kompleks", "omfattende"], a: 0 },
+            { lvl: "C1", q: "Hvilken setning bruker «imidlertid» korrekt?", opts: ["Resultatene var gode; imidlertid er det rom for forbedring.", "Resultatene var gode, imidlertid er det.", "Imidlertid resultatene var gode.", "Resultatene var imidlertid gode, men."], a: 0 },
+            { lvl: "C1", q: "Hva er et eksempel på en hypotese?", opts: ["Dette kan være løsningen.", "Det er varmt ute.", "Jeg liker kaffe.", "Hun er lærer."], a: 0 },
+            { lvl: "C1", q: "Hva betyr «å fremheve»?", opts: ["å fremheve", "å underbygge", "å belyse", "å betone"], a: 0 },
+            { lvl: "C1", q: "Hvilket ord er et akademisk begrep?", opts: ["paradigme", "bil", "hus", "tre"], a: 0 },
+            { lvl: "C1", q: "Hva er riktig bøying av «å innskrenke» i preteritum?", opts: ["innskrenket", "innskrenka", "innskrenkte", "innskrenk"], a: 0 },
+            { lvl: "C1", q: "Hva betyr «legitimitet»?", opts: ["legitimitet", "autonomi", "solidaritet", "ansvar"], a: 0 },
+            { lvl: "C1", q: "Hvilken setning inneholder en partisippkonstruksjon?", opts: ["Den kommende uken.", "Uken som kommer.", "Uken er kommet.", "Han kommer i uken."], a: 0 },
+            { lvl: "C1", q: "Hva er riktig bruk av «for så vidt»?", opts: ["For så vidt har du rett, men ...", "For så vidt, du har rett.", "Du har rett for så vidt.", "For så vidt, men du har rett."], a: 0 },
+
+            // ---- C2 (10 питань) ----
+            { lvl: "C2", q: "Hva betyr «å ta beina på nakken»?", opts: ["å stikke av", "å falle", "å hoppe", "å gå"], a: 0 },
+            { lvl: "C2", q: "Hvilken setning er et eksempel på ironi?", opts: ["For en fantastisk dag! (når det regner)", "Det er sol i dag.", "Jeg er glad.", "Været er fint."], a: 0 },
+            { lvl: "C2", q: "Hva er en «metafor»?", opts: ["en figurativ sammenligning", "en bokstavelig beskrivelse", "et spørsmål", "en oppfordring"], a: 0 },
+            { lvl: "C2", q: "Hva betyr «å male fanden på veggen»?", opts: ["å overdrive farer", "å tegne", "å være redd", "å forutsi"], a: 0 },
+            { lvl: "C2", q: "Hvilket ord er et synonym til «uunngåelig»?", opts: ["uunngåelig", "forutsigbar", "uforutsigbar", "unngåelig"], a: 0 },
+            { lvl: "C2", q: "Hva er riktig bruk av «nok» som modalpartikkel?", opts: ["Det er nok sant.", "Nok det er sant.", "Det nok er sant.", "Det er sant nok."], a: 0 },
+            { lvl: "C2", q: "Hva betyr «å fordufte»?", opts: ["å fordufte", "å forandre", "å forsvinne", "å forsterke"], a: 0 },
+            { lvl: "C2", q: "Hvilken setning er i formelt register?", opts: ["Vi anskaffer nye midler.", "Vi kjøper nye ting.", "Vi skaffer penger.", "Vi får tak i penger."], a: 0 },
+            { lvl: "C2", q: "Hva er en «allegori»?", opts: ["en utvidet metafor", "en kort historie", "et dikt", "en fortelling"], a: 0 },
+            { lvl: "C2", q: "Hva betyr «å ekskludere»?", opts: ["å utelukke", "å inkludere", "å avgrense", "å utvide"], a: 0 },
+
+            // ---- LESEOPPGAVE (B1) ----
+            { lvl: "B1", q: "Les teksten og svar: «Klimaendringene påvirker hele verden. Temperaturen stiger, og isen smelter. Mange dyr mister leveområder.» Hva er konsekvensen av klimaendringene?", opts: ["At dyr mister leveområder", "At temperaturen synker", "At isen fryser", "At det blir kaldere"], a: 0 },
+            { lvl: "B1", q: "Les teksten: «I dag bruker vi digitale verktøy i nesten alle deler av livet. Vi handler på nett og jobber hjemmefra.» Hva er et eksempel på digital bruk?", opts: ["Handle på nett", "Gå på butikken", "Møte venner", "Lage mat"], a: 0 },
+            { lvl: "B1", q: "Les teksten: «Mange mener at skolen bør ha mer praktiske fag.» Hva mener de?", opts: ["At skolen bør ha mer praktiske fag", "At skolen bør ha mer teori", "At skolen bør ha flere lekser", "At skolen bør ha flere prøver"], a: 0 },
+
+            // ---- LESEOPPGAVE (B2) ----
+            { lvl: "B2", q: "Les teksten: «Automatisering vil endre mange yrker. Noen jobber forsvinner, men nye kommer. Digital kompetanse blir viktig.» Hva er forfatterens syn på automatisering?", opts: ["Den skaper nye muligheter, men krever nye ferdigheter.", "Den er helt negativ.", "Den vil føre til arbeidsledighet.", "Den er uunngåelig."], a: 0 },
+            { lvl: "B2", q: "Les teksten: «Bærekraft handler om å møte dagens behov uten å ødelegge fremtiden.» Hva er hovedpoenget?", opts: ["Bevare fremtiden for kommende generasjoner", "Øke forbruket", "Prioritere kortsiktig profitt", "Redusere befolkningen"], a: 0 },
+            { lvl: "B2", q: "Les teksten: «Kunstig intelligens reiser nye etiske spørsmål.» Hvilket spørsmål kan stilles?", opts: ["Hvem er ansvarlig når en algoritme tar feil?", "Hvordan fungerer maskinlæring?", "Hva er kunstig intelligens?", "Hvor mye koster KI?"], a: 0 }
         ];
 
-        const TEST_TIERS = ["A1", "A2", "B1", "B2", "C1", "C2"];
-        const TIER_PASS_THRESHOLD = { A1: 0.4, A2: 0.5, B1: 0.55, B2: 0.6, C1: 0.65, C2: 0.7 };
+        const TIER_PASS_THRESHOLD = {
+            A1: 0.6,   // 60% правильних відповідей на A1-питання
+            A2: 0.55,
+            B1: 0.55,
+            B2: 0.55,
+            C1: 0.55,
+            C2: 0.5    // для C2 трохи нижче, бо питання складні
+        };
 
         // questions: набір питань тесту (необов'язковий). За замовчуванням —
         // вбудований норвезький LEVEL_TEST, але приймає й інший масив (той
