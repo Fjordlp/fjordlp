@@ -1,4 +1,4 @@
-        /* ===== СТИЛІ ===== */
+/* ===== СТИЛІ ===== */
         :root {
             --navy: #0F2A3D;
             --teal: #2FA89B;
@@ -498,6 +498,12 @@
             box-shadow: var(--shadow-lg); max-width: 260px;
         }
         .mc-opt.book-selected { border-color: var(--teal); background: var(--cream); }
+        .book-chapter-list-item {
+            padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: .9rem;
+            transition: background .12s;
+        }
+        .book-chapter-list-item:hover { background: var(--cream); }
+        .book-chapter-list-item.active { background: var(--teal); color: #fff; font-weight: 600; }
 
         /* ===== ADMIN: books editor ===== */
         .book-chapter-editor { border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; background: var(--frost); }

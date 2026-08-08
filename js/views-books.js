@@ -69,7 +69,15 @@ function viewBookReader() {
             <div class="view">
                 <button class="btn btn-ghost btn-sm" id="bkBackBtn">← ${t('books_back_to_library')}</button>
                 <h1 style="margin-top:10px;">${escHtml(book.title)}</h1>
-                <h2 style="font-size:1.05rem;color:var(--ink-soft);margin:0 0 6px;">${escHtml(chapter.title || tf('books_chapter_n', {n: chapterIdx + 1}))}</h2>
+
+                <div class="card" id="bkChapterListCard" style="margin-bottom:16px;">
+                    <button class="btn btn-ghost btn-sm" id="bkChapterListToggle" style="width:100%;display:flex;justify-content:space-between;align-items:center;">
+                        <span>📖 ${tf('books_chapter_n', {n: chapterIdx + 1})}: ${escHtml(chapter.title || '')}</span>
+                        <span id="bkChapterListArrow">▾</span>
+                    </button>
+                    <div id="bkChapterList" style="display:none;margin-top:10px;"></div>
+                </div>
+
                 <p style="font-size:.78rem;color:var(--ink-soft);margin-bottom:16px;">${t('books_tap_word_hint')}</p>
                 <div class="card" id="bkText" style="line-height:1.9;font-size:1.02rem;"></div>
                 <div id="bkWordPopup"></div>
@@ -81,6 +89,33 @@ function viewBookReader() {
                 <div id="bkTasksSection" style="margin-top:24px;"></div>
             </div>
         `;
+
+        // Список розділів (таблиця змісту) — згорнутий за замовчуванням, щоб
+        // не займати весь екран для книг з багатьма розділами; розкривається
+        // по кліку на заголовок поточного розділу. Кожен рядок клікабельний
+        // і одразу переносить на обраний розділ, з позначкою ✅ для вже
+        // прочитаних. Раніше єдиним способом перейти до розділу було
+        // послідовно тиснути "Наступний розділ" — не можна було відкрити,
+        // наприклад, одразу 5-й розділ.
+        const listBody = wrap.querySelector('#bkChapterList');
+        listBody.innerHTML = chapters.map((c, i) => `
+            <div class="book-chapter-list-item ${i === chapterIdx ? 'active' : ''}" data-idx="${i}">
+                <span>${isChapterRead(bookId, i) ? '✅' : '○'} ${tf('books_chapter_n', {n: i + 1})}${c.title ? ': ' + escHtml(c.title) : ''}</span>
+            </div>
+        `).join('');
+        listBody.querySelectorAll('.book-chapter-list-item').forEach(item => {
+            item.onclick = () => {
+                const idx = parseInt(item.dataset.idx, 10);
+                if (idx !== chapterIdx) navigate('book-read', { bookId, chapterIdx: idx });
+            };
+        });
+        const toggleBtn = wrap.querySelector('#bkChapterListToggle');
+        const arrow = wrap.querySelector('#bkChapterListArrow');
+        toggleBtn.onclick = () => {
+            const isOpen = listBody.style.display !== 'none';
+            listBody.style.display = isOpen ? 'none' : 'block';
+            arrow.textContent = isOpen ? '▾' : '▴';
+        };
 
         const textEl = wrap.querySelector('#bkText');
         paragraphs.forEach(p => {
