@@ -2,6 +2,25 @@
 //  VIEWS – повний набір сторінок
 // =====================================================================
 
+// Розмітка картки "Слово дня" — винесена в окрему функцію, бо
+// використовується двічі: одразу при рендері (автоматичний вибір dw) і
+// повторно, якщо адмін опублікував конкретне слово на сьогодні (тоді
+// #dailyWordCardBody перемальовується цією ж функцією з іншим словом,
+// без переходу на нову сторінку).
+function dailyWordCardBody(w, level) {
+    if (!w) return `<p>${t('no_words_for_level')}</p>`;
+    return `
+        <div class="dailyword">
+            <button class="soundbtn" id="dwSound">🔊</button>
+            <div>
+                <div class="word-no">${escHtml(w.no)}</div>
+                <div class="word-uk">${escHtml(wordTranslation(w, level))}</div>
+            </div>
+        </div>
+        <p style="color:var(--ink-soft);font-style:italic;margin-top:10px;font-size:.9rem;">${escHtml(w.ex_no||'')}<br><span style="font-style:normal;font-size:.8rem;">${escHtml(wordExampleTranslation(w, level))}</span></p>
+    `;
+}
+
 function viewHome() {
     ensureStateDefaults(STATE);
     const level = LD().level || "A1";
@@ -129,7 +148,7 @@ function viewHome() {
                     <button class="btn" data-r="tests">${t('home_tests_btn')}</button>
                     <button class="btn" data-r="test-listen">${t('home_listen_btn')}</button>
                     <button class="btn" data-r="troll">${tf('home_troll_btn', {lvl: trollLvl})}</button>
-                    ${(STATE.targetLang || 'no') === 'no' ? `<button class="btn" data-r="norskprove">🎓 Norskprøve</button>` : ''}
+                    <button class="btn" data-r="norskprove">🎓 ${examSectionNavLabel()}</button>
                 </div>
             </div>
 
@@ -140,16 +159,7 @@ function viewHome() {
             <div class="grid cols-2">
                 <div class="card">
                     <h3>${t('daily_word_title')}</h3>
-                    ${dw? `
-                    <div class="dailyword">
-                        <button class="soundbtn" id="dwSound">🔊</button>
-                        <div>
-                            <div class="word-no">${escHtml(dw.no)}</div>
-                            <div class="word-uk">${escHtml(wordTranslation(dw, level))}</div>
-                        </div>
-                    </div>
-                    <p style="color:var(--ink-soft);font-style:italic;margin-top:10px;font-size:.9rem;">${escHtml(dw.ex_no)}<br><span style="font-style:normal;font-size:.8rem;">${escHtml(wordExampleTranslation(dw, level))}</span></p>
-                    ` : `<p>${t('no_words_for_level')}</p>`}
+                    <div id="dailyWordCardBody">${dailyWordCardBody(dw, level)}</div>
                 </div>
                 <div class="card">
                     <h3>${t('activity_title')}</h3>
@@ -211,8 +221,15 @@ function viewHome() {
     });
     const moreLangsBtn = wrap.querySelector('#homeMoreLangsBtn');
     if (moreLangsBtn) moreLangsBtn.onclick = () => navigate('profile');
-    const snd = wrap.querySelector('#dwSound');
-    if (snd && dw) snd.onclick = () => speak(dw.no, STATE.targetLang);
+    // Прив'язка кнопки озвучення винесена в окрему функцію, бо картку
+    // "Слово дня" може бути перемальовано вдруге (див. loadDailyWordOverride
+    // нижче), і тоді #dwSound — вже новий DOM-елемент, який треба
+    // прив'язати заново.
+    function wireDailyWordSound(word) {
+        const snd = wrap.querySelector('#dwSound');
+        if (snd && word) snd.onclick = () => speak(word.no, STATE.targetLang);
+    }
+    wireDailyWordSound(dw);
     const rt = wrap.querySelector('#retest');
     if (rt) rt.onclick = () => navigate('leveltest');
     const upgradeBtn = wrap.querySelector('#upgradeLevelBtn');
@@ -243,10 +260,19 @@ function viewHome() {
         if (!container) return;
         try {
             const today = new Date().toISOString().slice(0, 10);
-            const doc = await firebaseDb.collection('daily_tasks').doc(today).get();
+            const lang = STATE.targetLang || 'no';
+            // Раніше завдання зберігалось під id === today (одне на весь
+            // сайт) — людина, що вчить англійську, бачила те саме (як
+            // правило, норвезьке) завдання, що й та, яка вчить норвезьку.
+            // Тепер шукаємо саме за мовою користувача; якщо для неї на
+            // сьогодні ще нічого не опубліковано — картка просто не
+            // з'являється (замість показу чужомовного завдання).
+            let doc = await firebaseDb.collection('daily_tasks').doc(`${lang}_${today}`).get();
             if (!doc.exists) {
-                container.innerHTML = '';
-                return;
+                // Фолбек на старі записи без мови (створені до цього фіксу) —
+                // лише для норвезької, щоб не "зникали" вже опубліковані раніше.
+                if (lang === 'no') doc = await firebaseDb.collection('daily_tasks').doc(today).get();
+                if (!doc.exists) { container.innerHTML = ''; return; }
             }
             const task = { id: doc.id, ...doc.data() };
             const html = `
@@ -280,6 +306,29 @@ function viewHome() {
         }
     }
     loadDailyTask();
+
+    // ---- Перевірка, чи адмін опублікував конкретне "Слово дня" ----
+    // dw (обраний автоматично) уже показаний у розмітці вище — це дає
+    // миттєвий, невблокований рендер. Якщо для сьогодні й поточної мови
+    // є адмінська публікація в daily_words, підміняємо вміст картки на
+    // неї (як і loadDailyTask, "тихо", без переходу на нову сторінку).
+    async function loadDailyWordOverride() {
+        const body = wrap.querySelector('#dailyWordCardBody');
+        if (!body || !firebaseReady || !firebaseDb) return;
+        try {
+            const today = new Date().toISOString().slice(0, 10);
+            const lang = STATE.targetLang || 'no';
+            const doc = await firebaseDb.collection('daily_words').doc(`${lang}_${today}`).get();
+            if (!doc.exists) return; // нічого не опубліковано — лишаємо автоматичний вибір
+            const override = doc.data();
+            body.innerHTML = dailyWordCardBody(override, level);
+            wireDailyWordSound(override);
+        } catch (e) {
+            console.error('Помилка завантаження слова дня:', e);
+            // мовчки лишаємо автоматичний вибір, який уже показаний
+        }
+    }
+    loadDailyWordOverride();
 
     return wrap;
 }

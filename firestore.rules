@@ -112,6 +112,12 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+    // Слово дня (адмінська підбірка, перекриває автоматичний вибір) —
+    // той самий принцип.
+    match /daily_words/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
     // Явна заборона на все інше (без цього блоку Firestore і так
     // забороняє за замовчуванням шляхи, не описані вище, але залишаємо
     // явно для читабельності).

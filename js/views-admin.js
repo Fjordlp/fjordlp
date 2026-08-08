@@ -55,6 +55,12 @@ function viewAdmin() {
                     <h3>Книги</h3>
                     <p style="color:var(--ink-soft);font-size:.85rem;">Додати книгу суспільного надбання для читання (текст вставляється вручну)</p>
                 </div>
+
+                <div class="card admin-card" onclick="navigate('admin-daily-word')" style="cursor:pointer;transition:all .2s;">
+                    <div style="font-size:2rem;margin-bottom:8px;">📝</div>
+                    <h3>Слово дня</h3>
+                    <p style="color:var(--ink-soft);font-size:.85rem;">Обрати конкретне слово, яке з'явиться на головній сьогодні — окремо для кожної мови</p>
+                </div>
             </div>
         </div>
     `;
@@ -184,13 +190,24 @@ function viewAdminTournaments() {
 // =====================================================================
 function viewAdminDaily() {
     if (!STATE || !STATE.admin) return errorAccessDenied();
-    
+
     return `
         <div class="view">
             <h1>📅 Завдання дня</h1>
+            <div class="card" style="margin-bottom:16px;color:var(--ink-soft);font-size:.85rem;">
+                ⚠️ Завдання публікується окремо для кожної мови навчання — люди, які вчать
+                іншу мову, побачать своє (або взагалі нічого, якщо для їхньої мови на
+                сьогодні ще нічого не опубліковано).
+            </div>
             <div class="card">
                 <h3>✏️ Створити завдання на сьогодні</h3>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+                    <div class="field" style="grid-column:1/-1;">
+                        <label>Мова навчання</label>
+                        <select id="dailyLang">
+                            ${LANGUAGES.map(l => `<option value="${l.code}">${l.flag} ${l.name.uk}</option>`).join('')}
+                        </select>
+                    </div>
                     <div class="field" style="grid-column:1/-1;">
                         <label>Питання</label>
                         <input id="dailyQuestion" placeholder="Наприклад: Як перекладається 'bil'?">
@@ -215,12 +232,12 @@ function viewAdminDaily() {
                 </div>
                 <button class="btn btn-primary" onclick="adminCreateDaily()">📅 Опублікувати завдання дня</button>
             </div>
-            
+
             <div class="card" style="margin-top:16px;">
                 <h3>📋 Останні завдання</h3>
                 <div id="dailyList" style="margin-top:12px;">Завантаження...</div>
             </div>
-            
+
             <button class="btn btn-ghost btn-sm" onclick="navigate('admin')" style="margin-top:12px;">← Назад до панелі</button>
         </div>
     `;
@@ -431,6 +448,7 @@ window.adminCreateTournament = async function() {
 
 // Створити завдання дня
 window.adminCreateDaily = async function() {
+    const lang = document.getElementById('dailyLang').value;
     const question = document.getElementById('dailyQuestion').value.trim();
     const optionsRaw = document.getElementById('dailyOptions').value.trim();
     const correct = parseInt(document.getElementById('dailyCorrect').value) || 0;
@@ -448,17 +466,23 @@ window.adminCreateDaily = async function() {
     }
     
     const today = new Date().toISOString().slice(0, 10);
+    // Раніше документ мав id === today, спільний для АБСОЛЮТНО ВСІХ мов —
+    // людина, що вчить англійську, бачила те саме (найчастіше норвезьке)
+    // завдання, що й той, хто вчить норвезьку. Тепер id включає мову, і
+    // кожна мова має власне завдання дня.
+    const docId = `${lang}_${today}`;
     
     try {
-        await firebaseDb.collection('daily_tasks').doc(today).set({
+        await firebaseDb.collection('daily_tasks').doc(docId).set({
             question,
             options,
             correct,
             type,
-            level: LD().level || 'A1',
+            lang,
+            level: LD(lang).level || 'A1',
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-        toast(`✅ Завдання на ${today} створено!`);
+        toast(`✅ Завдання на ${today} (${getLanguage(lang).name.uk}) створено!`);
         document.getElementById('dailyQuestion').value = '';
         document.getElementById('dailyOptions').value = '';
         loadDailyList();
@@ -639,12 +663,14 @@ async function loadDailyList() {
         let html = '';
         snap.forEach(doc => {
             const data = doc.data();
+            const langInfo = data.lang ? getLanguage(data.lang) : null;
+            const langLabel = langInfo ? `${langInfo.flag} ${langInfo.name.uk}` : '⚠️ без мови (старий запис)';
             html += `
                 <div class="card" style="margin-bottom:8px;">
                     <div style="display:flex;justify-content:space-between;align-items:center;">
                         <div>
                             <strong>${data.question?.slice(0, 60)}...</strong>
-                            <span style="font-size:.8rem;color:var(--ink-soft);margin-left:12px;">${doc.id}</span>
+                            <span style="font-size:.8rem;color:var(--ink-soft);margin-left:12px;">${langLabel} · ${doc.id}</span>
                         </div>
                         <button class="btn btn-danger btn-sm" onclick="adminDeleteDaily('${doc.id}')">🗑️</button>
                     </div>
@@ -1317,3 +1343,170 @@ function initAdminBooks() {
         }
     };
 }
+
+// =====================================================================
+//  СТОРІНКА: Слово дня (адмін обирає конкретне слово для головної)
+// =====================================================================
+// "Завдання дня" (daily_tasks) — це квіз-питання з варіантами відповіді.
+// "Слово дня" — інша, простіша річ: картка на головній (dw у viewHome),
+// раніше вибиралась ЛИШЕ автоматично — детермінований прохід по словнику
+// поточного рівня (pickDailyWord() у views-core.js), без жодної можливості
+// для адміна вплинути на вибір. Тепер адмін може опублікувати конкретне
+// слово на сьогодні для обраної мови (daily_words/{lang}_{today}) — і воно
+// перекриє автоматичний вибір саме для тих, хто вчить цю мову. Якщо на
+// сьогодні для мови нічого не опубліковано — просто працює як раніше,
+// автоматичний вибір.
+function viewAdminDailyWord() {
+    if (!STATE || !STATE.admin) return errorAccessDenied();
+
+    return `
+        <div class="view">
+            <h1>📝 Слово дня</h1>
+            <div class="card" style="margin-bottom:16px;color:var(--ink-soft);font-size:.85rem;">
+                Публікується окремо для кожної мови навчання й діє лише на сьогодні
+                (${new Date().toISOString().slice(0,10)}). Якщо нічого не опубліковано —
+                на головній показується слово, обране автоматично.
+            </div>
+            <div class="card">
+                <h3>✏️ Опублікувати слово на сьогодні</h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+                    <div class="field">
+                        <label>Мова навчання</label>
+                        <select id="dwLang">
+                            ${LANGUAGES.map(l => `<option value="${l.code}">${l.flag} ${l.name.uk}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Рівень</label>
+                        <select id="dwLevel">
+                            ${['A1','A2','B1','B2','C1','C2'].map(l => `<option value="${l}">${l}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Слово (мовою вивчення)</label>
+                        <input id="dwNo" placeholder="Наприклад: bil">
+                    </div>
+                    <div class="field">
+                        <label>Переклад українською</label>
+                        <input id="dwUk" placeholder="Наприклад: машина">
+                    </div>
+                    <div class="field">
+                        <label>Переклад англійською</label>
+                        <input id="dwEn" placeholder="car">
+                    </div>
+                    <div class="field">
+                        <label>Переклад російською</label>
+                        <input id="dwRu" placeholder="машина">
+                    </div>
+                    <div class="field" style="grid-column:1/-1;">
+                        <label>Приклад речення мовою вивчення</label>
+                        <input id="dwExNo" placeholder="Jeg har en bil.">
+                    </div>
+                    <div class="field" style="grid-column:1/-1;">
+                        <label>Переклад прикладу українською</label>
+                        <input id="dwExUk" placeholder="У мене є машина.">
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="dwPublishBtn">📝 Опублікувати на сьогодні</button>
+                <p id="dwStatus" style="color:var(--ink-soft);font-size:.85rem;margin-top:8px;"></p>
+            </div>
+
+            <div class="card" style="margin-top:16px;">
+                <h3>📋 Опубліковано на сьогодні</h3>
+                <div id="dwTodayList" style="margin-top:12px;">Завантаження…</div>
+            </div>
+
+            <button class="btn btn-ghost btn-sm" onclick="navigate('admin')" style="margin-top:12px;">← Назад до панелі</button>
+        </div>
+    `;
+}
+
+function initAdminDailyWord() {
+    const publishBtn = document.getElementById('dwPublishBtn');
+    if (!publishBtn) return; // не та сторінка
+
+    const statusEl = document.getElementById('dwStatus');
+    const listEl = document.getElementById('dwTodayList');
+    const today = new Date().toISOString().slice(0, 10);
+
+    async function refreshList() {
+        if (!firebaseReady || !firebaseDb) {
+            listEl.textContent = 'Firestore недоступний.';
+            return;
+        }
+        try {
+            const snap = await firebaseDb.collection('daily_words')
+                .where('date', '==', today).get();
+            if (snap.empty) {
+                listEl.innerHTML = '<p style="color:var(--ink-soft);">На сьогодні ще нічого не опубліковано — діє автоматичний вибір.</p>';
+                return;
+            }
+            const rows = [];
+            snap.forEach(doc => {
+                const d = doc.data();
+                const lang = getLanguage(d.lang);
+                rows.push(`
+                    <div class="card" style="margin-bottom:8px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <strong>${escHtml(d.no)}</strong> — ${escHtml(d.uk)}
+                                <span style="font-size:.8rem;color:var(--ink-soft);margin-left:12px;">${lang.flag} ${lang.name.uk} · ${d.level}</span>
+                            </div>
+                            <button class="btn btn-danger btn-sm" onclick="adminDeleteDailyWord('${doc.id}')">🗑️</button>
+                        </div>
+                    </div>
+                `);
+            });
+            listEl.innerHTML = rows.join('');
+        } catch (e) {
+            console.error('[Адмін] Помилка завантаження слів дня:', e);
+            listEl.textContent = 'Помилка завантаження.';
+        }
+    }
+    refreshList();
+
+    publishBtn.onclick = async () => {
+        const lang = document.getElementById('dwLang').value;
+        const level = document.getElementById('dwLevel').value;
+        const no = document.getElementById('dwNo').value.trim();
+        const uk = document.getElementById('dwUk').value.trim();
+        const en = document.getElementById('dwEn').value.trim();
+        const ru = document.getElementById('dwRu').value.trim();
+        const ex_no = document.getElementById('dwExNo').value.trim();
+        const ex_uk = document.getElementById('dwExUk').value.trim();
+
+        if (!no || !uk) {
+            toast('❌ Заповніть щонайменше слово й переклад українською');
+            return;
+        }
+
+        publishBtn.disabled = true;
+        try {
+            const docId = `${lang}_${today}`;
+            await firebaseDb.collection('daily_words').doc(docId).set({
+                no, uk, en, ru, ex_no, ex_uk, level, lang, date: today,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+            toast(`✅ Слово дня для ${getLanguage(lang).name.uk} опубліковано!`);
+            statusEl.textContent = `Опубліковано: "${no}" (${lang}, ${today}).`;
+            refreshList();
+        } catch (e) {
+            console.error('[Адмін] Помилка публікації слова дня:', e);
+            statusEl.textContent = '⚠️ Не вдалося опублікувати. Перевірте доступ до Firestore.';
+        } finally {
+            publishBtn.disabled = false;
+        }
+    };
+}
+
+window.adminDeleteDailyWord = async function(docId) {
+    if (!confirm('Видалити це слово дня?')) return;
+    try {
+        await firebaseDb.collection('daily_words').doc(docId).delete();
+        toast('🗑️ Видалено');
+        navigate('admin-daily-word');
+    } catch (e) {
+        console.error('[Адмін] Помилка видалення слова дня:', e);
+        toast('❌ Помилка видалення');
+    }
+};

@@ -41,6 +41,9 @@ function render() {
     if (ROUTE === 'admin-books' && typeof initAdminBooks === 'function') {
         initAdminBooks();
     }
+    if (ROUTE === 'admin-daily-word' && typeof initAdminDailyWord === 'function') {
+        initAdminDailyWord();
+    }
     if (ROUTE === 'admin-words' && typeof initAdminWords === 'function') {
         initAdminWords();
     }
@@ -67,7 +70,7 @@ const NAV_ROUTE_GROUPS = {
     profile: ['profile', 'levels', 'leveltest'],
     tournaments: ['tournaments', 'tournament-play'],
     books: ['books', 'book-read'],
-    admin: ['admin', 'admin-words', 'admin-tournaments', 'admin-daily', 'admin-users', 'admin-vocab-gen', 'admin-grammar-gen', 'admin-books'],
+    admin: ['admin', 'admin-words', 'admin-tournaments', 'admin-daily', 'admin-users', 'admin-vocab-gen', 'admin-grammar-gen', 'admin-books', 'admin-daily-word'],
 };
 
 function updateNav() {
@@ -185,6 +188,8 @@ function renderView() {
             return el(viewAdminSharedGrammar());
         case 'admin-books':
             return el(viewAdminBooks());
+        case 'admin-daily-word':
+            return el(viewAdminDailyWord());
         default:
             return el('<div class="view"><p>Сторінку не знайдено.</p></div>');
     }
