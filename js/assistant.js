@@ -156,7 +156,39 @@ function parseAiJson(raw) {
     const startArr = cleaned.indexOf('[');
     let from = start;
     if (startArr !== -1 && (start === -1 || startArr < start)) from = startArr;
-    const sliced = from > 0 ? cleaned.slice(from) : cleaned;
+    if (from === -1) return JSON.parse(cleaned); // немає ні { ні [ — нехай впаде з нормальною помилкою
+    const openCh = cleaned[from];
+    const closeCh = openCh === '{' ? '}' : ']';
+    // Раніше тут просто бралось "від першої дужки до кінця рядка" —
+    // працювало, лише поки AI повертав ЧИСТО JSON і нічого більше. Якщо
+    // модель дописувала бодай один зайвий символ/рядок ПІСЛЯ JSON
+    // (пояснення, порожній рядок з крапкою тощо — трапляється, особливо
+    // коли за лаштунками сервер не впізнав режим запиту і відповів у
+    // звичайному "розмовному" стилі замість строгого JSON) — JSON.parse
+    // падав з "Unexpected non-whitespace character after JSON data".
+    // Тепер шукаємо ВІДПОВІДНУ закриваючу дужку (рахуючи вкладеність і
+    // ігноруючи дужки всередині рядкових значень), і парсимо лише цей
+    // збалансований шматок — усе, що йде далі, просто відкидається.
+    let depth = 0;
+    let inString = false;
+    let escaped = false;
+    let end = -1;
+    for (let i = from; i < cleaned.length; i++) {
+        const ch = cleaned[i];
+        if (inString) {
+            if (escaped) escaped = false;
+            else if (ch === '\\') escaped = true;
+            else if (ch === '"') inString = false;
+            continue;
+        }
+        if (ch === '"') { inString = true; continue; }
+        if (ch === openCh) depth++;
+        else if (ch === closeCh) {
+            depth--;
+            if (depth === 0) { end = i; break; }
+        }
+    }
+    const sliced = end !== -1 ? cleaned.slice(from, end + 1) : cleaned.slice(from);
     return JSON.parse(sliced);
 }
 

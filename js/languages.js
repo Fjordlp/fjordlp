@@ -355,13 +355,17 @@ async function ensureGrammarAvailable(lang, level) {
             if (typeof render === 'function' && STATE.targetLang === lang && (LD().level || 'A1') === level) render();
             return;
         }
-        if (typeof generateBulkGrammar !== 'function' || typeof callAiRaw !== 'function') return; // AI недоступна
-        const rules = await generateBulkGrammar(lang, level, 2, null);
-        if (rules && rules.length) {
-            STATE.generatedGrammar[lang][level] = rules;
-            updateState();
-            if (typeof render === 'function' && STATE.targetLang === lang && (LD().level || 'A1') === level) render();
-        }
+        // Особисту AI-генерацію "про запас" для окремого користувача
+        // вимкнено навмисно: раніше, щойно людина заходила в розділ
+        // "Граматика" для мови без вбудованого файлу, сайт одразу тихо
+        // генерував правила через AI на кожного користувача окремо
+        // (витрата AI-квоти + непередбачувана якість). Тепер джерела для
+        // не вбудованих мов лише два: власний файл LANG_DATA[lang].GRAMMAR
+        // (js/data-<lang>.js) або те, що адмін вручну опублікував через
+        // "Спільна граматика" в адмінці (loadSharedGrammar вище) —
+        // особистого фолбека більше нема, якщо нічого з цього не знайдено,
+        // розділ граматики просто лишається порожнім для цієї мови/рівня.
+        return;
     } catch (e) {
         console.error('[Граматика] Не вдалося підготувати правила для', lang, level, e);
     } finally {
