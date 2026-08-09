@@ -475,6 +475,74 @@ function renderNorskproveTask(task, mode, index, total) {
   return wrap;
 }
 // =====================================================================
+//  VIEW: ВИБІР МОВИ ВИВЧЕННЯ (окремий обов'язковий перший екран)
+// =====================================================================
+// Раніше мову вивчення можна було або взагалі не вибрати (тихо лишалась
+// норвезька), або вибрати з обмеженого списку 6 мов, змішаного з кроком
+// "мета навчання" в онбордингу. Тепер це окремий, самодостатній екран
+// без нічого зайвого — лише вибір мови з усіх 30 — і саме з нього
+// починається шлях нового користувача, ще ДО постановки мети й тесту на
+// рівень. Той самий екран повторно використовується, коли людина хоче
+// ПОМІНЯТИ мову навчання пізніше (з головної) — тоді SUBSTATE.switchMode
+// = true, і після вибору повертаємо на головну, а не в онбординг.
+function viewChooseLanguage() {
+    const switchMode = !!SUBSTATE.switchMode;
+
+    const wrap = el(`
+        <div class="view" style="max-width:780px;margin:0 auto;">
+            <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;">
+                <div id="clUiLangRow" style="display:flex;gap:6px;"></div>
+            </div>
+            <div id="clTrollSlot" style="display:flex;justify-content:center;margin-bottom:16px;"></div>
+            <h1 style="text-align:center;">${switchMode ? t('cl_switch_title') : t('cl_welcome_title')}</h1>
+            <p style="text-align:center;color:var(--ink-soft);font-size:.95rem;margin-bottom:20px;">
+                ${switchMode ? t('cl_switch_desc') : t('cl_welcome_desc')}
+            </p>
+            <div id="clGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;"></div>
+            ${switchMode ? `<div style="text-align:center;margin-top:20px;"><button class="btn btn-ghost btn-sm" id="clCancelBtn">${t('cl_cancel_btn')}</button></div>` : ''}
+        </div>
+    `);
+
+    const uiLangRow = wrap.querySelector('#clUiLangRow');
+    [['uk', 'UK'], ['en', 'EN'], ['ru', 'RU']].forEach(([code, label]) => {
+        const b = el(`<button class="chip ${STATE.uiLang === code ? 'active' : ''}" style="padding:4px 10px;font-size:.75rem;">${label}</button>`);
+        b.onclick = () => setUiLang(code);
+        uiLangRow.appendChild(b);
+    });
+
+    wrap.querySelector('#clTrollSlot').appendChild(renderTrollBubble('excited', 'greeting', 72));
+
+    const grid = wrap.querySelector('#clGrid');
+    LANGUAGES.forEach(l => {
+        const isCurrent = switchMode && STATE.targetLang === l.code;
+        const card = el(`
+            <button class="cl-lang-card ${isCurrent ? 'active' : ''}" data-code="${l.code}">
+                <span class="cl-lang-flag">${l.flag}</span>
+                <span class="cl-lang-native">${l.native}</span>
+                <span class="cl-lang-name">${l.name[STATE.uiLang] || l.name.uk}</span>
+            </button>
+        `);
+        card.onclick = () => {
+            STATE.targetLang = l.code;
+            STATE._targetLangChosen = true;
+            updateState();
+            if (switchMode) {
+                navigate('home');
+                toast(tf('cl_switched_toast', { lang: l.name[STATE.uiLang] || l.name.uk }));
+            } else {
+                navigate('onboarding');
+            }
+        };
+        grid.appendChild(card);
+    });
+
+    const cancelBtn = wrap.querySelector('#clCancelBtn');
+    if (cancelBtn) cancelBtn.onclick = () => navigate('home');
+
+    return wrap;
+}
+
+// =====================================================================
 //  VIEW: ОНБОРДИНГ (ВХІДНИЙ ТЕСТ + ВИБІР МЕТИ + ПЛАН)
 // =====================================================================
 function viewOnboarding() {
@@ -486,6 +554,7 @@ function viewOnboarding() {
     const goal = SUBSTATE.onbGoal;
     const level = SUBSTATE.onbLevel || LD().level || 'A1';
 
+    const currentLang = getLanguage(STATE.targetLang || 'no');
     const wrap = el(`
         <div class="view" style="max-width:700px;margin:0 auto;">
             <div id="onbTrollSlot" style="display:flex;justify-content:center;margin-bottom:20px;"></div>
@@ -501,7 +570,7 @@ function viewOnboarding() {
                     </div>
                     <div>
                         <div style="font-size:.78rem;color:var(--ink-soft);margin-bottom:6px;">${t('field_learn_lang')}</div>
-                        <div id="onbTargetLangRow" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+                        <button class="chip active" id="onbChangeLangBtn">${currentLang.flag} ${currentLang.native} · ${t('change_lang_link')}</button>
                     </div>
                 </div>
             </div>
@@ -512,28 +581,16 @@ function viewOnboarding() {
         </div>
     `);
 
-    // ---- Мова інтерфейсу + мова вивчення (видно одразу, на всіх кроках) ----
+    // ---- Мова інтерфейсу (мова вивчення тепер обирається на окремому
+    // екрані viewChooseLanguage — і саме він відкривається "звідусіль",
+    // якщо тут захочуть її змінити, замість дубльованого міні-списку) ----
     const onbUiLangRow = wrap.querySelector('#onbUiLangRow');
     [['uk', 'UK'], ['en', 'EN'], ['ru', 'RU']].forEach(([code, label]) => {
         const b = el(`<button class="chip ${STATE.uiLang === code ? 'active' : ''}">${label}</button>`);
         b.onclick = () => setUiLang(code); // сама перемальовує екран через render()
         onbUiLangRow.appendChild(b);
     });
-    const onbTargetLangRow = wrap.querySelector('#onbTargetLangRow');
-    ['no', 'en', 'de', 'es', 'fr', 'it'].forEach(code => {
-        const l = getLanguage(code);
-        const b = el(`<button class="chip ${STATE.targetLang === code ? 'active' : ''}">${l.flag} ${l.native}</button>`);
-        b.onclick = () => {
-            if (STATE.targetLang === code) return;
-            STATE.targetLang = code;
-            updateState();
-            navigate('onboarding', SUBSTATE); // лишаємось на тому ж кроці, лише оновлюємо мову
-        };
-        onbTargetLangRow.appendChild(b);
-    });
-    const onbMoreLangsBtn = el(`<button class="chip">🌐…</button>`);
-    onbMoreLangsBtn.title = t('onb_more_langs_title');
-    onbTargetLangRow.appendChild(onbMoreLangsBtn);
+    wrap.querySelector('#onbChangeLangBtn').onclick = () => navigate('choose-language', { switchMode: true });
 
     wrap.querySelector('#onbTrollSlot').appendChild(renderTrollBubble('excited', 'greeting', 72));
 

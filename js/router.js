@@ -166,6 +166,8 @@ function renderView() {
             return viewLevelTest();
         case 'onboarding':
             return viewOnboarding();
+        case 'choose-language':
+            return viewChooseLanguage();
         case 'norskprove':
             return viewNorskprove();
         case 'tournaments':

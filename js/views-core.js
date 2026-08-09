@@ -67,14 +67,18 @@ function viewHome() {
     // і, навіть якби працювали, вони керували полем, яке ніде більше не
     // використовувалось. Тепер це той самий STATE.targetLang, що й у
     // Налаштуваннях, з робочими обробниками подій.
-    const HOME_QUICK_LANGS = ['no', 'en', 'de', 'es', 'fr', 'it'];
+    // ----- ВИБІР МОВИ (посилання на окремий екран вибору мови) -----
+    // Раніше тут одразу на головній був ряд чіпів із 6 мовами + кнопка
+    // "більше" — цілий міні-перемикач просто серед іншого контенту
+    // дашборду. Тепер вибір мови — окремий, самодостатній екран
+    // (viewChooseLanguage), а тут лишається лише один компактний
+    // рядок-посилання з поточною мовою: головне меню відображає саме ту
+    // мову, яку вже вибрано, а не пропонує постійно перемикати її просто
+    // серед іншого вмісту.
+    const currentLang = getLanguage(STATE.targetLang || 'no');
     const langOptions = `
-        <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;justify-content:center;align-items:center;">
-            ${HOME_QUICK_LANGS.map(code => {
-                const l = getLanguage(code);
-                return `<button class="chip ${STATE.targetLang === code ? 'active' : ''}" data-lang="${code}">${l.flag} ${l.native}</button>`;
-            }).join('')}
-            <button class="chip" id="homeMoreLangsBtn">${t('more_langs_btn')}</button>
+        <div style="display:flex;justify-content:center;margin:12px 0;">
+            <button class="chip" id="homeChangeLangBtn">${currentLang.flag} ${currentLang.native} · ${t('change_lang_link')}</button>
         </div>
     `;
 
@@ -210,17 +214,8 @@ function viewHome() {
     // ---- Обробники ----
     wrap.querySelector('#trollGreetSlot').appendChild(renderTrollBubble('idle', 'greeting', 64));
     wrap.querySelectorAll('[data-r]').forEach(b => b.onclick = () => navigate(b.dataset.r));
-    wrap.querySelectorAll('[data-lang]').forEach(b => {
-        b.onclick = () => {
-            const code = b.dataset.lang;
-            if (code === STATE.targetLang) return;
-            STATE.targetLang = code;
-            updateState();
-            navigate('home'); // словник/картки/тести залежать від мови — оновлюємо вкладку
-        };
-    });
-    const moreLangsBtn = wrap.querySelector('#homeMoreLangsBtn');
-    if (moreLangsBtn) moreLangsBtn.onclick = () => navigate('profile');
+    const changeLangBtn = wrap.querySelector('#homeChangeLangBtn');
+    if (changeLangBtn) changeLangBtn.onclick = () => navigate('choose-language', { switchMode: true });
     // Прив'язка кнопки озвучення винесена в окрему функцію, бо картку
     // "Слово дня" може бути перемальовано вдруге (див. loadDailyWordOverride
     // нижче), і тоді #dwSound — вже новий DOM-елемент, який треба
@@ -1803,32 +1798,58 @@ function viewTestTranslate() {
 
 function viewGrammar() {
     const lang = STATE.targetLang || 'no';
-    const level = LD().level || 'A1';
+    const userLevel = LD().level || 'A1';
 
-    // Якщо для цієї мови нема власного файлу-граматики (LANG_DATA[lang].
-    // GRAMMAR) — підвантажуємо/генеруємо через AI. Викликаємо "тихо":
-    // перший рендер може показати порожньо/спінер, ensureGrammarAvailable
-    // сам перемалює екран, коли правила будуть готові (той самий патерн,
-    // що й ensureVocabAvailable для словника).
+    // Раніше показувались правила ЛИШЕ поточного рівня користувача —
+    // хтось на A1 взагалі не бачив, що в граматиці є, наприклад, на B1.
+    // Тепер вкладка одразу показує правила ВСІХ рівнів (A1–C2), а фільтр
+    // рівнів зверху — це лише зручність навігації по довгому списку, не
+    // обмеження: за замовчуванням обрано "Усі".
     const hasBuiltinGrammar = !!(window.LANG_DATA && window.LANG_DATA[lang] && window.LANG_DATA[lang].GRAMMAR);
-    if (!hasBuiltinGrammar) ensureGrammarAvailable(lang, level);
+    if (!hasBuiltinGrammar) LEVELS.forEach(lvl => ensureGrammarAvailable(lang, lvl));
 
-    const rules = grammarForLevel(level, lang);
+    const rulesByLevel = {};
+    LEVELS.forEach(lvl => { rulesByLevel[lvl] = grammarForLevel(lvl, lang); });
+    const allRules = LEVELS.flatMap(lvl => rulesByLevel[lvl]);
+    const totalMissing = LEVELS.filter(lvl => rulesByLevel[lvl].length === 0).length;
 
-    const wrap = el(
-        `<div class="view"><h1>${t('h_grammar')}</h1><input class="type-input" id="gsearch" placeholder="${t('search_placeholder')}" style="max-width:100%;margin-bottom:16px;padding:10px 14px;font-size:.9rem;"><div id="gramNotice"></div><div id="gramlist"></div></div>`
-    );
+    const wrap = el(`
+        <div class="view">
+            <h1>${t('h_grammar')}</h1>
+            <input class="type-input" id="gsearch" placeholder="${t('search_placeholder')}" style="max-width:100%;margin-bottom:12px;padding:10px 14px;font-size:.9rem;">
+            <div id="gramLevelFilter" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;"></div>
+            <div id="gramNotice"></div>
+            <div id="gramlist"></div>
+        </div>
+    `);
     const list = wrap.querySelector('#gramlist');
+    let activeLevel = 'all';
+
+    // ---- Фільтр рівнів ----
+    const filterBar = wrap.querySelector('#gramLevelFilter');
+    const levelChips = [{ code: 'all', label: t('grammar_all_levels') }].concat(
+        LEVELS.map(lvl => ({ code: lvl, label: `${lvl}${rulesByLevel[lvl].length ? ` (${rulesByLevel[lvl].length})` : ''}` }))
+    );
+    levelChips.forEach(({ code, label }) => {
+        const chip = el(`<button class="chip ${code === 'all' ? 'active' : ''}">${label}</button>`);
+        chip.onclick = () => {
+            activeLevel = code;
+            filterBar.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            renderList(wrap.querySelector('#gsearch').value);
+        };
+        filterBar.appendChild(chip);
+    });
 
     if (lang !== 'no') {
         const langName = targetLangName(lang);
-        const notice = el(rules.length === 0 ? `
+        const notice = el(totalMissing > 0 ? `
             <div class="card" style="margin-bottom:16px;color:var(--ink-soft);font-size:.9rem;">
-                🤖 ${tf('grammar_generating_notice', {lang: langName, level})}
+                🤖 ${tf('grammar_generating_notice_all', {lang: langName})}
             </div>
         ` : `
             <div class="card" style="margin-bottom:16px;color:var(--ink-soft);font-size:.85rem;">
-                🤖 ${tf('grammar_ai_generated_notice', {lang: langName, level})}
+                🤖 ${tf('grammar_ai_generated_notice_all', {lang: langName})}
             </div>
         `);
         wrap.querySelector('#gramNotice').appendChild(notice);
@@ -1836,7 +1857,8 @@ function viewGrammar() {
 
     function renderList(filter) {
         list.innerHTML = "";
-        rules.filter(g => !filter || grammarLocalized(g, 'title').toLowerCase().includes(filter.toLowerCase())).forEach(g => {
+        const source = activeLevel === 'all' ? allRules : rulesByLevel[activeLevel];
+        source.filter(g => !filter || grammarLocalized(g, 'title').toLowerCase().includes(filter.toLowerCase())).forEach(g => {
             const title = grammarLocalized(g, 'title');
             const exp = grammarLocalized(g, 'exp');
             const head = grammarLocalizedHead(g);
@@ -1873,6 +1895,9 @@ function viewGrammar() {
             mini.appendChild(qEl);
             list.appendChild(item);
         });
+        if (!source.length) {
+            list.innerHTML = `<div class="card"><p style="color:var(--ink-soft);">${t('grammar_empty')}</p></div>`;
+        }
     }
     renderList('');
     wrap.querySelector('#gsearch').oninput = (e) => renderList(e.target.value);

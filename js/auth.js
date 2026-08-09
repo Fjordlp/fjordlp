@@ -75,7 +75,9 @@ function initAuth() {
         app.classList.add('active');
         initAssistantWidget();
         checkAndApplyStreakFreeze();
-        if (shouldShowOnboarding()) {
+        if (shouldShowLanguageChoice()) {
+            navigate('choose-language');
+        } else if (shouldShowOnboarding()) {
             navigate('onboarding');
         } else {
             navigate('home');
@@ -155,7 +157,9 @@ function initAuth() {
             app.classList.add('active');
             initAssistantWidget();
             checkAndApplyStreakFreeze();
-            if (shouldShowOnboarding()) {
+            if (shouldShowLanguageChoice()) {
+                navigate('choose-language');
+            } else if (shouldShowOnboarding()) {
                 navigate('onboarding');
             } else {
                 navigate('home');
@@ -185,7 +189,13 @@ function initAuth() {
         app.classList.add('active');
         initAssistantWidget();
         checkAndApplyStreakFreeze();
-        navigate('home');
+        if (shouldShowLanguageChoice()) {
+            navigate('choose-language');
+        } else if (shouldShowOnboarding()) {
+            navigate('onboarding');
+        } else {
+            navigate('home');
+        }
     }
 }
 

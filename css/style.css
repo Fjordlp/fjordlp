@@ -521,6 +521,18 @@
         .book-illustration img { max-width: 100%; border-radius: 12px; box-shadow: var(--shadow); }
         .book-illustration figcaption { margin-top: 8px; font-size: .8rem; color: var(--ink-soft); font-style: italic; }
 
+        /* ===== CHOOSE LANGUAGE (dedicated first-run screen) ===== */
+        .cl-lang-card {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            padding: 18px 10px; border: 2px solid var(--line); border-radius: 14px;
+            background: var(--frost); cursor: pointer; transition: all .15s; font-family: inherit;
+        }
+        .cl-lang-card:hover { border-color: var(--teal); transform: translateY(-2px); box-shadow: var(--shadow); }
+        .cl-lang-card.active { border-color: var(--teal); background: rgba(47,168,155,0.08); }
+        .cl-lang-flag { font-size: 2rem; line-height: 1; }
+        .cl-lang-native { font-weight: 600; font-size: .95rem; margin-top: 4px; }
+        .cl-lang-name { font-size: .75rem; color: var(--ink-soft); }
+
         /* ===== ADMIN: books editor ===== */
         .book-chapter-editor { border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; background: var(--frost); }
         .book-chapter-editor textarea { width: 100%; min-height: 160px; font-family: inherit; font-size: .88rem; padding: 8px; border: 1px solid var(--line); border-radius: 8px; resize: vertical; }

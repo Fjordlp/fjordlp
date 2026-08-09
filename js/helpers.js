@@ -5,6 +5,15 @@ function shouldShowOnboarding() {
     return !STATE._onboardingDone;
 }
 
+// Раніше мову вивчення можна було або взагалі не вибирати (тихо
+// лишалась норвезька за замовчуванням), або вибрати з обмеженого списку
+// 6 мов, змішаного з кроками "мета навчання"/"вхідний тест" в онбордингу.
+// Тепер це окремий обов'язковий перший екран (усі 30 мов), який
+// гарантовано проходить кожен НОВИЙ користувач ще ДО онбордингу.
+function shouldShowLanguageChoice() {
+    return !STATE._targetLangChosen;
+}
+
 function getStudyPlan(level, goalId) {
     const lang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
     const noGoalMsg = { uk: 'Оберіть мету, щоб отримати план навчання.', en: 'Choose a goal to get a study plan.', ru: 'Выберите цель, чтобы получить план обучения.' }[lang];

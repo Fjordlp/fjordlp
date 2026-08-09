@@ -124,6 +124,17 @@
             }
             if (!state.vocabLang) state.vocabLang = state.uiLang;
             if (!state.targetLang) state.targetLang = 'no';
+            // Новий обов'язковий екран вибору мови вивчення (усі 30 мов, до
+            // онбордингу) не повинен раптово "вискакувати" перед людьми, які
+            // вже давно користуються застосунком і вже мають налаштовану
+            // мову — інакше це виглядало б як баг, а не нова фіча. Тому
+            // "прощаємо" (позначаємо як уже вибрану) усіх, хто вже пройшов
+            // онбординг раніше АБО чий STATE взагалі вже існував до появи
+            // цього поля (typeof undefined тут і є ознакою "стан був
+            // збережений раніше, просто без цього конкретного прапорця").
+            if (typeof state._targetLangChosen === 'undefined') {
+                state._targetLangChosen = !!state._onboardingDone || Object.keys(state.langData || {}).length > 0;
+            }
             if (!state.generatedVocab || typeof state.generatedVocab !== 'object') state.generatedVocab = {};
             if (!state.generatedGrammar || typeof state.generatedGrammar !== 'object') state.generatedGrammar = {};
             if (!state.generatedTasks || typeof state.generatedTasks !== 'object') state.generatedTasks = {};

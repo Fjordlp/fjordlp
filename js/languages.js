@@ -352,7 +352,13 @@ async function ensureGrammarAvailable(lang, level) {
         const shared = await loadSharedGrammar(lang, level);
         if (shared && shared.length) {
             STATE.generatedGrammar[lang][level] = shared;
-            if (typeof render === 'function' && STATE.targetLang === lang && (LD().level || 'A1') === level) render();
+            // Раніше тут перемальовувалось лише якщо рівень щойно
+            // завантаженої граматики збігався з LD().level (поточним рівнем
+            // користувача). Але вкладка "Граматика" тепер показує ВСІ рівні
+            // одразу, тож перемальовуємо, поки людина реально на цій
+            // вкладці — незалежно від того, який саме рівень підвантажився.
+            if (typeof render === 'function' && STATE.targetLang === lang &&
+                typeof ROUTE !== 'undefined' && ROUTE === 'grammar') render();
             return;
         }
         // Особисту AI-генерацію "про запас" для окремого користувача
