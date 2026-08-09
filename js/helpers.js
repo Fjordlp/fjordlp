@@ -198,7 +198,9 @@ function getLevelRecommendation() {
         // які generateNorskTaskAI() і так генерує цільовою мовою.
         function norskTasksFor(level, mode) {
             const lang = (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
-            const base = lang === 'no' ? ((NORSKPROVE_TASKS[level] && NORSKPROVE_TASKS[level][mode]) || []) : [];
+            const langFile = window.LANG_DATA && window.LANG_DATA[lang];
+            const tasks = langFile && langFile.NORSKPROVE_TASKS;
+            const base = (tasks && tasks[level] && tasks[level][mode]) || [];
             const custom = (LD().customNorskTasks && LD().customNorskTasks[level] && LD().customNorskTasks[level][mode]) || [];
             return base.concat(custom);
         }
@@ -338,14 +340,16 @@ async function loadWordsForLang(lang) {
 function vocabForLevel(level, lang) {
     lang = lang || (STATE && STATE.targetLang) || 'no';
     let base;
-    if (lang === 'no') {
-        // Раніше тут було ЛИШЕ вбудоване VOCAB[level] — опубліковані
-        // адміном через "Спільні словники" норвезькі слова (STATE.
-        // generatedVocab.no[level]) ніколи не потрапляли користувачам,
-        // навіть якщо адмін їх щойно опублікував. Тепер додаємо їх до
-        // вбудованого словника (а не замінюємо).
-        const builtin = (VOCAB && VOCAB[level]) || [];
-        const extra = (STATE && STATE.generatedVocab && STATE.generatedVocab.no && STATE.generatedVocab.no[level]) || [];
+    // Якщо для цієї мови є власний файл-словник (js/data-<lang>.js,
+    // зареєстрований у LANG_DATA — так само, як норвезька в data.js) —
+    // використовуємо його. Якщо файлу нема, як і раніше, працює
+    // AI-генерація (STATE.generatedVocab). Опубліковані адміном "Спільні
+    // словники" завжди додаються ЗВЕРХУ вбудованого файлу, а не замінюють
+    // його — незалежно від того, норвезька це чи будь-яка інша мова.
+    const langFile = window.LANG_DATA && window.LANG_DATA[lang];
+    if (langFile && langFile.VOCAB) {
+        const builtin = langFile.VOCAB[level] || [];
+        const extra = (STATE && STATE.generatedVocab && STATE.generatedVocab[lang] && STATE.generatedVocab[lang][level]) || [];
         base = extra.length ? builtin.concat(extra) : builtin;
     } else {
         if (!STATE.generatedVocab) STATE.generatedVocab = {};
@@ -367,8 +371,9 @@ function vocabForLevel(level, lang) {
 // про артиклі en/ei/et: GRAMMAR використовували напряму, без фільтра мови).
 function grammarForLevel(level, lang) {
     lang = lang || (STATE && STATE.targetLang) || 'no';
-    if (lang === 'no') {
-        return (typeof GRAMMAR !== 'undefined' ? GRAMMAR : []).filter(g => g.level === level);
+    const langFile = window.LANG_DATA && window.LANG_DATA[lang];
+    if (langFile && langFile.GRAMMAR) {
+        return langFile.GRAMMAR.filter(g => g.level === level);
     }
     if (!STATE.generatedGrammar) STATE.generatedGrammar = {};
     if (!STATE.generatedGrammar[lang]) STATE.generatedGrammar[lang] = {};

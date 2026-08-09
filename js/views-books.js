@@ -8,38 +8,74 @@ function viewBooksLibrary() {
         <div class="view">
             <h1>📚 ${t('h_books')}</h1>
             <p style="color:var(--ink-soft);margin-bottom:16px;">${t('books_intro')}</p>
+            <div id="booksGenreFilter" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;"></div>
             <div id="booksList"><p style="color:var(--ink-soft);">${t('loading')}</p></div>
         </div>
     `);
     const list = wrap.querySelector('#booksList');
+    const filterBar = wrap.querySelector('#booksGenreFilter');
+    let activeGenre = 'all';
+
+    function renderCards(books) {
+        const filtered = activeGenre === 'all' ? books : books.filter(b => (b.genre || 'other') === activeGenre);
+        if (!filtered.length) {
+            list.innerHTML = `<div class="card"><p style="color:var(--ink-soft);">${t('books_empty')}</p></div>`;
+            return;
+        }
+        list.innerHTML = '';
+        filtered.forEach(book => {
+            const progress = getBookProgress(book.id);
+            const total = (book.chapters || []).length;
+            const done = progress.chaptersRead.length;
+            const genre = getBookGenre(book.genre);
+            const card = el(`
+                <div class="card" style="margin-bottom:14px;cursor:pointer;display:flex;gap:14px;">
+                    ${book.coverUrl ? `<img src="${escHtml(book.coverUrl)}" alt="" class="book-cover-thumb" onerror="this.style.display='none';">` : `<div class="book-cover-thumb book-cover-placeholder">${genre.emoji}</div>`}
+                    <div style="flex:1;min-width:0;">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+                            <div>
+                                <h3 style="margin:0 0 4px;">${escHtml(book.title)}</h3>
+                                <p style="margin:0;color:var(--ink-soft);font-size:.85rem;">${escHtml(book.author || '')}</p>
+                            </div>
+                            <span class="tag level-${book.level}">${book.level}</span>
+                        </div>
+                        <p style="margin:6px 0 0;font-size:.78rem;color:var(--ink-soft);">${genre.label}</p>
+                        ${book.description ? `<p style="margin:6px 0 0;font-size:.85rem;color:var(--ink-soft);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escHtml(book.description)}</p>` : ''}
+                        <p style="margin:8px 0 0;font-size:.82rem;color:var(--ink-soft);">
+                            ${done > 0 ? tf('books_progress', {done, total}) : tf('books_chapters_count', {total})}
+                        </p>
+                    </div>
+                </div>
+            `);
+            card.onclick = () => navigate('book-read', { bookId: book.id, chapterIdx: 0 });
+            list.appendChild(card);
+        });
+    }
 
     loadSharedBooks(lang).then(books => {
         if (!books.length) {
             list.innerHTML = `<div class="card"><p style="color:var(--ink-soft);">${t('books_empty')}</p></div>`;
             return;
         }
-        list.innerHTML = '';
-        books.forEach(book => {
-            const progress = getBookProgress(book.id);
-            const total = (book.chapters || []).length;
-            const done = progress.chaptersRead.length;
-            const card = el(`
-                <div class="card" style="margin-bottom:14px;cursor:pointer;" >
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
-                        <div>
-                            <h3 style="margin:0 0 4px;">${escHtml(book.title)}</h3>
-                            <p style="margin:0;color:var(--ink-soft);font-size:.85rem;">${escHtml(book.author || '')}</p>
-                        </div>
-                        <span class="tag level-${book.level}">${book.level}</span>
-                    </div>
-                    <p style="margin:10px 0 0;font-size:.82rem;color:var(--ink-soft);">
-                        ${done > 0 ? tf('books_progress', {done, total}) : tf('books_chapters_count', {total})}
-                    </p>
-                </div>
-            `);
-            card.onclick = () => navigate('book-read', { bookId: book.id, chapterIdx: 0 });
-            list.appendChild(card);
+        // Показуємо фільтр лише по темах, які реально є серед книг цієї
+        // мови (не весь список BOOK_GENRES одразу — якщо є лише казки й
+        // пригоди, немає сенсу показувати порожні фільтри на 10 інших тем).
+        const presentGenres = Array.from(new Set(books.map(b => b.genre || 'other')));
+        const chips = [{ code: 'all', label: t('books_genre_all') }].concat(
+            presentGenres.map(code => ({ code, label: getBookGenre(code).label }))
+        );
+        filterBar.innerHTML = '';
+        chips.forEach(({ code, label }) => {
+            const chip = el(`<button class="chip ${code === activeGenre ? 'active' : ''}">${label}</button>`);
+            chip.onclick = () => {
+                activeGenre = code;
+                filterBar.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                renderCards(books);
+            };
+            filterBar.appendChild(chip);
         });
+        renderCards(books);
     });
 
     return wrap;
@@ -69,6 +105,13 @@ function viewBookReader() {
             <div class="view">
                 <button class="btn btn-ghost btn-sm" id="bkBackBtn">← ${t('books_back_to_library')}</button>
                 <h1 style="margin-top:10px;">${escHtml(book.title)}</h1>
+                <p style="margin:0 0 12px;color:var(--ink-soft);font-size:.9rem;">${escHtml(book.author || '')}</p>
+
+                ${book.coverUrl || book.description ? `
+                <div class="card" style="margin-bottom:16px;display:flex;gap:16px;align-items:flex-start;">
+                    ${book.coverUrl ? `<img src="${escHtml(book.coverUrl)}" alt="" class="book-cover-large" onerror="this.style.display='none';">` : ''}
+                    ${book.description ? `<p style="margin:0;color:var(--ink-soft);font-size:.9rem;line-height:1.6;">${escHtml(book.description)}</p>` : ''}
+                </div>` : ''}
 
                 <div class="card" id="bkChapterListCard" style="margin-bottom:16px;">
                     <button class="btn btn-ghost btn-sm" id="bkChapterListToggle" style="width:100%;display:flex;justify-content:space-between;align-items:center;">
@@ -119,6 +162,26 @@ function viewBookReader() {
 
         const textEl = wrap.querySelector('#bkText');
         paragraphs.forEach(p => {
+            // Ілюстрація: адмін вставив [img: URL] або [img: URL | підпис] як
+            // окремий абзац тексту. Такий "абзац" рендеримо як картинку, а не
+            // як клікабельний для перекладу текст.
+            const imgMarker = parseImageMarker(p);
+            if (imgMarker) {
+                const figure = document.createElement('figure');
+                figure.className = 'book-illustration';
+                const img = document.createElement('img');
+                img.src = imgMarker.url;
+                img.alt = imgMarker.caption || '';
+                img.onerror = () => { figure.style.display = 'none'; };
+                figure.appendChild(img);
+                if (imgMarker.caption) {
+                    const cap = document.createElement('figcaption');
+                    cap.textContent = imgMarker.caption;
+                    figure.appendChild(cap);
+                }
+                textEl.appendChild(figure);
+                return;
+            }
             const pEl = document.createElement('p');
             pEl.style.marginBottom = '14px';
             // Розбиваємо на слова так, щоб пунктуація лишалась окремим текстовим

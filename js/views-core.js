@@ -148,7 +148,7 @@ function viewHome() {
                     <button class="btn" data-r="tests">${t('home_tests_btn')}</button>
                     <button class="btn" data-r="test-listen">${t('home_listen_btn')}</button>
                     <button class="btn" data-r="troll">${tf('home_troll_btn', {lvl: trollLvl})}</button>
-                    <button class="btn" data-r="norskprove">🎓 ${examSectionNavLabel()}</button>
+                    ${(STATE.targetLang || 'no') === 'no' ? `<button class="btn" data-r="norskprove">🎓 ${examSectionNavLabel()}</button>` : ''}
                 </div>
             </div>
 
@@ -489,8 +489,10 @@ async function buildDynamicLevelTest(lang) {
 
 function viewLevelTest() {
     const lang = STATE.targetLang || 'no';
+    const langFile = window.LANG_DATA && window.LANG_DATA[lang];
+    const hasBuiltinTest = !!(langFile && langFile.LEVEL_TEST && langFile.LEVEL_TEST.length);
 
-    if (lang !== 'no') {
+    if (!hasBuiltinTest) {
         // Питання ще не готові — запускаємо (один раз) асинхронну
         // побудову й показуємо заглушку, доки вона не завершиться.
         if (!SUBSTATE.testQuestions && !SUBSTATE.testLoading) {
@@ -527,7 +529,7 @@ function viewLevelTest() {
         }
     }
 
-    const questions = lang === 'no' ? LEVEL_TEST : SUBSTATE.testQuestions;
+    const questions = hasBuiltinTest ? langFile.LEVEL_TEST : SUBSTATE.testQuestions;
 
     if (!SUBSTATE.i) { SUBSTATE.i = 0; SUBSTATE.answers = []; }
     const i = SUBSTATE.i;
@@ -558,7 +560,7 @@ function viewLevelTest() {
     // від мови інтерфейсу. Для згенерованих (не норвезьких) питань
     // текст уже будується мовою інтерфейсу на етапі генерації, тож
     // localizedField тут просто поверне q.q/q.opts як є.
-    const q = lang === 'no' ? {
+    const q = hasBuiltinTest ? {
         ...questions[i],
         q: localizedField(questions[i], 'q'),
         opts: (STATE.uiLang !== 'uk' && questions[i]['opts_' + STATE.uiLang]) || questions[i].opts,
@@ -1803,15 +1805,15 @@ function viewGrammar() {
     const lang = STATE.targetLang || 'no';
     const level = LD().level || 'A1';
 
-    // Для будь-якої мови, крім норвезької, вбудованого GRAMMAR немає (це
-    // 27 захардкоджених норвезьких правил) — тож підвантажуємо/генеруємо
-    // граматику для поточного рівня. Викликаємо "тихо": перший рендер може
-    // показати порожньо/спінер, ensureGrammarAvailable сам перемалює
-    // екран, коли правила будуть готові (той самий патерн, що й
-    // ensureVocabAvailable для словника).
-    if (lang !== 'no') ensureGrammarAvailable(lang, level);
+    // Якщо для цієї мови нема власного файлу-граматики (LANG_DATA[lang].
+    // GRAMMAR) — підвантажуємо/генеруємо через AI. Викликаємо "тихо":
+    // перший рендер може показати порожньо/спінер, ensureGrammarAvailable
+    // сам перемалює екран, коли правила будуть готові (той самий патерн,
+    // що й ensureVocabAvailable для словника).
+    const hasBuiltinGrammar = !!(window.LANG_DATA && window.LANG_DATA[lang] && window.LANG_DATA[lang].GRAMMAR);
+    if (!hasBuiltinGrammar) ensureGrammarAvailable(lang, level);
 
-    const rules = lang === 'no' ? GRAMMAR : grammarForLevel(level, lang);
+    const rules = grammarForLevel(level, lang);
 
     const wrap = el(
         `<div class="view"><h1>${t('h_grammar')}</h1><input class="type-input" id="gsearch" placeholder="${t('search_placeholder')}" style="max-width:100%;margin-bottom:16px;padding:10px 14px;font-size:.9rem;"><div id="gramNotice"></div><div id="gramlist"></div></div>`

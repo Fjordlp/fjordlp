@@ -9,7 +9,7 @@
 // activate() видаляє лише кеші з ІНШОЮ назвою, тож поки назва не зміниться,
 // стара версія файлів (у т.ч. вже полагоджені баги) може роками "застрягати"
 // в кеші користувача, і stale-while-revalidate віддаватиме її першою.
-const CACHE_NAME = 'fjord-shell-v2';
+const CACHE_NAME = 'fjord-shell-v3';
 
 const APP_SHELL = [
   './',
@@ -23,6 +23,11 @@ const APP_SHELL = [
   './js/languages.js',
   './js/assistant.js',
   './js/data.js',
+  './js/data-en.js',
+  './js/data-de.js',
+  './js/data-es.js',
+  './js/data-fr.js',
+  './js/data-it.js',
   './js/helpers.js',
   './js/gear-i18n.js',
   './js/bust-accessories.js',

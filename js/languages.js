@@ -7,7 +7,7 @@
 // =====================================================================
 const LANGUAGES = [
     { code: 'no', flag: '🇳🇴', native: 'Norsk', name: { uk: 'Норвезька', en: 'Norwegian', ru: 'Норвежский' }, builtin: true },
-    { code: 'en', flag: '🇬🇧', native: 'English', name: { uk: 'Англійська', en: 'English', ru: 'Английский' }, builtin: false },
+    { code: 'en', flag: '🇬🇧', native: 'English', name: { uk: 'Англійська', en: 'English', ru: 'Английский' }, builtin: true },
     { code: 'de', flag: '🇩🇪', native: 'Deutsch', name: { uk: 'Німецька', en: 'German', ru: 'Немецкий' }, builtin: false },
     { code: 'es', flag: '🇪🇸', native: 'Español', name: { uk: 'Іспанська', en: 'Spanish', ru: 'Испанский' }, builtin: false },
     { code: 'fr', flag: '🇫🇷', native: 'Français', name: { uk: 'Французька', en: 'French', ru: 'Французский' }, builtin: false },
@@ -201,9 +201,14 @@ async function generateBulkVocab(langCode, level, batches, onProgress) {
     return collected;
 }
 
-function ensureGeneratedVocabStore() {
+function ensureGeneratedVocabStore(lang) {
     if (!STATE.generatedVocab) STATE.generatedVocab = {};
-    const lang = STATE.targetLang || 'no';
+    // Раніше ця функція завжди ініціалізувала кеш лише для
+    // STATE.targetLang, ігноруючи параметр lang. Це працювало для
+    // звичайних користувачів (targetLang уже дорівнює потрібній мові на
+    // момент виклику), але падало з TypeError, щойно щось запитувало
+    // слова для мови, ВІДМІННОЇ від поточної targetLang користувача.
+    lang = lang || STATE.targetLang || 'no';
     if (!STATE.generatedVocab[lang]) STATE.generatedVocab[lang] = {};
 }
 
@@ -334,7 +339,8 @@ async function saveSharedGrammar(lang, level, rules) {
 // його по LD() немає сенсу.
 let _grammarAutoGenLoading = {};
 async function ensureGrammarAvailable(lang, level) {
-    if (!lang || lang === 'no') return; // вбудована граматика вже покриває норвезьку
+    if (!lang) return;
+    if (window.LANG_DATA && window.LANG_DATA[lang] && window.LANG_DATA[lang].GRAMMAR) return; // вбудований файл цієї мови вже покриває граматику
     if (!STATE.generatedGrammar) STATE.generatedGrammar = {};
     if (!STATE.generatedGrammar[lang]) STATE.generatedGrammar[lang] = {};
     const already = STATE.generatedGrammar[lang][level];
@@ -410,7 +416,7 @@ async function ensureSharedVocabLoaded(lang, level) {
     // для 'no' більше не можна: інакше опубліковані слова ніколи не
     // потраплять користувачам. vocabForLevel() у helpers.js додає їх до
     // вбудованого VOCAB, а не замінює його.
-    ensureGeneratedVocabStore();
+    ensureGeneratedVocabStore(lang);
     if (STATE.generatedVocab[lang][level] && STATE.generatedVocab[lang][level].length) return; // вже є (з кешу чи попереднього фетчу)
     const key = lang + '|' + level;
     if (_sharedVocabLoading[key]) return; // вже вантажиться
@@ -444,7 +450,7 @@ async function ensureSharedVocabLoaded(lang, level) {
 let _vocabAutoGenLoading = {};
 async function ensureVocabAvailable(lang, level) {
     if (!lang) return;
-    ensureGeneratedVocabStore();
+    ensureGeneratedVocabStore(lang);
     // Для норвезької лише перевіряємо, чи адмін щось додатково опублікував —
     // AI-самогенерацію нижче пропускаємо, вона тут не потрібна.
     if (lang === 'no') {

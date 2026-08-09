@@ -1117,6 +1117,12 @@ function viewAdminBooks() {
                         </select>
                     </div>
                     <div class="field">
+                        <label>Тема/жанр</label>
+                        <select id="abGenre">
+                            ${BOOK_GENRES.map(g => `<option value="${g.code}">${g.label}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="field">
                         <label>Назва книги</label>
                         <input type="text" id="abTitle" placeholder="напр. Peter Pan">
                     </div>
@@ -1129,8 +1135,21 @@ function viewAdminBooks() {
                     <label>Джерело / підтвердження суспільного надбання</label>
                     <input type="text" id="abSource" placeholder="напр. Project Gutenberg, gutenberg.org/ebooks/16">
                 </div>
+                <div class="field" style="margin-top:10px;">
+                    <label>Обкладинка (посилання на зображення)</label>
+                    <input type="text" id="abCover" placeholder="https://…jpg — необов'язково">
+                </div>
+                <div class="field" style="margin-top:10px;">
+                    <label>Опис книги</label>
+                    <textarea id="abDescription" placeholder="Коротко про що книга, для бібліотеки й сторінки читання" style="width:100%;min-height:70px;font-family:inherit;font-size:.9rem;padding:8px;border:1px solid var(--line);border-radius:8px;resize:vertical;"></textarea>
+                </div>
 
                 <h4 style="margin:18px 0 8px;">Розділи</h4>
+                <p style="color:var(--ink-soft);font-size:.8rem;margin:0 0 10px;">
+                    💡 Щоб вставити ілюстрацію прямо в текст розділу, напиши в окремому абзаці
+                    <code>[img: посилання_на_картинку]</code> або з підписом —
+                    <code>[img: посилання | підпис]</code>.
+                </p>
                 <div id="abChapters"></div>
                 <button class="btn btn-ghost btn-sm" id="abAddChapterBtn">+ Додати розділ</button>
 
@@ -1251,9 +1270,12 @@ function initAdminBooks() {
         document.getElementById('abFormTitle').textContent = '➕ Нова книга';
         document.getElementById('abLang').value = document.getElementById('abLang').options[0].value;
         document.getElementById('abLevel').value = 'A1';
+        document.getElementById('abGenre').value = BOOK_GENRES[0].code;
         document.getElementById('abTitle').value = '';
         document.getElementById('abAuthor').value = '';
         document.getElementById('abSource').value = '';
+        document.getElementById('abCover').value = '';
+        document.getElementById('abDescription').value = '';
         resetBtn.style.display = 'none';
         statusEl.textContent = '';
         renderChapters();
@@ -1272,9 +1294,10 @@ function initAdminBooks() {
             snap.forEach(doc => {
                 const d = doc.data();
                 const lang = getLanguage(d.lang);
+                const genre = getBookGenre(d.genre);
                 const row = el(`
                     <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line-soft);">
-                        <span>${lang.flag} ${escHtml(d.title)} — <span class="tag level-${d.level}">${d.level}</span> · ${(d.chapters||[]).length} розд.</span>
+                        <span>${lang.flag} ${escHtml(d.title)} — <span class="tag level-${d.level}">${d.level}</span> · ${genre.label} · ${(d.chapters||[]).length} розд.</span>
                         <span>
                             <button class="btn btn-ghost btn-sm ab-edit-book" data-id="${doc.id}">✏️</button>
                             <button class="btn btn-ghost btn-sm ab-delete-book" data-id="${doc.id}">🗑️</button>
@@ -1307,9 +1330,12 @@ function initAdminBooks() {
         document.getElementById('abFormTitle').textContent = `✏️ Редагування: ${data.title}`;
         document.getElementById('abLang').value = data.lang;
         document.getElementById('abLevel').value = data.level;
+        document.getElementById('abGenre').value = data.genre || 'other';
         document.getElementById('abTitle').value = data.title || '';
         document.getElementById('abAuthor').value = data.author || '';
         document.getElementById('abSource').value = data.sourceNote || '';
+        document.getElementById('abCover').value = data.coverUrl || '';
+        document.getElementById('abDescription').value = data.description || '';
         chapters = (data.chapters || []).map(c => Object.assign({}, c));
         resetBtn.style.display = 'inline-block';
         renderChapters();
@@ -1321,9 +1347,12 @@ function initAdminBooks() {
     publishBtn.onclick = async () => {
         const lang = document.getElementById('abLang').value;
         const level = document.getElementById('abLevel').value;
+        const genre = document.getElementById('abGenre').value;
         const title = document.getElementById('abTitle').value.trim();
         const author = document.getElementById('abAuthor').value.trim();
         const sourceNote = document.getElementById('abSource').value.trim();
+        const coverUrl = document.getElementById('abCover').value.trim();
+        const description = document.getElementById('abDescription').value.trim();
         if (!title) { toast('⚠️ Введи назву книги.'); return; }
         if (!chapters.length || !chapters.some(c => c.text && c.text.trim().length > 0)) {
             toast('⚠️ Додай хоча б один розділ із текстом.');
@@ -1339,7 +1368,7 @@ function initAdminBooks() {
             const cleanChapters = chapters
                 .filter(c => c.text && c.text.trim())
                 .map(c => ({ title: c.title || '', text: c.text, tasks: c.tasks || [] }));
-            const id = await saveSharedBook(_abEditingBookId, { lang, level, title, author, sourceNote, chapters: cleanChapters });
+            const id = await saveSharedBook(_abEditingBookId, { lang, level, genre, title, author, sourceNote, coverUrl, description, chapters: cleanChapters });
             _abEditingBookId = id;
             toast(`✅ Опубліковано "${title}"`);
             statusEl.textContent = `Опубліковано (${cleanChapters.length} розділів).`;
