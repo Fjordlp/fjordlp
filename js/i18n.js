@@ -484,6 +484,7 @@ const TOPIC_TRANSLATIONS = {
     'Академічна': { en: 'Academic', ru: 'Академическая' },
     'Банк': { en: 'Bank', ru: 'Банк' },
     'Бізнес': { en: 'Business', ru: 'Бизнес' },
+    "Кар'єра": { en: 'Career', ru: 'Карьера' },
     'Дискурс': { en: 'Discourse', ru: 'Дискурс' },
     'Дні тижня': { en: 'Days of the week', ru: 'Дни недели' },
     'Довкілля': { en: 'Environment', ru: 'Окружающая среда' },
@@ -501,6 +502,7 @@ const TOPIC_TRANSLATIONS = {
     'Меблі': { en: 'Furniture', ru: 'Мебель' },
     'Медицина': { en: 'Medicine', ru: 'Медицина' },
     'Медіа': { en: 'Media', ru: 'Медиа' },
+    'Минулий час': { en: 'Past tense', ru: 'Прошедшее время' },
     'Місто': { en: 'City', ru: 'Город' },
     'Місяці': { en: 'Months', ru: 'Месяцы' },
     'Напрямки': { en: 'Directions', ru: 'Направления' },
@@ -532,7 +534,6 @@ const TOPIC_TRANSLATIONS = {
     'Стилістика': { en: 'Stylistics', ru: 'Стилистика' },
     'Стосунки': { en: 'Relationships', ru: 'Отношения' },
     'Тварини': { en: 'Animals', ru: 'Животные' },
-    'Технologiї': { en: 'Technology', ru: 'Технологии' }, // так у вихідних даних (є друкарська помилка — латинська "logi"), лишаємо ключ як є, щоб збігався
     'Технології': { en: 'Technology', ru: 'Технологии' },
     'Транспорт': { en: 'Transport', ru: 'Транспорт' },
     'Тіло': { en: 'Body', ru: 'Тело' },
