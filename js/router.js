@@ -70,6 +70,7 @@ const NAV_ROUTE_GROUPS = {
     profile: ['profile', 'levels', 'leveltest'],
     tournaments: ['tournaments', 'tournament-play'],
     books: ['books', 'book-read'],
+    story: ['story'],
     admin: ['admin', 'admin-words', 'admin-tournaments', 'admin-daily', 'admin-users', 'admin-vocab-gen', 'admin-grammar-gen', 'admin-books', 'admin-daily-word'],
 };
 
@@ -82,6 +83,7 @@ function updateNav() {
         ["tests", t('nav_tests')],
         ["grammar", t('nav_grammar')],
         ["books", t('nav_books')],
+        ["story", t('nav_story')],
         ["troll", t('nav_troll')],
         ["profile", t('nav_profile')],
         ["onboarding", t('nav_onboarding')],
@@ -158,6 +160,8 @@ function renderView() {
             return viewBooksLibrary();
         case 'book-read':
             return viewBookReader();
+        case 'story':
+            return viewStory();
         case 'profile':
             return viewProfile();
         case 'levels':

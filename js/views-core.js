@@ -12,6 +12,7 @@ function dailyWordCardBody(w, level) {
     return `
         <div class="dailyword">
             <button class="soundbtn" id="dwSound">🔊</button>
+            <span id="dwMicSlot"></span>
             <div>
                 <div class="word-no">${escHtml(w.no)}</div>
                 <div class="word-uk">${escHtml(wordTranslation(w, level))}</div>
@@ -223,6 +224,12 @@ function viewHome() {
     function wireDailyWordSound(word) {
         const snd = wrap.querySelector('#dwSound');
         if (snd && word) snd.onclick = () => speak(word.no, STATE.targetLang);
+        const micSlot = wrap.querySelector('#dwMicSlot');
+        if (micSlot && word) {
+            micSlot.innerHTML = '';
+            const mic = renderMicButton(word.no, STATE.targetLang);
+            if (mic) micSlot.appendChild(mic);
+        }
     }
     wireDailyWordSound(dw);
     const rt = wrap.querySelector('#retest');
@@ -816,6 +823,7 @@ function renderFlipCard(item) {
                 <div class="flip-face flip-front">
                     <div class="no-word">${escHtml(item.w.no)}</div>
                     <button class="soundbtn" id="fSound">🔊</button>
+                    <span id="fMicSlot"></span>
                     <div class="flip-hint">${t('flip_hint')}</div>
                 </div>
                 <div class="flip-face flip-back">
@@ -826,12 +834,17 @@ function renderFlipCard(item) {
         </div>
     `);
     const inner = cardWrap.querySelector('.flip-inner');
-    inner.onclick = (e) => { if (e.target.id === 'fSound') return;
+    inner.onclick = (e) => { if (e.target.id === 'fSound' || e.target.closest('.mic-btn')) return;
         inner.classList.toggle('flipped');
         SUBSTATE.flipped = inner.classList.contains('flipped');
         renderGrades(); };
     cardWrap.querySelector('#fSound').onclick = (e) => { e.stopPropagation();
         speak(item.w.no, STATE.targetLang); };
+    const fMicSlot = cardWrap.querySelector('#fMicSlot');
+    if (fMicSlot) {
+        const fMic = renderMicButton(item.w.no, STATE.targetLang);
+        if (fMic) fMicSlot.appendChild(fMic);
+    }
     holder.appendChild(cardWrap);
 
     const gradeHolder = el(`<div></div>`);

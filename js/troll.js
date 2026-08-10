@@ -441,7 +441,40 @@ async function speak(text, lang) {
     lang = lang || (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
     const voiceCfg = getTtsVoice(lang);
 
-    // Спроба Edge TTS (якщо бібліотека завантажена)
+    // Варіант 1: власний Worker-проксі (/tts-api) — якщо власник сайту його
+    // додав до worker-hardened-example.js (готова, перевірена реалізація:
+    // https://github.com/DIYgod/cloudflare-edge-tts — Worker сам говорить з
+    // Edge TTS по WebSocket на СЕРВЕРІ, де немає обмежень браузера). Це
+    // єдиний спосіб реально отримати якісний нейронний голос Edge TTS —
+    // варіант 2 нижче (клієнтська бібліотека) працює лише в самому браузері
+    // Microsoft Edge, у Chrome/Firefox/Safari вона завжди падає.
+    if (typeof AI_PROXY_URL !== 'undefined' && AI_PROXY_URL) {
+        try {
+            const ttsUrl = AI_PROXY_URL.replace(/\/?$/, '') + '/tts-api';
+            const res = await fetch(ttsUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, voice: voiceCfg.edge }),
+            });
+            if (res.ok) {
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const audio = new Audio(url);
+                audio.play();
+                return;
+            }
+        } catch (e) {
+            console.warn('/tts-api недоступний, пробуємо запасні варіанти:', e);
+        }
+    }
+
+    // Варіант 2: клієнтська бібліотека Edge TTS (якщо завантажена). УВАГА:
+    // за задокументованою поведінкою пакету @edge-tts/universal вона працює
+    // ЛИШЕ в браузері Microsoft Edge — Chrome/Firefox/Safari відхиляють
+    // потрібний WebSocket-заголовок на рівні браузерного API, тож для
+    // більшості людей цей блок завжди мовчки провалюється й падає у
+    // фолбек нижче. Лишаємо про всяк випадок (для тих, хто таки в Edge),
+    // але не покладаємось на нього як на основне рішення.
     if (typeof edgeTTS !== 'undefined' && edgeTTS.synthesize) {
         try {
             const audioData = await edgeTTS.synthesize(text, {
@@ -459,7 +492,8 @@ async function speak(text, lang) {
         }
     }
 
-    // Fallback: вбудований SpeechSynthesis
+    // Варіант 3 (останній фолбек): вбудований SpeechSynthesis браузера.
+    // Голос звучить помітно роботизованіше, зате працює завжди й скрізь.
     if (!('speechSynthesis' in window)) {
         toast("Озвучення не підтримується");
         return;
@@ -472,4 +506,116 @@ async function speak(text, lang) {
     u.rate = 0.9;
     u.pitch = 1.0;
     speechSynthesis.speak(u);
+}
+
+// =====================================================================
+//  ПРАКТИКА ВИМОВИ (Web Speech API — розпізнавання мовлення)
+// =====================================================================
+// До цього в застосунку була лише ОДНОСТОРОННЯ мовленнєва взаємодія —
+// TTS (кнопка 🔊 "Слухати"). Тут людина каже слово вголос, браузер
+// розпізнає сказане, і ми порівнюємо з очікуваним словом. Працює через
+// стандартний Web Speech API (SpeechRecognition) — підтримується в
+// Chrome/Edge (desktop і Android) та Safari (desktop і iOS 14.5+), АЛЕ
+// НЕ підтримується у Firefox узагалі — тому перевіряємо підтримку і
+// просто ховаємо кнопку мікрофона там, де її нема, замість показувати
+// непрацюючу.
+function isSpeechRecognitionSupported() {
+    return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+}
+
+// Грубе нормалізування для порівняння: нижній регістр, без діакритики,
+// без пунктуації. Не ідеально для всіх мов (наприклад, ієрогліфічні
+// системи письма це не "почистить"), але покриває більшість підтримуваних
+// мов достатньо добре для практики вимови (а не суворого диктанту).
+function normalizeForPronunciation(s) {
+    return (s || '')
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^\p{L}\p{N}\s]/gu, '')
+        .trim();
+}
+
+function levenshteinDistance(a, b) {
+    const m = a.length, n = b.length;
+    if (!m) return n;
+    if (!n) return m;
+    const dp = [];
+    for (let i = 0; i <= m; i++) dp.push(new Array(n + 1).fill(0));
+    for (let i = 0; i <= m; i++) dp[i][0] = i;
+    for (let j = 0; j <= n; j++) dp[0][j] = j;
+    for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+            dp[i][j] = a[i - 1] === b[j - 1] ?
+                dp[i - 1][j - 1] :
+                1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+        }
+    }
+    return dp[m][n];
+}
+
+// callback(result, transcript) де result: 'correct' | 'close' | 'wrong' |
+// 'no-speech' | 'error' | 'unsupported'
+function checkPronunciation(word, lang, callback) {
+    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Recognition) { callback('unsupported'); return; }
+
+    const voiceCfg = getTtsVoice(lang);
+    const rec = new Recognition();
+    rec.lang = voiceCfg.bcp47;
+    rec.maxAlternatives = 3;
+    rec.interimResults = false;
+
+    let done = false;
+    const finish = (result, transcript) => {
+        if (done) return;
+        done = true;
+        try { rec.stop(); } catch (e) {}
+        callback(result, transcript);
+    };
+
+    rec.onresult = (e) => {
+        const alts = Array.from(e.results[0]).map(r => normalizeForPronunciation(r.transcript));
+        const target = normalizeForPronunciation(word);
+        if (alts.includes(target)) { finish('correct', alts[0]); return; }
+        const dist = Math.min(...alts.map(a => levenshteinDistance(a, target)));
+        // Поріг "близько" — приблизно третина довжини слова (толерантно до
+        // невеликих відхилень вимови/розпізнавання, але не до зовсім іншого слова).
+        const threshold = Math.max(1, Math.round(target.length * 0.34));
+        finish(dist <= threshold ? 'close' : 'wrong', alts[0]);
+    };
+    rec.onerror = (e) => {
+        finish(e.error === 'no-speech' ? 'no-speech' : 'error');
+    };
+    rec.onend = () => { if (!done) finish('no-speech'); };
+
+    try { rec.start(); } catch (e) { callback('error'); }
+}
+
+// Готова кнопка-мікрофон із вбудованим станом "слухаю" і фідбеком через
+// toast(). Повертає null, якщо розпізнавання не підтримується браузером —
+// виклик має просто не додавати кнопку в цьому випадку.
+function renderMicButton(word, lang, onDone) {
+    if (!isSpeechRecognitionSupported()) return null;
+    const btn = el(`<button class="soundbtn mic-btn" title="${t('pronounce_btn')}">🎤</button>`);
+    btn.onclick = (e) => {
+        e.stopPropagation();
+        if (btn.classList.contains('listening')) return;
+        btn.classList.add('listening');
+        btn.textContent = '🎙️';
+        checkPronunciation(word, lang, (result, transcript) => {
+            btn.classList.remove('listening');
+            btn.textContent = '🎤';
+            const msgs = {
+                correct: t('pronounce_correct'),
+                close: t('pronounce_close'),
+                wrong: t('pronounce_wrong'),
+                'no-speech': t('pronounce_no_speech'),
+                error: t('pronounce_error'),
+                unsupported: t('pronounce_unsupported'),
+            };
+            toast(msgs[result] || msgs.error);
+            if (onDone) onDone(result, transcript);
+        });
+    };
+    return btn;
 }
