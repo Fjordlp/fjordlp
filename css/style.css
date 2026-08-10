@@ -396,6 +396,8 @@
             transition: background .15s, transform .1s;
         }
         .soundbtn:hover { background: var(--line-soft); transform: scale(1.05); }
+        .mic-btn.listening { background: var(--rose); color: var(--frost); animation: mic-pulse 1s infinite; }
+        @keyframes mic-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(217,118,91,.5); } 50% { box-shadow: 0 0 0 8px rgba(217,118,91,0); } }
 
         .calendar-strip { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
         .calendar-strip .day {
@@ -520,8 +522,6 @@
         .book-illustration { margin: 18px 0; text-align: center; }
         .book-illustration img { max-width: 100%; border-radius: 12px; box-shadow: var(--shadow); }
         .book-illustration figcaption { margin-top: 8px; font-size: .8rem; color: var(--ink-soft); font-style: italic; }
-        .mic-btn.listening { background: var(--rose); color: var(--frost); animation: mic-pulse 1s infinite; }
-        @keyframes mic-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(217,118,91,.5); } 50% { box-shadow: 0 0 0 8px rgba(217,118,91,0); } }
 
         /* ===== CHOOSE LANGUAGE (dedicated first-run screen) ===== */
         .cl-lang-card {
