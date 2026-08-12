@@ -441,19 +441,14 @@ async function speak(text, lang) {
     lang = lang || (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
     const voiceCfg = getTtsVoice(lang);
 
-    // Варіант 1: власний Worker-проксі (/tts-api → Azure Cognitive Services
-    // Speech, ті самі нейронні голоси, що й у voiceCfg.edge, тільки через
-    // стабільний офіційний REST API — код Worker'а див. у
-    // worker-hardened-example.js). Якщо власник сайту ще не додав секрети
-    // AZURE_SPEECH_KEY/AZURE_SPEECH_REGION, маршрут поверне зрозумілу
-    // помилку (не 200 OK), і код нижче тихо піде у фолбек.
+    // Варіант 1: Worker (melotts)
     if (typeof AI_PROXY_URL !== 'undefined' && AI_PROXY_URL) {
         try {
             const ttsUrl = AI_PROXY_URL.replace(/\/?$/, '') + '/tts-api';
             const res = await fetch(ttsUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text, voice: voiceCfg.edge }),
+                body: JSON.stringify({ text, lang: lang }), // <-- ЗМІНА: передаємо lang
             });
             if (res.ok) {
                 const blob = await res.blob();
@@ -461,15 +456,16 @@ async function speak(text, lang) {
                 const audio = new Audio(url);
                 audio.play();
                 return;
+            } else {
+                // Якщо Worker повернув помилку – йдемо до фолбеку
+                throw new Error(`Worker responded with status ${res.status}`);
             }
         } catch (e) {
             console.warn('/tts-api недоступний, використовуємо вбудований голос браузера:', e);
         }
     }
 
-    // Варіант 2 (фолбек): вбудований SpeechSynthesis браузера. Голос
-    // звучить помітно роботизованіше, зате працює завжди й скрізь без
-    // жодного налаштування на сервері.
+    // Варіант 2 (фолбек): вбудований SpeechSynthesis
     if (!('speechSynthesis' in window)) {
         toast("Озвучення не підтримується");
         return;
@@ -483,7 +479,6 @@ async function speak(text, lang) {
     u.pitch = 1.0;
     speechSynthesis.speak(u);
 }
-
 // =====================================================================
 //  ПРАКТИКА ВИМОВИ (Web Speech API — розпізнавання мовлення)
 // =====================================================================
