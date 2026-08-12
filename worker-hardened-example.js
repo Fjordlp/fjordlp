@@ -38,6 +38,7 @@ const SYSTEM_PROMPTS = {
   gen_grammar: "Ти — досвідчений викладач іноземних мов, який готує стислі граматичні картки для рівня CEFR. Відповідай ЛИШЕ чистим JSON-масивом без жодного тексту навколо, без markdown-огорожі.",
   gen_book_tasks: "Ти — вчитель іноземної мови, який готує завдання на розуміння прочитаного (reading comprehension) за КОНКРЕТНИМ текстом, який тобі надають — не вигадуй сюжет від себе, спирайся лише на наданий уривок. Відповідай ЛИШЕ чистим JSON-масивом без жодного тексту навколо, без markdown-огорожі.",
   translate_word: "Ти — точний і стислий словниковий перекладач для читача, який вивчає мову. Відповідай ЛИШЕ чистим JSON-об'єктом без жодного тексту навколо, без markdown-огорожі.",
+  story_chapter: "Ти — майстер інтерактивних історій \"вибери свій шлях\" для вивчення мов, який пише короткі розділи СПЕЦІАЛЬНО під словниковий запас конкретного читача (гіпотеза i+1: майже все зрозуміло, лише трохи нового). Точно дотримуйся вказаної мови тексту й рівня CEFR, використовуй переважно подані \"вже відомі\" слова, природно вплітай кілька нових. Відповідай ЛИШЕ чистим JSON-об'єктом без жодного тексту навколо, без markdown-огорожі.",
 };
 
 const MAX_MESSAGE_LEN = 4000;
@@ -98,6 +99,149 @@ async function handleOrdApi(request, corsHeaders) {
 }
 
 // ============================================================
+//  TTS-ПРОКСІ (Azure Cognitive Services Speech)
+// ============================================================
+// НАВІЩО САМЕ ТАК: клієнтська бібліотека @edge-tts/universal, яку сайт
+// пробував використовувати раніше, працює ЛИШЕ в самому браузері
+// Microsoft Edge (протокол вимагає WebSocket-заголовок Sec-MS-GEC, який
+// звичайний браузерний API забороняє виставляти скриптом) — у решті
+// браузерів вона завжди мовчки провалюється. Перенести цю саму логіку
+// сюди, у Worker, теж ризиковано: за свідченнями спільноти (issue-трекер
+// проєкту edge-tts, форумні звіти про розгортання на Colab/HF Spaces),
+// Microsoft часто ФІЛЬТРУЄ запити з дата-центрових/хмарних IP-адрес —
+// а Cloudflare Workers це якраз такий IP: з'єднання приймається, але
+// аудіо-даних у відповідь не приходить. Тобто навіть бездоганна
+// реалізація протоколу могла б просто мовчки не працювати з Worker'а.
+//
+// Замість цього тут — ОФІЦІЙНИЙ, стабільний, документований REST API:
+// Azure Cognitive Services Speech. Це та сама технологія й ТІ САМІ
+// нейронні голоси (наприклад nb-NO-FinnNeural), що вже прописані в
+// TTS_VOICES на клієнті — міняється лише канал доставки, не голоси.
+//
+// Налаштування (обов'язково перед використанням):
+//   1. Створіть безкоштовний ресурс "Speech" в Azure Portal (free tier:
+//      ~500 000 символів нейронного голосу на місяць).
+//   2. wrangler secret put AZURE_SPEECH_KEY
+//   3. wrangler secret put AZURE_SPEECH_REGION   (наприклад "westeurope")
+//   Без цих двох секретів маршрут поверне зрозумілу помилку 501, а не
+//   впаде мовчки — клієнт (troll.js) при цьому сам відкотиться на
+//   вбудований SpeechSynthesis браузера.
+
+function escapeXml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+// Токен доступу Azure дійсний 10 хвилин — кешуємо в тому самому KV, що й
+// rate-limit (якщо він підключений), щоб не запитувати новий токен на
+// кожне окреме слово, яке хтось озвучує.
+async function getAzureSpeechToken(env) {
+  const cacheKey = 'azure-speech-token';
+  if (env.RATE_KV) {
+    const cached = await env.RATE_KV.get(cacheKey);
+    if (cached) return cached;
+  }
+  const region = env.AZURE_SPEECH_REGION || 'westeurope';
+  const res = await fetch(`https://${region}.api.cognitive.microsoft.com/sts/v1.0/issueToken`, {
+    method: 'POST',
+    headers: { 'Ocp-Apim-Subscription-Key': env.AZURE_SPEECH_KEY, 'Content-Length': '0' },
+  });
+  if (!res.ok) throw new Error(`Не вдалось отримати токен Azure Speech (${res.status})`);
+  const token = await res.text();
+  if (env.RATE_KV) {
+    // Кешуємо трохи менше за реальні 10 хв — про всяк випадок, щоб не
+    // намагатись використати токен, який Azure вже встиг відкликати.
+    await env.RATE_KV.put(cacheKey, token, { expirationTtl: 480 });
+  }
+  return token;
+}
+
+async function handleTtsApi(request, corsHeaders, env, ctx) {
+  if (request.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405, headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    });
+  }
+  if (!env.AZURE_SPEECH_KEY) {
+    return new Response(JSON.stringify({ error: 'AZURE_SPEECH_KEY не налаштований на сервері (wrangler secret put AZURE_SPEECH_KEY)' }), {
+      status: 501, headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    });
+  }
+
+  // Окремий rate-limit від AI-запитів (озвучення дешевше й частіше, але
+  // все одно не повинно бути необмеженим — це обмежує зловживання
+  // платним ключем Azure).
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  if (env.RATE_KV) {
+    const rateKey = `rl:tts:${ip}:${Math.floor(Date.now() / 60000)}`;
+    const current = parseInt((await env.RATE_KV.get(rateKey)) || '0', 10);
+    if (current >= 60) {
+      return new Response(JSON.stringify({ error: 'Забагато запитів на озвучення, спробуйте за хвилину' }), {
+        status: 429, headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
+    }
+    ctx.waitUntil(env.RATE_KV.put(rateKey, String(current + 1), { expirationTtl: 60 }));
+  }
+
+  let body;
+  try { body = await request.json(); }
+  catch {
+    return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
+      status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    });
+  }
+
+  const text = typeof body.text === 'string' ? body.text.slice(0, 600) : '';
+  const voice = typeof body.voice === 'string' && body.voice ? body.voice : 'en-US-JennyNeural';
+  if (!text) {
+    return new Response(JSON.stringify({ error: 'Empty text' }), {
+      status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    });
+  }
+  // xml:lang у SSML беремо з початку імені голосу (напр. "nb-NO" із
+  // "nb-NO-FinnNeural") — Azure не надто суворий до точності цього поля,
+  // коли вже явно вказане конкретне ім'я голосу.
+  const langMatch = voice.match(/^([a-zA-Z]{2,3}-[a-zA-Z]{2,4})/);
+  const xmlLang = langMatch ? langMatch[1] : 'en-US';
+  const ssml = `<speak version='1.0' xml:lang='${xmlLang}'><voice xml:lang='${xmlLang}' name='${voice}'>${escapeXml(text)}</voice></speak>`;
+  const region = env.AZURE_SPEECH_REGION || 'westeurope';
+
+  try {
+    const token = await getAzureSpeechToken(env);
+    const ttsRes = await fetch(`https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/ssml+xml',
+        'X-Microsoft-OutputFormat': 'audio-24khz-48kbitrate-mono-mp3',
+        'User-Agent': 'FjordLearningPlatform',
+      },
+      body: ssml,
+    });
+    if (!ttsRes.ok) {
+      const errText = await ttsRes.text();
+      console.warn('Azure Speech TTS помилка:', ttsRes.status, errText);
+      return new Response(JSON.stringify({ error: 'Azure Speech TTS помилка', status: ttsRes.status, detail: errText.slice(0, 300) }), {
+        status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
+    }
+    const audioData = await ttsRes.arrayBuffer();
+    return new Response(audioData, {
+      headers: { 'Content-Type': 'audio/mpeg', ...corsHeaders },
+    });
+  } catch (e) {
+    console.error('TTS-проксі впав:', e.message);
+    return new Response(JSON.stringify({ error: 'TTS proxy failed', detail: e.message }), {
+      status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    });
+  }
+}
+
+// ============================================================
 //  ОСНОВНА ФУНКЦІЯ FETCH
 // ============================================================
 
@@ -129,6 +273,11 @@ export default {
     // --- Маршрут для ord.uib.no ---
     if (url.pathname.startsWith('/ord-api')) {
       return handleOrdApi(request, corsHeaders);
+    }
+
+    // --- Маршрут для озвучення (Azure Speech) ---
+    if (url.pathname.startsWith('/tts-api')) {
+      return handleTtsApi(request, corsHeaders, env, ctx);
     }
 
     // --- Маршрут для AI (Gemini) ---

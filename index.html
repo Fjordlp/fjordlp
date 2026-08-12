@@ -261,7 +261,13 @@
     <script defer src="js/views-story.js"></script>
 <script defer src="js/views-admin.js"></script>
     <script defer src="js/auth.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/@edge-tts/universal/dist/index.global.js"></script>
+    <!-- Раніше тут був @edge-tts/universal — прибрано: ця бібліотека
+         офіційно працює лише в самому браузері Microsoft Edge (протокол
+         вимагає WebSocket-заголовок, який жоден інший браузер не дозволяє
+         виставляти скриптом), тож для Chrome/Firefox/Safari вона завжди
+         мовчки провалювалась. Якісна озвучка тепер іде через власний
+         Worker-проксі /tts-api (Azure Speech) — див. speak() у js/troll.js
+         і worker-hardened-example.js. -->
     <script>
         // Реєстрація service worker — робить сайт встановлюваним застосунком
         // (кнопка "Додати на головний екран") і дає базовий офлайн-доступ до

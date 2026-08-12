@@ -441,13 +441,12 @@ async function speak(text, lang) {
     lang = lang || (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
     const voiceCfg = getTtsVoice(lang);
 
-    // Варіант 1: власний Worker-проксі (/tts-api) — якщо власник сайту його
-    // додав до worker-hardened-example.js (готова, перевірена реалізація:
-    // https://github.com/DIYgod/cloudflare-edge-tts — Worker сам говорить з
-    // Edge TTS по WebSocket на СЕРВЕРІ, де немає обмежень браузера). Це
-    // єдиний спосіб реально отримати якісний нейронний голос Edge TTS —
-    // варіант 2 нижче (клієнтська бібліотека) працює лише в самому браузері
-    // Microsoft Edge, у Chrome/Firefox/Safari вона завжди падає.
+    // Варіант 1: власний Worker-проксі (/tts-api → Azure Cognitive Services
+    // Speech, ті самі нейронні голоси, що й у voiceCfg.edge, тільки через
+    // стабільний офіційний REST API — код Worker'а див. у
+    // worker-hardened-example.js). Якщо власник сайту ще не додав секрети
+    // AZURE_SPEECH_KEY/AZURE_SPEECH_REGION, маршрут поверне зрозумілу
+    // помилку (не 200 OK), і код нижче тихо піде у фолбек.
     if (typeof AI_PROXY_URL !== 'undefined' && AI_PROXY_URL) {
         try {
             const ttsUrl = AI_PROXY_URL.replace(/\/?$/, '') + '/tts-api';
@@ -464,36 +463,13 @@ async function speak(text, lang) {
                 return;
             }
         } catch (e) {
-            console.warn('/tts-api недоступний, пробуємо запасні варіанти:', e);
+            console.warn('/tts-api недоступний, використовуємо вбудований голос браузера:', e);
         }
     }
 
-    // Варіант 2: клієнтська бібліотека Edge TTS (якщо завантажена). УВАГА:
-    // за задокументованою поведінкою пакету @edge-tts/universal вона працює
-    // ЛИШЕ в браузері Microsoft Edge — Chrome/Firefox/Safari відхиляють
-    // потрібний WebSocket-заголовок на рівні браузерного API, тож для
-    // більшості людей цей блок завжди мовчки провалюється й падає у
-    // фолбек нижче. Лишаємо про всяк випадок (для тих, хто таки в Edge),
-    // але не покладаємось на нього як на основне рішення.
-    if (typeof edgeTTS !== 'undefined' && edgeTTS.synthesize) {
-        try {
-            const audioData = await edgeTTS.synthesize(text, {
-                voice: voiceCfg.edge,
-                rate: 0.95,
-                pitch: 0
-            });
-            const blob = new Blob([audioData], { type: 'audio/mp3' });
-            const url = URL.createObjectURL(blob);
-            const audio = new Audio(url);
-            audio.play();
-            return;
-        } catch (e) {
-            console.warn('Edge TTS failed, fallback to SpeechSynthesis:', e);
-        }
-    }
-
-    // Варіант 3 (останній фолбек): вбудований SpeechSynthesis браузера.
-    // Голос звучить помітно роботизованіше, зате працює завжди й скрізь.
+    // Варіант 2 (фолбек): вбудований SpeechSynthesis браузера. Голос
+    // звучить помітно роботизованіше, зате працює завжди й скрізь без
+    // жодного налаштування на сервері.
     if (!('speechSynthesis' in window)) {
         toast("Озвучення не підтримується");
         return;

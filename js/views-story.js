@@ -54,17 +54,32 @@ function viewStory() {
 
         const chapterCard = el(`
             <div class="card">
-                <p style="color:var(--ink-soft);font-size:.75rem;margin:0 0 8px;">${tf('books_chapter_n', {n: last.chapterIndex})}</p>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <p style="color:var(--ink-soft);font-size:.75rem;margin:0;">${tf('books_chapter_n', {n: last.chapterIndex})}</p>
+                    <button class="soundbtn" id="storyListenBtn" title="${t('btn_listen')}">🔊</button>
+                </div>
                 <div id="storyText" style="line-height:1.9;font-size:1.02rem;margin-bottom:8px;"></div>
                 ${last.newWords && last.newWords.length ? `
                     <div style="margin:14px 0;padding:10px 12px;background:var(--cream);border-radius:10px;font-size:.85rem;">
-                        ✨ ${t('story_new_words_label')}: ${last.newWords.map(w => `<strong>${escHtml(w.no)}</strong> — ${escHtml(w.uk)}`).join(' · ')}
+                        ✨ ${t('story_new_words_label')}:
+                        <div id="storyNewWordsList" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;"></div>
                     </div>
                 ` : ''}
                 <div id="storyChoices" style="display:flex;flex-direction:column;gap:8px;margin-top:16px;"></div>
             </div>
         `);
         body.appendChild(chapterCard);
+        chapterCard.querySelector('#storyListenBtn').onclick = () => speak(last.text, STATE.targetLang || 'no');
+
+        const newWordsList = chapterCard.querySelector('#storyNewWordsList');
+        if (newWordsList && last.newWords) {
+            last.newWords.forEach(w => {
+                const item = el(`<span style="display:inline-flex;align-items:center;gap:4px;"><strong>${escHtml(w.no)}</strong> — ${escHtml(w.uk)}</span>`);
+                const mic = renderMicButton(w.no, STATE.targetLang);
+                if (mic) { mic.style.padding = '2px 6px'; mic.style.fontSize = '.8rem'; item.appendChild(mic); }
+                newWordsList.appendChild(item);
+            });
+        }
 
         // Той самий клікабельний-для-перекладу рендер тексту, що й у книгах —
         // читач може торкнутись будь-якого слова, щоб побачити переклад.
@@ -110,7 +125,7 @@ function viewStory() {
                 });
             } else if (choicesEl) {
                 const contBtn = el(`<button class="btn btn-primary" id="storyContinueBtn">${t('story_continue_btn')} →</button>`);
-                contBtn.onclick = () => runChapter(t('story_continue_generic'));
+                contBtn.onclick = () => runChapter(STORY_CONTINUE_SIGNAL);
                 choicesEl.appendChild(contBtn);
             }
         } catch (e) {
@@ -129,7 +144,16 @@ function viewStory() {
                     <button class="btn btn-ghost" id="storyRetryBtn">${t('story_retry_btn')}</button>
                 </div>
             `;
-            body.querySelector('#storyRetryBtn').onclick = renderLastChapter;
+            // ВАЖЛИВО: раніше тут стояло renderLastChapter — воно лише
+            // перемальовує ОСТАННІЙ УЖЕ УСПІШНИЙ розділ, але саме не додає
+            // жодних кнопок вибору (це робить лише runChapter() після
+            // вдалої генерації). Людина лишалась дивитись на текст без
+            // жодної кнопки, щоб рухатись далі. Тепер повторюємо той самий
+            // запит (choiceText із замикання цього виклику), що впав —
+            // напряму, без окремої зовнішньої змінної (яку паралельний
+            // виклик runChapter() міг би теоретично перезаписати до того,
+            // як цей запит встигне впасти).
+            body.querySelector('#storyRetryBtn').onclick = () => runChapter(choiceText);
         }
     }
 
