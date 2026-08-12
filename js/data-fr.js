@@ -1,16 +1,14 @@
-```javascript
 // =====================================================================
 //  js/data-fr.js — ФРАНЦУЗЬКА МОВА (ПОВНИЙ НАБІР)
 //  Повністю сумісний з js/data.js для норвезької.
-//  Містить VOCAB, GRAMMAR, NORSKPROVE_TASKS, LEVEL_TEST.
 // =====================================================================
 (function () {
+    'use strict';
 
     // =====================================================================
     //  VOCAB – СЛОВНИК ЗА РІВНЯМИ (A1-C2)
     // =====================================================================
     const VOCAB = {
-        // -------------------- A1 --------------------
         A1: [
             // Greetings
             { t: "Привітання", no: "bonjour", uk: "привіт", en: "hello", ru: "привет", ex_no: "Bonjour, comment ça va?", ex_uk: "Привіт, як справи?", en_ex: "Hello, how are you?", ru_ex: "Привет, как дела?" },
@@ -110,7 +108,6 @@
             { t: "Транспорт", no: "le train", uk: "поїзд", en: "train", ru: "поезд", ex_no: "Le train part à huit heures.", ex_uk: "Поїзд відправляється о восьмій.", en_ex: "The train leaves at eight.", ru_ex: "Поезд отправляется в восемь." },
             { t: "Транспорт", no: "le vélo", uk: "велосипед", en: "bicycle", ru: "велосипед", ex_no: "Je vais au travail à vélo.", ex_uk: "Я їду на велосипеді на роботу.", en_ex: "I ride my bicycle to work.", ru_ex: "Я еду на велосипеде на работу." },
         ],
-        // -------------------- A2 --------------------
         A2: [
             // Shopping
             { t: "Покупки", no: "le magasin", uk: "магазин", en: "shop", ru: "магазин", ex_no: "Le magasin ouvre à neuf heures.", ex_uk: "Магазин відкривається о дев'ятій.", en_ex: "The shop opens at nine.", ru_ex: "Магазин открывается в девять." },
@@ -163,7 +160,6 @@
             { t: "Здоров'я", no: "le médicament", uk: "ліки", en: "medicine", ru: "лекарство", ex_no: "Prends ce médicament trois fois par jour.", ex_uk: "Приймай ці ліки тричі на день.", en_ex: "Take this medicine three times a day.", ru_ex: "Принимай это лекарство три раза в день." },
             { t: "Здоров'я", no: "la fièvre", uk: "температура", en: "fever", ru: "температура", ex_no: "Il a de la fièvre.", ex_uk: "У нього температура.", en_ex: "He has a fever.", ru_ex: "У него температура." },
         ],
-        // -------------------- B1 --------------------
         B1: [
             // Travel
             { t: "Подорожі", no: "l'aéroport", uk: "аеропорт", en: "airport", ru: "аэропорт", ex_no: "Nous nous retrouvons à l'aéroport.", ex_uk: "Зустрінемось в аеропорту.", en_ex: "We meet at the airport.", ru_ex: "Встретимся в аэропорту." },
@@ -207,7 +203,6 @@
             { t: "Кар'єра", no: "le collègue", uk: "колега", en: "colleague", ru: "коллега", ex_no: "Mes collègues sont sympathiques.", ex_uk: "Мої колеги привітні.", en_ex: "My colleagues are friendly.", ru_ex: "Мои коллеги приветливы." },
             { t: "Кар'єра", no: "la candidature", uk: "заявка", en: "application", ru: "заявка", ex_no: "J'ai envoyé ma candidature hier.", ex_uk: "Я подав заявку вчора.", en_ex: "I submitted my application yesterday.", ru_ex: "Я подал заявку вчера." },
         ],
-        // -------------------- B2 --------------------
         B2: [
             // Politics
             { t: "Політика", no: "le gouvernement", uk: "уряд", en: "government", ru: "правительство", ex_no: "Le gouvernement a présenté un nouveau budget.", ex_uk: "Уряд представив новий бюджет.", en_ex: "The government presented a new budget.", ru_ex: "Правительство представило новый бюджет." },
@@ -244,7 +239,6 @@
             { t: "Медицина", no: "l'épidémie", uk: "епідемія", en: "epidemic", ru: "эпидемия", ex_no: "L'épidémie s'est propagée rapidement.", ex_uk: "Епідемія швидко поширилася.", en_ex: "The epidemic spread quickly.", ru_ex: "Эпидемия быстро распространилась." },
             { t: "Медицина", no: "la prévention", uk: "профілактика", en: "prevention", ru: "профилактика", ex_no: "La prévention vaut mieux que la guérison.", ex_uk: "Профілактика краща за лікування.", en_ex: "Prevention is better than cure.", ru_ex: "Профилактика лучше лечения." },
         ],
-        // -------------------- C1 --------------------
         C1: [
             // Discourse
             { t: "Дискурс", no: "cependant", uk: "однак", en: "however", ru: "однако", ex_no: "Les résultats étaient prometteurs; cependant, il reste encore du travail à faire.", ex_uk: "Результати були обнадійливі; однак роботи ще багато.", en_ex: "The results were promising; however, there is still work to do.", ru_ex: "Результаты были обнадёживающими; однако работы ещё много." },
@@ -280,7 +274,6 @@
             { t: "Психологія", no: "le comportement", uk: "поведінка", en: "behavior", ru: "поведение", ex_no: "Son comportement était inattendu.", ex_uk: "Його поведінка була несподіваною.", en_ex: "His behavior was unexpected.", ru_ex: "Его поведение было неожиданным." },
             { t: "Психологія", no: "la motivation", uk: "мотивація", en: "motivation", ru: "мотивация", ex_no: "La motivation vient de l'intérieur.", ex_uk: "Мотивація походить зсередини.", en_ex: "Motivation comes from within.", ru_ex: "Мотивация исходит изнутри." },
         ],
-        // -------------------- C2 --------------------
         C2: [
             // Idioms
             { t: "Ідіоми", no: "faire d'une pierre deux coups", uk: "убити двох зайців", en: "to kill two birds with one stone", ru: "убить двух зайцев", ex_no: "En travaillant à domicile, je fais d'une pierre deux coups.", ex_uk: "Працюючи з дому, я вбиваю двох зайців.", en_ex: "By working from home I kill two birds with one stone.", ru_ex: "Работая из дома, я убиваю двух зайцев." },
@@ -593,12 +586,17 @@
     // =====================================================================
     //  РЕЄСТРАЦІЯ ДАНИХ У ГЛОБАЛЬНИЙ ОБ'ЄКТ
     // =====================================================================
-    window.LANG_DATA = window.LANG_DATA || {};
-    window.LANG_DATA.fr = {
-        VOCAB,
-        GRAMMAR,
-        NORSKPROVE_TASKS,
-        LEVEL_TEST,
-    };
+    // Захист від повторної реєстрації та конфліктів
+    if (typeof window !== 'undefined') {
+        window.LANG_DATA = window.LANG_DATA || {};
+        // Перевіряємо, чи вже зареєстрована французька (щоб не перезаписати)
+        if (!window.LANG_DATA.fr) {
+            window.LANG_DATA.fr = {
+                VOCAB: VOCAB,
+                GRAMMAR: GRAMMAR,
+                NORSKPROVE_TASKS: NORSKPROVE_TASKS,
+                LEVEL_TEST: LEVEL_TEST,
+            };
+        }
+    }
 })();
-```
