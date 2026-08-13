@@ -169,8 +169,30 @@ async function generateStoryChapter(choiceMade) {
     const today = todayStr();
     if (story.lastPlayedDate !== today) { story.lastPlayedDate = today; story.chaptersToday = 0; }
     story.chaptersToday++;
+    // Раніше розділи пригоди взагалі не давали XP — єдина активність у
+    // застосунку, яка не була підключена до основного циклу гейміфікації
+    // (рівень тролля, спорядження). +12 XP за розділ — трохи більше, ніж
+    // за прочитаний розділ книги (+8), бо тут ще й активний вибір і нові
+    // слова одразу йдуть у колоду.
+    const xpGained = 12;
+    LD().xp = (LD().xp || 0) + xpGained;
     updateState();
     markActivityToday();
 
-    return { text: parsed.text, choices: Array.isArray(parsed.choices) ? parsed.choices : [], newWords };
+    return { text: parsed.text, choices: Array.isArray(parsed.choices) ? parsed.choices : [], newWords, xpGained };
+}
+
+// "Почати нову пригоду" — повне скидання поточної сюжетної лінії. Лічильник
+// денних розділів (chaptersToday) НЕ чіпаємо: він прив'язаний до дати, а не
+// до конкретної пригоди, тож рестарт не повинен бути способом обійти
+// майбутній денний ліміт.
+function resetStory() {
+    LD().story = {
+        chapterIndex: 0,
+        summary: '',
+        history: [],
+        lastPlayedDate: LD().story ? LD().story.lastPlayedDate : null,
+        chaptersToday: LD().story ? LD().story.chaptersToday : 0,
+    };
+    updateState();
 }

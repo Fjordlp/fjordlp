@@ -99,66 +99,44 @@ async function handleOrdApi(request, corsHeaders) {
 }
 
 // ============================================================
-//  TTS-ПРОКСІ (Azure Cognitive Services Speech)
+//  TTS-ПРОКСІ (VoiceRSS)
 // ============================================================
-// НАВІЩО САМЕ ТАК: клієнтська бібліотека @edge-tts/universal, яку сайт
-// пробував використовувати раніше, працює ЛИШЕ в самому браузері
-// Microsoft Edge (протокол вимагає WebSocket-заголовок Sec-MS-GEC, який
-// звичайний браузерний API забороняє виставляти скриптом) — у решті
-// браузерів вона завжди мовчки провалюється. Перенести цю саму логіку
-// сюди, у Worker, теж ризиковано: за свідченнями спільноти (issue-трекер
-// проєкту edge-tts, форумні звіти про розгортання на Colab/HF Spaces),
-// Microsoft часто ФІЛЬТРУЄ запити з дата-центрових/хмарних IP-адрес —
-// а Cloudflare Workers це якраз такий IP: з'єднання приймається, але
-// аудіо-даних у відповідь не приходить. Тобто навіть бездоганна
-// реалізація протоколу могла б просто мовчки не працювати з Worker'а.
+// Було: спершу Azure Cognitive Services Speech, потім Google Cloud
+// Text-to-Speech — обидва технічно мають безкоштовний рівень, АЛЕ обидва
+// вимагають прив'язати платіжну картку до акаунта вже на етапі
+// реєстрації (навіть якщо реально нічого не спишеться, поки не
+// перевищено безкоштовну квоту). Це саме та причина, чому обидва
+// варіанти не підійшли.
 //
-// Замість цього тут — ОФІЦІЙНИЙ, стабільний, документований REST API:
-// Azure Cognitive Services Speech. Це та сама технологія й ТІ САМІ
-// нейронні голоси (наприклад nb-NO-FinnNeural), що вже прописані в
-// TTS_VOICES на клієнті — міняється лише канал доставки, не голоси.
+// VoiceRSS (voicerss.org) — офіційно документований REST API, ключ
+// видається одразу після реєстрації лише поштою, БЕЗ картки (перевірено
+// за офіційною документацією: voicerss.org/api). Голоси не такі
+// "живі", як нейронні WaveNet/Neural2 у Google/Azure, але помітно
+// природніші за вбудований роботизований голос браузера — і головне,
+// не вимагають платіжного акаунта взагалі.
+//
+// ОБМЕЖЕННЯ, про які варто знати:
+//   - Покриває 28 із 30 мов застосунку. НЕМАЄ української (uk) та
+//     ісландської (is) — для цих двох мов /tts-api поверне помилку, і
+//     клієнт (troll.js) сам тихо відкотиться на вбудований голос
+//     браузера, як і для будь-якої іншої помилки цього маршруту.
+//   - Безкоштовний ключ має денний ліміт запитів (перевірте актуальне
+//     число на voicerss.org/pricing). Ліміт спільний на ВЕСЬ сайт (один
+//     ключ на всіх відвідувачів), а не на кожного окремо, тож у дуже
+//     активний день озвучення може тимчасово "скінчитись" до опівночі —
+//     сайт при цьому не ламається, просто тихо повертається до голосу
+//     браузера, доки ліміт не скинеться.
 //
 // Налаштування (обов'язково перед використанням):
-//   1. Створіть безкоштовний ресурс "Speech" в Azure Portal (free tier:
-//      ~500 000 символів нейронного голосу на місяць).
-//   2. wrangler secret put AZURE_SPEECH_KEY
-//   3. wrangler secret put AZURE_SPEECH_REGION   (наприклад "westeurope")
-//   Без цих двох секретів маршрут поверне зрозумілу помилку 501, а не
-//   впаде мовчки — клієнт (troll.js) при цьому сам відкотиться на
-//   вбудований SpeechSynthesis браузера.
+//   1. Зареєструйтесь на https://www.voicerss.org/personel (лише email,
+//      картка не потрібна) — ключ приходить одразу.
+//   2. wrangler secret put VOICERSS_API_KEY
+//   Без цього секрету маршрут поверне зрозумілу помилку 501, а не впаде
+//   мовчки.
 
-function escapeXml(s) {
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
-}
-
-// Токен доступу Azure дійсний 10 хвилин — кешуємо в тому самому KV, що й
-// rate-limit (якщо він підключений), щоб не запитувати новий токен на
-// кожне окреме слово, яке хтось озвучує.
-async function getAzureSpeechToken(env) {
-  const cacheKey = 'azure-speech-token';
-  if (env.RATE_KV) {
-    const cached = await env.RATE_KV.get(cacheKey);
-    if (cached) return cached;
-  }
-  const region = env.AZURE_SPEECH_REGION || 'westeurope';
-  const res = await fetch(`https://${region}.api.cognitive.microsoft.com/sts/v1.0/issueToken`, {
-    method: 'POST',
-    headers: { 'Ocp-Apim-Subscription-Key': env.AZURE_SPEECH_KEY, 'Content-Length': '0' },
-  });
-  if (!res.ok) throw new Error(`Не вдалось отримати токен Azure Speech (${res.status})`);
-  const token = await res.text();
-  if (env.RATE_KV) {
-    // Кешуємо трохи менше за реальні 10 хв — про всяк випадок, щоб не
-    // намагатись використати токен, який Azure вже встиг відкликати.
-    await env.RATE_KV.put(cacheKey, token, { expirationTtl: 480 });
-  }
-  return token;
-}
+// Мови, яких VoiceRSS не підтримує (перевірено за офіційним списком мов
+// у документації) — відсікаємо одразу, без зайвого запиту до їхнього API.
+const VOICERSS_UNSUPPORTED_LANGS = new Set(['uk', 'is']);
 
 async function handleTtsApi(request, corsHeaders, env, ctx) {
   if (request.method !== 'POST') {
@@ -166,20 +144,21 @@ async function handleTtsApi(request, corsHeaders, env, ctx) {
       status: 405, headers: { 'Content-Type': 'application/json', ...corsHeaders },
     });
   }
-  if (!env.AZURE_SPEECH_KEY) {
-    return new Response(JSON.stringify({ error: 'AZURE_SPEECH_KEY не налаштований на сервері (wrangler secret put AZURE_SPEECH_KEY)' }), {
+  if (!env.VOICERSS_API_KEY) {
+    return new Response(JSON.stringify({ error: 'VOICERSS_API_KEY не налаштований на сервері (wrangler secret put VOICERSS_API_KEY)' }), {
       status: 501, headers: { 'Content-Type': 'application/json', ...corsHeaders },
     });
   }
 
-  // Окремий rate-limit від AI-запитів (озвучення дешевше й частіше, але
-  // все одно не повинно бути необмеженим — це обмежує зловживання
-  // платним ключем Azure).
+  // Окремий rate-limit від AI-запитів — тут особливо важливо, оскільки
+  // безкоштовна квота VoiceRSS невелика й спільна на весь сайт (див.
+  // коментар вище); власний ліміт на IP додатково стримує одну людину
+  // від випадкового "проїдання" денної квоти всіх користувачів.
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
   if (env.RATE_KV) {
     const rateKey = `rl:tts:${ip}:${Math.floor(Date.now() / 60000)}`;
     const current = parseInt((await env.RATE_KV.get(rateKey)) || '0', 10);
-    if (current >= 60) {
+    if (current >= 20) {
       return new Response(JSON.stringify({ error: 'Забагато запитів на озвучення, спробуйте за хвилину' }), {
         status: 429, headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
@@ -195,42 +174,54 @@ async function handleTtsApi(request, corsHeaders, env, ctx) {
     });
   }
 
-  const text = typeof body.text === 'string' ? body.text.slice(0, 600) : '';
-  const voice = typeof body.voice === 'string' && body.voice ? body.voice : 'en-US-JennyNeural';
+  const text = typeof body.text === 'string' ? body.text.trim().slice(0, 2000) : '';
+  // voice, який шле клієнт, — це ім'я голосу Edge-стилю (напр.
+  // "nb-NO-FridaNeural"), успадковане від попередньої реалізації; тут нам
+  // потрібен лише BCP-47 префікс мови (напр. "nb-NO") — за щасливим
+  // збігом формат VoiceRSS ("nb-no", маленькими літерами) для 28 із 30
+  // наших мов — це просто той самий префікс у нижньому регістрі.
+  const voiceHint = typeof body.voice === 'string' ? body.voice : '';
+  const langMatch = voiceHint.match(/^([a-zA-Z]{2,3})-([a-zA-Z]{2,4})/);
+  const baseLangCode = langMatch ? langMatch[1].toLowerCase() : 'en';
+  const voicerssLang = langMatch ? `${langMatch[1].toLowerCase()}-${langMatch[2].toLowerCase()}` : 'en-us';
   if (!text) {
     return new Response(JSON.stringify({ error: 'Empty text' }), {
       status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders },
     });
   }
-  // xml:lang у SSML беремо з початку імені голосу (напр. "nb-NO" із
-  // "nb-NO-FinnNeural") — Azure не надто суворий до точності цього поля,
-  // коли вже явно вказане конкретне ім'я голосу.
-  const langMatch = voice.match(/^([a-zA-Z]{2,3}-[a-zA-Z]{2,4})/);
-  const xmlLang = langMatch ? langMatch[1] : 'en-US';
-  const ssml = `<speak version='1.0' xml:lang='${xmlLang}'><voice xml:lang='${xmlLang}' name='${voice}'>${escapeXml(text)}</voice></speak>`;
-  const region = env.AZURE_SPEECH_REGION || 'westeurope';
+  if (VOICERSS_UNSUPPORTED_LANGS.has(baseLangCode)) {
+    return new Response(JSON.stringify({ error: `VoiceRSS не підтримує мову "${baseLangCode}"` }), {
+      status: 501, headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    });
+  }
 
   try {
-    const token = await getAzureSpeechToken(env);
-    const ttsRes = await fetch(`https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`, {
+    const ttsRes = await fetch('https://api.voicerss.org/', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/ssml+xml',
-        'X-Microsoft-OutputFormat': 'audio-24khz-48kbitrate-mono-mp3',
-        'User-Agent': 'FjordLearningPlatform',
-      },
-      body: ssml,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        key: env.VOICERSS_API_KEY,
+        hl: voicerssLang,
+        src: text,
+        c: 'MP3',
+        f: '44khz_16bit_mono',
+      }).toString(),
     });
-    if (!ttsRes.ok) {
-      const errText = await ttsRes.text();
-      console.warn('Azure Speech TTS помилка:', ttsRes.status, errText);
-      return new Response(JSON.stringify({ error: 'Azure Speech TTS помилка', status: ttsRes.status, detail: errText.slice(0, 300) }), {
+    const buf = await ttsRes.arrayBuffer();
+    const bytes = new Uint8Array(buf);
+    // VoiceRSS не використовує HTTP-статус для помилок — повертає 200 OK
+    // з текстовим тілом "ERROR: ..." замість аудіо (задокументована
+    // поведінка їхнього API). Перевіряємо перші байти як текст: справжній
+    // mp3-файл ніколи не почнеться з читабельного "ERROR" ASCII-рядка.
+    const preview = new TextDecoder('utf-8', { fatal: false }).decode(bytes.slice(0, 16));
+    if (preview.toUpperCase().startsWith('ERROR')) {
+      const errText = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+      console.warn('VoiceRSS TTS помилка:', errText);
+      return new Response(JSON.stringify({ error: 'VoiceRSS TTS помилка', detail: errText.slice(0, 300) }), {
         status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }
-    const audioData = await ttsRes.arrayBuffer();
-    return new Response(audioData, {
+    return new Response(bytes, {
       headers: { 'Content-Type': 'audio/mpeg', ...corsHeaders },
     });
   } catch (e) {
