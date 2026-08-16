@@ -1162,48 +1162,48 @@ function runQuiz(sub, route, title) {
             checkAchievements({ perfectTest: pct === 100 });
         }
 
-        // ========== 🔥 ЗБЕРІГАЄМО ІСТОРІЮ ТЕСТУ ==========
-        const details = sub.qs.map((q, idx) => {
-            const ans = sub.userAnswers[idx];
-            const isCorrect = ans && ans.correct === true;
-            let questionText = q.q || '';
-            let correctAnswer = '';
-            if (q.opts && q.a !== undefined) {
-                correctAnswer = q.opts[q.a] || '';
-            } else if (q.original) {
-                correctAnswer = q.original.join(' ');
-            } else if (q.sentence) {
-                const match = q.sentence.match(/____/);
-                if (match) {
-                    correctAnswer = q.opts ? q.opts[q.a] : '';
-                }
-            }
-            let userAnswer = '';
-            if (ans) {
-                if (ans.input !== undefined) userAnswer = ans.input;
-                else if (ans.selected !== undefined && q.opts) userAnswer = q.opts[ans.selected] || '';
-                else if (ans.chosen && q.original) {
-                    userAnswer = ans.chosen.map(i => q.original ? q.original[i] : '').join(' ');
-                }
-            }
-            return {
-                question: questionText,
-                userAnswer: userAnswer,
-                correctAnswer: correctAnswer,
-                isCorrect: isCorrect,
-            };
-        });
+       // ========== ЗБЕРІГАЄМО ІСТОРІЮ ТЕСТУ ==========
+const details = sub.qs.map((q, idx) => {
+    const ans = sub.userAnswers[idx];
+    const isCorrect = ans && ans.correct === true;
+    let questionText = q.q || '';
+    let correctAnswer = '';
+    if (q.opts && q.a !== undefined) {
+        correctAnswer = q.opts[q.a] || '';
+    } else if (q.original) {
+        correctAnswer = q.original.join(' ');
+    } else if (q.sentence) {
+        const match = q.sentence.match(/____/);
+        if (match) {
+            correctAnswer = q.opts ? q.opts[q.a] : '';
+        }
+    }
+    let userAnswer = '';
+    if (ans) {
+        if (ans.input !== undefined) userAnswer = ans.input;
+        else if (ans.selected !== undefined && q.opts) userAnswer = q.opts[ans.selected] || '';
+        else if (ans.chosen && q.original) {
+            userAnswer = ans.chosen.map(i => q.original ? q.original[i] : '').join(' ');
+        }
+    }
+    return {
+        question: questionText,
+        userAnswer: userAnswer,
+        correctAnswer: correctAnswer,
+        isCorrect: isCorrect,
+    };
+});
 
-        const testResult = {
-            type: route.replace('test-', ''),
-            level: LD().level || 'A1',
-            total: sub.qs.length,
-            correct: sub.correct || 0,
-            score: pct,
-            details: details,
-        };
-        addTestResult(testResult);
-        // ================================================
+const testResult = {
+    type: route.replace('test-', ''),
+    level: LD().level || 'A1',
+    total: sub.qs.length,
+    correct: sub.correct || 0,
+    score: pct,
+    details: details,
+};
+addTestResult(testResult); // ← тепер деталі зберігаються в localStorage
+// ================================================
 
         updateState();
         const trollMood = pct >= 70 ? 'happy' : (pct >= 40 ? 'idle' : 'sad');

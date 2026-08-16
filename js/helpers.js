@@ -101,7 +101,7 @@ function getStudyPlan(level, goalId) {
         const lv = LEVELS[i];
         if (goal[lv]) {
             const entry = goal[lv];
-            if (typeof entry === 'string') return entry; // старі дані без перекладу (про всяк випадок)
+            if (typeof entry === 'string') return entry;
             return entry[lang] || entry.uk;
         }
     }
@@ -170,10 +170,7 @@ function toast(msg) {
     setTimeout(() => el.remove(), 2400);
 }
 
-// Екранування HTML-спецсимволів перед вставкою будь-якого динамічного
-// тексту (слова від AI, назви завдань Norskprøve, ім'я користувача
-// тощо) у innerHTML-шаблони — запобігає XSS, якщо туди потрапить
-// розмітка на кшталт <img onerror=...>.
+// Екранування HTML-спецсимволів
 function escHtml(s) {
     return String(s == null ? '' : s)
         .replace(/&/g, '&amp;')
@@ -216,24 +213,11 @@ function isFuzzyMatch(input, target) {
     return levenshtein(a, b) <= threshold;
 }
 
-// ВАЖЛИВО: ключ обов'язково включає мову. Раніше ключ був лише
-// "рівень|слово" — а w.no це просто текст слова цільовою мовою (те саме
-// поле "no" історично перевикористовується для будь-якої мови, див.
-// generateBulkVocab). Слова, які однаково пишуться в різних мовах
-// (інтернаціоналізми на кшталт "taxi", "hotel", "internet", "chocolate"),
-// на одному й тому ж рівні ділили один SRS-запис і один рахунок
-// "переглянуто" — прогрес з іспанської міг позначити слово вивченим і в
-// норвезькій, і навпаки. Тепер кожна мова має власний ізольований набір
-// ключів (LD().srs / LD().stats.wordsSeen), навіть якщо однакове слово
-// трапляється в кількох мовах.
 function wordKey(w, lang) {
     lang = lang || (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
     return lang + "|" + (w.level || '') + "|" + w.no;
 }
 
-// Додає нові слова (згенеровані AI або введені вручну) до словника
-// користувача. Слова одразу стають доступними у словнику, картках,
-// тестах і SRS — бо всі вони йдуть через vocabForLevel().
 function addCustomWords(level, words) {
     if (!Array.isArray(LD().customWords)) LD().customWords = [];
     const lang = STATE.targetLang || 'no';
@@ -265,8 +249,6 @@ function addCustomWords(level, words) {
     return added;
 }
 
-// Об'єднує вбудовані завдання Norskprøve з тими, що згенерував AI
-// і які збережені у LD().customNorskTasks[level][mode].
 function norskTasksFor(level, mode) {
     const lang = (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
     const langFile = window.LANG_DATA && window.LANG_DATA[lang];
@@ -439,22 +421,8 @@ function grammarLocalizedQ(g) {
 }
 
 // =====================================================================
-//  ІСТОРІЯ ТЕСТІВ
+//  ІСТОРІЯ ТЕСТІВ – збереження в localStorage (щоб не перевищувати 1 МБ Firestore)
 // =====================================================================
-
-// Структура одного запису в історії:
-// {
-//   id: 'timestamp',
-//   type: 'mc' | 'cloze' | 'order' | 'listen' | 'translate',
-//   level: 'A1' | 'A2' | ...,
-//   date: '2026-08-16T10:00:00',
-//   total: 10,
-//   correct: 8,
-//   score: 80,
-//   details: [
-//     { question: '...', userAnswer: '...', correctAnswer: '...', isCorrect: true/false }
-//   ]
-// }
 
 function getTestHistory() {
     if (!LD().testHistory) {
@@ -467,23 +435,43 @@ function addTestResult(testResult) {
     const history = getTestHistory();
     testResult.id = Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
     testResult.date = new Date().toISOString();
-    history.unshift(testResult); // нові записи зверху
-    // Обмежуємо історію до 200 записів, щоб не роздувати сховище
-    if (history.length > 200) {
-        history.length = 200;
+    
+    // 🔥 ЗБЕРІГАЄМО ДЕТАЛІ В localStorage (вони великі)
+    const details = testResult.details || [];
+    try {
+        localStorage.setItem('fjord_test_detail_' + testResult.id, JSON.stringify(details));
+    } catch (e) {
+        console.warn('Не вдалося зберегти деталі тесту в localStorage:', e);
+    }
+    
+    // У Firestore зберігаємо ТІЛЬКИ метадані (без details)
+    const metaOnly = {
+        id: testResult.id,
+        type: testResult.type,
+        level: testResult.level,
+        date: testResult.date,
+        total: testResult.total,
+        correct: testResult.correct,
+        score: testResult.score,
+        // details відсутні
+    };
+    
+    history.unshift(metaOnly);
+    // Обмежуємо до 50 записів, щоб не роздувати стан
+    if (history.length > 50) {
+        history.length = 50;
     }
     updateState();
     return testResult.id;
 }
 
-function getTestHistoryByLevel(level) {
-    const history = getTestHistory();
-    return history.filter(t => t.level === level);
-}
-
-function getTestHistoryByType(type) {
-    const history = getTestHistory();
-    return history.filter(t => t.type === type);
+function getTestDetails(testId) {
+    try {
+        const data = localStorage.getItem('fjord_test_detail_' + testId);
+        return data ? JSON.parse(data) : [];
+    } catch (e) {
+        return [];
+    }
 }
 
 function getTestStatistics() {
@@ -516,8 +504,6 @@ function getTestStatistics() {
     });
 
     stats.avgScore = Math.round(totalScore / history.length);
-
-    // Обчислюємо середні по рівнях
     Object.keys(stats.byLevel).forEach(level => {
         stats.byLevel[level].avgScore = Math.round(stats.byLevel[level].totalScore / stats.byLevel[level].count);
     });
@@ -528,23 +514,21 @@ function getTestStatistics() {
     return stats;
 }
 
-// Отримує всі неправильні відповіді з історії тестів
 function getWrongAnswers(limit = 50) {
     const history = getTestHistory();
     const wrong = [];
     for (const test of history) {
-        if (test.details) {
-            for (const detail of test.details) {
-                if (!detail.isCorrect && detail.question) {
-                    wrong.push({
-                        question: detail.question,
-                        userAnswer: detail.userAnswer,
-                        correctAnswer: detail.correctAnswer,
-                        testType: test.type,
-                        level: test.level,
-                        date: test.date,
-                    });
-                }
+        const details = getTestDetails(test.id);
+        for (const detail of details) {
+            if (!detail.isCorrect && detail.question) {
+                wrong.push({
+                    question: detail.question,
+                    userAnswer: detail.userAnswer,
+                    correctAnswer: detail.correctAnswer,
+                    testType: test.type,
+                    level: test.level,
+                    date: test.date,
+                });
             }
         }
         if (wrong.length >= limit) break;
@@ -552,8 +536,10 @@ function getWrongAnswers(limit = 50) {
     return wrong;
 }
 
-// Очистити історію тестів (для адмінів або за потреби)
 function clearTestHistory() {
     LD().testHistory = [];
     updateState();
+    // Видаляємо всі деталі з localStorage
+    const keys = Object.keys(localStorage);
+    keys.filter(k => k.startsWith('fjord_test_detail_')).forEach(k => localStorage.removeItem(k));
 }

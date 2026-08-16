@@ -94,6 +94,13 @@ function viewProfile() {
 function viewTestHistory() {
     const history = getTestHistory();
     const stats = getTestStatistics();
+    
+    // Завантажуємо деталі для кожного тесту з localStorage
+    const historyWithDetails = history.map(test => {
+        const details = getTestDetails(test.id);
+        return { ...test, details };
+    });
+    
     const wrap = el(`
         <div class="view">
             <h1>📊 ${t('test_history_title') || 'Історія тестів'}</h1>
@@ -124,9 +131,9 @@ function viewTestHistory() {
     let filter = 'all';
 
     function renderList() {
-        let filtered = history;
+        let filtered = historyWithDetails;
         if (filter !== 'all') {
-            filtered = history.filter(t => t.type === filter);
+            filtered = historyWithDetails.filter(t => t.type === filter);
         }
 
         if (filtered.length === 0) {
