@@ -366,7 +366,7 @@ function markActivityToday() {
 }
 
 // =====================================================================
-//  SPEECH (TTS) – оновлена версія з Web Audio API
+//  SPEECH (TTS) – оновлена версія з Web Audio API + <audio> fallback для iOS
 // =====================================================================
 
 function pickVoiceFor(bcp47) {
@@ -380,7 +380,7 @@ if ('speechSynthesis' in window) {
     speechSynthesis.onvoiceschanged = () => {};
 }
 
-// Основний метод озвучення – використовує Web Audio API для відтворення MP3 від Worker
+// Основний метод озвучення – використовує Web Audio API з резервом на <audio>
 async function speak(text, lang) {
     lang = lang || (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
     const voiceCfg = getTtsVoice(lang);
@@ -398,19 +398,29 @@ async function speak(text, lang) {
             if (res.ok) {
                 const arrayBuffer = await res.arrayBuffer();
 
-                // Створюємо AudioContext (він має бути створений після жесту користувача)
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                // Якщо контекст призупинено – відновлюємо (обхід політики автовідтворення)
-                if (audioContext.state === 'suspended') {
-                    await audioContext.resume();
+                // Спроба 1: Web Audio API (краще для якості)
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    if (audioContext.state === 'suspended') {
+                        await audioContext.resume();
+                    }
+                    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                    const source = audioContext.createBufferSource();
+                    source.buffer = audioBuffer;
+                    source.connect(audioContext.destination);
+                    source.start(0);
+                    return;
+                } catch (webAudioError) {
+                    // Якщо Web Audio не вийшло (наприклад, Safari на iOS не підтримує MP3), використовуємо <audio>
+                    console.warn('Web Audio failed, using <audio> fallback:', webAudioError);
+                    const blob = new Blob([arrayBuffer], { type: 'audio/mpeg' });
+                    const url = URL.createObjectURL(blob);
+                    const audio = new Audio(url);
+                    audio.onended = () => URL.revokeObjectURL(url);
+                    // Для iOS важливо, щоб play() викликався після жесту
+                    await audio.play();
+                    return;
                 }
-
-                const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-                const source = audioContext.createBufferSource();
-                source.buffer = audioBuffer;
-                source.connect(audioContext.destination);
-                source.start(0);
-                return;
             } else {
                 throw new Error(`Worker responded with status ${res.status}`);
             }
@@ -419,7 +429,7 @@ async function speak(text, lang) {
         }
     }
 
-    // Фолбек – SpeechSynthesis (вбудований у браузер)
+    // Фолбек – SpeechSynthesis (вбудований у браузер, працює завжди)
     if (!('speechSynthesis' in window)) {
         toast("Озвучення не підтримується");
         return;
