@@ -46,12 +46,12 @@ function initAuth() {
         heroTrollEl.innerHTML = trollSVG('happy', 88, {});
     }
 
-    // ---- Допоміжна функція: визначення, чи потрібно показувати онбординг ----
+    // ---- Допоміжна функція: визначення, куди перенаправити після входу ----
     function getInitialRoute() {
         // Примусово перевіряємо дані, щоб онбординг не показувався для існуючих користувачів
         if (STATE) {
-            // Перевіряємо наявність даних
             const hasData = (function checkData() {
+                // Перевіряємо langData (прогрес по мовах)
                 if (STATE.langData && typeof STATE.langData === 'object') {
                     for (const lang in STATE.langData) {
                         const data = STATE.langData[lang];
@@ -65,6 +65,7 @@ function initAuth() {
                         }
                     }
                 }
+                // Перевіряємо плоскі поля (старі дані)
                 if (STATE.xp > 0) return true;
                 if (STATE.stats && STATE.stats.wordsSeen && Object.keys(STATE.stats.wordsSeen).length > 0) return true;
                 if (STATE.stats && STATE.stats.testsCompleted > 0) return true;
@@ -74,6 +75,7 @@ function initAuth() {
                 return false;
             })();
 
+            // Якщо є хоч якісь дані – це існуючий користувач, онбординг не показуємо
             if (hasData) {
                 STATE._onboardingDone = true;
                 STATE._targetLangChosen = true;
@@ -82,7 +84,7 @@ function initAuth() {
             }
         }
 
-        // Якщо даних немає – перевіряємо, чи потрібно показувати вибір мови або онбординг
+        // Якщо даних немає – це новий користувач
         if (shouldShowLanguageChoice()) {
             return 'choose-language';
         } else if (shouldShowOnboarding()) {

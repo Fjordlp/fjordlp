@@ -1130,6 +1130,10 @@ function currentLevelWords() {
     return lang === 'no' ? VOCAB.A1 : [];
 }
 
+// =====================================================================
+//  runQuiz – ОСНОВНА ФУНКЦІЯ З БЛОКОМ ЗБЕРЕЖЕННЯ ІСТОРІЇ
+// =====================================================================
+
 function runQuiz(sub, route, title) {
     if (!sub.qs || sub.qs.length === 0) {
         // Порожньо буває, коли для щойно обраної мови ще нема слів на
@@ -1157,6 +1161,50 @@ function runQuiz(sub, route, title) {
             addXP(100, 'test_complete');
             checkAchievements({ perfectTest: pct === 100 });
         }
+
+        // ========== 🔥 ЗБЕРІГАЄМО ІСТОРІЮ ТЕСТУ ==========
+        const details = sub.qs.map((q, idx) => {
+            const ans = sub.userAnswers[idx];
+            const isCorrect = ans && ans.correct === true;
+            let questionText = q.q || '';
+            let correctAnswer = '';
+            if (q.opts && q.a !== undefined) {
+                correctAnswer = q.opts[q.a] || '';
+            } else if (q.original) {
+                correctAnswer = q.original.join(' ');
+            } else if (q.sentence) {
+                const match = q.sentence.match(/____/);
+                if (match) {
+                    correctAnswer = q.opts ? q.opts[q.a] : '';
+                }
+            }
+            let userAnswer = '';
+            if (ans) {
+                if (ans.input !== undefined) userAnswer = ans.input;
+                else if (ans.selected !== undefined && q.opts) userAnswer = q.opts[ans.selected] || '';
+                else if (ans.chosen && q.original) {
+                    userAnswer = ans.chosen.map(i => q.original ? q.original[i] : '').join(' ');
+                }
+            }
+            return {
+                question: questionText,
+                userAnswer: userAnswer,
+                correctAnswer: correctAnswer,
+                isCorrect: isCorrect,
+            };
+        });
+
+        const testResult = {
+            type: route.replace('test-', ''),
+            level: LD().level || 'A1',
+            total: sub.qs.length,
+            correct: sub.correct || 0,
+            score: pct,
+            details: details,
+        };
+        addTestResult(testResult);
+        // ================================================
+
         updateState();
         const trollMood = pct >= 70 ? 'happy' : (pct >= 40 ? 'idle' : 'sad');
         const wrap = el(`

@@ -437,3 +437,123 @@ function grammarLocalizedQ(g) {
     if (uiLang === 'ru' && g.q_ru) return g.q_ru;
     return g.ex.q;
 }
+
+// =====================================================================
+//  ІСТОРІЯ ТЕСТІВ
+// =====================================================================
+
+// Структура одного запису в історії:
+// {
+//   id: 'timestamp',
+//   type: 'mc' | 'cloze' | 'order' | 'listen' | 'translate',
+//   level: 'A1' | 'A2' | ...,
+//   date: '2026-08-16T10:00:00',
+//   total: 10,
+//   correct: 8,
+//   score: 80,
+//   details: [
+//     { question: '...', userAnswer: '...', correctAnswer: '...', isCorrect: true/false }
+//   ]
+// }
+
+function getTestHistory() {
+    if (!LD().testHistory) {
+        LD().testHistory = [];
+    }
+    return LD().testHistory;
+}
+
+function addTestResult(testResult) {
+    const history = getTestHistory();
+    testResult.id = Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+    testResult.date = new Date().toISOString();
+    history.unshift(testResult); // нові записи зверху
+    // Обмежуємо історію до 200 записів, щоб не роздувати сховище
+    if (history.length > 200) {
+        history.length = 200;
+    }
+    updateState();
+    return testResult.id;
+}
+
+function getTestHistoryByLevel(level) {
+    const history = getTestHistory();
+    return history.filter(t => t.level === level);
+}
+
+function getTestHistoryByType(type) {
+    const history = getTestHistory();
+    return history.filter(t => t.type === type);
+}
+
+function getTestStatistics() {
+    const history = getTestHistory();
+    if (history.length === 0) return null;
+
+    const stats = {
+        total: history.length,
+        avgScore: 0,
+        byLevel: {},
+        byType: {},
+        bestScore: 0,
+        worstScore: 100,
+        recent: history.slice(0, 10),
+    };
+
+    let totalScore = 0;
+    history.forEach(t => {
+        totalScore += t.score;
+        if (t.score > stats.bestScore) stats.bestScore = t.score;
+        if (t.score < stats.worstScore) stats.worstScore = t.score;
+
+        if (!stats.byLevel[t.level]) stats.byLevel[t.level] = { count: 0, totalScore: 0 };
+        stats.byLevel[t.level].count++;
+        stats.byLevel[t.level].totalScore += t.score;
+
+        if (!stats.byType[t.type]) stats.byType[t.type] = { count: 0, totalScore: 0 };
+        stats.byType[t.type].count++;
+        stats.byType[t.type].totalScore += t.score;
+    });
+
+    stats.avgScore = Math.round(totalScore / history.length);
+
+    // Обчислюємо середні по рівнях
+    Object.keys(stats.byLevel).forEach(level => {
+        stats.byLevel[level].avgScore = Math.round(stats.byLevel[level].totalScore / stats.byLevel[level].count);
+    });
+    Object.keys(stats.byType).forEach(type => {
+        stats.byType[type].avgScore = Math.round(stats.byType[type].totalScore / stats.byType[type].count);
+    });
+
+    return stats;
+}
+
+// Отримує всі неправильні відповіді з історії тестів
+function getWrongAnswers(limit = 50) {
+    const history = getTestHistory();
+    const wrong = [];
+    for (const test of history) {
+        if (test.details) {
+            for (const detail of test.details) {
+                if (!detail.isCorrect && detail.question) {
+                    wrong.push({
+                        question: detail.question,
+                        userAnswer: detail.userAnswer,
+                        correctAnswer: detail.correctAnswer,
+                        testType: test.type,
+                        level: test.level,
+                        date: test.date,
+                    });
+                }
+            }
+        }
+        if (wrong.length >= limit) break;
+    }
+    return wrong;
+}
+
+// Очистити історію тестів (для адмінів або за потреби)
+function clearTestHistory() {
+    LD().testHistory = [];
+    updateState();
+}

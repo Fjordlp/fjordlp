@@ -1,92 +1,209 @@
-        // ---- PROFILE ----
-        function viewProfile() {
-            const wrap = el(`
-            <div class="view">
-              <h1>${t('h_profile')}</h1>
-              <div class="grid cols-4" style="margin-bottom:16px;">
-                <div class="card stat-box"><div class="num">${Object.keys(LD().stats?.wordsSeen||{}).length}</div><div class="label">${t('stat_words_studied')}</div></div>
-                <div class="card stat-box"><div class="num">${LD().stats?.testsCompleted||0}</div><div class="label">${t('stat_tests')}</div></div>
-                <div class="card stat-box"><div class="num">${LD().streak||0}</div><div class="label">${t('stat_streak_days')}</div></div>
-                <div class="card stat-box"><div class="num">${LD().stats?.bestStreak||0}</div><div class="label">${t('stat_best_streak')}</div></div>
-              </div>
-              <div class="grid cols-2">
-                <div class="card">
-                  <h3>${t('calendar_15days')}</h3>
-                  <div class="calendar-grid" id="calgrid"></div>
-                </div>
-                <div class="card">
-                  <h3>${t('settings_title')}</h3>
-                  <div class="field"><label>${t('field_name')}</label><input id="setName" value="${escHtml(STATE.name||'')}"></div>
-                  <div class="field"><label>${t('field_learn_lang')}</label>
-                    <select id="setTargetLang">
-                      ${LANGUAGES.map(l => `<option value="${l.code}" ${STATE.targetLang===l.code?'selected':''}>${l.flag} ${l.name[STATE.uiLang]||l.name.uk}</option>`).join('')}
-                    </select>
-                  </div>
-                  <div class="field"><label>${t('field_goal')}</label><input id="setGoal" value="${escHtml(STATE.settings?.goal||'')}" placeholder="${t('field_goal_placeholder')}"></div>
-                  <div class="field"><label>${t('field_reminder_time')}</label><input type="time" id="setTime" value="${STATE.settings?.reminderTime||'18:00'}"></div>
-                  <div class="field"><label>${t('field_pace')}</label>
-                    <select id="setPace">
-                      <option value="calm" ${STATE.settings?.pace==='calm'?'selected':''}>${t('pace_calm')}</option>
-                      <option value="steady" ${STATE.settings?.pace==='steady'?'selected':''}>${t('pace_steady')}</option>
-                      <option value="intense" ${STATE.settings?.pace==='intense'?'selected':''}>${t('pace_intense')}</option>
-                    </select>
-                  </div>
-                  <button class="btn btn-primary btn-block" id="saveSettings">${t('save_btn2')}</button>
-                </div>
-              </div>
-              <div class="card" style="margin-top:16px;">
-                <h3>${t('leaderboard_title')}</h3>
-                <div id="lb"></div>
-              </div>
-              <div class="card" style="margin-top:16px;">
-                <h3>${t('data_title')}</h3>
-                <p style="font-size:.8rem;color:var(--ink-soft);">${t('data_note')}</p>
-              </div>
+// ---- PROFILE ----
+function viewProfile() {
+    const wrap = el(`
+    <div class="view">
+      <h1>${t('h_profile')}</h1>
+      <div class="grid cols-4" style="margin-bottom:16px;">
+        <div class="card stat-box"><div class="num">${Object.keys(LD().stats?.wordsSeen||{}).length}</div><div class="label">${t('stat_words_studied')}</div></div>
+        <div class="card stat-box"><div class="num">${LD().stats?.testsCompleted||0}</div><div class="label">${t('stat_tests')}</div></div>
+        <div class="card stat-box"><div class="num">${LD().streak||0}</div><div class="label">${t('stat_streak_days')}</div></div>
+        <div class="card stat-box"><div class="num">${LD().stats?.bestStreak||0}</div><div class="label">${t('stat_best_streak')}</div></div>
+      </div>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>${t('calendar_15days')}</h3>
+          <div class="calendar-grid" id="calgrid"></div>
+        </div>
+        <div class="card">
+          <h3>${t('settings_title')}</h3>
+          <div class="field"><label>${t('field_name')}</label><input id="setName" value="${escHtml(STATE.name||'')}"></div>
+          <div class="field"><label>${t('field_learn_lang')}</label>
+            <select id="setTargetLang">
+              ${LANGUAGES.map(l => `<option value="${l.code}" ${STATE.targetLang===l.code?'selected':''}>${l.flag} ${l.name[STATE.uiLang]||l.name.uk}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field"><label>${t('field_goal')}</label><input id="setGoal" value="${escHtml(STATE.settings?.goal||'')}" placeholder="${t('field_goal_placeholder')}"></div>
+          <div class="field"><label>${t('field_reminder_time')}</label><input type="time" id="setTime" value="${STATE.settings?.reminderTime||'18:00'}"></div>
+          <div class="field"><label>${t('field_pace')}</label>
+            <select id="setPace">
+              <option value="calm" ${STATE.settings?.pace==='calm'?'selected':''}>${t('pace_calm')}</option>
+              <option value="steady" ${STATE.settings?.pace==='steady'?'selected':''}>${t('pace_steady')}</option>
+              <option value="intense" ${STATE.settings?.pace==='intense'?'selected':''}>${t('pace_intense')}</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-block" id="saveSettings">${t('save_btn2')}</button>
+          <button class="btn btn-ghost btn-block" onclick="navigate('test-history')" style="margin-top:10px;">📊 ${t('test_history_title') || 'Історія тестів'}</button>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <h3>${t('leaderboard_title')}</h3>
+        <div id="lb"></div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <h3>${t('data_title')}</h3>
+        <p style="font-size:.8rem;color:var(--ink-soft);">${t('data_note')}</p>
+      </div>
+    </div>
+  `);
+    const cal = wrap.querySelector('#calgrid');
+    const dates = LD().stats?.activityDates || [];
+    const set = new Set(dates);
+    for (let i = 44; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const on = set.has(todayStr(d));
+        cal.appendChild(el(`<div class="cell ${on?'on':''}" title="${todayStr(d)}"></div>`));
+    }
+    const lb = wrap.querySelector('#lb');
+    const bots = [
+        ["Ingrid", 1240],
+        ["Kari", 980],
+        ["Ola", 860],
+        ["Lars", 640]
+    ];
+    const rows = bots.concat([
+        [STATE.name || currentUser, LD().leaderboardScore || 0]
+    ]).sort((a, b) => b[1] - a[1]);
+    rows.forEach((r, i) => {
+        const isYou = r[0] === (STATE.name || currentUser);
+        lb.appendChild(el(
+            `<div class="leaderboard-row ${isYou?'you':''}"><span class="rank">${i+1}</span><span class="name">${escHtml(r[0])}${isYou?t('you_label'):''}</span><span class="pts">${r[1]}</span></div>`
+            ));
+    });
+    wrap.querySelector('#saveSettings').onclick = () => {
+        STATE.name = wrap.querySelector('#setName').value.trim() || STATE.name || currentUser;
+        if (!STATE.settings) STATE.settings = {};
+        STATE.settings.goal = wrap.querySelector('#setGoal').value.trim();
+        STATE.settings.reminderTime = wrap.querySelector('#setTime').value;
+        STATE.settings.pace = wrap.querySelector('#setPace').value;
+        const newTargetLang = wrap.querySelector('#setTargetLang').value;
+        const targetLangChanged = newTargetLang !== STATE.targetLang;
+        STATE.targetLang = newTargetLang;
+        updateState();
+        toast(t('settings_saved'));
+        document.getElementById('userNameDisplay').textContent = STATE.name;
+        if (targetLangChanged) navigate('home');
+    };
+    return wrap;
+}
+
+// =====================================================================
+//  ІСТОРІЯ ТЕСТІВ
+// =====================================================================
+
+function viewTestHistory() {
+    const history = getTestHistory();
+    const stats = getTestStatistics();
+    const wrap = el(`
+        <div class="view">
+            <h1>📊 ${t('test_history_title') || 'Історія тестів'}</h1>
+            <button class="btn btn-ghost btn-sm" onclick="navigate('profile')" style="margin-bottom:16px;">← ${t('back_to_profile') || 'Назад до кабінету'}</button>
+            
+            ${stats ? `
+            <div class="grid cols-4" style="margin-bottom:16px;">
+                <div class="card stat-box"><div class="num">${stats.total}</div><div class="label">Всього тестів</div></div>
+                <div class="card stat-box"><div class="num">${stats.avgScore}%</div><div class="label">Середній результат</div></div>
+                <div class="card stat-box"><div class="num">${stats.bestScore}%</div><div class="label">Найкращий</div></div>
+                <div class="card stat-box"><div class="num">${stats.worstScore}%</div><div class="label">Найгірший</div></div>
             </div>
-          `);
-            const cal = wrap.querySelector('#calgrid');
-            const dates = LD().stats?.activityDates || [];
-            const set = new Set(dates);
-            for (let i = 44; i >= 0; i--) {
-                const d = new Date();
-                d.setDate(d.getDate() - i);
-                const on = set.has(todayStr(d));
-                cal.appendChild(el(`<div class="cell ${on?'on':''}" title="${todayStr(d)}"></div>`));
-            }
-            const lb = wrap.querySelector('#lb');
-            const bots = [
-                ["Ingrid", 1240],
-                ["Kari", 980],
-                ["Ola", 860],
-                ["Lars", 640]
-            ];
-            const rows = bots.concat([
-                [STATE.name || currentUser, LD().leaderboardScore || 0]
-            ]).sort((a, b) => b[1] - a[1]);
-            rows.forEach((r, i) => {
-                const isYou = r[0] === (STATE.name || currentUser);
-                lb.appendChild(el(
-                    `<div class="leaderboard-row ${isYou?'you':''}"><span class="rank">${i+1}</span><span class="name">${escHtml(r[0])}${isYou?t('you_label'):''}</span><span class="pts">${r[1]}</span></div>`
-                    ));
-            });
-            wrap.querySelector('#saveSettings').onclick = () => {
-                STATE.name = wrap.querySelector('#setName').value.trim() || STATE.name || currentUser;
-                if (!STATE.settings) STATE.settings = {};
-                STATE.settings.goal = wrap.querySelector('#setGoal').value.trim();
-                STATE.settings.reminderTime = wrap.querySelector('#setTime').value;
-                STATE.settings.pace = wrap.querySelector('#setPace').value;
-                const newTargetLang = wrap.querySelector('#setTargetLang').value;
-                const targetLangChanged = newTargetLang !== STATE.targetLang;
-                STATE.targetLang = newTargetLang;
-                updateState();
-                toast(t('settings_saved'));
-                document.getElementById('userNameDisplay').textContent = STATE.name;
-                if (targetLangChanged) navigate('home'); // словник/картки/тести залежать від мови — оновлюємо вкладку
-            };
-            return wrap;
+            ` : ''}
+            
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+                <button class="chip active" data-filter="all">Всі</button>
+                ${['mc','cloze','order','listen','translate'].map(type => `
+                    <button class="chip" data-filter="${type}">${t('test_' + type + '_title') || type}</button>
+                `).join('')}
+                <button class="chip btn-danger" id="clearHistoryBtn" style="color:var(--rose);border-color:var(--rose);">🗑️ Очистити</button>
+            </div>
+            
+            <div id="historyList"></div>
+        </div>
+    `);
+
+    const list = wrap.querySelector('#historyList');
+    let filter = 'all';
+
+    function renderList() {
+        let filtered = history;
+        if (filter !== 'all') {
+            filtered = history.filter(t => t.type === filter);
         }
 
-        // ---- NORSKPRØVE ----
+        if (filtered.length === 0) {
+            list.innerHTML = `<div class="empty-state"><h3>Немає тестів</h3><p>Пройдіть хоча б один тест, щоб побачити історію.</p><button class="btn btn-primary" onclick="navigate('tests')">До тестів</button></div>`;
+            return;
+        }
+
+        let html = '';
+        filtered.forEach((test, idx) => {
+            const date = new Date(test.date);
+            const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+            const typeLabel = t('test_' + test.type + '_title') || test.type;
+            const isExpanded = idx === 0;
+            
+            html += `
+                <div class="card" style="margin-bottom:12px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;cursor:pointer;" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
+                        <div>
+                            <strong>${typeLabel}</strong>
+                            <span class="tag level-${test.level}" style="margin-left:8px;">${test.level}</span>
+                            <span style="font-size:.8rem;color:var(--ink-soft);margin-left:8px;">${dateStr}</span>
+                        </div>
+                        <div>
+                            <span class="tag ${test.score >= 70 ? 'level-B1' : test.score >= 40 ? 'level-A2' : 'level-A1'}">${test.score}%</span>
+                            <span style="font-size:.8rem;color:var(--ink-soft);margin-left:8px;">${test.correct}/${test.total}</span>
+                        </div>
+                    </div>
+                    <div style="margin-top:10px;display:${isExpanded ? 'block' : 'none'};">
+                        ${test.details && test.details.length > 0 ? test.details.map((d, di) => `
+                            <div style="padding:6px 8px;border-bottom:1px solid var(--line-soft);font-size:.85rem;${d.isCorrect ? 'border-left:3px solid var(--teal);' : 'border-left:3px solid var(--rose);'}">
+                                <div style="display:flex;gap:8px;align-items:center;">
+                                    <span>${d.isCorrect ? '✅' : '❌'}</span>
+                                    <span style="flex:1;">${escHtml(d.question)}</span>
+                                </div>
+                                ${!d.isCorrect ? `
+                                    <div style="margin-left:28px;font-size:.78rem;color:var(--ink-soft);">
+                                        <span style="color:var(--rose);">Ваша відповідь: ${escHtml(d.userAnswer)}</span>
+                                        <span style="color:var(--teal);"> → Правильно: ${escHtml(d.correctAnswer)}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('') : ''}
+                    </div>
+                </div>
+            `;
+        });
+
+        list.innerHTML = html;
+    }
+
+    // Фільтри
+    wrap.querySelectorAll('[data-filter]').forEach(btn => {
+        btn.onclick = () => {
+            wrap.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filter = btn.dataset.filter;
+            renderList();
+        };
+    });
+
+    // Очищення історії
+    const clearBtn = wrap.querySelector('#clearHistoryBtn');
+    if (clearBtn) {
+        clearBtn.onclick = () => {
+            if (confirm('Ви впевнені, що хочете очистити всю історію тестів?')) {
+                clearTestHistory();
+                renderList();
+                toast('🗑️ Історію тестів очищено');
+            }
+        };
+    }
+
+    renderList();
+    return wrap;
+}
+
+// ---- NORSKPRØVE ----
 function viewNorskprove() {
   // Стан для навігації всередині розділу
   if (!SUBSTATE.norskLevel) SUBSTATE.norskLevel = LD().level || "A1";
@@ -273,6 +390,7 @@ function viewNorskprove() {
 
   return wrap;
 }
+
 function renderNorskproveTask(task, mode, index, total) {
   const wrap = el(`<div class="card" style="margin-top:8px;"></div>`);
 
@@ -474,6 +592,7 @@ function renderNorskproveTask(task, mode, index, total) {
 
   return wrap;
 }
+
 // =====================================================================
 //  VIEW: ВИБІР МОВИ ВИВЧЕННЯ (окремий обов'язковий перший екран)
 // =====================================================================
@@ -781,11 +900,6 @@ function viewTournaments() {
         if (!container) return;
         try {
             const targetLang = STATE.targetLang || 'no';
-            // Раніше показувались УСІ турніри поспіль, незалежно від мови,
-            // яку вивчає користувач, — бо турніри самі по собі до нещодавна
-            // взагалі не мали поля lang. Турніри, створені до цього фіксу,
-            // не мають lang — трактуємо відсутнє поле як норвезьку (це й
-            // була єдина мова, якою можна було їх створити раніше).
             const snap = await firebaseDb.collection('tournaments').orderBy('createdAt', 'desc').limit(50).get();
             const relevant = snap.docs.filter(doc => (doc.data().lang || 'no') === targetLang);
             if (relevant.length === 0) {
@@ -894,7 +1008,6 @@ function viewTournamentPlay() {
         const tr = { id: trDoc.id, ...trDoc.data() };
         const status = tournamentLiveStatus(tr);
 
-        // Чи вже грав(-ла) цей користувач?
         let existing = null;
         if (uid) {
             try {
@@ -904,7 +1017,6 @@ function viewTournamentPlay() {
         }
 
         if (existing || status === 'ended') {
-            // Показуємо результат (свій, якщо є) + таблицю результатів
             container.innerHTML = `
                 <div class="card session-end">
                     <h2>${escHtml(tr.name||'')}</h2>
@@ -926,8 +1038,6 @@ function viewTournamentPlay() {
             return;
         }
 
-        // Гра: проходимо questions по черзі (той самий фіксований набір
-        // для всіх учасників — чесно, ніхто не отримує легших питань).
         const questions = tr.questions || [];
         if (!questions.length) {
             container.innerHTML = `<div class="empty-state"><h3>${t('tourn_no_tournaments')}</h3></div>`;
@@ -989,7 +1099,7 @@ function viewTournamentPlay() {
                 try {
                     await firebaseDb.collection('tournaments').doc(tr.id).collection('participants').doc(uid).set({
                         name: STATE.name || 'Гравець',
-                        score: correct, // для сортування таблиці (Firestore не вміє сортувати за "correct/total" напряму)
+                        score: correct,
                         correct,
                         total,
                         completedAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -997,22 +1107,10 @@ function viewTournamentPlay() {
                     addXP(50, 'tournament_participation');
                     updateState();
                 } catch (e) {
-                    // Найчастіша причина: правила Firestore (firestore.rules) не
-                    // опубліковані в Firebase Console або документ users/{uid}
-                    // ще не встиг створитись. Показуємо помилку явно, а не
-                    // ковтаємо її мовчки — інакше людина бачить "% результату"
-                    // на екрані, а сам результат ніде насправді не зберігся.
                     console.error('[Турніри] Не вдалося зберегти результат:', e);
                     toast(t('tourn_submit_error'));
                 }
             } else {
-                // Гість (без входу в акаунт) не має власного uid, а правила
-                // Firestore навмисно дозволяють писати результат лише в
-                // документ із id === свій uid (щоб ніхто не міг підробити
-                // чужий результат) — тож для гостя результат технічно
-                // нікуди зберігати. Раніше про це просто мовчали: гість
-                // проходив увесь турнір, бачив свій відсоток, а результат
-                // безслідно зникав. Тепер попереджаємо одразу.
                 toast(t('tourn_guest_not_saved'));
             }
             renderLeaderboard(container.querySelector('#tpLeaderboard'), tr, uid);
