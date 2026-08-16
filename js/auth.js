@@ -46,6 +46,52 @@ function initAuth() {
         heroTrollEl.innerHTML = trollSVG('happy', 88, {});
     }
 
+    // ---- Допоміжна функція: визначення, чи потрібно показувати онбординг ----
+    function getInitialRoute() {
+        // Примусово перевіряємо дані, щоб онбординг не показувався для існуючих користувачів
+        if (STATE) {
+            // Перевіряємо наявність даних
+            const hasData = (function checkData() {
+                if (STATE.langData && typeof STATE.langData === 'object') {
+                    for (const lang in STATE.langData) {
+                        const data = STATE.langData[lang];
+                        if (data) {
+                            if (data.xp > 0) return true;
+                            if (data.stats && data.stats.wordsSeen && Object.keys(data.stats.wordsSeen).length > 0) return true;
+                            if (data.stats && data.stats.testsCompleted > 0) return true;
+                            if (data.customWords && data.customWords.length > 0) return true;
+                            if (data.srs && Object.keys(data.srs).length > 0) return true;
+                            if (data.stats && data.stats.activityDates && data.stats.activityDates.length > 0) return true;
+                        }
+                    }
+                }
+                if (STATE.xp > 0) return true;
+                if (STATE.stats && STATE.stats.wordsSeen && Object.keys(STATE.stats.wordsSeen).length > 0) return true;
+                if (STATE.stats && STATE.stats.testsCompleted > 0) return true;
+                if (STATE.customWords && STATE.customWords.length > 0) return true;
+                if (STATE.targetLang && STATE.targetLang !== 'no') return true;
+                if (STATE.name && STATE.name !== 'Гість') return true;
+                return false;
+            })();
+
+            if (hasData) {
+                STATE._onboardingDone = true;
+                STATE._targetLangChosen = true;
+                updateState();
+                return 'home';
+            }
+        }
+
+        // Якщо даних немає – перевіряємо, чи потрібно показувати вибір мови або онбординг
+        if (shouldShowLanguageChoice()) {
+            return 'choose-language';
+        } else if (shouldShowOnboarding()) {
+            return 'onboarding';
+        } else {
+            return 'home';
+        }
+    }
+
     // ---- Гостьовий вхід ----
     document.getElementById('guestBtn').onclick = () => {
         let guestState = getGuestState();
@@ -75,13 +121,9 @@ function initAuth() {
         app.classList.add('active');
         initAssistantWidget();
         checkAndApplyStreakFreeze();
-        if (shouldShowLanguageChoice()) {
-            navigate('choose-language');
-        } else if (shouldShowOnboarding()) {
-            navigate('onboarding');
-        } else {
-            navigate('home');
-        }
+        
+        const route = getInitialRoute();
+        navigate(route);
         toast('🎮 Ласкаво просимо! Ви в режимі гостя. Дані зберігаються локально.');
     };
 
@@ -120,7 +162,6 @@ function initAuth() {
             return;
         }
 
-        // Блокуємо кнопку, щоб уникнути подвійних кліків
         submitBtn.disabled = true;
         submitBtn.textContent = '⏳ Зачекайте...';
         errorEl.textContent = '';
@@ -157,13 +198,9 @@ function initAuth() {
             app.classList.add('active');
             initAssistantWidget();
             checkAndApplyStreakFreeze();
-            if (shouldShowLanguageChoice()) {
-                navigate('choose-language');
-            } else if (shouldShowOnboarding()) {
-                navigate('onboarding');
-            } else {
-                navigate('home');
-            }
+            
+            const route = getInitialRoute();
+            navigate(route);
             toast(`Ласкаво просимо, ${STATE.name || login}!`);
         } else {
             const result = await signUpWithFirebase(login, password);
@@ -174,7 +211,7 @@ function initAuth() {
                 return;
             }
             toast('Реєстрація успішна! Тепер увійдіть.');
-            switchMode(); // Перемикаємо на вхід
+            switchMode();
             submitBtn.disabled = false;
             submitBtn.textContent = 'Увійти';
         }
@@ -189,13 +226,9 @@ function initAuth() {
         app.classList.add('active');
         initAssistantWidget();
         checkAndApplyStreakFreeze();
-        if (shouldShowLanguageChoice()) {
-            navigate('choose-language');
-        } else if (shouldShowOnboarding()) {
-            navigate('onboarding');
-        } else {
-            navigate('home');
-        }
+        
+        const route = getInitialRoute();
+        navigate(route);
     }
 }
 
