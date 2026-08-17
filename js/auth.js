@@ -7,6 +7,16 @@
 // =====================================================================
 let isLogin = true;
 
+// ---- Допоміжна функція для визначення, чи показувати вибір мови ----
+function shouldShowLanguageChoice() {
+    // Якщо _targetLangChosen вже true – не показуємо
+    if (STATE && STATE._targetLangChosen) return false;
+    // Якщо є дані – не показуємо
+    if (STATE && hasExistingData()) return false;
+    // Для нових користувачів – показуємо
+    return true;
+}
+
 function initAuth() {
     const authPage = document.getElementById('authPage');
     const app = document.getElementById('app');
@@ -195,7 +205,7 @@ function initAuth() {
             // Успішний вхід – редірект відбудеться в onAuthStateChanged
             currentUser = login;
             isGuest = false;
-            saveSession(currentUser, false);
+            // ❌ ВИДАЛЕНО: saveSession(currentUser, false); – більше не потрібно
             authPage.style.display = 'none';
             app.classList.add('active');
             initAssistantWidget();
@@ -222,15 +232,20 @@ function initAuth() {
     loginInput.onkeydown = (e) => { if (e.key === 'Enter') submitBtn.click(); };
     passwordInput.onkeydown = (e) => { if (e.key === 'Enter') submitBtn.click(); };
 
-    // ---- Відновлення сесії ----
-    if (loadSession()) {
-        authPage.style.display = 'none';
-        app.classList.add('active');
-        initAssistantWidget();
-        checkAndApplyStreakFreeze();
-        
-        const route = getInitialRoute();
-        navigate(route);
+    // ---- Відновлення сесії (ТІЛЬКИ ДЛЯ ГОСТІВ) ----
+    const session = loadSession();
+    if (session && session.guest) {
+        const guestState = getGuestState();
+        if (guestState) {
+            STATE = ensureStateDefaults(guestState);
+            currentUser = 'guest';
+            isGuest = true;
+            authPage.style.display = 'none';
+            app.classList.add('active');
+            initAssistantWidget();
+            checkAndApplyStreakFreeze();
+            navigate(getInitialRoute());
+        }
     }
 }
 

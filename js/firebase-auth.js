@@ -126,18 +126,8 @@ async function loadFromFirestore(uid) {
   }
 }
 
-// Дебаунс: кожен виклик updateState() у коді (39 місць по всьому застосунку —
-// XP, стрік, збережені слова, зміна мови і т.д.) раніше одразу слав ОКРЕМИЙ
-// .set() у Firestore без жодної затримки чи об'єднання. Якщо десь підряд
-// (навіть через баг чи гонку умов) виникало багато таких викликів за
-// короткий час, черга записів клієнтського SDK переповнювалась і Firestore
-// падав з "resource-exhausted: Write stream exhausted maximum allowed
-// queued writes" — застосунок при цьому продовжував відкладати нові спроби,
-// не отримуючи підтвердження. Тепер записи об'єднуються: кілька викликів
-// підряд протягом DEBOUNCE_MS шлють лише ОДИН реальний запит з останнім
-// (найповнішим) знімком стану — це безпечно, бо updateState() і так завжди
-// передає ПОВНИЙ STATE, а не часткове оновлення.
-const FIRESTORE_SAVE_DEBOUNCE_MS = 800;
+// Дебаунс: зменшено до 300 мс для швидшого збереження
+const FIRESTORE_SAVE_DEBOUNCE_MS = 300;
 let _firestoreSaveTimer = null;
 let _firestoreSavePending = null;
 
@@ -231,3 +221,11 @@ async function signOutFromFirebase() {
     console.error('❌ Помилка виходу:', e);
   }
 }
+
+// Експортуємо необхідні функції у глобальний простір (якщо потрібно)
+window.waitForFirebase = waitForFirebase;
+window.loadFromFirestore = loadFromFirestore;
+window.saveToFirestore = saveToFirestore;
+window.signUpWithFirebase = signUpWithFirebase;
+window.signInWithFirebase = signInWithFirebase;
+window.signOutFromFirebase = signOutFromFirebase;

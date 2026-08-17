@@ -85,8 +85,7 @@ function getUsers() { try { return JSON.parse(localStorage.getItem(USERS_KEY)) |
 function saveUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
 
 function getGuestState() {
-    try { const raw = localStorage.getItem(GUEST_KEY); if (raw) { const d = JSON.parse(raw); return ensureStateDefaults(
-            d); } } catch { }
+    try { const raw = localStorage.getItem(GUEST_KEY); if (raw) { const d = JSON.parse(raw); return ensureStateDefaults(d); } } catch { }
     return null;
 }
 
@@ -94,13 +93,34 @@ function saveGuestState(state) {
     localStorage.setItem(GUEST_KEY, JSON.stringify(state));
 }
 
-// Примітка щодо безпеки: раніше тут була функція createUser(login,
-// password), яка зберігала пароль ВІДКРИТИМ ТЕКСТОМ у localStorage.
-// Вона ніде не викликалась (реальна автентифікація йде тільки через
-// Firebase — signInWithFirebase/signUpWithFirebase), тож це був
-// мертвий, але небезпечний код. Видалено. getUserData/saveUserData
-// нижче — це лише локальний кеш ВЛАСНОГО стану користувача (без
-// пароля), паралельний до Firestore, для офлайн-стійкості.
+// ---- Нова глобальна функція для перевірки наявності даних ----
+function hasExistingData(state) {
+    if (!state) state = STATE;
+    if (!state) return false;
+    // Перевіряємо langData – це головне сховище прогресу по мовах
+    if (state.langData && typeof state.langData === 'object') {
+        for (const lang in state.langData) {
+            const data = state.langData[lang];
+            if (data) {
+                if (data.xp > 0) return true;
+                if (data.stats && data.stats.wordsSeen && Object.keys(data.stats.wordsSeen).length > 0) return true;
+                if (data.stats && data.stats.testsCompleted > 0) return true;
+                if (data.customWords && data.customWords.length > 0) return true;
+                if (data.srs && Object.keys(data.srs).length > 0) return true;
+                if (data.stats && data.stats.activityDates && data.stats.activityDates.length > 0) return true;
+            }
+        }
+    }
+    // Перевіряємо плоскі поля (старі дані)
+    if (state.xp > 0) return true;
+    if (state.stats && state.stats.wordsSeen && Object.keys(state.stats.wordsSeen).length > 0) return true;
+    if (state.stats && state.stats.testsCompleted > 0) return true;
+    if (state.customWords && state.customWords.length > 0) return true;
+    if (state._onboardingDone) return true;
+    if (state._targetLangChosen) return true;
+    if (state.targetLang && state.targetLang !== 'no') return true;
+    return false;
+}
 
 function ensureStateDefaults(state) {
     if (!state) return state;
@@ -110,8 +130,7 @@ function ensureStateDefaults(state) {
     if (!state.trollGear.equipped) state.trollGear.equipped = { hat: null, glasses: null, bg: null };
     if (!Array.isArray(state.trollGear.unlocked)) state.trollGear.unlocked = [];
     if (!Array.isArray(state.lessonsDone)) state.lessonsDone = [];
-    if (!state.stats) state.stats = { wordsSeen: {}, testsCompleted: 0, sessionCount: 0, activityDates: [],
-        bestStreak: 0 };
+    if (!state.stats) state.stats = { wordsSeen: {}, testsCompleted: 0, sessionCount: 0, activityDates: [], bestStreak: 0 };
     if (typeof state.streak !== 'number') state.streak = 0;
     if (typeof state.leaderboardScore !== 'number') state.leaderboardScore = 0;
     if (!Array.isArray(state.assistantChat)) state.assistantChat = [];
@@ -126,38 +145,8 @@ function ensureStateDefaults(state) {
     if (!state.targetLang) state.targetLang = 'no';
     
     // 🔥 ВАЖЛИВО: Визначаємо, чи користувач вже існує (має дані)
-    // Якщо є хоч якісь дані – онбординг автоматично позначається як завершений
-    const hasExistingData = (function checkExistingData() {
-        // Перевіряємо langData – це головне сховище прогресу по мовах
-        if (state.langData && typeof state.langData === 'object') {
-            for (const lang in state.langData) {
-                const data = state.langData[lang];
-                if (data) {
-                    // Якщо є XP, вивчені слова, тести, кастомні слова або SRS
-                    if (data.xp > 0) return true;
-                    if (data.stats && data.stats.wordsSeen && Object.keys(data.stats.wordsSeen).length > 0) return true;
-                    if (data.stats && data.stats.testsCompleted > 0) return true;
-                    if (data.customWords && data.customWords.length > 0) return true;
-                    if (data.srs && Object.keys(data.srs).length > 0) return true;
-                    if (data.stats && data.stats.activityDates && data.stats.activityDates.length > 0) return true;
-                }
-            }
-        }
-        // Перевіряємо плоскі поля (старі дані)
-        if (state.xp > 0) return true;
-        if (state.stats && state.stats.wordsSeen && Object.keys(state.stats.wordsSeen).length > 0) return true;
-        if (state.stats && state.stats.testsCompleted > 0) return true;
-        if (state.customWords && state.customWords.length > 0) return true;
-        // Якщо є ім'я (не гість) або онбординг вже позначено
-        if (state._onboardingDone) return true;
-        if (state._targetLangChosen) return true;
-        // Якщо користувач вже вибрав мову або має прогрес – вважаємо існуючим
-        if (state.targetLang && state.targetLang !== 'no') return true;
-        return false;
-    })();
-
-    // Якщо користувач має дані – позначаємо онбординг як завершений
-    if (hasExistingData) {
+    // Використовуємо глобальну функцію hasExistingData
+    if (hasExistingData(state)) {
         state._onboardingDone = true;
         state._targetLangChosen = true;
     }
@@ -214,7 +203,7 @@ function loadSession() {
                     currentUser = 'guest';
                     STATE = gs;
                     isGuest = true;
-                    return true;
+                    return { guest: true };
                 }
                 return false;
             }
@@ -223,7 +212,7 @@ function loadSession() {
                 currentUser = login;
                 STATE = data;
                 isGuest = false;
-                return true;
+                return { guest: false };
             }
         } catch (e) { console.error('Session load error:', e); }
     }
@@ -252,3 +241,17 @@ function updateState() {
         }
     }
 }
+
+// ---- Нова функція для встановлення мови вивчення ----
+function setTargetLanguage(lang) {
+    if (!STATE) return;
+    STATE.targetLang = lang;
+    STATE._targetLangChosen = true;
+    // Якщо ще немає langData для цієї мови – створюємо
+    if (!STATE.langData) STATE.langData = {};
+    if (!STATE.langData[lang]) STATE.langData[lang] = defaultLangData();
+    updateState();
+}
+// Експортуємо для використання в інших файлах
+window.setTargetLanguage = setTargetLanguage;
+window.hasExistingData = hasExistingData;
