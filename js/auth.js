@@ -7,6 +7,16 @@
 // =====================================================================
 let isLogin = true;
 
+// ---- Допоміжна функція для визначення, чи показувати вибір мови ----
+function shouldShowLanguageChoice() {
+    // Якщо _targetLangChosen вже true – не показуємо
+    if (STATE && STATE._targetLangChosen) return false;
+    // Якщо є дані – не показуємо
+    if (STATE && hasExistingData(STATE)) return false;
+    // Для нових користувачів – показуємо
+    return true;
+}
+
 function initAuth() {
     const authPage = document.getElementById('authPage');
     const app = document.getElementById('app');
@@ -17,15 +27,6 @@ function initAuth() {
     const toggleLink = document.getElementById('authToggle');
     const titleEl = document.getElementById('authTitle');
 
-    // ---- Визначення початкового маршруту після входу ----
-    // Раніше цей блок (shouldShowLanguageChoice/shouldShowOnboarding)
-    // дослівно повторювався в 3 місцях (гість/логін/відновлена сесія).
-    // Винесено в одну функцію — і заразом додано захист від показу
-    // онбордингу ІСНУЮЧИМ користувачам: якщо в акаунті вже є реальний
-    // прогрес (XP, вивчені слова, пройдені тести, власні слова, SRS-дані
-    // по будь-якій мові) — це точно не новачок, навіть якщо прапорець
-    // _onboardingDone з якоїсь причини не виставлений (наприклад, дані
-    // імпортовані/відновлені вручну).
     function getInitialRoute() {
         if (STATE) {
             const hasData = (function checkData() {
@@ -42,7 +43,6 @@ function initAuth() {
                         }
                     }
                 }
-                // Перевіряємо й старі "плоскі" поля (дані до переходу на langData)
                 if (STATE.xp > 0) return true;
                 if (STATE.stats && STATE.stats.wordsSeen && Object.keys(STATE.stats.wordsSeen).length > 0) return true;
                 if (STATE.stats && STATE.stats.testsCompleted > 0) return true;
@@ -162,7 +162,6 @@ function initAuth() {
             return;
         }
 
-        // Блокуємо кнопку, щоб уникнути подвійних кліків
         submitBtn.disabled = true;
         submitBtn.textContent = '⏳ Зачекайте...';
         errorEl.textContent = '';
@@ -194,7 +193,7 @@ function initAuth() {
             // Успішний вхід – редірект відбудеться в onAuthStateChanged
             currentUser = login;
             isGuest = false;
-            saveSession(currentUser, false);
+            // ❌ ВИДАЛЕНО: saveSession(currentUser, false); – більше не потрібно
             authPage.style.display = 'none';
             app.classList.add('active');
             initAssistantWidget();
@@ -210,7 +209,7 @@ function initAuth() {
                 return;
             }
             toast('Реєстрація успішна! Тепер увійдіть.');
-            switchMode(); // Перемикаємо на вхід
+            switchMode();
             submitBtn.disabled = false;
             submitBtn.textContent = 'Увійти';
         }
@@ -219,13 +218,20 @@ function initAuth() {
     loginInput.onkeydown = (e) => { if (e.key === 'Enter') submitBtn.click(); };
     passwordInput.onkeydown = (e) => { if (e.key === 'Enter') submitBtn.click(); };
 
-    // ---- Відновлення сесії ----
-    if (loadSession()) {
-        authPage.style.display = 'none';
-        app.classList.add('active');
-        initAssistantWidget();
-        checkAndApplyStreakFreeze();
-        navigate(getInitialRoute());
+    // ---- Відновлення сесії (ТІЛЬКИ ДЛЯ ГОСТІВ) ----
+    const session = loadSession();
+    if (session && session.guest) {
+        const guestState = getGuestState();
+        if (guestState) {
+            STATE = ensureStateDefaults(guestState);
+            currentUser = 'guest';
+            isGuest = true;
+            authPage.style.display = 'none';
+            app.classList.add('active');
+            initAssistantWidget();
+            checkAndApplyStreakFreeze();
+            navigate(getInitialRoute());
+        }
     }
 }
 

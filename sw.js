@@ -5,11 +5,11 @@
 // зовнішні запити (Firebase, CDN, шрифти) НЕ перехоплюються — вони
 // завантажуються безпосередньо з мережі, щоб уникнути помилок.
 //
-// CACHE_NAME треба бампати щоразу, коли міняється JS/CSS/HTML застосунку —
-// activate() видаляє лише кеші з ІНШОЮ назвою, тож поки назва не зміниться,
-// стара версія файлів (у т.ч. вже полагоджені баги) може роками "застрягати"
-// в кеші користувача, і stale-while-revalidate віддаватиме її першою.
-const CACHE_NAME = 'fjord-shell-v3';
+// 🔥 ВАЖЛИВО: CACHE_NAME тепер динамічний (Date.now()), щоб при
+// кожному оновленні сторінки кеш оновлювався автоматично. Старі кеші
+// видаляються в activate.
+// =====================================================================
+const CACHE_NAME = 'fjord-shell-' + Date.now();
 
 const APP_SHELL = [
   './',
@@ -58,24 +58,26 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((names) =>
-      Promise.all(names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n)))
+      Promise.all(
+        names
+          .filter((n) => n !== CACHE_NAME)
+          .map((n) => caches.delete(n))
+      )
     ).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', (event) => {
   const req = event.request;
-  if (req.method !== 'GET') return; // POST-запити не кешуємо
+  if (req.method !== 'GET') return;
 
   const url = new URL(req.url);
   const isSameOrigin = url.origin === self.location.origin;
 
-  // Зовнішні запити (Firebase, CDN, шрифти) — пропускаємо, не перехоплюємо
   if (!isSameOrigin) {
     return;
   }
 
-  // Для власних файлів застосунку — stale-while-revalidate
   event.respondWith(
     caches.match(req).then((cached) => {
       const network = fetch(req).then((res) => {
