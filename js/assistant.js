@@ -106,6 +106,11 @@ async function callAiRaw(mode, systemPromptText, userText, history, lang) {
 
 async function callAiAssistant(userText, history) {
     const lang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+    // Worker ігнорує system, який шле клієнт (у нього свій, спільний для
+    // всіх), і читає мову вивчення з тексту самого повідомлення — тож
+    // додаємо приховану підказку з мовою на початок (у чаті користувач
+    // її не бачить, бо renderMessage() малює оригінальний userText,
+    // а не те, що йде в AI).
     const langHint = (typeof getLanguage === 'function' && typeof STATE !== 'undefined' && STATE && STATE.targetLang && STATE.targetLang !== 'no')
         ? `[Користувач зараз вивчає мову: ${getLanguage(STATE.targetLang).name.uk}] `
         : '';
@@ -146,40 +151,45 @@ async function checkWritingWithAI(level, topic, taskPrompt, studentText) {
 //  AI-ГЕНЕРАЦІЯ НОВОГО КОНТЕНТУ
 // =====================================================================
 function parseAiJson(raw) {
-    try {
-        const cleaned = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
-        const start = cleaned.indexOf('{');
-        const startArr = cleaned.indexOf('[');
-        let from = start;
-        if (startArr !== -1 && (start === -1 || startArr < start)) from = startArr;
-        if (from === -1) return JSON.parse(cleaned);
-        const openCh = cleaned[from];
-        const closeCh = openCh === '{' ? '}' : ']';
-        let depth = 0;
-        let inString = false;
-        let escaped = false;
-        let end = -1;
-        for (let i = from; i < cleaned.length; i++) {
-            const ch = cleaned[i];
-            if (inString) {
-                if (escaped) escaped = false;
-                else if (ch === '\\') escaped = true;
-                else if (ch === '"') inString = false;
-                continue;
-            }
-            if (ch === '"') { inString = true; continue; }
-            if (ch === openCh) depth++;
-            else if (ch === closeCh) {
-                depth--;
-                if (depth === 0) { end = i; break; }
-            }
+    const cleaned = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
+    const start = cleaned.indexOf('{');
+    const startArr = cleaned.indexOf('[');
+    let from = start;
+    if (startArr !== -1 && (start === -1 || startArr < start)) from = startArr;
+    if (from === -1) return JSON.parse(cleaned); // немає ні { ні [ — нехай впаде з нормальною помилкою
+    const openCh = cleaned[from];
+    const closeCh = openCh === '{' ? '}' : ']';
+    // Раніше тут просто бралось "від першої дужки до кінця рядка" —
+    // працювало, лише поки AI повертав ЧИСТО JSON і нічого більше. Якщо
+    // модель дописувала бодай один зайвий символ/рядок ПІСЛЯ JSON
+    // (пояснення, порожній рядок з крапкою тощо — трапляється, особливо
+    // коли за лаштунками сервер не впізнав режим запиту і відповів у
+    // звичайному "розмовному" стилі замість строгого JSON) — JSON.parse
+    // падав з "Unexpected non-whitespace character after JSON data".
+    // Тепер шукаємо ВІДПОВІДНУ закриваючу дужку (рахуючи вкладеність і
+    // ігноруючи дужки всередині рядкових значень), і парсимо лише цей
+    // збалансований шматок — усе, що йде далі, просто відкидається.
+    let depth = 0;
+    let inString = false;
+    let escaped = false;
+    let end = -1;
+    for (let i = from; i < cleaned.length; i++) {
+        const ch = cleaned[i];
+        if (inString) {
+            if (escaped) escaped = false;
+            else if (ch === '\\') escaped = true;
+            else if (ch === '"') inString = false;
+            continue;
         }
-        const sliced = end !== -1 ? cleaned.slice(from, end + 1) : cleaned.slice(from);
-        return JSON.parse(sliced);
-    } catch (e) {
-        console.error('[AI] Помилка парсингу JSON:', e, 'raw:', raw);
-        throw new Error('Invalid JSON from AI');
+        if (ch === '"') { inString = true; continue; }
+        if (ch === openCh) depth++;
+        else if (ch === closeCh) {
+            depth--;
+            if (depth === 0) { end = i; break; }
+        }
     }
+    const sliced = end !== -1 ? cleaned.slice(from, end + 1) : cleaned.slice(from);
+    return JSON.parse(sliced);
 }
 
 async function generateNorskTaskAI(level, mode) {
@@ -213,7 +223,19 @@ async function generateVocabWordsAI(level, existingWords) {
     const targetLangName = typeof getLanguage === 'function' ? getLanguage(targetLang).name.uk : 'норвезької';
     const words = Array.isArray(existingWords) ? existingWords : [];
     const topics = [...new Set(words.map(w => w.t).filter(Boolean))];
+    // Раніше сюди йшли лише НАЗВИ ТЕМ ("Їжа", "Транспорт") — AI не бачив
+    // самих слів, тому раз у раз пропонував ті самі базові варіанти.
+    // Тепер явно передаємо список уже доданих слів (мовою вивчення), щоб
+    // AI дійсно міг їх уникнути. Обрізаємо до 150, щоб не роздувати
+    // запит для великих словників — цього достатньо, щоб покрити типовий
+    // стартовий набір рівня.
     const avoidList = words.slice(-150).map(w => w.no).filter(Boolean).join(', ');
+    // Та сама причина, що й у generateStarterVocab (languages.js): слова
+    // без полів en/ru/en_ex/ru_ex мовчки показують український переклад
+    // навіть тим, хто вибрав англійський чи російський інтерфейс —
+    // wordTranslation()/wordExampleTranslation() просто не мають звідки
+    // взяти інший переклад. Ця кнопка ("✨ Додати ще слів") генерувала
+    // слова саме без цих полів.
     const userMsg =
         `Рівень: ${level}. Наявні теми у словнику: ${topics.join(', ') || 'немає даних'}. ` +
         (avoidList ? `Ці слова вже є у словнику користувача, НЕ повторюй їх і не пропонуй їхні прямі синоніми: ${avoidList}. ` : '') +

@@ -642,6 +642,38 @@
     ];
 
     // =====================================================================
+    //  АБЕТКА
+    // =====================================================================
+    const ALPHABET = [
+        { letter: "A a", name: "ей", sound: "«ей», у словах часто як «е» чи «а»", example: "cat", example_uk: "кіт" },
+        { letter: "B b", name: "бі", sound: "як українське «б»", example: "book", example_uk: "книга" },
+        { letter: "C c", name: "сі", sound: "як «к» або «с» залежно від слова", example: "cup", example_uk: "чашка" },
+        { letter: "D d", name: "ді", sound: "як українське «д»", example: "dog", example_uk: "собака" },
+        { letter: "E e", name: "і", sound: "у словах часто як «е»", example: "egg", example_uk: "яйце" },
+        { letter: "F f", name: "еф", sound: "як українське «ф»", example: "fish", example_uk: "риба" },
+        { letter: "G g", name: "джі", sound: "як «ґ» або «дж» залежно від слова", example: "green", example_uk: "зелений" },
+        { letter: "H h", name: "ейч", sound: "легке видихання, як в «hello»", example: "house", example_uk: "будинок" },
+        { letter: "I i", name: "ай", sound: "у словах часто як коротке «і»", example: "ink", example_uk: "чорнило" },
+        { letter: "J j", name: "джей", sound: "як українське «дж»", example: "jam", example_uk: "варення" },
+        { letter: "K k", name: "кей", sound: "як українське «к»", example: "key", example_uk: "ключ" },
+        { letter: "L l", name: "ел", sound: "як українське «л»", example: "lion", example_uk: "лев" },
+        { letter: "M m", name: "ем", sound: "як українське «м»", example: "moon", example_uk: "місяць" },
+        { letter: "N n", name: "ен", sound: "як українське «н»", example: "night", example_uk: "ніч" },
+        { letter: "O o", name: "оу", sound: "у словах часто як коротке «о»", example: "orange", example_uk: "апельсин" },
+        { letter: "P p", name: "пі", sound: "як українське «п»", example: "pen", example_uk: "ручка" },
+        { letter: "Q q", name: "к'ю", sound: "завжди разом з «u» — «кв»", example: "queen", example_uk: "королева" },
+        { letter: "R r", name: "ар", sound: "легше за українське «р», без розкату", example: "red", example_uk: "червоний" },
+        { letter: "S s", name: "ес", sound: "як українське «с»", example: "sun", example_uk: "сонце" },
+        { letter: "T t", name: "ті", sound: "як українське «т»", example: "table", example_uk: "стіл" },
+        { letter: "U u", name: "ю", sound: "у словах часто як «а» чи «ю»", example: "umbrella", example_uk: "парасолька" },
+        { letter: "V v", name: "ві", sound: "як українське «в», але зуби торкаються губи", example: "van", example_uk: "фургон" },
+        { letter: "W w", name: "дабл-ю", sound: "як коротке українське «у»", example: "water", example_uk: "вода" },
+        { letter: "X x", name: "екс", sound: "як «кс»", example: "box", example_uk: "коробка" },
+        { letter: "Y y", name: "вай", sound: "як «й» на початку слова, «і» в кінці", example: "yellow", example_uk: "жовтий" },
+        { letter: "Z z", name: "зед", sound: "як українське «з»", example: "zoo", example_uk: "зоопарк" },
+    ];
+
+    // =====================================================================
     //  РЕЄСТРАЦІЯ ДАНИХ У ГЛОБАЛЬНИЙ ОБ'ЄКТ
     // =====================================================================
     window.LANG_DATA = window.LANG_DATA || {};
@@ -650,5 +682,6 @@
         GRAMMAR,
         NORSKPROVE_TASKS,
         LEVEL_TEST,
+        ALPHABET,
     };
 })();

@@ -50,6 +50,12 @@ function viewAdmin() {
                     <p style="color:var(--ink-soft);font-size:.85rem;">Згенерувати й опублікувати граматичні правила для будь-якої мови й рівня</p>
                 </div>
 
+                <div class="card admin-card" onclick="navigate('admin-alphabet-gen')" style="cursor:pointer;transition:all .2s;">
+                    <div style="font-size:2rem;margin-bottom:8px;">🔤</div>
+                    <h3>Спільна абетка</h3>
+                    <p style="color:var(--ink-soft);font-size:.85rem;">Згенерувати й опублікувати абетку (літери + вимова + приклади) для будь-якої мови</p>
+                </div>
+
                 <div class="card admin-card" onclick="navigate('admin-books')" style="cursor:pointer;transition:all .2s;">
                     <div style="font-size:2rem;margin-bottom:8px;">📚</div>
                     <h3>Книги</h3>
@@ -1072,6 +1078,163 @@ function initAdminSharedGrammar() {
     const discardBtn = document.getElementById('agDiscardBtn');
     if (discardBtn) discardBtn.onclick = () => {
         pendingRules = null;
+        previewCard.style.display = 'none';
+    };
+}
+
+// =====================================================================
+//  СТОРІНКА: Спільна абетка (адмін генерує й публікує через AI, одна
+//  абетка на мову — на відміну від граматики/словника, тут нема поділу
+//  по рівнях)
+// =====================================================================
+function viewAdminSharedAlphabet() {
+    if (!STATE || !STATE.admin) return errorAccessDenied();
+
+    const nonNorwegian = LANGUAGES.filter(l => l.code !== 'no');
+
+    return `
+        <div class="view">
+            <h1>🔤 Спільна абетка</h1>
+            <p style="color:var(--ink-soft);margin-bottom:16px;">
+                Згенеруйте абетку для мови, перегляньте результат і опублікуйте — після
+                цього її одразу побачать усі користувачі, які вчать цю мову, у розділі
+                "Основи". На відміну від граматики й словника, тут нема поділу по рівнях —
+                одна абетка на мову.
+            </p>
+
+            <div class="card" style="margin-bottom:16px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div class="field">
+                        <label>Мова</label>
+                        <select id="aaLang">
+                            ${nonNorwegian.map(l => `<option value="${l.code}">${l.flag} ${l.name.uk}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="field" style="display:flex;align-items:flex-end;">
+                        <button class="btn btn-primary btn-block" id="aaGenerateBtn">✨ Згенерувати</button>
+                    </div>
+                </div>
+                <p id="aaStatus" style="color:var(--ink-soft);font-size:.85rem;margin-top:10px;"></p>
+            </div>
+
+            <div class="card" id="aaExistingCard" style="margin-bottom:16px;">
+                <h3>📚 Уже опубліковано</h3>
+                <div id="aaExistingList" style="color:var(--ink-soft);font-size:.85rem;">Завантаження…</div>
+            </div>
+
+            <div class="card" id="aaPreviewCard" style="display:none;">
+                <h3>👀 Прев'ю (<span id="aaPreviewCount">0</span> літер)</h3>
+                <div id="aaPreviewList" style="max-height:340px;overflow-y:auto;margin:12px 0;"></div>
+                <button class="btn btn-primary" id="aaPublishBtn">📤 Опублікувати для всіх користувачів</button>
+                <button class="btn btn-ghost" id="aaDiscardBtn">🗑️ Відхилити</button>
+            </div>
+
+            <button class="btn btn-ghost btn-sm" onclick="navigate('admin')" style="margin-top:12px;">← Назад до панелі</button>
+        </div>
+    `;
+}
+
+function initAdminSharedAlphabet() {
+    const genBtn = document.getElementById('aaGenerateBtn');
+    const statusEl = document.getElementById('aaStatus');
+    const previewCard = document.getElementById('aaPreviewCard');
+    const previewList = document.getElementById('aaPreviewList');
+    const previewCount = document.getElementById('aaPreviewCount');
+    const existingList = document.getElementById('aaExistingList');
+    if (!genBtn) return; // не та сторінка
+
+    let pendingLetters = null;
+    let pendingLang = null;
+
+    async function refreshExisting() {
+        if (!firebaseReady || !firebaseDb) {
+            existingList.textContent = 'Firestore недоступний.';
+            return;
+        }
+        try {
+            const snap = await firebaseDb.collection('sharedAlphabet').get();
+            if (snap.empty) {
+                existingList.textContent = 'Ще нічого не опубліковано.';
+                return;
+            }
+            const rows = [];
+            snap.forEach(doc => {
+                const d = doc.data();
+                const lang = getLanguage(d.lang);
+                rows.push(`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line-soft);">
+                    <span>${lang.flag} ${lang.name.uk}</span>
+                    <span>${d.count || (d.letters||[]).length} літер</span>
+                </div>`);
+            });
+            existingList.innerHTML = rows.join('');
+        } catch (e) {
+            console.error('[Адмін] Помилка завантаження списку абеток:', e);
+            existingList.textContent = 'Помилка завантаження.';
+        }
+    }
+    refreshExisting();
+
+    genBtn.onclick = async () => {
+        const lang = document.getElementById('aaLang').value;
+        genBtn.disabled = true;
+        const original = genBtn.textContent;
+        statusEl.textContent = 'Генерую абетку…';
+        try {
+            const letters = await generateAlphabetWithAI(lang);
+            if (!Array.isArray(letters) || !letters.length) {
+                throw new Error('AI повернула порожній або некоректний результат');
+            }
+            pendingLetters = letters;
+            pendingLang = lang;
+            previewCount.textContent = letters.length;
+            previewList.innerHTML = letters.map(l => `
+                <div style="padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:.85rem;">
+                    <strong>${escHtml(l.letter)}</strong> — ${escHtml(l.name)}
+                    <div style="color:var(--ink-soft);">${escHtml(l.sound)}</div>
+                </div>
+            `).join('');
+            previewCard.style.display = 'block';
+            statusEl.textContent = `Готово: ${letters.length} літер. Перевірте прев'ю нижче й опублікуйте.`;
+        } catch (e) {
+            console.error('[Адмін] Помилка генерації абетки:', e);
+            let reason = e && e.message || 'невідома помилка';
+            if (e && e.code === 'PROXY_ERROR') {
+                reason = `код ${e.status}` + (e.detail ? `: ${String(e.detail).slice(0, 200)}` : '');
+                if (e.status === 429) reason += ' (забагато запитів підряд — зачекайте хвилину й спробуйте знову)';
+                if (e.status === 403) reason += ' (Worker не дозволяє цей сайт як джерело запиту — перевірте ALLOWED_ORIGINS)';
+            } else if (e && e.code === 'NETWORK_ERROR') {
+                reason = 'не вдалось з\'єднатися з AI-проксі (мережа/CORS/URL Worker\'а)';
+            } else if (e && e.code === 'NOT_CONFIGURED') {
+                reason = 'адреса AI-проксі (AI_PROXY_URL) не налаштована на сайті';
+            }
+            statusEl.textContent = `⚠️ Помилка генерації: ${reason}`;
+        } finally {
+            genBtn.disabled = false;
+            genBtn.textContent = original;
+        }
+    };
+
+    const publishBtn = document.getElementById('aaPublishBtn');
+    if (publishBtn) publishBtn.onclick = async () => {
+        if (!pendingLetters || !pendingLetters.length) return;
+        publishBtn.disabled = true;
+        try {
+            await saveSharedAlphabet(pendingLang, pendingLetters);
+            toast(`✅ Опубліковано абетку (${pendingLetters.length} літер) для ${getLanguage(pendingLang).name.uk}`);
+            previewCard.style.display = 'none';
+            pendingLetters = null;
+            refreshExisting();
+        } catch (e) {
+            console.error('[Адмін] Помилка публікації абетки:', e);
+            toast('⚠️ Не вдалося опублікувати. Перевірте доступ до Firestore.');
+        } finally {
+            publishBtn.disabled = false;
+        }
+    };
+
+    const discardBtn = document.getElementById('aaDiscardBtn');
+    if (discardBtn) discardBtn.onclick = () => {
+        pendingLetters = null;
         previewCard.style.display = 'none';
     };
 }

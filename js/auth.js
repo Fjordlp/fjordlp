@@ -7,16 +7,6 @@
 // =====================================================================
 let isLogin = true;
 
-// ---- Допоміжна функція для визначення, чи показувати вибір мови ----
-function shouldShowLanguageChoice() {
-    // Якщо _targetLangChosen вже true – не показуємо
-    if (STATE && STATE._targetLangChosen) return false;
-    // Якщо є дані – не показуємо
-    if (STATE && hasExistingData()) return false;
-    // Для нових користувачів – показуємо
-    return true;
-}
-
 function initAuth() {
     const authPage = document.getElementById('authPage');
     const app = document.getElementById('app');
@@ -26,6 +16,54 @@ function initAuth() {
     const submitBtn = document.getElementById('authSubmit');
     const toggleLink = document.getElementById('authToggle');
     const titleEl = document.getElementById('authTitle');
+
+    // ---- Визначення початкового маршруту після входу ----
+    // Раніше цей блок (shouldShowLanguageChoice/shouldShowOnboarding)
+    // дослівно повторювався в 3 місцях (гість/логін/відновлена сесія).
+    // Винесено в одну функцію — і заразом додано захист від показу
+    // онбордингу ІСНУЮЧИМ користувачам: якщо в акаунті вже є реальний
+    // прогрес (XP, вивчені слова, пройдені тести, власні слова, SRS-дані
+    // по будь-якій мові) — це точно не новачок, навіть якщо прапорець
+    // _onboardingDone з якоїсь причини не виставлений (наприклад, дані
+    // імпортовані/відновлені вручну).
+    function getInitialRoute() {
+        if (STATE) {
+            const hasData = (function checkData() {
+                if (STATE.langData && typeof STATE.langData === 'object') {
+                    for (const lang in STATE.langData) {
+                        const data = STATE.langData[lang];
+                        if (data) {
+                            if (data.xp > 0) return true;
+                            if (data.stats && data.stats.wordsSeen && Object.keys(data.stats.wordsSeen).length > 0) return true;
+                            if (data.stats && data.stats.testsCompleted > 0) return true;
+                            if (data.customWords && data.customWords.length > 0) return true;
+                            if (data.srs && Object.keys(data.srs).length > 0) return true;
+                            if (data.stats && data.stats.activityDates && data.stats.activityDates.length > 0) return true;
+                        }
+                    }
+                }
+                // Перевіряємо й старі "плоскі" поля (дані до переходу на langData)
+                if (STATE.xp > 0) return true;
+                if (STATE.stats && STATE.stats.wordsSeen && Object.keys(STATE.stats.wordsSeen).length > 0) return true;
+                if (STATE.stats && STATE.stats.testsCompleted > 0) return true;
+                if (STATE.customWords && STATE.customWords.length > 0) return true;
+                if (STATE.targetLang && STATE.targetLang !== 'no') return true;
+                if (STATE.name && STATE.name !== 'Гість') return true;
+                return false;
+            })();
+
+            if (hasData) {
+                STATE._onboardingDone = true;
+                STATE._targetLangChosen = true;
+                updateState();
+                return 'home';
+            }
+        }
+
+        if (shouldShowLanguageChoice()) return 'choose-language';
+        if (shouldShowOnboarding()) return 'onboarding';
+        return 'home';
+    }
 
     function switchMode() {
         isLogin = !isLogin;
@@ -54,54 +92,6 @@ function initAuth() {
     const heroTrollEl = document.getElementById('heroTroll');
     if (heroTrollEl && typeof trollSVG === 'function') {
         heroTrollEl.innerHTML = trollSVG('happy', 88, {});
-    }
-
-    // ---- Допоміжна функція: визначення, куди перенаправити після входу ----
-    function getInitialRoute() {
-        // Примусово перевіряємо дані, щоб онбординг не показувався для існуючих користувачів
-        if (STATE) {
-            const hasData = (function checkData() {
-                // Перевіряємо langData (прогрес по мовах)
-                if (STATE.langData && typeof STATE.langData === 'object') {
-                    for (const lang in STATE.langData) {
-                        const data = STATE.langData[lang];
-                        if (data) {
-                            if (data.xp > 0) return true;
-                            if (data.stats && data.stats.wordsSeen && Object.keys(data.stats.wordsSeen).length > 0) return true;
-                            if (data.stats && data.stats.testsCompleted > 0) return true;
-                            if (data.customWords && data.customWords.length > 0) return true;
-                            if (data.srs && Object.keys(data.srs).length > 0) return true;
-                            if (data.stats && data.stats.activityDates && data.stats.activityDates.length > 0) return true;
-                        }
-                    }
-                }
-                // Перевіряємо плоскі поля (старі дані)
-                if (STATE.xp > 0) return true;
-                if (STATE.stats && STATE.stats.wordsSeen && Object.keys(STATE.stats.wordsSeen).length > 0) return true;
-                if (STATE.stats && STATE.stats.testsCompleted > 0) return true;
-                if (STATE.customWords && STATE.customWords.length > 0) return true;
-                if (STATE.targetLang && STATE.targetLang !== 'no') return true;
-                if (STATE.name && STATE.name !== 'Гість') return true;
-                return false;
-            })();
-
-            // Якщо є хоч якісь дані – це існуючий користувач, онбординг не показуємо
-            if (hasData) {
-                STATE._onboardingDone = true;
-                STATE._targetLangChosen = true;
-                updateState();
-                return 'home';
-            }
-        }
-
-        // Якщо даних немає – це новий користувач
-        if (shouldShowLanguageChoice()) {
-            return 'choose-language';
-        } else if (shouldShowOnboarding()) {
-            return 'onboarding';
-        } else {
-            return 'home';
-        }
     }
 
     // ---- Гостьовий вхід ----
@@ -133,9 +123,7 @@ function initAuth() {
         app.classList.add('active');
         initAssistantWidget();
         checkAndApplyStreakFreeze();
-        
-        const route = getInitialRoute();
-        navigate(route);
+        navigate(getInitialRoute());
         toast('🎮 Ласкаво просимо! Ви в режимі гостя. Дані зберігаються локально.');
     };
 
@@ -174,6 +162,7 @@ function initAuth() {
             return;
         }
 
+        // Блокуємо кнопку, щоб уникнути подвійних кліків
         submitBtn.disabled = true;
         submitBtn.textContent = '⏳ Зачекайте...';
         errorEl.textContent = '';
@@ -205,14 +194,12 @@ function initAuth() {
             // Успішний вхід – редірект відбудеться в onAuthStateChanged
             currentUser = login;
             isGuest = false;
-            // ❌ ВИДАЛЕНО: saveSession(currentUser, false); – більше не потрібно
+            saveSession(currentUser, false);
             authPage.style.display = 'none';
             app.classList.add('active');
             initAssistantWidget();
             checkAndApplyStreakFreeze();
-            
-            const route = getInitialRoute();
-            navigate(route);
+            navigate(getInitialRoute());
             toast(`Ласкаво просимо, ${STATE.name || login}!`);
         } else {
             const result = await signUpWithFirebase(login, password);
@@ -223,7 +210,7 @@ function initAuth() {
                 return;
             }
             toast('Реєстрація успішна! Тепер увійдіть.');
-            switchMode();
+            switchMode(); // Перемикаємо на вхід
             submitBtn.disabled = false;
             submitBtn.textContent = 'Увійти';
         }
@@ -232,20 +219,13 @@ function initAuth() {
     loginInput.onkeydown = (e) => { if (e.key === 'Enter') submitBtn.click(); };
     passwordInput.onkeydown = (e) => { if (e.key === 'Enter') submitBtn.click(); };
 
-    // ---- Відновлення сесії (ТІЛЬКИ ДЛЯ ГОСТІВ) ----
-    const session = loadSession();
-    if (session && session.guest) {
-        const guestState = getGuestState();
-        if (guestState) {
-            STATE = ensureStateDefaults(guestState);
-            currentUser = 'guest';
-            isGuest = true;
-            authPage.style.display = 'none';
-            app.classList.add('active');
-            initAssistantWidget();
-            checkAndApplyStreakFreeze();
-            navigate(getInitialRoute());
-        }
+    // ---- Відновлення сесії ----
+    if (loadSession()) {
+        authPage.style.display = 'none';
+        app.classList.add('active');
+        initAssistantWidget();
+        checkAndApplyStreakFreeze();
+        navigate(getInitialRoute());
     }
 }
 

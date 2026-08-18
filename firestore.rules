@@ -67,6 +67,12 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+    // Спільна абетка (той самий принцип): читати може будь-хто,
+    // публікувати — лише адмін.
+    match /sharedAlphabet/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
     // Книги (текст вставляє вручну адмін, суспільне надбання) — той самий
     // принцип: читати може будь-хто, публікувати/редагувати/видаляти — лише адмін.
     match /sharedBooks/{docId} {

@@ -38,6 +38,9 @@ function render() {
     if (ROUTE === 'admin-grammar-gen' && typeof initAdminSharedGrammar === 'function') {
         initAdminSharedGrammar();
     }
+    if (ROUTE === 'admin-alphabet-gen' && typeof initAdminSharedAlphabet === 'function') {
+        initAdminSharedAlphabet();
+    }
     if (ROUTE === 'admin-books' && typeof initAdminBooks === 'function') {
         initAdminBooks();
     }
@@ -67,22 +70,25 @@ function render() {
 const NAV_ROUTE_GROUPS = {
     flashcards: ['flashcards', 'flashsession'],
     tests: ['tests', 'test-mc', 'test-cloze', 'test-order', 'test-listen', 'test-translate'],
-    profile: ['profile', 'levels', 'leveltest'],
+    profile: ['profile', 'levels', 'leveltest', 'test-history'],
     tournaments: ['tournaments', 'tournament-play'],
     books: ['books', 'book-read'],
+    lessons: ['lessons', 'lesson-read'],
     story: ['story'],
-    admin: ['admin', 'admin-words', 'admin-tournaments', 'admin-daily', 'admin-users', 'admin-vocab-gen', 'admin-grammar-gen', 'admin-books', 'admin-daily-word'],
+    admin: ['admin', 'admin-words', 'admin-tournaments', 'admin-daily', 'admin-users', 'admin-vocab-gen', 'admin-grammar-gen', 'admin-alphabet-gen', 'admin-books', 'admin-daily-word'],
 };
 
 function updateNav() {
     const nav = document.getElementById('mainnav');
     const items = [
         ["home", t('nav_home')],
+        ["alphabet", t('nav_alphabet')],
         ["flashcards", t('nav_flashcards')],
         ["vocabulary", t('nav_vocabulary')],
         ["tests", t('nav_tests')],
         ["grammar", t('nav_grammar')],
         ["books", t('nav_books')],
+        ["lessons", t('nav_lessons')],
         ["story", t('nav_story')],
         ["troll", t('nav_troll')],
         ["profile", t('nav_profile')],
@@ -132,6 +138,8 @@ function renderView() {
     switch (ROUTE) {
         case 'home':
             return viewHome();
+        case 'alphabet':
+            return viewAlphabet();
         case 'flashcards':
             // Передаємо мову з SUBSTATE або з STATE
             const lang = SUBSTATE.lang || STATE.targetLang || 'no';
@@ -160,10 +168,16 @@ function renderView() {
             return viewBooksLibrary();
         case 'book-read':
             return viewBookReader();
+        case 'lessons':
+            return viewLessons();
+        case 'lesson-read':
+            return viewLessonRead();
         case 'story':
             return viewStory();
         case 'profile':
             return viewProfile();
+        case 'test-history':
+            return viewTestHistory();
         case 'levels':
             return viewLevels();
         case 'leveltest':
@@ -192,6 +206,8 @@ function renderView() {
             return el(viewAdminSharedVocab());
         case 'admin-grammar-gen':
             return el(viewAdminSharedGrammar());
+        case 'admin-alphabet-gen':
+            return el(viewAdminSharedAlphabet());
         case 'admin-books':
             return el(viewAdminBooks());
         case 'admin-daily-word':

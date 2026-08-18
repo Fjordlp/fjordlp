@@ -299,6 +299,78 @@ async function generateBulkGrammar(langCode, level, batches, onProgress) {
 }
 
 // =====================================================================
+//  СПІЛЬНА АБЕТКА (адмін генерує й публікує через AI, один раз на мову —
+//  на відміну від граматики/словника, тут нема поділу по рівнях)
+// =====================================================================
+async function loadSharedAlphabet(lang) {
+    if (!firebaseReady || !firebaseDb) return null;
+    try {
+        const doc = await firebaseDb.collection('sharedAlphabet').doc(lang).get();
+        if (doc.exists && Array.isArray(doc.data().letters)) return doc.data().letters;
+        return null;
+    } catch (e) {
+        console.error('[Спільна абетка] Помилка завантаження:', e);
+        return null;
+    }
+}
+
+async function saveSharedAlphabet(lang, letters) {
+    if (!firebaseReady || !firebaseDb) throw new Error('Firestore недоступний');
+    await firebaseDb.collection('sharedAlphabet').doc(lang).set({
+        letters, lang, updatedAt: new Date().toISOString(), count: letters.length,
+    });
+}
+
+// Кеш підвантаженої (вбудованої з файлу або спільної з Firestore) абетки
+// на поточну сесію — щоб не смикати Firestore при кожному відкритті екрана.
+let _alphabetCache = {};
+let _alphabetLoading = {};
+
+async function ensureAlphabetAvailable(lang) {
+    if (!lang) return;
+    if (window.LANG_DATA && window.LANG_DATA[lang] && window.LANG_DATA[lang].ALPHABET) return; // вбудований файл цієї мови вже покриває абетку
+    if (_alphabetCache[lang]) return;
+    if (_alphabetLoading[lang]) return;
+    _alphabetLoading[lang] = true;
+    try {
+        const shared = await loadSharedAlphabet(lang);
+        if (shared && shared.length) {
+            _alphabetCache[lang] = shared;
+            if (typeof render === 'function' && STATE.targetLang === lang &&
+                typeof ROUTE !== 'undefined' && ROUTE === 'alphabet') render();
+        }
+        // Так само, як і з граматикою: особистої AI-генерації "про запас"
+        // для кожного користувача навмисно немає — лише вбудований файл
+        // або те, що адмін опублікував через "Спільна абетка".
+    } catch (e) {
+        console.error('[Абетка] Помилка підготовки:', e);
+    } finally {
+        _alphabetLoading[lang] = false;
+    }
+}
+
+function getAlphabetForLang(lang) {
+    const langFile = window.LANG_DATA && window.LANG_DATA[lang];
+    if (langFile && langFile.ALPHABET) return langFile.ALPHABET;
+    return _alphabetCache[lang] || null;
+}
+
+async function generateAlphabetWithAI(lang) {
+    const targetLangName = typeof getLanguage === 'function' ? getLanguage(lang).name.uk : lang;
+    const userMsg =
+        `Мова: "${targetLangName}". Склади повну абетку цієї мови для початківця, який ` +
+        `розмовляє українською. Формат масиву: [{"letter": "як виглядає літера (велика й мала, наприклад \\"A a\\")", ` +
+        `"name": "як літера називається (українською транслітерацією)", ` +
+        `"sound": "коротке, практичне пояснення вимови українською — не наукова фонетика, а orientir для новачка", ` +
+        `"example": "приклад слова з цією літерою мовою вивчення", "example_uk": "переклад прикладу українською"}, ...]. ` +
+        `Включи ВСІ літери абетки цієї мови в правильному порядку (якщо в мові є діакритичні літери — включи і їх наприкінці).`;
+    const sys = `Ти — досвідчений викладач мови "${targetLangName}" для україномовних початківців з нуля. ` +
+        "Відповідай ЛИШЕ чистим JSON-масивом без жодного тексту навколо, без markdown-огорожі.";
+    const reply = await callAiRaw('gen_alphabet', sys, userMsg, [], 'uk');
+    return parseAiJson(reply);
+}
+
+// =====================================================================
 //  СПІЛЬНА (ГЛОБАЛЬНА) ГРАМАТИКА У FIRESTORE — той самий принцип, що й
 //  sharedVocab: адмін один раз генерує й публікує граматику для мови+рівня
 //  у Firestore, і після цього всі користувачі бачать її одразу, без
