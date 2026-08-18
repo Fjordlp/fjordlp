@@ -7,16 +7,12 @@ let firebaseDb = null;
 let firebaseUser = null;
 let firebaseInitPromise = null;
 
-// Функція, яка повертає проміс, що резолвиться, коли Firebase готовий
 function waitForFirebase(timeout = 5000) {
   if (firebaseReady) return Promise.resolve();
   return new Promise((resolve, reject) => {
     const start = Date.now();
     const check = () => {
-      if (firebaseReady) {
-        resolve();
-        return;
-      }
+      if (firebaseReady) { resolve(); return; }
       if (Date.now() - start > timeout) {
         reject(new Error('Firebase initialization timeout'));
         return;
@@ -28,7 +24,6 @@ function waitForFirebase(timeout = 5000) {
 }
 
 function initFirebase() {
-  // Якщо вже ініціалізовано або йде ініціалізація – повертаємо існуючий проміс
   if (firebaseInitPromise) return firebaseInitPromise;
 
   firebaseInitPromise = new Promise((resolve, reject) => {
@@ -46,7 +41,6 @@ function initFirebase() {
         firebaseReady = true;
         console.log('🔥 Firebase підключено!');
 
-        // Налаштовуємо спостерігача авторизації
         firebaseAuth.onAuthStateChanged(async (user) => {
           if (user) {
             firebaseUser = user;
@@ -90,7 +84,6 @@ function initFirebase() {
         resolve();
       } catch (e) {
         console.error('❌ Помилка ініціалізації Firebase:', e);
-        // Повторна спроба через 1 секунду, якщо помилка
         setTimeout(tryInit, 1000);
       }
     };
@@ -100,10 +93,8 @@ function initFirebase() {
   return firebaseInitPromise;
 }
 
-// Запускаємо ініціалізацію відразу, але не блокуємо виконання
 initFirebase();
 
-// Функції для роботи з Firestore – тепер вони чекають на готовність
 async function loadFromFirestore(uid) {
   await waitForFirebase();
   if (!firebaseDb) return null;
@@ -126,24 +117,58 @@ async function loadFromFirestore(uid) {
   }
 }
 
-// Дебаунс: кожен виклик updateState() у коді (39 місць по всьому застосунку —
-// XP, стрік, збережені слова, зміна мови і т.д.) раніше одразу слав ОКРЕМИЙ
-// .set() у Firestore без жодної затримки чи об'єднання. Якщо десь підряд
-// (навіть через баг чи гонку умов) виникало багато таких викликів за
-// короткий час, черга записів клієнтського SDK переповнювалась і Firestore
-// падав з "resource-exhausted: Write stream exhausted maximum allowed
-// queued writes" — застосунок при цьому продовжував відкладати нові спроби,
-// не отримуючи підтвердження. Тепер записи об'єднуються: кілька викликів
-// підряд протягом DEBOUNCE_MS шлють лише ОДИН реальний запит з останнім
-// (найповнішим) знімком стану — це безпечно, бо updateState() і так завжди
-// передає ПОВНИЙ STATE, а не часткове оновлення.
-const FIRESTORE_SAVE_DEBOUNCE_MS = 800;
+// ------------------------------------------------------------
+//  🔥 ВИПРАВЛЕННЯ: підготовка даних для Firestore (обрізка великих полів)
+// ------------------------------------------------------------
+function prepareDataForFirestore(data) {
+  // Глибока копія, щоб не змінювати оригінальний STATE
+  const clean = JSON.parse(JSON.stringify(data));
+
+  // 1. Обрізаємо історію чату до 20 останніх повідомлень
+  if (Array.isArray(clean.assistantChat) && clean.assistantChat.length > 20) {
+    clean.assistantChat = clean.assistantChat.slice(-20);
+  }
+
+  // 2. Обмежуємо кількість слів у stats.wordsSeen до 200 останніх (щоб не роздувати документ)
+  if (clean.stats && clean.stats.wordsSeen && typeof clean.stats.wordsSeen === 'object') {
+    const keys = Object.keys(clean.stats.wordsSeen);
+    if (keys.length > 200) {
+      // Сортуємо за ключем (якщо ключі містять дату/час, то це будуть найновіші)
+      const sorted = keys.sort(); // або за бажанням можна сортувати за часом додавання
+      const recentKeys = sorted.slice(-200);
+      const limited = {};
+      recentKeys.forEach(k => { limited[k] = clean.stats.wordsSeen[k]; });
+      clean.stats.wordsSeen = limited;
+    }
+  }
+
+  // 3. (Опціонально) Обрізаємо інші масиви, що можуть рости, наприклад customWords
+  if (Array.isArray(clean.customWords) && clean.customWords.length > 500) {
+    clean.customWords = clean.customWords.slice(-500);
+  }
+
+  // 4. Видаляємо зайві тимчасові поля, які не потрібні в хмарі (наприклад, _onboardingDone тощо)
+  //    (залишаємо їх локально, але не зберігаємо)
+  delete clean._onboardingDone;
+  // Якщо є ще якісь службові поля, можна додати сюди
+
+  return clean;
+}
+
+// ------------------------------------------------------------
+//  Дебаунс із використанням підготовлених даних
+// ------------------------------------------------------------
+const FIRESTORE_SAVE_DEBOUNCE_MS = 300;
 let _firestoreSaveTimer = null;
 let _firestoreSavePending = null;
 
 async function saveToFirestore(uid, data) {
-  _firestoreSavePending = { uid, data };
-  if (_firestoreSaveTimer) return; // вже заплановано — це збереження підхопить найсвіжіші дані само
+  // Готуємо дані – обрізаємо великі поля
+  const preparedData = prepareDataForFirestore(data);
+
+  _firestoreSavePending = { uid, data: preparedData };
+  if (_firestoreSaveTimer) return;
+
   _firestoreSaveTimer = setTimeout(async () => {
     const { uid: pendingUid, data: pendingData } = _firestoreSavePending;
     _firestoreSaveTimer = null;
@@ -153,13 +178,53 @@ async function saveToFirestore(uid, data) {
     try {
       const docRef = firebaseDb.collection('users').doc(pendingUid);
       await docRef.set(pendingData, { merge: true });
-      console.log('💾 Дані збережено у Firestore');
+      console.log('💾 Дані збережено у Firestore (розмір зменшено)');
     } catch (e) {
       console.error('❌ Помилка збереження у Firestore:', e);
+      // Якщо помилка знову через розмір, можна спробувати обрізати ще сильніше
+      if (e.code === 'resource-exhausted' || e.message.includes('exceeds maximum allowed size')) {
+        console.warn('⚠️ Документ все ще завеликий, спроба екстремального обрізання...');
+        const emergencyData = prepareDataForFirestore(pendingData, true); // true = агресивне обрізання
+        try {
+          await docRef.set(emergencyData, { merge: true });
+          console.log('💾 Дані збережено після екстремального обрізання');
+        } catch (e2) {
+          console.error('❌ Навіть після обрізання не вдалося зберегти:', e2);
+        }
+      }
     }
   }, FIRESTORE_SAVE_DEBOUNCE_MS);
 }
 
+// Якщо потрібна агресивніша версія (наприклад, для екстреного випадку)
+function prepareDataForFirestore(data, aggressive = false) {
+  const clean = JSON.parse(JSON.stringify(data));
+  // Агресивно обрізаємо до 5 повідомлень
+  if (Array.isArray(clean.assistantChat) && clean.assistantChat.length > 5) {
+    clean.assistantChat = clean.assistantChat.slice(-5);
+  }
+  if (clean.stats && clean.stats.wordsSeen) {
+    const keys = Object.keys(clean.stats.wordsSeen);
+    if (keys.length > 50) {
+      const sorted = keys.sort();
+      const recentKeys = sorted.slice(-50);
+      const limited = {};
+      recentKeys.forEach(k => { limited[k] = clean.stats.wordsSeen[k]; });
+      clean.stats.wordsSeen = limited;
+    }
+  }
+  if (Array.isArray(clean.customWords) && clean.customWords.length > 100) {
+    clean.customWords = clean.customWords.slice(-100);
+  }
+  delete clean._onboardingDone;
+  // Також можна видалити великі кеші, якщо вони є
+  delete clean.generatedVocab;
+  delete clean.generatedTasks;
+  delete clean.wordTranslations;
+  return clean;
+}
+
+// ---- Функції входу/реєстрації (без змін) ----
 async function signUpWithFirebase(email, password) {
   try {
     await waitForFirebase(5000);
@@ -231,3 +296,10 @@ async function signOutFromFirebase() {
     console.error('❌ Помилка виходу:', e);
   }
 }
+
+window.waitForFirebase = waitForFirebase;
+window.loadFromFirestore = loadFromFirestore;
+window.saveToFirestore = saveToFirestore;
+window.signUpWithFirebase = signUpWithFirebase;
+window.signInWithFirebase = signInWithFirebase;
+window.signOutFromFirebase = signOutFromFirebase;
