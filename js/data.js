@@ -1087,9 +1087,6 @@
         
             ]
         };
-// =====================================================================
-//  NORSKPRØVE – ТРЕНУВАЛЬНІ ЗАВДАННЯ ДЛЯ ВСІХ РІВНІВ
-// =====================================================================
 const NORSKPROVE_TASKS = {
   A1: {
     reading: [
@@ -1109,26 +1106,24 @@ const NORSKPROVE_TASKS = {
           { q: "Hvor mange søsken har jeg?", opts: ["En", "To", "Tre"], a: 1 },
           { q: "Hva er moren min?", opts: ["Lærer", "Sykepleier", "Ingeniør"], a: 1 },
           { q: "Hva heter broren min?", opts: ["Kari", "Ole", "Per"], a: 1 }
- ]
+        ]
       },
-
-{
-  title: "På skolen",
-  text: "Jeg går på skole. Læreren heter Maria. Vi har norsk og matematikk. Jeg liker norsk best. Matematikk er vanskelig.",
-  questions: [
-    { q: "Hva heter læreren?", opts: ["Maria", "Anna", "Kari"], a: 0 },
-    { q: "Hvilket fag liker jeg best?", opts: ["Matematikk", "Norsk", "Engelsk"], a: 1 },
-    { q: "Hva synes jeg om matematikk?", opts: ["Det er lett", "Det er vanskelig", "Det er kjedelig"], a: 1 }
-  ]
-},
-{
-  title: "Hjemme",
-  text: "Jeg bor i en leilighet med familien min. Vi har tre rom. Kjøkkenet er stort. Stua er koselig. Jeg har mitt eget soverom.",
-  questions: [
-    { q: "Hvor bor jeg?", opts: ["I et hus", "I en leilighet", "På en båt"], a: 1 },
-    { q: "Hvor mange rom har vi?", opts: ["To", "Tre", "Fire"], a: 1 },
-    { q: "Hvordan er stua?", opts: ["Stor", "Koselig", "Liten"], a: 1 }
-  
+      {
+        title: "På skolen",
+        text: "Jeg går på skole. Læreren heter Maria. Vi har norsk og matematikk. Jeg liker norsk best. Matematikk er vanskelig.",
+        questions: [
+          { q: "Hva heter læreren?", opts: ["Maria", "Anna", "Kari"], a: 0 },
+          { q: "Hvilket fag liker jeg best?", opts: ["Matematikk", "Norsk", "Engelsk"], a: 1 },
+          { q: "Hva synes jeg om matematikk?", opts: ["Det er lett", "Det er vanskelig", "Det er kjedelig"], a: 1 }
+        ]
+      },
+      {
+        title: "Hjemme",
+        text: "Jeg bor i en leilighet med familien min. Vi har tre rom. Kjøkkenet er stort. Stua er koselig. Jeg har mitt eget soverom.",
+        questions: [
+          { q: "Hvor bor jeg?", opts: ["I et hus", "I en leilighet", "På en båt"], a: 1 },
+          { q: "Hvor mange rom har vi?", opts: ["To", "Tre", "Fire"], a: 1 },
+          { q: "Hvordan er stua?", opts: ["Stor", "Koselig", "Liten"], a: 1 }
         ]
       }
     ],
@@ -1149,26 +1144,26 @@ const NORSKPROVE_TASKS = {
           { q: "Hvor mange tall teller han?", opts: ["Ti", "Ni", "Åtte"], a: 0 }
         ]
       },
-{
-  title: "På kafé",
-  text: "Jeg vil gjerne ha en kopp kaffe og en bolle, takk. Har dere epler? Ja, vi har epler. Jeg tar to epler, takk.",
-  questions: [
-    { q: "Hva bestiller han?", opts: ["Kaffe og bolle", "Te og kake", "Vann og brød"], a: 0 },
-    { q: "Hva tar han i tillegg?", opts: ["To epler", "En bolle", "En kake"], a: 0 }
-  ]
-}
+      {
+        title: "På kafé",
+        text: "Jeg vil gjerne ha en kopp kaffe og en bolle, takk. Har dere epler? Ja, vi har epler. Jeg tar to epler, takk.",
+        questions: [
+          { q: "Hva bestiller han?", opts: ["Kaffe og bolle", "Te og kake", "Vann og brød"], a: 0 },
+          { q: "Hva tar han i tillegg?", opts: ["To epler", "En bolle", "En kake"], a: 0 }
+        ]
+      }
     ],
     writing: [
       { topic: "Fortell om deg selv", prompt: "Skriv 3–5 setninger om hvem du er, hvor du bor, og hva du liker." },
       { topic: "Familien min", prompt: "Skriv 3–5 setninger om familien din." },
-{ topic: "Min favorittmat", prompt: "Skriv 3–5 setninger om hva du liker å spise." },
-{ topic: "Min beste venn", prompt: "Skriv 3–5 setninger om vennen din." }
+      { topic: "Min favorittmat", prompt: "Skriv 3–5 setninger om hva du liker å spise." },
+      { topic: "Min beste venn", prompt: "Skriv 3–5 setninger om vennen din." }
     ],
     speaking: [
       { topic: "Hils på en venn", prompt: "Si hei, spør hvordan det går, og fortell ditt navn." },
       { topic: "Fortell om fritiden din", prompt: "Hva liker du å gjøre på fritiden?" },
-{ topic: "Fortell om familien din", prompt: "Hvem er i familien din?" },
-{ topic: "Hva liker du å gjøre?", prompt: "Fortell om hobbiene dine." }
+      { topic: "Fortell om familien din", prompt: "Hvem er i familien din?" },
+      { topic: "Hva liker du å gjøre?", prompt: "Fortell om hobbiene dine." }
     ]
   },
   A2: {
@@ -1180,28 +1175,26 @@ const NORSKPROVE_TASKS = {
           { q: "Hva kjøpte jeg?", opts: ["Brød, melk, ost", "Brød, melk, egg", "Egg, ost, smør"], a: 1 },
           { q: "Hvem møtte jeg?", opts: ["En lærer", "En venn", "En lege"], a: 1 },
           { q: "Hvor var jeg?", opts: ["I skolen", "På butikken", "På jobb"], a: 1 }
- ]
+        ]
       },
-
-        {
-  title: "En tur til butikken",
-  text: "I dag gikk jeg til butikken for å handle. Jeg kjøpte melk, brød og egg. Jeg glemte å kjøpe sukker. Butikken var full av folk, så jeg måtte vente lenge i kø.",
-  questions: [
-    { q: "Hva kjøpte jeg?", opts: ["Melk, brød, egg", "Melk, sukker, brød", "Egg, sukker, melk"], a: 0 },
-    { q: "Hva glemte jeg?", opts: ["Brød", "Sukker", "Egg"], a: 1 },
-    { q: "Hvorfor måtte jeg vente?", opts: ["Fordi butikken var full", "Fordi kassen var ødelagt", "Fordi jeg hadde mye"], a: 0 }
-  ]
-},
-{
-  title: "Værmelding",
-  text: "I morgen blir det regn i sør og snø i fjellet. I øst blir det sol og varmt. Vinden vil være sterk i kystområdene. Temperaturen faller om kvelden.",
-  questions: [
-    { q: "Hvordan blir været i fjellet?", opts: ["Regn", "Snø", "Sol"], a: 1 },
-    { q: "Hvor blir det varmt?", opts: ["I sør", "I øst", "I vest"], a: 1 },
-    { q: "Hva skjer om kvelden?", opts: ["Temperaturen stiger", "Temperaturen faller", "Det blir vind"], a: 1 }
-  ]
-}
-      
+      {
+        title: "En tur til butikken",
+        text: "I dag gikk jeg til butikken for å handle. Jeg kjøpte melk, brød og egg. Jeg glemte å kjøpe sukker. Butikken var full av folk, så jeg måtte vente lenge i kø.",
+        questions: [
+          { q: "Hva kjøpte jeg?", opts: ["Melk, brød, egg", "Melk, sukker, brød", "Egg, sukker, melk"], a: 0 },
+          { q: "Hva glemte jeg?", opts: ["Brød", "Sukker", "Egg"], a: 1 },
+          { q: "Hvorfor måtte jeg vente?", opts: ["Fordi butikken var full", "Fordi kassen var ødelagt", "Fordi jeg hadde mye"], a: 0 }
+        ]
+      },
+      {
+        title: "Værmelding",
+        text: "I morgen blir det regn i sør og snø i fjellet. I øst blir det sol og varmt. Vinden vil være sterk i kystområdene. Temperaturen faller om kvelden.",
+        questions: [
+          { q: "Hvordan blir været i fjellet?", opts: ["Regn", "Snø", "Sol"], a: 1 },
+          { q: "Hvor blir det varmt?", opts: ["I sør", "I øst", "I vest"], a: 1 },
+          { q: "Hva skjer om kvelden?", opts: ["Temperaturen stiger", "Temperaturen faller", "Det blir vind"], a: 1 }
+        ]
+      }
     ],
     listening: [
       {
@@ -1212,26 +1205,26 @@ const NORSKPROVE_TASKS = {
           { q: "Hvor mye koster det?", opts: ["60 kroner", "70 kroner", "80 kroner"], a: 1 }
         ]
       },
-{
-  title: "På bussen",
-  text: "Unnskyld, går denne bussen til sentrum? Ja, den går til sentrum. Når kommer vi fram? Om omtrent ti minutter. Takk!",
-  questions: [
-    { q: "Hvor skal han?", opts: ["Til skolen", "Til sentrum", "Til sykehuset"], a: 1 },
-    { q: "Hvor lang tid tar det?", opts: ["Fem minutter", "Ti minutter", "Femten minutter"], a: 1 }
-  ]
-}
+      {
+        title: "På bussen",
+        text: "Unnskyld, går denne bussen til sentrum? Ja, den går til sentrum. Når kommer vi fram? Om omtrent ti minutter. Takk!",
+        questions: [
+          { q: "Hvor skal han?", opts: ["Til skolen", "Til sentrum", "Til sykehuset"], a: 1 },
+          { q: "Hvor lang tid tar det?", opts: ["Fem minutter", "Ti minutter", "Femten minutter"], a: 1 }
+        ]
+      }
     ],
     writing: [
       { topic: "Din favorittdag", prompt: "Skriv 5–7 setninger om en dag du liker (f.eks. søndag)." },
       { topic: "En reise", prompt: "Skriv om en reise du har vært på." },
-{ topic: "En dag jeg aldri glemmer", prompt: "Skriv 5–7 setninger om en spesiell dag." },
-{ topic: "Mine hobbyer", prompt: "Skriv 5–7 setninger om hva du liker å gjøre på fritiden." }
+      { topic: "En dag jeg aldri glemmer", prompt: "Skriv 5–7 setninger om en spesiell dag." },
+      { topic: "Mine hobbyer", prompt: "Skriv 5–7 setninger om hva du liker å gjøre på fritiden." }
     ],
     speaking: [
       { topic: "Fortell om maten du liker", prompt: "Hva liker du å spise? Hva liker du ikke?" },
       { topic: "Fortell om været i dag", prompt: "Hvordan er været akkurat nå?" },
-{ topic: "Fortell om en reise", prompt: "Hvor dro du? Hva gjorde du?" },
-{ topic: "Hvordan er en vanlig dag for deg?", prompt: "Fortell om dagen din." }
+      { topic: "Fortell om en reise", prompt: "Hvor dro du? Hva gjorde du?" },
+      { topic: "Hvordan er en vanlig dag for deg?", prompt: "Fortell om dagen din." }
     ]
   },
   B1: {
@@ -1243,24 +1236,23 @@ const NORSKPROVE_TASKS = {
           { q: "Hva skjer med isen?", opts: ["Den fryser", "Den smelter", "Den vokser"], a: 1 },
           { q: "Hva kan vi gjøre?", opts: ["Bruke mer olje", "Kildesortere", "Kjøre mer bil"], a: 1 },
           { q: "Hva truer dyrene?", opts: ["Tap av leveområder", "Jakt", "Forurensning"], a: 0 }
- ]
+        ]
       },
-{
-  title: "Klimaendringer",
-  text: "Klimaendringene påvirker hele verden. Temperaturen stiger, og ekstremvær blir vanligere. Mange land jobber med å redusere utslipp av klimagasser. Det er viktig at alle bidrar.",
-  questions: [
-    { q: "Hva blir vanligere?", opts: ["Sol", "Ekstremvær", "Snø"], a: 1 },
-    { q: "Hva jobber mange land med?", opts: ["Å øke utslipp", "Å redusere utslipp", "Å stoppe regn"], a: 1 },
-    { q: "Hvem bør bidra?", opts: ["Bare regjeringer", "Alle", "Bare bedrifter"], a: 1 }
-  ]
-},
-{
-  title: "Digital hverdag",
-  text: "I dag bruker vi digitale verktøy i nesten alle deler av livet. Vi handler på nett, kommuniserer med venner og jobber hjemmefra. Dette gir både fordeler og ulemper.",
-  questions: [
-    { q: "Hva bruker vi digitale verktøy til?", opts: ["Bare jobb", "Nesten alt", "Bare shopping"], a: 1 },
-    { q: "Hva gir dette?", opts: ["Kun fordeler", "Fordeler og ulemper", "Kun ulemper"], a: 1 }
-  
+      {
+        title: "Klimaendringer",
+        text: "Klimaendringene påvirker hele verden. Temperaturen stiger, og ekstremvær blir vanligere. Mange land jobber med å redusere utslipp av klimagasser. Det er viktig at alle bidrar.",
+        questions: [
+          { q: "Hva blir vanligere?", opts: ["Sol", "Ekstremvær", "Snø"], a: 1 },
+          { q: "Hva jobber mange land med?", opts: ["Å øke utslipp", "Å redusere utslipp", "Å stoppe regn"], a: 1 },
+          { q: "Hvem bør bidra?", opts: ["Bare regjeringer", "Alle", "Bare bedrifter"], a: 1 }
+        ]
+      },
+      {
+        title: "Digital hverdag",
+        text: "I dag bruker vi digitale verktøy i nesten alle deler av livet. Vi handler på nett, kommuniserer med venner og jobber hjemmefra. Dette gir både fordeler og ulemper.",
+        questions: [
+          { q: "Hva bruker vi digitale verktøy til?", opts: ["Bare jobb", "Nesten alt", "Bare shopping"], a: 1 },
+          { q: "Hva gir dette?", opts: ["Kun fordeler", "Fordeler og ulemper", "Kun ulemper"], a: 1 }
         ]
       }
     ],
@@ -1277,14 +1269,14 @@ const NORSKPROVE_TASKS = {
     writing: [
       { topic: "Fordeler og ulemper ved sosiale medier", prompt: "Skriv 8–10 setninger." },
       { topic: "Hvordan vil du redusere plastforurensning?", prompt: "Gi forslag og forklar." },
-{ topic: "Fordeler og ulemper ved å bo i byen", prompt: "Skriv 8–10 setninger." },
-{ topic: "Hvordan vil du bruke norsk i fremtiden?", prompt: "Skriv 8–10 setninger." }
+      { topic: "Fordeler og ulemper ved å bo i byen", prompt: "Skriv 8–10 setninger." },
+      { topic: "Hvordan vil du bruke norsk i fremtiden?", prompt: "Skriv 8–10 setninger." }
     ],
     speaking: [
       { topic: "Diskuter et aktuelt samfunnsproblem", prompt: "Hva mener du om klimakrisen?" },
       { topic: "Fortell om en bok eller film du har sett", prompt: "Hva handlet den om? Likte du den?" },
-{ topic: "Hva er det beste med å bo i Norge?", prompt: "Gi eksempler og forklar." },
-{ topic: "Diskuter et aktuelt samfunnsproblem", prompt: "Hva mener du om miljøkrisen?" }
+      { topic: "Hva er det beste med å bo i Norge?", prompt: "Gi eksempler og forklar." },
+      { topic: "Diskuter et aktuelt samfunnsproblem", prompt: "Hva mener du om miljøkrisen?" }
     ]
   },
   B2: {
@@ -1296,28 +1288,34 @@ const NORSKPROVE_TASKS = {
           { q: "Hva skjer med noen yrker?", opts: ["De forsvinner", "De blir tryggere", "De lønner bedre"], a: 0 },
           { q: "Hva blir viktig?", opts: ["Fysisk styrke", "Digital kompetanse", "Sosialt nettverk"], a: 1 },
           { q: "Hva kan teknologi forbedre?", opts: ["Lønnen", "Arbeidsmiljøet", "Fritiden"], a: 1 }
- ]
-},
-
-{
-  title: "Arbeidsmarkedet i endring",
-  text: "Automatisering og kunstig intelligens endrer arbeidsmarkedet. Enkelte yrker forsvinner, men nye oppstår. Fremtidens arbeidstakere må være fleksible og ha digital kompetanse.",
-  questions: [
-    { q: "Hva endrer arbeidsmarkedet?", opts: ["Kunstig intelligens", "Politikk", "Skatt"], a: 0 },
-    { q: "Hva må fremtidens arbeidstakere ha?", opts: ["Fysisk styrke", "Digital kompetanse", "Språkkunnskaper"], a: 1 }
-  ]
-},
-{
-  title: "Bærekraftig utvikling",
-  text: "Bærekraft handler om å møte dagens behov uten å ødelegge fremtiden. Dette krever endringer i forbruk, produksjon og politikk. Individuelle valg er viktige.",
-  questions: [
-    { q: "Hva handler bærekraft om?", opts: ["Økt forbruk", "Bevare fremtiden", "Kortsiktig profitt"], a: 1 },
-    { q: "Hva er viktig?", opts: ["Individuelle valg", "Bare politikk", "Bare produksjon"], a: 0 }
-  ]
-}
-         
+        ]
+      },
+      {
+        title: "Arbeidsmarkedet i endring",
+        text: "Automatisering og kunstig intelligens endrer arbeidsmarkedet. Enkelte yrker forsvinner, men nye oppstår. Fremtidens arbeidstakere må være fleksible og ha digital kompetanse.",
+        questions: [
+          { q: "Hva endrer arbeidsmarkedet?", opts: ["Kunstig intelligens", "Politikk", "Skatt"], a: 0 },
+          { q: "Hva må fremtidens arbeidstakere ha?", opts: ["Fysisk styrke", "Digital kompetanse", "Språkkunnskaper"], a: 1 }
+        ]
+      },
+      {
+        title: "Bærekraftig utvikling",
+        text: "Bærekraft handler om å møte dagens behov uten å ødelegge fremtiden. Dette krever endringer i forbruk, produksjon og politikk. Individuelle valg er viktige.",
+        questions: [
+          { q: "Hva handler bærekraft om?", opts: ["Økt forbruk", "Bevare fremtiden", "Kortsiktig profitt"], a: 1 },
+          { q: "Hva er viktig?", opts: ["Individuelle valg", "Bare politikk", "Bare produksjon"], a: 0 }
+        ]
+      }
     ],
     listening: [
+      {
+        title: "Debatt om skole",
+        text: "Mange mener at skolen bør ha mer praktiske fag. Andre prioriterer teoretisk kunnskap. Det er viktig at elevene får prøve seg i ulike felt. Skolen bør forberede elevene på videre studier og arbeidsliv.",
+        questions: [
+          { q: "Hva mener mange?", opts: ["Mer praktiske fag", "Mindre lekse", "Flere lærere"], a: 0 },
+          { q: "Hva bør skolen forberede elevene på?", opts: ["Ferie", "Studier og arbeid", "Idrett"], a: 1 }
+        ]
+      },
       {
         title: "Debatt om skole",
         text: "Mange mener at skolen bør ha mer praktiske fag. Andre prioriterer teoretisk kunnskap. Det er viktig at elevene får prøve seg i ulike felt. Skolen bør forberede elevene på videre studier og arbeidsliv.",
@@ -1330,14 +1328,18 @@ const NORSKPROVE_TASKS = {
     writing: [
       { topic: "Bør alle ha rett til gratis utdanning?", prompt: "Argumenter for eller imot. Skriv 10–15 setninger." },
       { topic: "Fordeler og ulemper ved å bo i by vs. på landet", prompt: "Drøft begge sider." },
-{ topic: "Bør skolen ha mer praktiske fag?", prompt: "Skriv 10–15 setninger med argumenter." },
-{ topic: "Hvordan påvirker sosiale medier samfunnet?", prompt: "Drøft fordeler og ulemper." }
+      { topic: "Bør skolen ha mer praktiske fag?", prompt: "Skriv 10–15 setninger med argumenter." },
+      { topic: "Hvordan påvirker sosiale medier samfunnet?", prompt: "Drøft fordeler og ulemper." },
+      { 
+        topic: "Fordeler og ulemper ved å bo i byen", 
+        prompt: "Skriv 8–10 setninger om fordeler og ulemper ved å bo i en stor by kontra på landet." 
+      }
     ],
     speaking: [
       { topic: "Diskuter teknologiens påvirkning på hverdagen", prompt: "Er teknologien til hjelp eller hindring?" },
       { topic: "Hva er din mening om innvandring?", prompt: "Gi eksempler på fordeler og utfordringer." },
-{ topic: "Teknologiens påvirkning på hverdagen", prompt: "Er teknologien til hjelp eller hindring?" },
-{ topic: "Hva er din mening om innvandring?", prompt: "Gi eksempler på fordeler og utfordringer." }
+      { topic: "Teknologiens påvirkning på hverdagen", prompt: "Er teknologien til hjelp eller hindring?" },
+      { topic: "Hva er din mening om innvandring?", prompt: "Gi eksempler på fordeler og utfordringer." }
     ]
   },
   C1: {
@@ -1351,14 +1353,23 @@ const NORSKPROVE_TASKS = {
           { q: "Hva må vi utvikle?", opts: ["Nye algoritmer", "Retningslinjer", "Flere datasentre"], a: 1 }
         ]
       },
-{
-  title: "Etiske utfordringer med KI",
-  text: "Kunstig intelligens reiser nye etiske spørsmål. Hvem er ansvarlig når en algoritme tar feil? Bør KI ha rettigheter? Samtidig kan KI bidra til medisinsk forskning og klimamodellering.",
-  questions: [
-    { q: "Hva reiser KI?", opts: ["Nye etiske spørsmål", "Tekniske problemer", "Økonomisk vekst"], a: 0 },
-    { q: "Hva kan KI bidra til?", opts: ["Forskning", "Krigføring", "Overvåking"], a: 0 }
-  ]
-}
+      {
+        title: "Etiske utfordringer med KI",
+        text: "Kunstig intelligens reiser nye etiske spørsmål. Hvem er ansvarlig når en algoritme tar feil? Bør KI ha rettigheter? Samtidig kan KI bidra til medisinsk forskning og klimamodellering.",
+        questions: [
+          { q: "Hva reiser KI?", opts: ["Nye etiske spørsmål", "Tekniske problemer", "Økonomisk vekst"], a: 0 },
+          { q: "Hva kan KI bidra til?", opts: ["Forskning", "Krigføring", "Overvåking"], a: 0 }
+        ]
+      },
+      {
+        title: "Kunstig intelligens og samfunn",
+        text: "Kunstig intelligens (KI) blir stadig viktigere i samfunnet. Den brukes i alt fra medisin til transport. Samtidig reiser KI nye etiske spørsmål: Hvem har ansvar når en algoritme tar feil? Hvordan sikrer vi at KI ikke diskriminerer? Det er viktig å utvikle retningslinjer som sikrer ansvarlig bruk.",
+        questions: [
+          { q: "Hvor brukes KI?", opts: ["Bare i medisin", "I mange områder", "Bare i transport"], a: 1 },
+          { q: "Hva er en etisk utfordring?", opts: ["At KI er for dyr", "At algoritmer kan ta feil", "At KI er for treg"], a: 1 },
+          { q: "Hva må vi utvikle?", opts: ["Nye algoritmer", "Retningslinjer", "Flere datamaskiner"], a: 1 }
+        ]
+      }
     ],
     listening: [
       {
@@ -1373,14 +1384,18 @@ const NORSKPROVE_TASKS = {
     writing: [
       { topic: "Kunstig intelligens – trussel eller mulighet?", prompt: "Skriv et essay (200–250 ord)." },
       { topic: "Er demokrati i fare?", prompt: "Drøft trusler og muligheter i dagens samfunn." },
-{ topic: "Kunstig intelligens – trussel eller mulighet?", prompt: "Skriv et essay (200–250 ord)." },
-{ topic: "Er demokrati i fare?", prompt: "Drøft trusler og muligheter i dagens samfunn." }
+      { topic: "Kunstig intelligens – trussel eller mulighet?", prompt: "Skriv et essay (200–250 ord)." },
+      { topic: "Er demokrati i fare?", prompt: "Drøft trusler og muligheter i dagens samfunn." },
+      { 
+        topic: "Teknologiens påvirkning på hverdagen", 
+        prompt: "Skriv et essay (200–250 ord) om hvordan teknologi har endret hvordan vi lever og arbeider. Diskuter både positive og negative sider." 
+      }
     ],
     speaking: [
       { topic: "Debatt om ytringsfrihet", prompt: "Hvor langt bør ytringsfriheten gå?" },
       { topic: "Fremtidens arbeidsmarked", prompt: "Hvordan vil jobber endre seg?" },
-{ topic: "Debatt om ytringsfrihet", prompt: "Hvor langt bør ytringsfriheten gå?" },
-{ topic: "Fremtidens arbeidsmarked", prompt: "Hvordan vil jobber endre seg?" }
+      { topic: "Debatt om ytringsfrihet", prompt: "Hvor langt bør ytringsfriheten gå?" },
+      { topic: "Fremtidens arbeidsmarked", prompt: "Hvordan vil jobber endre seg?" }
     ]
   },
   C2: {
@@ -1393,14 +1408,22 @@ const NORSKPROVE_TASKS = {
           { q: "Hva er essensielt?", opts: ["Kritisk tenkning", "Akademiske titler", "Publisering"], a: 0 }
         ]
       },
-{
-  title: "Filosofi og vitenskap",
-  text: "Vitenskapen hviler på filosofiske antakelser. Spørsmålet om hva som er sant, og hvordan vi kan vite det, er grunnleggende. Kritisk tenkning er essensielt.",
-  questions: [
-    { q: "Hva hviler vitenskapen på?", opts: ["Filosofiske antakelser", "Religiøse dogmer", "Politisk makt"], a: 0 },
-    { q: "Hva er essensielt?", opts: ["Kritisk tenkning", "Akademiske titler", "Publisering"], a: 0 }
-  ]
-}
+      {
+        title: "Filosofi og vitenskap",
+        text: "Vitenskapen hviler på filosofiske antakelser. Spørsmålet om hva som er sant, og hvordan vi kan vite det, er grunnleggende. Kritisk tenkning er essensielt.",
+        questions: [
+          { q: "Hva hviler vitenskapen på?", opts: ["Filosofiske antakelser", "Religiøse dogmer", "Politisk makt"], a: 0 },
+          { q: "Hva er essensielt?", opts: ["Kritisk tenkning", "Akademiske titler", "Publisering"], a: 0 }
+        ]
+      },
+      {
+        title: "Filosofi og vitenskap",
+        text: "Vitenskapen hviler på filosofiske antakelser. Spørsmålet om hva som er sant, og hvordan vi kan vite det, er grunnleggende. Vitenskapelig metode gir oss verktøy, men er ikke ufeilbarlig. Kritisk tenkning er essensielt for å vurdere både vitenskapelige og filosofiske påstander.",
+        questions: [
+          { q: "Hva hviler vitenskapen på?", opts: ["Filosofiske antakelser", "Religiøse dogmer", "Politisk makt"], a: 0 },
+          { q: "Hva er essensielt?", opts: ["Kritisk tenkning", "Akademiske titler", "Publisering"], a: 0 }
+        ]
+      }
     ],
     listening: [
       {
@@ -1415,14 +1438,22 @@ const NORSKPROVE_TASKS = {
     writing: [
       { topic: "Analyse av et litterært verk", prompt: "Velg en bok eller et dikt og analyser det (300 ord)." },
       { topic: "Filosofiske perspektiver på teknologi", prompt: "Drøft teknologiens innvirkning på menneskelig eksistens." },
-{ topic: "Analyse av et litterært verk", prompt: "Velg en bok eller et dikt og analyser det (300 ord)." },
-{ topic: "Filosofiske perspektiver på teknologi", prompt: "Drøft teknologiens innvirkning på menneskelig eksistens." }
+      { topic: "Analyse av et litterært verk", prompt: "Velg en bok eller et dikt og analyser det (300 ord)." },
+      { topic: "Filosofiske perspektiver på teknologi", prompt: "Drøft teknologiens innvirkning på menneskelig eksistens." },
+      { 
+        topic: "Filosofiske perspektiver på teknologi", 
+        prompt: "Drøft teknologiens innvirkning på menneskelig eksistens og samfunnsutvikling. Skriv et reflekterende essay (300 ord)." 
+      }
     ],
     speaking: [
       { topic: "Filosofisk samtale", prompt: "Hva er meningen med livet?" },
       { topic: "Fremtidens utdanning", prompt: "Hvordan bør skolen tilpasses en digital tidsalder?" },
-{ topic: "Filosofisk samtale", prompt: "Hva er meningen med livet?" },
-{ topic: "Fremtidens utdanning", prompt: "Hvordan bør skolen tilpasses en digital tidsalder?" }
+      { topic: "Filosofisk samtale", prompt: "Hva er meningen med livet?" },
+      { topic: "Fremtidens utdanning", prompt: "Hvordan bør skolen tilpasses en digital tidsalder?" },
+      { 
+        topic: "Fremtidens utdanning", 
+        prompt: "Hvordan bør skolen tilpasses en digital tidsalder? Diskuter utfordringer og muligheter." 
+      }
     ]
   }
 };
@@ -1601,6 +1632,235 @@ const STUDY_PLANS = {
                     ["å anskaffe", "å kjøpe"],
                     ["å avslutte", "å slutte"]
                 ] }, ex: { q: "Формальне слово для «купити»", opts: ["kjøpe", "anskaffe", "handle"], a: 1 }, title_en: "Stylistic registers", title_ru: "Стилистические регистры", exp_en: "Formal vs. colloquial vocabulary.", exp_ru: "Формальная и разговорная лексика.", head_en: ["Formal", "Colloquial"], head_ru: ["Формально", "Разговорно"], q_en: "The formal word for \"to buy\"", q_ru: "Формальное слово для «купить»" },
+            // ---------- НОВІ ГРАМАТИЧНІ ПРАВИЛА ----------
+            {
+                id: "gr28",
+                level: "A2",
+                title: "Refleksive verb (å vaske seg)",
+                exp: "Рефлексивні дієслова виражають дію, спрямовану на самого себе. Вони мають зворотний займенник: seg, meg, deg, oss, dere.",
+                table: {
+                    head: ["Infinitiv", "Presens"],
+                    rows: [
+                        ["å vaske seg", "vasker seg"],
+                        ["å kle seg", "kler seg"],
+                        ["å glede seg", "gleder seg"]
+                    ]
+                },
+                ex: { q: "Оберіть правильну форму: Hun ___ seg.", opts: ["vasker", "vasker seg", "vaskes"], a: 1 },
+                title_en: "Reflexive verbs (å vaske seg)",
+                title_ru: "Возвратные глаголы (å vaske seg)",
+                exp_en: "Reflexive verbs express an action directed at oneself. They have a reflexive pronoun: seg, meg, deg, oss, dere.",
+                exp_ru: "Возвратные глаголы выражают действие, направленное на себя. Они имеют возвратное местоимение: seg, meg, deg, oss, dere.",
+                head_en: ["Infinitive", "Present"],
+                head_ru: ["Инфинитив", "Настоящее"],
+                q_en: "Choose the correct form: Hun ___ seg.",
+                q_ru: "Выберите правильную форму: Hun ___ seg."
+            },
+            {
+                id: "gr29",
+                level: "B1",
+                title: "S-passiv",
+                exp: "Пасивний стан можна утворити, додаючи -s до дієслова в теперішньому часі. Використовується, коли виконавець дії не важливий.",
+                table: {
+                    head: ["Aktiv", "Passiv (s)"],
+                    rows: [
+                        ["Han skriver boken.", "Boken skrives."],
+                        ["De bygger huset.", "Huset bygges."]
+                    ]
+                },
+                ex: { q: "Оберіть пасивну форму: Boken ___ av forfatteren.", opts: ["skrives", "skriver", "ble skrevet"], a: 0 },
+                title_en: "S-passive",
+                title_ru: "S-пассив",
+                exp_en: "The passive can be formed by adding -s to the verb in the present tense. Used when the doer is not important.",
+                exp_ru: "Пассивный залог можно образовать, добавляя -s к глаголу в настоящем времени. Используется, когда исполнитель не важен.",
+                head_en: ["Active", "Passive (s)"],
+                head_ru: ["Актив", "Пассив (s)"],
+                q_en: "Choose the passive form: Boken ___ av forfatteren.",
+                q_ru: "Выберите пассивную форму: Boken ___ av forfatteren."
+            },
+            {
+                id: "gr30",
+                level: "B1",
+                title: "Preteritum vs perfektum",
+                exp: "Preteritum використовується для завершених дій у минулому (часто з конкретним часом). Perfektum використовується для дій, які мають зв'язок із теперішнім або результат важливий.",
+                table: {
+                    head: ["Preteritum (завершено)", "Perfektum (зв'язок із теперішнім)"],
+                    rows: [
+                        ["Jeg spiste frokost kl. 8.", "Jeg har spist frokost."],
+                        ["Hun bodde i Bergen i fjor.", "Hun har bodd i Bergen."]
+                    ]
+                },
+                ex: { q: "Оберіть правильний час: Jeg ___ (spise) nettopp.", opts: ["spiste", "har spist", "spiser"], a: 1 },
+                title_en: "Preteritum vs perfektum",
+                title_ru: "Претеритум против перфекта",
+                exp_en: "Preteritum is used for completed past actions (often with a specific time). Perfektum is used for actions connected to the present or where the result matters.",
+                exp_ru: "Претеритум используется для завершенных действий в прошлом (часто с указанием времени). Перфект используется для действий, связанных с настоящим, или когда важен результат.",
+                head_en: ["Preteritum (completed)", "Perfektum (present connection)"],
+                head_ru: ["Претеритум (завершено)", "Перфект (связь с настоящим)"],
+                q_en: "Choose the correct tense: Jeg ___ (spise) nettopp.",
+                q_ru: "Выберите правильное время: Jeg ___ (spise) nettopp."
+            },
+            {
+                id: "gr31",
+                level: "A2",
+                title: "Futurum (skal / vil)",
+                exp: "Майбутній час утворюється за допомогою модальних дієслів skal (заплановане) або vil (бажання / припущення) + інфінітив.",
+                table: {
+                    head: ["Modal", "Приклад"],
+                    rows: [
+                        ["skal", "Jeg skal reise i morgen."],
+                        ["vil", "Det vil regne snart."]
+                    ]
+                },
+                ex: { q: "Оберіть правильний варіант: Vi ___ reise til Spania i sommer.", opts: ["skal", "vil", "må"], a: 0 },
+                title_en: "Future (skal / vil)",
+                title_ru: "Будущее время (skal / vil)",
+                exp_en: "The future is formed with the modal verbs skal (planned) or vil (wish / assumption) + infinitive.",
+                exp_ru: "Будущее время образуется с помощью модальных глаголов skal (запланированное) или vil (желание / предположение) + инфинитив.",
+                head_en: ["Modal", "Example"],
+                head_ru: ["Модальный", "Пример"],
+                q_en: "Choose the correct form: Vi ___ reise til Spania i sommer.",
+                q_ru: "Выберите правильный вариант: Vi ___ reise til Spania i sommer."
+            },
+            {
+                id: "gr32",
+                level: "A2",
+                title: "Adjektivbøying i flertall",
+                exp: "У множині прикметники отримують закінчення -e незалежно від роду.",
+                table: {
+                    head: ["Entall (ubestemt)", "Flertall"],
+                    rows: [
+                        ["en rød bil", "røde biler"],
+                        ["et grønt hus", "grønne hus"],
+                        ["ei gul sol", "gule soler"]
+                    ]
+                },
+                ex: { q: "Оберіть правильну форму: Jeg har ___ (blå) sko.", opts: ["blå", "blåe", "blått"], a: 1 },
+                title_en: "Adjective plural",
+                title_ru: "Множественное число прилагательных",
+                exp_en: "In the plural, adjectives get the ending -e regardless of gender.",
+                exp_ru: "Во множественном числе прилагательные получают окончание -e независимо от рода.",
+                head_en: ["Singular (indefinite)", "Plural"],
+                head_ru: ["Единственное (неопределённое)", "Множественное"],
+                q_en: "Choose the correct form: Jeg har ___ (blå) sko.",
+                q_ru: "Выберите правильную форму: Jeg har ___ (blå) sko."
+            },
+            {
+                id: "gr33",
+                level: "B1",
+                title: "Genitiv med sin / si / sitt / sine",
+                exp: "Присвійні займенники sin/si/sitt/sine використовуються, коли власник є підметом речення (відносяться до 3-ї особи однини/множини).",
+                table: {
+                    head: ["Pronomen", "Eksempel"],
+                    rows: [
+                        ["sin (m)", "Han vasker bilen sin."],
+                        ["si (f)", "Hun tar veska si."],
+                        ["sitt (n)", "Barnet leker med sitt leketøy."],
+                        ["sine (pl)", "De besøker foreldrene sine."]
+                    ]
+                },
+                ex: { q: "Оберіть правильну форму: Han elsker kona ___.", opts: ["sin", "si", "sitt"], a: 0 },
+                title_en: "Genitive with sin / si / sitt / sine",
+                title_ru: "Притяжательные местоимения sin / si / sitt / sine",
+                exp_en: "The possessive pronouns sin/si/sitt/sine are used when the owner is the subject of the sentence (referring to 3rd person singular/plural).",
+                exp_ru: "Притяжательные местоимения sin/si/sitt/sine используются, когда владелец является подлежащим предложения (относятся к 3-му лицу единственного/множественного числа).",
+                head_en: ["Pronoun", "Example"],
+                head_ru: ["Местоимение", "Пример"],
+                q_en: "Choose the correct form: Han elsker kona ___.",
+                q_ru: "Выберите правильную форму: Han elsker kona ___."
+            },
+            {
+                id: "gr34",
+                level: "A2",
+                title: "Preposisjoner for tid (i / på / om / til)",
+                exp: "Прийменники часу: i (місяці/роки/пора року), på (дні тижня/дати/частини доби), om (неозначений час у майбутньому), til (напрямок часу).",
+                table: {
+                    head: ["Preposisjon", "Bruk", "Eksempel"],
+                    rows: [
+                        ["i", "måneder, år, årstider", "i juli, i 2024, i sommer"],
+                        ["på", "dager, datoer, deler av dagen", "på mandag, på sommeren (vardagligt)"],
+                        ["om", "fremtidig tid (om + tid)", "om to uker, om en time"],
+                        ["til", "tidspunkt (til klokka)", "til klokka åtte"]
+                    ]
+                },
+                ex: { q: "Оберіть правильний прийменник: Jeg kommer ___ 10 minutter.", opts: ["i", "på", "om"], a: 2 },
+                title_en: "Prepositions of time (i / på / om / til)",
+                title_ru: "Предлоги времени (i / på / om / til)",
+                exp_en: "Time prepositions: i (months/years/seasons), på (days/dates/parts of day), om (indefinite future time), til (time direction).",
+                exp_ru: "Предлоги времени: i (месяцы/годы/времена года), på (дни недели/даты/части дня), om (неопределённое время в будущем), til (направление времени).",
+                head_en: ["Preposition", "Usage", "Example"],
+                head_ru: ["Предлог", "Использование", "Пример"],
+                q_en: "Choose the correct preposition: Jeg kommer ___ 10 minutter.",
+                q_ru: "Выберите правильный предлог: Jeg kommer ___ 10 minutter."
+            },
+            {
+                id: "gr35",
+                level: "A1",
+                title: "Bestemt form med adjektiv",
+                exp: "Коли прикметник стоїть перед означеним іменником, використовується форма: den + adjektiv (med -e) + substantiv (bestemt).",
+                table: {
+                    head: ["Ubestemt", "Bestemt"],
+                    rows: [
+                        ["en rød bil", "den røde bilen"],
+                        ["et stort hus", "det store huset"],
+                        ["ei grønn dør", "den grønne døra"]
+                    ]
+                },
+                ex: { q: "Оберіть правильну форму: ___ (stor) bilen.", opts: ["den stor", "den store", "det store"], a: 1 },
+                title_en: "Definite form with adjective",
+                title_ru: "Определённая форма с прилагательным",
+                exp_en: "When an adjective precedes a definite noun, use: den + adjective (with -e) + noun (definite).",
+                exp_ru: "Когда прилагательное стоит перед определённым существительным, используется форма: den + прилагательное (с -e) + существительное (определённое).",
+                head_en: ["Indefinite", "Definite"],
+                head_ru: ["Неопределённая", "Определённая"],
+                q_en: "Choose the correct form: ___ (stor) bilen.",
+                q_ru: "Выберите правильную форму: ___ (stor) bilen."
+            },
+            {
+                id: "gr36",
+                level: "B1",
+                title: "Ordstilling i leddsetninger (biord)",
+                exp: "У підрядних реченнях прислівники (ikke, alltid, ofte) стоять перед дієсловом, на відміну від головного речення, де вони після дієслова.",
+                table: {
+                    head: ["Hovedsetning", "Leddsetning"],
+                    rows: [
+                        ["Jeg vet ikke.", "... at jeg ikke vet."],
+                        ["Han kommer alltid.", "... at han alltid kommer."]
+                    ]
+                },
+                ex: { q: "Оберіть правильний порядок: Han sier at han ___ kommer.", opts: ["ikke", "kommer ikke", "ikke kommer"], a: 2 },
+                title_en: "Word order in subordinate clauses (adverbs)",
+                title_ru: "Порядок слов в придаточных предложениях (наречия)",
+                exp_en: "In subordinate clauses, adverbs (ikke, alltid, ofte) are placed before the verb, unlike in main clauses where they follow the verb.",
+                exp_ru: "В придаточных предложениях наречия (ikke, alltid, ofte) стоят перед глаголом, в отличие от главного предложения, где они после глагола.",
+                head_en: ["Main clause", "Subordinate clause"],
+                head_ru: ["Главное предложение", "Придаточное предложение"],
+                q_en: "Choose the correct word order: Han sier at han ___ kommer.",
+                q_ru: "Выберите правильный порядок: Han sier at han ___ kommer."
+            },
+            {
+                id: "gr37",
+                level: "B1",
+                title: "Infinitivsstrukturer (å + infinitiv / uten å)",
+                exp: "Після багатьох дієслів (elske, hate, like, prøve, begynne) використовується інфінітив з 'å'. Заперечення утворюється з 'uten å'.",
+                table: {
+                    head: ["Konstruksjon", "Eksempel"],
+                    rows: [
+                        ["elsker å + inf", "Jeg elsker å svømme."],
+                        ["prøver å + inf", "Hun prøver å lære norsk."],
+                        ["uten å + inf", "Han gikk uten å si noe."]
+                    ]
+                },
+                ex: { q: "Заповніть: Jeg liker ___ lese bøker.", opts: ["å", "uten å", "til"], a: 0 },
+                title_en: "Infinitive structures (å + infinitive / uten å)",
+                title_ru: "Инфинитивные конструкции (å + инфинитив / uten å)",
+                exp_en: "Many verbs (elske, hate, like, prøve, begynne) are followed by the infinitive with 'å'. Negation uses 'uten å'.",
+                exp_ru: "После многих глаголов (elske, hate, like, prøve, begynne) используется инфинитив с 'å'. Отрицание образуется с 'uten å'.",
+                head_en: ["Construction", "Example"],
+                head_ru: ["Конструкция", "Пример"],
+                q_en: "Fill in: Jeg liker ___ lese bøker.",
+                q_ru: "Заполните: Jeg liker ___ lese bøker."
+            },
         ];
 
         // =====================================================================
