@@ -395,8 +395,28 @@
             { t: "Тіло", no: "hår", uk: "волосся", ex_no: "Hun har langt hår.", ex_uk: "У неї довге волосся.", en: "hair", en_ex: "She has long hair.", ru: "волосы", ru_ex: "У неё длинные волосы." },
             { t: "Тіло", no: "tann", uk: "зуб", ex_no: "Jeg pusser tennene mine.", ex_uk: "Я чищу зуби.", en: "tooth", en_ex: "I brush my teeth.", ru: "зуб", ru_ex: "Я чищу зубы." },
             { t: "Тіло", no: "hals", uk: "шия", ex_no: "Halsen min er vond.", ex_uk: "У мене болить шия.", en: "neck/throat", en_ex: "My neck hurts.", ru: "шея", ru_ex: "У меня болит шея." },
-            { t: "Тіло", no: "kne", uk: "коліно", ex_no: "Jeg falt og slo kneet.", ex_uk: "Я впав і забив коліно.", en: "knee", en_ex: "I fell and hit my knee.", ru: "колено", ru_ex: "Я упал и ударил колено." }
-        
+            { t: "Тіло", no: "kne", uk: "коліно", ex_no: "Jeg falt og slo kneet.", ex_uk: "Я впав і забив коліно.", en: "knee", en_ex: "I fell and hit my knee.", ru: "колено", ru_ex: "Я упал и ударил колено." },
+        // ---------- НОВІ СЛОВА ДЛЯ A1 ----------
+{ t: "Погода", no: "vær", uk: "погода", en: "weather", ru: "погода", ex_no: "Været er fint i dag.", ex_uk: "Погода сьогодні гарна.", en_ex: "The weather is nice today.", ru_ex: "Погода сегодня хорошая." },
+{ t: "Погода", no: "overskyet", uk: "хмарно", en: "cloudy", ru: "облачно", ex_no: "Det er overskyet i morgen.", ex_uk: "Завтра буде хмарно.", en_ex: "It will be cloudy tomorrow.", ru_ex: "Завтра будет облачно." },
+{ t: "Погода", no: "vindstille", uk: "безвітряно", en: "calm", ru: "безветренно", ex_no: "I dag er det vindstille.", ex_uk: "Сьогодні безвітряно.", en_ex: "Today it's calm.", ru_ex: "Сегодня безветренно." },
+{ t: "Кольори", no: "beige", uk: "бежевий", en: "beige", ru: "бежевый", ex_no: "Veggen er beige.", ex_uk: "Стіна бежева.", en_ex: "The wall is beige.", ru_ex: "Стена бежевая." },
+{ t: "Кольори", no: "mørk", uk: "темний", en: "dark", ru: "тёмный", ex_no: "Det er mørkt ute.", ex_uk: "Надворі темно.", en_ex: "It's dark outside.", ru_ex: "На улице темно." },
+{ t: "Кольори", no: "lys", uk: "світлий", en: "light", ru: "светлый", ex_no: "Hun har lyst hår.", ex_uk: "У неї світле волосся.", en_ex: "She has light hair.", ru_ex: "У неё светлые волосы." },
+{ t: "Дієслова", no: "å lukke", uk: "закривати", en: "to close", ru: "закрывать", ex_no: "Lukk døren, vær så snill.", ex_uk: "Закрий двері, будь ласка.", en_ex: "Close the door, please.", ru_ex: "Закрой дверь, пожалуйста." },
+{ t: "Дієслова", no: "å åpne", uk: "відкривати", en: "to open", ru: "открывать", ex_no: "Åpne vinduet, det er varmt.", ex_uk: "Відкрий вікно, спекотно.", en_ex: "Open the window, it's hot.", ru_ex: "Открой окно, жарко." },
+{ t: "Дієслова", no: "å sette", uk: "ставити", en: "to put", ru: "ставить", ex_no: "Sett boken på bordet.", ex_uk: "Постав книгу на стіл.", en_ex: "Put the book on the table.", ru_ex: "Поставь книгу на стол." },
+{ t: "Дієслова", no: "å ta", uk: "брати", en: "to take", ru: "брать", ex_no: "Ta med deg paraplyen.", ex_uk: "Візьми з собою парасольку.", en_ex: "Take the umbrella with you.", ru_ex: "Возьми с собой зонт." },
+{ t: "Дієслова", no: "å gi", uk: "давати", en: "to give", ru: "давать", ex_no: "Gi meg saltet, takk.", ex_uk: "Дай мені сіль, будь ласка.", en_ex: "Give me the salt, please.", ru_ex: "Дай мне соль, пожалуйста." },
+{ t: "Дім", no: "tak", uk: "дах", en: "roof", ru: "крыша", ex_no: "Fuglen sitter på taket.", ex_uk: "Птах сидить на даху.", en_ex: "The bird is sitting on the roof.", ru_ex: "Птица сидит на крыше." },
+{ t: "Дім", no: "vegg", uk: "стіна", en: "wall", ru: "стена", ex_no: "Bildet henger på veggen.", ex_uk: "Картина висить на стіні.", en_ex: "The picture hangs on the wall.", ru_ex: "Картина висит на стене." },
+{ t: "Дім", no: "gulv", uk: "підлога", en: "floor", ru: "пол", ex_no: "Teppet ligger på gulvet.", ex_uk: "Килим лежить на підлозі.", en_ex: "The carpet is on the floor.", ru_ex: "Ковёр лежит на полу." },
+{ t: "Дім", no: "trapp", uk: "сходи", en: "stairs", ru: "лестница", ex_no: "Vi må gå i trappen opp.", ex_uk: "Нам треба піднятися сходами.", en_ex: "We have to go up the stairs.", ru_ex: "Нам нужно подняться по лестнице." },
+{ t: "Їжа", no: "kjeks", uk: "печиво", en: "biscuit", ru: "печенье", ex_no: "Barna spiser kjeks til kvelds.", ex_uk: "Діти їдять печиво на вечерю.", en_ex: "The children eat biscuits for supper.", ru_ex: "Дети едят печенье на ужин." },
+{ t: "Їжа", no: "saft", uk: "сік (неконцентрований)", en: "juice (diluted)", ru: "сок (разбавленный)", ex_no: "Vil du ha et glass saft?", ex_uk: "Хочеш склянку соку?", en_ex: "Would you like a glass of juice?", ru_ex: "Хочешь стакан сока?" },
+{ t: "Їжа", no: "grøt", uk: "каша", en: "porridge", ru: "каша", ex_no: "Jeg spiser grøt til frokost.", ex_uk: "Я їм кашу на сніданок.", en_ex: "I eat porridge for breakfast.", ru_ex: "Я ем кашу на завтрак." },
+{ t: "Транспорт", no: "taxi", uk: "таксі", en: "taxi", ru: "такси", ex_no: "Vi tar taxi til hotellet.", ex_uk: "Ми їдемо на таксі до готелю.", en_ex: "We take a taxi to the hotel.", ru_ex: "Мы едем на такси в отель." },
+{ t: "Транспорт", no: "motorvei", uk: "автострада", en: "motorway", ru: "автострада", ex_no: "Motorveien er stengt.", ex_uk: "Автострада закрита.", en_ex: "The motorway is closed.", ru_ex: "Автострада закрыта." },
         
             ],
             A2: [
@@ -623,7 +643,28 @@
             { t: "Робота", no: "rapport", uk: "звіт", ex_no: "Jeg skriver en rapport i dag.", ex_uk: "Я пишу звіт сьогодні.", en: "report", en_ex: "I'm writing a report today.", ru: "отчёт", ru_ex: "Я пишу отчёт сегодня." },
             { t: "Робота", no: "prosjekt", uk: "проєкт", ex_no: "Prosjektet er nesten ferdig.", ex_uk: "Проєкт майже завершено.", en: "project", en_ex: "The project is almost done.", ru: "проект", ru_ex: "Проект почти завершён." },
             { t: "Дієслова", no: "å telle", uk: "рахувати", ex_no: "Barnet lærer å telle til hundre.", ex_uk: "Дитина вчиться рахувати до ста.", en: "to count", en_ex: "The child is learning to count to a hundred.", ru: "считать", ru_ex: "Ребёнок учится считать до ста." },
-            { t: "Дієслова", no: "å måle", uk: "вимірювати", ex_no: "Vi målte rommet før vi kjøpte sofaen.", ex_uk: "Ми виміряли кімнату перед покупкою дивана.", en: "to measure", en_ex: "We measured the room before buying the sofa.", ru: "измерять", ru_ex: "Мы измерили комнату перед покупкой дивана." }
+            { t: "Дієслова", no: "å måle", uk: "вимірювати", ex_no: "Vi målte rommet før vi kjøpte sofaen.", ex_uk: "Ми виміряли кімнату перед покупкою дивана.", en: "to measure", en_ex: "We measured the room before buying the sofa.", ru: "измерять", ru_ex: "Мы измерили комнату перед покупкой дивана." },
+    // ---------- НОВІ СЛОВА ДЛЯ A2 ----------
+{ t: "Подорожі", no: "ferge", uk: "пором", en: "ferry", ru: "паром", ex_no: "Vi tar fergen til Danmark.", ex_uk: "Ми пливемо поромом до Данії.", en_ex: "We take the ferry to Denmark.", ru_ex: "Мы плывём паромом в Данию." },
+{ t: "Подорожі", no: "landemerke", uk: "пам'ятка", en: "landmark", ru: "достопримечательность", ex_no: "Operaen er et kjent landemerke.", ex_uk: "Опера – відома пам'ятка.", en_ex: "The Opera is a famous landmark.", ru_ex: "Опера – известная достопримечательность." },
+{ t: "Здоров'я", no: "syk", uk: "хворий", en: "ill", ru: "больной", ex_no: "Hun er syk og blir hjemme.", ex_uk: "Вона хвора і залишається вдома.", en_ex: "She is ill and stays home.", ru_ex: "Она больна и остаётся дома." },
+{ t: "Здоров'я", no: "frisk", uk: "здоровий", en: "healthy", ru: "здоровый", ex_no: "Jeg føler meg frisk i dag.", ex_uk: "Я почуваюся здоровим сьогодні.", en_ex: "I feel healthy today.", ru_ex: "Я чувствую себя здоровым сегодня." },
+{ t: "Робота", no: "kontor", uk: "офіс", en: "office", ru: "офис", ex_no: "Hun jobber på et stort kontor.", ex_uk: "Вона працює у великому офісі.", en_ex: "She works in a big office.", ru_ex: "Она работает в большом офисе." },
+{ t: "Робота", no: "møte", uk: "зустріч (нарада)", en: "meeting", ru: "совещание", ex_no: "Vi har møte klokka ti.", ex_uk: "У нас нарада о десятій.", en_ex: "We have a meeting at ten.", ru_ex: "У нас совещание в десять." },
+{ t: "Хобі", no: "fotball", uk: "футбол", en: "football", ru: "футбол", ex_no: "Guttene spiller fotball på lørdager.", ex_uk: "Хлопці грають у футбол по суботах.", en_ex: "The boys play football on Saturdays.", ru_ex: "Мальчики играют в футбол по субботам." },
+{ t: "Хобі", no: "svømming", uk: "плавання", en: "swimming", ru: "плавание", ex_no: "Svømming er god trening.", ex_uk: "Плавання – гарне тренування.", en_ex: "Swimming is good exercise.", ru_ex: "Плавание – хорошая тренировка." },
+{ t: "Освіта", no: "bibliotek", uk: "бібліотека", en: "library", ru: "библиотека", ex_no: "Jeg låner bøker på biblioteket.", ex_uk: "Я позичаю книги в бібліотеці.", en_ex: "I borrow books from the library.", ru_ex: "Я беру книги в библиотеке." },
+{ t: "Освіта", no: "forelesning", uk: "лекція", en: "lecture", ru: "лекция", ex_no: "Forelesningen var interessant.", ex_uk: "Лекція була цікавою.", en_ex: "The lecture was interesting.", ru_ex: "Лекция была интересной." },
+{ t: "Технології", no: "datamaskin", uk: "комп'ютер", en: "computer", ru: "компьютер", ex_no: "Datamaskinen er treg.", ex_uk: "Комп'ютер повільний.", en_ex: "The computer is slow.", ru_ex: "Компьютер медленный." },
+{ t: "Технології", no: "mobiltelefon", uk: "мобільний телефон", en: "mobile phone", ru: "мобильный телефон", ex_no: "Mobiltelefonen min er gammel.", ex_uk: "Мій мобільний телефон старий.", en_ex: "My mobile phone is old.", ru_ex: "Мой мобильный телефон старый." },
+{ t: "Природа", no: "skog", uk: "ліс", en: "forest", ru: "лес", ex_no: "Vi går tur i skogen.", ex_uk: "Ми гуляємо в лісі.", en_ex: "We go for a walk in the forest.", ru_ex: "Мы гуляем в лесу." },
+{ t: "Природа", no: "elv", uk: "річка", en: "river", ru: "река", ex_no: "Elven renner gjennom byen.", ex_uk: "Річка протікає через місто.", en_ex: "The river flows through the city.", ru_ex: "Река протекает через город." },
+{ t: "Місто", no: "torg", uk: "площа", en: "square", ru: "площадь", ex_no: "Torget er fullt av mennesker.", ex_uk: "Площа повна людей.", en_ex: "The square is full of people.", ru_ex: "Площадь полна людей." },
+{ t: "Місто", no: "park", uk: "парк", en: "park", ru: "парк", ex_no: "Vi sitter i parken.", ex_uk: "Ми сидимо в парку.", en_ex: "We sit in the park.", ru_ex: "Мы сидим в парке." },
+{ t: "Покупки", no: "butikk", uk: "магазин", en: "shop", ru: "магазин", ex_no: "Butikken er stengt i dag.", ex_uk: "Магазин сьогодні закритий.", en_ex: "The shop is closed today.", ru_ex: "Магазин сегодня закрыт." },
+{ t: "Покупки", no: "salgspris", uk: "ціна продажу", en: "sale price", ru: "цена продажи", ex_no: "Salgsprisen er god.", ex_uk: "Ціна продажу хороша.", en_ex: "The sale price is good.", ru_ex: "Цена продажи хорошая." },
+{ t: "Емоції", no: "nervøs", uk: "нервовий", en: "nervous", ru: "нервный", ex_no: "Hun er nervøs før eksamen.", ex_uk: "Вона нервує перед іспитом.", en_ex: "She is nervous before the exam.", ru_ex: "Она нервничает перед экзаменом." },
+{ t: "Емоції", no: "stolt", uk: "гордий", en: "proud", ru: "гордый", ex_no: "Jeg er stolt av deg.", ex_uk: "Я пишаюся тобою.", en_ex: "I am proud of you.", ru_ex: "Я горжусь тобой." },
         
         
             ],
@@ -811,9 +852,30 @@
             { t: "Дієслова", no: "å beskrive", uk: "описувати", ex_no: "Kan du beskrive hva som skjedde?", ex_uk: "Можеш описати, що сталося?", en: "to describe", en_ex: "Can you describe what happened?", ru: "описывать", ru_ex: "Можешь описать, что случилось?" },
             { t: "Дієслова", no: "å sammenligne", uk: "порівнювати", ex_no: "Det er vanskelig å sammenligne de to byene.", ex_uk: "Важко порівнювати ці два міста.", en: "to compare", en_ex: "It's hard to compare the two cities.", ru: "сравнивать", ru_ex: "Трудно сравнивать эти два города." },
             { t: "Дієслова", no: "å bekrefte", uk: "підтверджувати", ex_no: "Kan du bekrefte avtalen på e-post?", ex_uk: "Можеш підтвердити домовленість електронною поштою?", en: "to confirm", en_ex: "Can you confirm the agreement by email?", ru: "подтверждать", ru_ex: "Можешь подтвердить договорённость по электронной почте?" },
-            { t: "Дієслова", no: "å avlyse", uk: "скасовувати (захід)", ex_no: "Konserten ble avlyst på grunn av vær.", ex_uk: "Концерт скасували через погоду.", en: "to cancel (an event)", en_ex: "The concert was cancelled due to weather.", ru: "отменять (мероприятие)", ru_ex: "Концерт отменили из-за погоды." }
+            { t: "Дієслова", no: "å avlyse", uk: "скасовувати (захід)", ex_no: "Konserten ble avlyst på grunn av vær.", ex_uk: "Концерт скасували через погоду.", en: "to cancel (an event)", en_ex: "The concert was cancelled due to weather.", ru: "отменять (мероприятие)", ru_ex: "Концерт отменили из-за погоды." },
         
-        
+        // ---------- НОВІ СЛОВА ДЛЯ B1 ----------
+{ t: "Стосунки", no: "kjæreste", uk: "партнер (коханий/а)", en: "partner", ru: "партнёр", ex_no: "Hun introduserte kjæresten sin.", ex_uk: "Вона познайомила зі своїм партнером.", en_ex: "She introduced her partner.", ru_ex: "Она познакомила со своим партнёром." },
+{ t: "Стосунки", no: "tillit", uk: "довіра", en: "trust", ru: "доверие", ex_no: "Tillit er viktig i forhold.", ex_uk: "Довіра важлива у стосунках.", en_ex: "Trust is important in relationships.", ru_ex: "Доверие важно в отношениях." },
+{ t: "Медіа", no: "nyhet", uk: "новина", en: "news", ru: "новость", ex_no: "Jeg hører på nyhetene.", ex_uk: "Я слухаю новини.", en_ex: "I listen to the news.", ru_ex: "Я слушаю новости." },
+{ t: "Медіа", no: "avis", uk: "газета", en: "newspaper", ru: "газета", ex_no: "Han leser avisen om morgenen.", ex_uk: "Він читає газету вранці.", en_ex: "He reads the newspaper in the morning.", ru_ex: "Он читает газету утром." },
+{ t: "Довкілля", no: "forurensning", uk: "забруднення", en: "pollution", ru: "загрязнение", ex_no: "Forurensning skader miljøet.", ex_uk: "Забруднення шкодить довкіллю.", en_ex: "Pollution damages the environment.", ru_ex: "Загрязнение вредит окружающей среде." },
+{ t: "Довкілля", no: "gjenvinning", uk: "переробка відходів", en: "recycling", ru: "переработка", ex_no: "Gjenvinning er viktig.", ex_uk: "Переробка відходів важлива.", en_ex: "Recycling is important.", ru_ex: "Переработка отходов важна." },
+{ t: "Дієслова", no: "å påvirke", uk: "впливати", en: "to influence", ru: "влиять", ex_no: "Media påvirker oss.", ex_uk: "ЗМІ впливають на нас.", en_ex: "The media influences us.", ru_ex: "СМИ влияют на нас." },
+{ t: "Дієслова", no: "å vurdere", uk: "оцінювати", en: "to assess", ru: "оценивать", ex_no: "Jeg vurderer situasjonen.", ex_uk: "Я оцінюю ситуацію.", en_ex: "I assess the situation.", ru_ex: "Я оцениваю ситуацию." },
+{ t: "Кар'єра", no: "karriere", uk: "кар'єра", en: "career", ru: "карьера", ex_no: "Hun har en god karriere.", ex_uk: "Вона має гарну кар'єру.", en_ex: "She has a good career.", ru_ex: "У неё хорошая карьера." },
+{ t: "Кар'єра", no: "intervju", uk: "співбесіда", en: "interview", ru: "собеседование", ex_no: "Intervjuet gikk bra.", ex_uk: "Співбесіда пройшла добре.", en_ex: "The interview went well.", ru_ex: "Собеседование прошло хорошо." },
+{ t: "Абстрактне", no: "mulighet", uk: "можливість", en: "opportunity", ru: "возможность", ex_no: "Dette er en god mulighet.", ex_uk: "Це гарна можливість.", en_ex: "This is a good opportunity.", ru_ex: "Это хорошая возможность." },
+{ t: "Абстрактне", no: "utfordring", uk: "виклик", en: "challenge", ru: "вызов", ex_no: "Dette er en stor utfordring.", ex_uk: "Це великий виклик.", en_ex: "This is a big challenge.", ru_ex: "Это большой вызов." },
+{ t: "Побут", no: "kontrakt", uk: "контракт", en: "contract", ru: "контракт", ex_no: "Vi signerte kontrakten.", ex_uk: "Ми підписали контракт.", en_ex: "We signed the contract.", ru_ex: "Мы подписали контракт." },
+{ t: "Побут", no: "husleie", uk: "орендна плата", en: "rent", ru: "арендная плата", ex_no: "Husleien øker hvert år.", ex_uk: "Орендна плата зростає щороку.", en_ex: "The rent increases every year.", ru_ex: "Арендная плата растёт каждый год." },
+{ t: "Технології", no: "nettside", uk: "вебсайт", en: "website", ru: "веб-сайт", ex_no: "Nettsiden er oppdatert.", ex_uk: "Вебсайт оновлено.", en_ex: "The website is updated.", ru_ex: "Веб-сайт обновлён." },
+{ t: "Технології", no: "programvare", uk: "програмне забезпечення", en: "software", ru: "программное обеспечение", ex_no: "Programvaren er ny.", ex_uk: "Програмне забезпечення нове.", en_ex: "The software is new.", ru_ex: "Программное обеспечение новое." },
+{ t: "Подорожі", no: "reiseplan", uk: "план подорожі", en: "travel plan", ru: "план поездки", ex_no: "Vi har en fleksibel reiseplan.", ex_uk: "У нас гнучкий план подорожі.", en_ex: "We have a flexible travel plan.", ru_ex: "У нас гибкий план поездки." },
+{ t: "Подорожі", no: "suvenir", uk: "сувенір", en: "souvenir", ru: "сувенир", ex_no: "Jeg kjøpte en suvenir.", ex_uk: "Я купив сувенір.", en_ex: "I bought a souvenir.", ru_ex: "Я купил сувенир." },
+{ t: "Здоров'я", no: "smerte", uk: "біль", en: "pain", ru: "боль", ex_no: "Smertene er sterke.", ex_uk: "Біль сильний.", en_ex: "The pain is strong.", ru_ex: "Боль сильная." },
+{ t: "Здоров'я", no: "helse", uk: "здоров'я", en: "health", ru: "здоровье", ex_no: "Helse er viktig.", ex_uk: "Здоров'я важливе.", en_ex: "Health is important.", ru_ex: "Здоровье важно." }, 
+
             ],
             B2: [
             { t: "Політика", no: "regjering", uk: "уряд", ex_no: "Regjeringen la fram et nytt forslag til budsjett.",
@@ -926,9 +988,30 @@
             { t: "Наука", no: "empirisk", uk: "емпіричний", ex_no: "Studien er basert på empirisk data.", ex_uk: "Дослідження базується на емпіричних даних.", en: "empirical", en_ex: "The study is based on empirical data.", ru: "эмпирический", ru_ex: "Исследование основано на эмпирических данных." },
             { t: "Наука", no: "kvalitativ", uk: "якісний (дослідження)", ex_no: "Vi brukte en kvalitativ tilnærming.", ex_uk: "Ми використали якісний підхід.", en: "qualitative", en_ex: "We used a qualitative approach.", ru: "качественный (исследование)", ru_ex: "Мы использовали качественный подход." },
             { t: "Наука", no: "kvantitativ", uk: "кількісний", ex_no: "Kvantitative data gir et bredere bilde.", ex_uk: "Кількісні дані дають ширшу картину.", en: "quantitative", en_ex: "Quantitative data gives a broader picture.", ru: "количественный", ru_ex: "Количественные данные дают более широкую картину." },
-            { t: "Наука", no: "korrelasjon", uk: "кореляція", ex_no: "Det er en tydelig korrelasjon mellom de to faktorene.", ex_uk: "Між цими двома факторами є чітка кореляція.", en: "correlation", en_ex: "There's a clear correlation between the two factors.", ru: "корреляция", ru_ex: "Между этими двумя факторами есть чёткая корреляция." }
+            { t: "Наука", no: "korrelasjon", uk: "кореляція", ex_no: "Det er en tydelig korrelasjon mellom de to faktorene.", ex_uk: "Між цими двома факторами є чітка кореляція.", en: "correlation", en_ex: "There's a clear correlation between the two factors.", ru: "корреляция", ru_ex: "Между этими двумя факторами есть чёткая корреляция." },
         
-        
+        // ---------- НОВІ СЛОВА ДЛЯ B2 ----------
+{ t: "Політика", no: "regjering", uk: "уряд", en: "government", ru: "правительство", ex_no: "Regjeringen har ny plan.", ex_uk: "Уряд має новий план.", en_ex: "The government has a new plan.", ru_ex: "У правительства новый план." },
+{ t: "Політика", no: "valg", uk: "вибори", en: "election", ru: "выборы", ex_no: "Valget er i september.", ex_uk: "Вибори у вересні.", en_ex: "The election is in September.", ru_ex: "Выборы в сентябре." },
+{ t: "Економіка", no: "økonomi", uk: "економіка", en: "economy", ru: "экономика", ex_no: "Økonomien vokser.", ex_uk: "Економіка зростає.", en_ex: "The economy is growing.", ru_ex: "Экономика растёт." },
+{ t: "Економіка", no: "inflasjon", uk: "інфляція", en: "inflation", ru: "инфляция", ex_no: "Inflasjonen er høy.", ex_uk: "Інфляція висока.", en_ex: "Inflation is high.", ru_ex: "Инфляция высокая." },
+{ t: "Наука", no: "forskning", uk: "дослідження", en: "research", ru: "исследование", ex_no: "Forskning er viktig.", ex_uk: "Дослідження важливе.", en_ex: "Research is important.", ru_ex: "Исследования важны." },
+{ t: "Наука", no: "teori", uk: "теорія", en: "theory", ru: "теория", ex_no: "Teorien er bekreftet.", ex_uk: "Теорію підтверджено.", en_ex: "The theory is confirmed.", ru_ex: "Теория подтверждена." },
+{ t: "Культура", no: "kunst", uk: "мистецтво", en: "art", ru: "искусство", ex_no: "Hun studerer kunst.", ex_uk: "Вона вивчає мистецтво.", en_ex: "She studies art.", ru_ex: "Она изучает искусство." },
+{ t: "Культура", no: "litteratur", uk: "література", en: "literature", ru: "литература", ex_no: "Norsk litteratur er rik.", ex_uk: "Норвезька література багата.", en_ex: "Norwegian literature is rich.", ru_ex: "Норвежская литература богата." },
+{ t: "Дієслова", no: "å implementere", uk: "впроваджувати", en: "to implement", ru: "внедрять", ex_no: "Vi implementerer nytt system.", ex_uk: "Ми впроваджуємо нову систему.", en_ex: "We implement a new system.", ru_ex: "Мы внедряем новую систему." },
+{ t: "Дієслова", no: "å evaluere", uk: "оцінювати", en: "to evaluate", ru: "оценивать", ex_no: "De evaluerer resultatene.", ex_uk: "Вони оцінюють результати.", en_ex: "They evaluate the results.", ru_ex: "Они оценивают результаты." },
+{ t: "Медицина", no: "diagnose", uk: "діагноз", en: "diagnosis", ru: "диагноз", ex_no: "Legen stilte diagnose.", ex_uk: "Лікар поставив діагноз.", en_ex: "The doctor made a diagnosis.", ru_ex: "Врач поставил диагноз." },
+{ t: "Медицина", no: "symptom", uk: "симптом", en: "symptom", ru: "симптом", ex_no: "Feber er et symptom.", ex_uk: "Температура – симптом.", en_ex: "Fever is a symptom.", ru_ex: "Температура – симптом." },
+{ t: "Право", no: "dom", uk: "вирок", en: "sentence", ru: "приговор", ex_no: "Dommen ble anket.", ex_uk: "Вирок оскаржили.", en_ex: "The sentence was appealed.", ru_ex: "Приговор обжаловали." },
+{ t: "Право", no: "vitne", uk: "свідок", en: "witness", ru: "свидетель", ex_no: "Vitnet så alt.", ex_uk: "Свідок бачив усе.", en_ex: "The witness saw everything.", ru_ex: "Свидетель видел всё." },
+{ t: "Бізнес", no: "forretning", uk: "бізнес", en: "business", ru: "бизнес", ex_no: "Forretningen går bra.", ex_uk: "Бізнес іде добре.", en_ex: "The business is going well.", ru_ex: "Бизнес идёт хорошо." },
+{ t: "Бізнес", no: "strategi", uk: "стратегія", en: "strategy", ru: "стратегия", ex_no: "Vi trenger en ny strategi.", ex_uk: "Нам потрібна нова стратегія.", en_ex: "We need a new strategy.", ru_ex: "Нам нужна новая стратегия." },
+{ t: "Економіка", no: "budsjett", uk: "бюджет", en: "budget", ru: "бюджет", ex_no: "Budsjettet er stramt.", ex_uk: "Бюджет обмежений.", en_ex: "The budget is tight.", ru_ex: "Бюджет ограничен." },
+{ t: "Економіка", no: "konkurs", uk: "банкрутство", en: "bankruptcy", ru: "банкротство", ex_no: "Bedriften gikk konkurs.", ex_uk: "Компанія збанкрутувала.", en_ex: "The company went bankrupt.", ru_ex: "Компания обанкротилась." },
+{ t: "Медіа", no: "journalist", uk: "журналіст", en: "journalist", ru: "журналист", ex_no: "Journalisten skriver en artikkel.", ex_uk: "Журналіст пише статтю.", en_ex: "The journalist writes an article.", ru_ex: "Журналист пишет статью." },
+{ t: "Медіа", no: "press", uk: "преса", en: "press", ru: "пресса", ex_no: "Pressen har rett til å ytre seg.", ex_uk: "Преса має право висловлюватися.", en_ex: "The press has the right to speak.", ru_ex: "Пресса имеет право высказываться." },
+
             ],
             C1: [
             { t: "Дискурс", no: "imidlertid", uk: "однак (формально)", ex_no: "Resultatene var lovende; det gjenstår imidlertid mye arbeid.",
@@ -1013,7 +1096,28 @@
             { t: "Філософія", no: "eksplisitt", uk: "явний", ex_no: "Han ga en eksplisitt advarsel.", ex_uk: "Він дав явне попередження.", en: "explicit", en_ex: "He gave an explicit warning.", ru: "явный", ru_ex: "Он сделал явное предупреждение." },
             { t: "Філософія", no: "rasjonalitet", uk: "раціональність", ex_no: "Økonomisk teori antar ofte fullstendig rasjonalitet.", ex_uk: "Економічна теорія часто передбачає повну раціональність.", en: "rationality", en_ex: "Economic theory often assumes complete rationality.", ru: "рациональность", ru_ex: "Экономическая теория часто предполагает полную рациональность." }
         
-        
+        // ---------- НОВІ СЛОВА ДЛЯ C1 ----------
+{ t: "Дискурс", no: "imidlertid", uk: "однак (формально)", en: "however (formal)", ru: "однако (формально)", ex_no: "Resultatene var gode; imidlertid er det forbedringer.", ex_uk: "Результати були хороші; однак є покращення.", en_ex: "The results were good; however, there are improvements.", ru_ex: "Результаты были хорошими; однако есть улучшения." },
+{ t: "Дискурс", no: "følgelig", uk: "отже (внаслідок)", en: "consequently", ru: "следовательно", ex_no: "Etterspørselen falt, og prisene sank følgelig.", ex_uk: "Попит впав, і ціни, відповідно, знизилися.", en_ex: "Demand fell, and prices consequently dropped.", ru_ex: "Спрос упал, и цены, соответственно, снизились." },
+{ t: "Нюанси", no: "å antyde", uk: "натякати", en: "to imply", ru: "намекать", ex_no: "Rapporten antyder flere årsaker.", ex_uk: "Звіт натякає на кілька причин.", en_ex: "The report implies several causes.", ru_ex: "Отчёт намекает на несколько причин." },
+{ t: "Нюанси", no: "å fremheve", uk: "підкреслювати", en: "to emphasize", ru: "подчёркивать", ex_no: "Hun fremhevet viktigheten.", ex_uk: "Вона підкреслила важливість.", en_ex: "She emphasized the importance.", ru_ex: "Она подчеркнула важность." },
+{ t: "Академічна", no: "hypotese", uk: "гіпотеза", en: "hypothesis", ru: "гипотеза", ex_no: "Forskerne testet hypotesen.", ex_uk: "Науковці перевірили гіпотезу.", en_ex: "The researchers tested the hypothesis.", ru_ex: "Учёные проверили гипотезу." },
+{ t: "Академічна", no: "metode", uk: "метод", en: "method", ru: "метод", ex_no: "Metoden er pålitelig.", ex_uk: "Метод надійний.", en_ex: "The method is reliable.", ru_ex: "Метод надёжен." },
+{ t: "Філософія", no: "eksistens", uk: "існування", en: "existence", ru: "существование", ex_no: "Eksistens er et sentralt tema.", ex_uk: "Існування – центральна тема.", en_ex: "Existence is a central theme.", ru_ex: "Существование – центральная тема." },
+{ t: "Філософія", no: "bevissthet", uk: "свідомість", en: "consciousness", ru: "сознание", ex_no: "Bevissthet er komplekst.", ex_uk: "Свідомість складна.", en_ex: "Consciousness is complex.", ru_ex: "Сознание сложно." },
+{ t: "Лінгвістика", no: "syntaks", uk: "синтаксис", en: "syntax", ru: "синтаксис", ex_no: "Syntaks er setningsstruktur.", ex_uk: "Синтаксис – структура речень.", en_ex: "Syntax is sentence structure.", ru_ex: "Синтаксис – структура предложений." },
+{ t: "Лінгвістика", no: "semantikk", uk: "семантика", en: "semantics", ru: "семантика", ex_no: "Semantikk handler om betydning.", ex_uk: "Семантика займається значенням.", en_ex: "Semantics deals with meaning.", ru_ex: "Семантика занимается значением." },
+{ t: "Соціологія", no: "sosial ulikhet", uk: "соціальна нерівність", en: "social inequality", ru: "социальное неравенство", ex_no: "Sosial ulikhet er et problem.", ex_uk: "Соціальна нерівність – проблема.", en_ex: "Social inequality is a problem.", ru_ex: "Социальное неравенство – проблема." },
+{ t: "Соціологія", no: "mangfold", uk: "різноманіття", en: "diversity", ru: "разнообразие", ex_no: "Mangfold beriker samfunnet.", ex_uk: "Різноманіття збагачує суспільство.", en_ex: "Diversity enriches society.", ru_ex: "Разнообразие обогащает общество." },
+{ t: "Психологія", no: "kognisjon", uk: "когніція", en: "cognition", ru: "когниция", ex_no: "Kognisjon omfatter tenkning.", ex_uk: "Когніція охоплює мислення.", en_ex: "Cognition includes thinking.", ru_ex: "Когниция охватывает мышление." },
+{ t: "Психологія", no: "emosjon", uk: "емоція", en: "emotion", ru: "эмоция", ex_no: "Emosjoner påvirker oss.", ex_uk: "Емоції впливають на нас.", en_ex: "Emotions affect us.", ru_ex: "Эмоции влияют на нас." },
+{ t: "Абстрактні", no: "legitimitet", uk: "легітимність", en: "legitimacy", ru: "легитимность", ex_no: "Regjeringens legitimitet er høy.", ex_uk: "Легітимність уряду висока.", en_ex: "The government's legitimacy is high.", ru_ex: "Легитимность правительства высока." },
+{ t: "Абстрактні", no: "autonomi", uk: "автономія", en: "autonomy", ru: "автономия", ex_no: "Regionen krever autonomi.", ex_uk: "Регіон вимагає автономії.", en_ex: "The region demands autonomy.", ru_ex: "Регион требует автономии." },
+{ t: "Дискурс", no: "for så vidt", uk: "власне кажучи", en: "in a sense", ru: "в некотором смысле", ex_no: "For så vidt har du rett.", ex_uk: "Власне кажучи, ти маєш рацію.", en_ex: "In a sense you're right.", ru_ex: "В некотором смысле ты прав." },
+{ t: "Нюанси", no: "nyansert", uk: "нюансований", en: "nuanced", ru: "нюансированный", ex_no: "Debatten er nyansert.", ex_uk: "Дебати нюансовані.", en_ex: "The debate is nuanced.", ru_ex: "Дебаты нюансированные." },
+{ t: "Академічна", no: "paradigme", uk: "парадигма", en: "paradigm", ru: "парадигма", ex_no: "Teorien representerer et nytt paradigme.", ex_uk: "Теорія представляє нову парадигму.", en_ex: "The theory represents a new paradigm.", ru_ex: "Теория представляет новую парадигму." },
+{ t: "Філософія", no: "dialektikk", uk: "діалектика", en: "dialectics", ru: "диалектика", ex_no: "Dialektikken er viktig.", ex_uk: "Діалектика важлива.", en_ex: "Dialectics is important.", ru_ex: "Диалектика важна." },
+
             ],
             C2: [
             { t: "Ідіоми", no: "å ta beina på nakken", uk: "дременути (втекти)", ex_no: "Da politiet kom, tok tyven beina på nakken.",
@@ -1083,7 +1187,28 @@
             { t: "Абстрактні", no: "å reflektere", uk: "відображати / міркувати", ex_no: "Samtalen reflekterer samfunnsutviklingen.", ex_uk: "Розмова відображає розвиток суспільства.", en: "to reflect", en_ex: "The conversation reflects the development of society.", ru: "отражать/размышлять", ru_ex: "Разговор отражает развитие общества." },
             { t: "Абстрактні", no: "å avgrense", uk: "обмежувати (звужувати)", ex_no: "Vi må avgrense temaet for å gjøre det håndterbart.", ex_uk: "Ми повинні звузити тему, щоб зробити її керованою.", en: "to narrow down/delimit", en_ex: "We need to narrow down the topic to make it manageable.", ru: "сужать (тему)", ru_ex: "Мы должны сузить тему, чтобы сделать её управляемой." },
             { t: "Абстрактні", no: "å utdype", uk: "поглиблювати (розширювати)", ex_no: "Kan du utdype dette punktet?", ex_uk: "Можеш детальніше розкрити цей пункт?", en: "to elaborate on", en_ex: "Can you elaborate on this point?", ru: "углублять/раскрывать подробнее", ru_ex: "Можешь раскрыть подробнее этот пункт?" },
-            { t: "Абстрактні", no: "sammenheng", uk: "зв'язок / контекст", ex_no: "Uten sammenheng blir det vanskelig å forstå.", ex_uk: "Без контексту важко зрозуміти.", en: "context/coherence", en_ex: "Without context it becomes difficult to understand.", ru: "связь/контекст", ru_ex: "Без контекста трудно понять." }
+            { t: "Абстрактні", no: "sammenheng", uk: "зв'язок / контекст", ex_no: "Uten sammenheng blir det vanskelig å forstå.", ex_uk: "Без контексту важко зрозуміти.", en: "context/coherence", en_ex: "Without context it becomes difficult to understand.", ru: "связь/контекст", ru_ex: "Без контекста трудно понять." },
+// ---------- НОВІ СЛОВА ДЛЯ C2 ----------
+{ t: "Ідіоми", no: "å ta beina på nakken", uk: "дременути (втекти)", en: "to bolt", ru: "дать дёру", ex_no: "Tyven tok beina på nakken.", ex_uk: "Злодій дременув.", en_ex: "The thief bolted.", ru_ex: "Вор дал дёру." },
+{ t: "Ідіоми", no: "å bite i det sure eplet", uk: "проковтнути гірку пігулку", en: "to bite the bullet", ru: "проглотить горькую пилюлю", ex_no: "Han måtte bite i det sure eplet.", ex_uk: "Йому довелося проковтнути гірку пігулку.", en_ex: "He had to bite the bullet.", ru_ex: "Ему пришлось проглотить горькую пилюлю." },
+{ t: "Ідіоми", no: "å ha bein i nesa", uk: "мати характер", en: "to have backbone", ru: "иметь характер", ex_no: "Hun har bein i nesa.", ex_uk: "Вона має характер.", en_ex: "She has backbone.", ru_ex: "У неё есть характер." },
+{ t: "Стилістика", no: "skjønnlitteratur", uk: "художня література", en: "fiction", ru: "художественная литература", ex_no: "Hun leser skjønnlitteratur.", ex_uk: "Вона читає художню літературу.", en_ex: "She reads fiction.", ru_ex: "Она читает художественную литературу." },
+{ t: "Стилістика", no: "satire", uk: "сатира", en: "satire", ru: "сатира", ex_no: "Programmet er satire.", ex_uk: "Програма – сатира.", en_ex: "The show is satire.", ru_ex: "Программа – сатира." },
+{ t: "Рідкісна лексика", no: "forgjengelig", uk: "минущий", en: "transient", ru: "преходящий", ex_no: "Berømmelse er forgjengelig.", ex_uk: "Слава минуща.", en_ex: "Fame is transient.", ru_ex: "Слава преходяща." },
+{ t: "Рідкісна лексика", no: "uforutsigbar", uk: "непередбачуваний", en: "unpredictable", ru: "непредсказуемый", ex_no: "Været er uforutsigbart.", ex_uk: "Погода непередбачувана.", en_ex: "The weather is unpredictable.", ru_ex: "Погода непредсказуема." },
+{ t: "Риторика", no: "retorikk", uk: "риторика", en: "rhetoric", ru: "риторика", ex_no: "Retorikk er kunsten å overbevise.", ex_uk: "Риторика – мистецтво переконувати.", en_ex: "Rhetoric is the art of persuasion.", ru_ex: "Риторика – искусство убеждения." },
+{ t: "Риторика", no: "argumentasjon", uk: "аргументація", en: "argumentation", ru: "аргументация", ex_no: "Argumentasjonen hans var solid.", ex_uk: "Його аргументація була солідною.", en_ex: "His argumentation was solid.", ru_ex: "Его аргументация была убедительной." },
+{ t: "Літературознавство", no: "motiv", uk: "мотив", en: "motif", ru: "мотив", ex_no: "Kjærlighet er et motiv i boken.", ex_uk: "Кохання – мотив у книзі.", en_ex: "Love is a motif in the book.", ru_ex: "Любовь – мотив в книге." },
+{ t: "Літературознавство", no: "tema", uk: "тема", en: "theme", ru: "тема", ex_no: "Ensomhet er temaet.", ex_uk: "Самотність – тема.", en_ex: "Loneliness is the theme.", ru_ex: "Одиночество – тема." },
+{ t: "Ідіоми", no: "å gå på limpinnen", uk: "попастися на гачок", en: "to fall for it", ru: "попасться на удочку", ex_no: "Han gikk på limpinnen.", ex_uk: "Він попався на гачок.", en_ex: "He fell for it.", ru_ex: "Он попался на удочку." },
+{ t: "Ідіоми", no: "å male fanden på veggen", uk: "згущувати фарби", en: "to paint a bleak picture", ru: "сгущать краски", ex_no: "Ikke mal fanden på veggen.", ex_uk: "Не згущуй фарби.", en_ex: "Don't paint a bleak picture.", ru_ex: "Не сгущай краски." },
+{ t: "Стилістика", no: "allegori", uk: "алегорія", en: "allegory", ru: "аллегория", ex_no: "Diktet er en allegori.", ex_uk: "Вірш – алегорія.", en_ex: "The poem is an allegory.", ru_ex: "Стихотворение – аллегория." },
+{ t: "Стилістика", no: "metafor", uk: "метафора", en: "metaphor", ru: "метафора", ex_no: "Språket er rikt på metaforer.", ex_uk: "Мова багата на метафори.", en_ex: "The language is rich in metaphors.", ru_ex: "Язык богат метафорами." },
+{ t: "Рідкісна лексика", no: "å fordufte", uk: "зникнути (як дим)", en: "to vanish", ru: "испариться", ex_no: "Penger kan fordufte.", ex_uk: "Гроші можуть зникнути.", en_ex: "Money can vanish.", ru_ex: "Деньги могут испариться." },
+{ t: "Рідкісна лексика", no: "å gruble", uk: "роздумувати", en: "to ponder", ru: "размышлять", ex_no: "Han grublet over problemet.", ex_uk: "Він роздумував над проблемою.", en_ex: "He pondered the problem.", ru_ex: "Он размышлял над проблемой." },
+{ t: "Літературознавство", no: "epos", uk: "епос", en: "epic", ru: "эпос", ex_no: "«Kalevala» er et epos.", ex_uk: "«Калевала» – епос.", en_ex: "'Kalevala' is an epic.", ru_ex: "«Калевала» – эпос." },
+{ t: "Риторика", no: "ethos", uk: "етос (довіра до оратора)", en: "ethos", ru: "этос", ex_no: "Ethos er viktig i tale.", ex_uk: "Етос важливий у промові.", en_ex: "Ethos is important in speech.", ru_ex: "Этос важен в речи." },
+{ t: "Риторика", no: "pathos", uk: "пафос (емоційний вплив)", en: "pathos", ru: "пафос", ex_no: "Pathos gjorde talen rørende.", ex_uk: "Пафос зробив промову зворушливою.", en_ex: "Pathos made the speech moving.", ru_ex: "Пафос сделал речь трогательной." },
         
             ]
         };
@@ -1287,6 +1412,16 @@ const NORSKPROVE_TASKS = {
 { topic: "Diskuter et aktuelt samfunnsproblem", prompt: "Hva mener du om miljøkrisen?" }
     ]
   },
+// ---------- B1 – нове завдання на читання ----------
+{
+  title: "Digital hverdag",
+  text: "I dag bruker vi digitale verktøy i nesten alle deler av livet. Vi handler på nett, kommuniserer med venner og jobber hjemmefra. Dette gir både fordeler og ulemper. Fordelene er fleksibilitet og tilgjengelighet, men ulempene kan være avhengighet og mindre sosial kontakt.",
+  questions: [
+    { q: "Hva bruker vi digitale verktøy til?", opts: ["Bare jobb", "Nesten alt", "Bare shopping"], a: 1 },
+    { q: "Hva er en fordel?", opts: ["Mindre sosial kontakt", "Fleksibilitet", "Avhengighet"], a: 1 },
+    { q: "Hva er en ulempe?", opts: ["Tilgjengelighet", "Fleksibilitet", "Avhengighet"], a: 2 }
+  ]
+},
   B2: {
     reading: [
       {
@@ -1340,6 +1475,21 @@ const NORSKPROVE_TASKS = {
 { topic: "Hva er din mening om innvandring?", prompt: "Gi eksempler på fordeler og utfordringer." }
     ]
   },
+// ---------- B2 – нове завдання на аудіювання ----------
+{
+  title: "Debatt om skole",
+  text: "Mange mener at skolen bør ha mer praktiske fag. Andre prioriterer teoretisk kunnskap. Det er viktig at elevene får prøve seg i ulike felt. Skolen bør forberede elevene på videre studier og arbeidsliv.",
+  questions: [
+    { q: "Hva mener mange?", opts: ["Mer praktiske fag", "Mindre lekse", "Flere lærere"], a: 0 },
+    { q: "Hva bør skolen forberede elevene på?", opts: ["Ferie", "Studier og arbeid", "Idrett"], a: 1 }
+  ]
+}, 
+// ---------- B2 – нове завдання на письмо ----------
+{ 
+  topic: "Fordeler og ulemper ved å bo i byen", 
+  prompt: "Skriv 8–10 setninger om fordeler og ulemper ved å bo i en stor by kontra på landet." 
+}, 
+
   C1: {
     reading: [
       {
@@ -1383,6 +1533,22 @@ const NORSKPROVE_TASKS = {
 { topic: "Fremtidens arbeidsmarked", prompt: "Hvordan vil jobber endre seg?" }
     ]
   },
+// ---------- C1 – нове завдання на письмо ----------
+{ 
+  topic: "Teknologiens påvirkning på hverdagen", 
+  prompt: "Skriv et essay (200–250 ord) om hvordan teknologi har endret hvordan vi lever og arbeider. Diskuter både positive og negative sider." 
+}, 
+// ---------- C1 – нове завдання на читання ----------
+{
+  title: "Kunstig intelligens og samfunn",
+  text: "Kunstig intelligens (KI) blir stadig viktigere i samfunnet. Den brukes i alt fra medisin til transport. Samtidig reiser KI nye etiske spørsmål: Hvem har ansvar når en algoritme tar feil? Hvordan sikrer vi at KI ikke diskriminerer? Det er viktig å utvikle retningslinjer som sikrer ansvarlig bruk.",
+  questions: [
+    { q: "Hvor brukes KI?", opts: ["Bare i medisin", "I mange områder", "Bare i transport"], a: 1 },
+    { q: "Hva er en etisk utfordring?", opts: ["At KI er for dyr", "At algoritmer kan ta feil", "At KI er for treg"], a: 1 },
+    { q: "Hva må vi utvikle?", opts: ["Nye algoritmer", "Retningslinjer", "Flere datamaskiner"], a: 1 }
+  ]
+},
+
   C2: {
     reading: [
       {
@@ -1424,7 +1590,26 @@ const NORSKPROVE_TASKS = {
 { topic: "Filosofisk samtale", prompt: "Hva er meningen med livet?" },
 { topic: "Fremtidens utdanning", prompt: "Hvordan bør skolen tilpasses en digital tidsalder?" }
     ]
-  }
+  },
+// ---------- C2 – нове завдання на читання ----------
+{
+  title: "Filosofi og vitenskap",
+  text: "Vitenskapen hviler på filosofiske antakelser. Spørsmålet om hva som er sant, og hvordan vi kan vite det, er grunnleggende. Vitenskapelig metode gir oss verktøy, men er ikke ufeilbarlig. Kritisk tenkning er essensielt for å vurdere både vitenskapelige og filosofiske påstander.",
+  questions: [
+    { q: "Hva hviler vitenskapen på?", opts: ["Filosofiske antakelser", "Religiøse dogmer", "Politisk makt"], a: 0 },
+    { q: "Hva er essensielt?", opts: ["Kritisk tenkning", "Akademiske titler", "Publisering"], a: 0 }
+  ]
+},
+// ---------- C2 – нове завдання на письмо ----------
+{ 
+  topic: "Filosofiske perspektiver på teknologi", 
+  prompt: "Drøft teknologiens innvirkning på menneskelig eksistens og samfunnsutvikling. Skriv et reflekterende essay (300 ord)." 
+},
+// ---------- C2 – нове завдання на усну частину ----------
+{ 
+  topic: "Fremtidens utdanning", 
+  prompt: "Hvordan bør skolen tilpasses en digital tidsalder? Diskuter utfordringer og muligheter." 
+},
 };
 
         // =====================================================================
@@ -1601,6 +1786,161 @@ const STUDY_PLANS = {
                     ["å anskaffe", "å kjøpe"],
                     ["å avslutte", "å slutte"]
                 ] }, ex: { q: "Формальне слово для «купити»", opts: ["kjøpe", "anskaffe", "handle"], a: 1 }, title_en: "Stylistic registers", title_ru: "Стилистические регистры", exp_en: "Formal vs. colloquial vocabulary.", exp_ru: "Формальная и разговорная лексика.", head_en: ["Formal", "Colloquial"], head_ru: ["Формально", "Разговорно"], q_en: "The formal word for \"to buy\"", q_ru: "Формальное слово для «купить»" },
+// ---------- НОВІ ГРАМАТИЧНІ ПРАВИЛА (A2–C2) ----------
+{
+  id: "gr28", level: "A2",
+  title: "Прийменники місця (i / på / til / for)",
+  exp: "Прийменники вказують на місцезнаходження або напрямок. Найчастіші: i (всередині/в), på (на поверхні), til (до), for (перед/заради).",
+  table: { head: ["Прийменник", "Використання", "Приклад"], rows: [
+    ["i", "в/у (всередині)", "Jeg bor i Oslo."],
+    ["på", "на (поверхня)", "Boken ligger på bordet."],
+    ["til", "до (напрямок)", "Jeg går til butikken."],
+    ["for", "перед / заради", "Han står foran døren."]
+  ]},
+  ex: { q: "Оберіть правильний прийменник: Jeg bor ___ Bergen.", opts: ["i", "på", "til"], a: 0 },
+  title_en: "Prepositions of place (i / på / til / for)",
+  title_ru: "Предлоги места (i / på / til / for)",
+  exp_en: "Prepositions indicate location or direction.",
+  exp_ru: "Предлоги указывают на местоположение или направление.",
+  head_en: ["Preposition", "Usage", "Example"],
+  head_ru: ["Предлог", "Использование", "Пример"],
+  q_en: "Choose the correct preposition: Jeg bor ___ Bergen.",
+  q_ru: "Выберите правильный предлог: Jeg bor ___ Bergen."
+},
+{
+  id: "gr29", level: "B1",
+  title: "Умовний спосіб (hvis + presens / ville + inf.)",
+  exp: "Умовні речення виражають умову та наслідок. У теперішньому часі: hvis + presens, ... (presens / vil). У майбутньому: hvis + presens, ... vil + inf.",
+  table: { head: ["Тип", "Структура", "Приклад"], rows: [
+    ["Реальна умова", "hvis + presens, ... presens", "Hvis du går, kommer jeg."],
+    ["Майбутня умова", "hvis + presens, ... vil + inf.", "Hvis du ringer, vil jeg svare."]
+  ]},
+  ex: { q: "Заповніть: Hvis du ___ (komme), vil jeg bli glad.", opts: ["kommer", "kom", "komme"], a: 0 },
+  title_en: "Conditional sentences (hvis + present / ville + inf.)",
+  title_ru: "Условные предложения (hvis + настоящее / ville + инф.)",
+  exp_en: "Conditional sentences express a condition and a consequence.",
+  exp_ru: "Условные предложения выражают условие и следствие.",
+  head_en: ["Type", "Structure", "Example"],
+  head_ru: ["Тип", "Структура", "Пример"],
+  q_en: "Fill in: Hvis du ___ (komme), vil jeg bli glad.",
+  q_ru: "Заполните: Hvis du ___ (komme), vil jeg bli glad."
+},
+{
+  id: "gr30", level: "B2",
+  title: "Пасивний стан (bli + perfektum partisipp)",
+  exp: "Пасив використовується, коли дія важливіша за виконавця. Утворюється з bli + perfektum partisipp.",
+  table: { head: ["Актив", "Пасив"], rows: [
+    ["Hun skriver brevet.", "Brevet blir skrevet."],
+    ["De bygger huset.", "Huset blir bygget."]
+  ]},
+  ex: { q: "Оберіть пасивну форму: Boken ___ av forfatteren.", opts: ["blir skrevet", "skriver", "ble skrevet"], a: 0 },
+  title_en: "Passive voice (bli + past participle)",
+  title_ru: "Пассивный залог (bli + причастие прошедшего времени)",
+  exp_en: "The passive is used when the action is more important than the doer.",
+  exp_ru: "Пассив используется, когда действие важнее исполнителя.",
+  head_en: ["Active", "Passive"],
+  head_ru: ["Актив", "Пассив"],
+  q_en: "Choose the passive form: Boken ___ av forfatteren.",
+  q_ru: "Выберите пассивную форму: Boken ___ av forfatteren."
+},
+{
+  id: "gr31", level: "B2",
+  title: "Непряма мова (indirekte tale)",
+  exp: "Непряма мова передає чужі слова. Часто використовується med at + setning.",
+  table: { head: ["Direkte tale", "Indirekte tale"], rows: [
+    ["«Jeg er trøtt», sa hun.", "Hun sa at hun var trøtt."],
+    ["«Vi kommer i morgen», sa de.", "De sa at de kom i morgen."]
+  ]},
+  ex: { q: "Перетворіть у непряму мову: Han sa: «Jeg kommer.»", opts: ["Han sa at han kom.", "Han sa at han kommer.", "Han sa at han ville komme."], a: 0 },
+  title_en: "Indirect speech (indirekte tale)",
+  title_ru: "Косвенная речь (indirekte tale)",
+  exp_en: "Indirect speech reports what someone said.",
+  exp_ru: "Косвенная речь передаёт чужие слова.",
+  head_en: ["Direct speech", "Indirect speech"],
+  head_ru: ["Прямая речь", "Косвенная речь"],
+  q_en: "Convert to indirect speech: Han sa: «Jeg kommer.»",
+  q_ru: "Преобразуйте в косвенную речь: Han sa: «Jeg kommer.»"
+},
+{
+  id: "gr32", level: "C1",
+  title: "Сполучники підрядності (selv om, mens, ettersom, idet)",
+  exp: "Ці сполучники вводять підрядні речення: selv om (хоча), mens (тоді як), ettersom (оскільки), idet (коли/як тільки).",
+  table: { head: ["Сполучник", "Значення", "Приклад"], rows: [
+    ["selv om", "хоча", "Jeg går, selv om det regner."],
+    ["mens", "тоді як", "Hun leser, mens han skriver."],
+    ["ettersom", "оскільки", "Ettersom du spør, skal jeg svare."],
+    ["idet", "коли / щойно", "Idet jeg så henne, ble jeg glad."]
+  ]},
+  ex: { q: "Оберіть сполучник: ___ det regnet, gikk vi tur.", opts: ["Selv om", "Mens", "Ettersom"], a: 0 },
+  title_en: "Subordinating conjunctions (selv om, mens, ettersom, idet)",
+  title_ru: "Подчинительные союзы (selv om, mens, ettersom, idet)",
+  exp_en: "These conjunctions introduce subordinate clauses.",
+  exp_ru: "Эти союзы вводят придаточные предложения.",
+  head_en: ["Conjunction", "Meaning", "Example"],
+  head_ru: ["Союз", "Значение", "Пример"],
+  q_en: "Choose the conjunction: ___ det regnet, gikk vi tur.",
+  q_ru: "Выберите союз: ___ det regnet, gikk vi tur."
+},
+{
+  id: "gr33", level: "C1",
+  title: "Номіналізація (verb → substantiv)",
+  exp: "Номіналізація – це перетворення дієслова на іменник. Часто додаються суфікси: -ing, -else, -het, -dom.",
+  table: { head: ["Дієслово", "Іменник"], rows: [
+    ["å utvikle", "utvikling"],
+    ["å diskutere", "diskusjon"],
+    ["å vurdere", "vurdering"],
+    ["å forbedre", "forbedring"]
+  ]},
+  ex: { q: "Іменник від 'å analysere'", opts: ["analyse", "analysering", "analysjon"], a: 0 },
+  title_en: "Nominalization (verb → noun)",
+  title_ru: "Номинализация (глагол → существительное)",
+  exp_en: "Nominalization is turning a verb into a noun.",
+  exp_ru: "Номинализация – это превращение глагола в существительное.",
+  head_en: ["Verb", "Noun"],
+  head_ru: ["Глагол", "Существительное"],
+  q_en: "Noun form of 'å analysere'",
+  q_ru: "Существительное от 'å analysere'"
+},
+{
+  id: "gr34", level: "C2",
+  title: "Модальні частинки (jo, nok, vel, liksom)",
+  exp: "Модальні частинки додають відтінок значення: jo (підтвердження), nok (напевно), vel (мабуть), liksom (ніби).",
+  table: { head: ["Частинка", "Значення", "Приклад"], rows: [
+    ["jo", "адже / ж (підтвердження)", "Det er jo sant."],
+    ["nok", "напевно", "Han kommer nok snart."],
+    ["vel", "мабуть / напевно (припущення)", "Du forstår vel?"],
+    ["liksom", "ніби (немов)", "Hun er liksom sjefen."]
+  ]},
+  ex: { q: "Частинка для «напевно»", opts: ["jo", "nok", "vel"], a: 1 },
+  title_en: "Modal particles (jo, nok, vel, liksom)",
+  title_ru: "Модальные частицы (jo, nok, vel, liksom)",
+  exp_en: "Modal particles add nuances to the meaning.",
+  exp_ru: "Модальные частицы добавляют оттенки значения.",
+  head_en: ["Particle", "Meaning", "Example"],
+  head_ru: ["Частица", "Значение", "Пример"],
+  q_en: "The particle for 'probably'",
+  q_ru: "Частица для «наверное»"
+},
+{
+  id: "gr35", level: "C2",
+  title: "Стилістичні регістри (formell vs uformell)",
+  exp: "Норвезька має формальний і неформальний стиль. У формальному мовленні використовуються інші слова та конструкції.",
+  table: { head: ["Formellt", "Uformellt", "Betydning"], rows: [
+    ["å anskaffe", "å kjøpe", "купити"],
+    ["å avslutte", "å slutte", "завершити"],
+    ["å benytte", "å bruke", "використовувати"],
+    ["å motta", "å få", "отримати"]
+  ]},
+  ex: { q: "Формальне слово для «купити»", opts: ["kjøpe", "anskaffe", "handle"], a: 1 },
+  title_en: "Stylistic registers (formal vs informal)",
+  title_ru: "Стилистические регистры (формальный vs неформальный)",
+  exp_en: "Norwegian has formal and informal styles.",
+  exp_ru: "Норвежский имеет формальный и неформальный стиль.",
+  head_en: ["Formal", "Informal", "Meaning"],
+  head_ru: ["Формальный", "Неформальный", "Значение"],
+  q_en: "Formal word for 'to buy'",
+  q_ru: "Формальное слово для «купить»"
+
         ];
 
         // =====================================================================
