@@ -1422,7 +1422,7 @@ const NORSKPROVE_TASKS = {
     ]
   },
 
- B2: {
+  B2: {
     reading: [
       {
         title: "Arbeidsliv i fremtiden",
@@ -1459,7 +1459,7 @@ const NORSKPROVE_TASKS = {
           { q: "Hva bør skolen forberede elevene på?", opts: ["Ferie", "Studier og arbeid", "Idrett"], a: 1 }
         ]
       },
-      // Додаткове завдання на аудіювання (воно було винесене поза об'єкт – тепер воно всередині масиву)
+      // Додаткове завдання на аудіювання (тепер всередині масиву)
       {
         title: "Debatt om skole",
         text: "Mange mener at skolen bør ha mer praktiske fag. Andre prioriterer teoretisk kunnskap. Det er viktig at elevene får prøve seg i ulike felt. Skolen bør forberede elevene på videre studier og arbeidsliv.",
