@@ -1387,7 +1387,16 @@ const NORSKPROVE_TASKS = {
     { q: "Hva gir dette?", opts: ["Kun fordeler", "Fordeler og ulemper", "Kun ulemper"], a: 1 }
   
         ]
-      }
+      },
+{
+  title: "Digital hverdag",
+  text: "I dag bruker vi digitale verktøy i nesten alle deler av livet. Vi handler på nett, kommuniserer med venner og jobber hjemmefra. Dette gir både fordeler og ulemper. Fordelene er fleksibilitet og tilgjengelighet, men ulempene kan være avhengighet og mindre sosial kontakt.",
+  questions: [
+    { q: "Hva bruker vi digitale verktøy til?", opts: ["Bare jobb", "Nesten alt", "Bare shopping"], a: 1 },
+    { q: "Hva er en fordel?", opts: ["Mindre sosial kontakt", "Fleksibilitet", "Avhengighet"], a: 1 },
+    { q: "Hva er en ulempe?", opts: ["Tilgjengelighet", "Fleksibilitet", "Avhengighet"], a: 2 }
+  ]
+},
     ],
     listening: [
       {
@@ -1412,16 +1421,7 @@ const NORSKPROVE_TASKS = {
 { topic: "Diskuter et aktuelt samfunnsproblem", prompt: "Hva mener du om miljøkrisen?" }
     ]
   },
-// ---------- B1 – нове завдання на читання ----------
-{
-  title: "Digital hverdag",
-  text: "I dag bruker vi digitale verktøy i nesten alle deler av livet. Vi handler på nett, kommuniserer med venner og jobber hjemmefra. Dette gir både fordeler og ulemper. Fordelene er fleksibilitet og tilgjengelighet, men ulempene kan være avhengighet og mindre sosial kontakt.",
-  questions: [
-    { q: "Hva bruker vi digitale verktøy til?", opts: ["Bare jobb", "Nesten alt", "Bare shopping"], a: 1 },
-    { q: "Hva er en fordel?", opts: ["Mindre sosial kontakt", "Fleksibilitet", "Avhengighet"], a: 1 },
-    { q: "Hva er en ulempe?", opts: ["Tilgjengelighet", "Fleksibilitet", "Avhengighet"], a: 2 }
-  ]
-},
+
   B2: {
     reading: [
       {
