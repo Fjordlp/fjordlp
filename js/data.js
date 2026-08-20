@@ -1487,7 +1487,7 @@ const NORSKPROVE_TASKS = {
     ]
   },
 
-  C1: {
+    C1: {
     reading: [
       {
         title: "Kunstig intelligens og etikk",
@@ -1498,14 +1498,24 @@ const NORSKPROVE_TASKS = {
           { q: "Hva må vi utvikle?", opts: ["Nye algoritmer", "Retningslinjer", "Flere datasentre"], a: 1 }
         ]
       },
-{
-  title: "Etiske utfordringer med KI",
-  text: "Kunstig intelligens reiser nye etiske spørsmål. Hvem er ansvarlig når en algoritme tar feil? Bør KI ha rettigheter? Samtidig kan KI bidra til medisinsk forskning og klimamodellering.",
-  questions: [
-    { q: "Hva reiser KI?", opts: ["Nye etiske spørsmål", "Tekniske problemer", "Økonomisk vekst"], a: 0 },
-    { q: "Hva kan KI bidra til?", opts: ["Forskning", "Krigføring", "Overvåking"], a: 0 }
-  ]
-}
+      {
+        title: "Etiske utfordringer med KI",
+        text: "Kunstig intelligens reiser nye etiske spørsmål. Hvem er ansvarlig når en algoritme tar feil? Bør KI ha rettigheter? Samtidig kan KI bidra til medisinsk forskning og klimamodellering.",
+        questions: [
+          { q: "Hva reiser KI?", opts: ["Nye etiske spørsmål", "Tekniske problemer", "Økonomisk vekst"], a: 0 },
+          { q: "Hva kan KI bidra til?", opts: ["Forskning", "Krigføring", "Overvåking"], a: 0 }
+        ]
+      },
+      // ---------- РАНІШЕ БУЛО ЗАЙВИМ, ТЕПЕР ВСЕРЕДИНІ ----------
+      {
+        title: "Kunstig intelligens og samfunn",
+        text: "Kunstig intelligens (KI) blir stadig viktigere i samfunnet. Den brukes i alt fra medisin til transport. Samtidig reiser KI nye etiske spørsmål: Hvem har ansvar når en algoritme tar feil? Hvordan sikrer vi at KI ikke diskriminerer? Det er viktig å utvikle retningslinjer som sikrer ansvarlig bruk.",
+        questions: [
+          { q: "Hvor brukes KI?", opts: ["Bare i medisin", "I mange områder", "Bare i transport"], a: 1 },
+          { q: "Hva er en etisk utfordring?", opts: ["At KI er for dyr", "At algoritmer kan ta feil", "At KI er for treg"], a: 1 },
+          { q: "Hva må vi utvikle?", opts: ["Nye algoritmer", "Retningslinjer", "Flere datamaskiner"], a: 1 }
+        ]
+      }
     ],
     listening: [
       {
@@ -1520,31 +1530,21 @@ const NORSKPROVE_TASKS = {
     writing: [
       { topic: "Kunstig intelligens – trussel eller mulighet?", prompt: "Skriv et essay (200–250 ord)." },
       { topic: "Er demokrati i fare?", prompt: "Drøft trusler og muligheter i dagens samfunn." },
-{ topic: "Kunstig intelligens – trussel eller mulighet?", prompt: "Skriv et essay (200–250 ord)." },
-{ topic: "Er demokrati i fare?", prompt: "Drøft trusler og muligheter i dagens samfunn." }
+      { topic: "Kunstig intelligens – trussel eller mulighet?", prompt: "Skriv et essay (200–250 ord)." },
+      { topic: "Er demokrati i fare?", prompt: "Drøft trusler og muligheter i dagens samfunn." },
+      // ---------- РАНІШЕ БУЛО ЗАЙВИМ, ТЕПЕР ВСЕРЕДИНІ ----------
+      { 
+        topic: "Teknologiens påvirkning på hverdagen", 
+        prompt: "Skriv et essay (200–250 ord) om hvordan teknologi har endret hvordan vi lever og arbeider. Diskuter både positive og negative sider." 
+      }
     ],
     speaking: [
       { topic: "Debatt om ytringsfrihet", prompt: "Hvor langt bør ytringsfriheten gå?" },
       { topic: "Fremtidens arbeidsmarked", prompt: "Hvordan vil jobber endre seg?" },
-{ topic: "Debatt om ytringsfrihet", prompt: "Hvor langt bør ytringsfriheten gå?" },
-{ topic: "Fremtidens arbeidsmarked", prompt: "Hvordan vil jobber endre seg?" }
+      { topic: "Debatt om ytringsfrihet", prompt: "Hvor langt bør ytringsfriheten gå?" },
+      { topic: "Fremtidens arbeidsmarked", prompt: "Hvordan vil jobber endre seg?" }
     ]
   },
-// ---------- C1 – нове завдання на письмо ----------
-{ 
-  topic: "Teknologiens påvirkning på hverdagen", 
-  prompt: "Skriv et essay (200–250 ord) om hvordan teknologi har endret hvordan vi lever og arbeider. Diskuter både positive og negative sider." 
-}, 
-// ---------- C1 – нове завдання на читання ----------
-{
-  title: "Kunstig intelligens og samfunn",
-  text: "Kunstig intelligens (KI) blir stadig viktigere i samfunnet. Den brukes i alt fra medisin til transport. Samtidig reiser KI nye etiske spørsmål: Hvem har ansvar når en algoritme tar feil? Hvordan sikrer vi at KI ikke diskriminerer? Det er viktig å utvikle retningslinjer som sikrer ansvarlig bruk.",
-  questions: [
-    { q: "Hvor brukes KI?", opts: ["Bare i medisin", "I mange områder", "Bare i transport"], a: 1 },
-    { q: "Hva er en etisk utfordring?", opts: ["At KI er for dyr", "At algoritmer kan ta feil", "At KI er for treg"], a: 1 },
-    { q: "Hva må vi utvikle?", opts: ["Nye algoritmer", "Retningslinjer", "Flere datamaskiner"], a: 1 }
-  ]
-},
 
   C2: {
     reading: [
@@ -1556,14 +1556,23 @@ const NORSKPROVE_TASKS = {
           { q: "Hva er essensielt?", opts: ["Kritisk tenkning", "Akademiske titler", "Publisering"], a: 0 }
         ]
       },
-{
-  title: "Filosofi og vitenskap",
-  text: "Vitenskapen hviler på filosofiske antakelser. Spørsmålet om hva som er sant, og hvordan vi kan vite det, er grunnleggende. Kritisk tenkning er essensielt.",
-  questions: [
-    { q: "Hva hviler vitenskapen på?", opts: ["Filosofiske antakelser", "Religiøse dogmer", "Politisk makt"], a: 0 },
-    { q: "Hva er essensielt?", opts: ["Kritisk tenkning", "Akademiske titler", "Publisering"], a: 0 }
-  ]
-}
+      {
+        title: "Filosofi og vitenskap",
+        text: "Vitenskapen hviler på filosofiske antakelser. Spørsmålet om hva som er sant, og hvordan vi kan vite det, er grunnleggende. Kritisk tenkning er essensielt.",
+        questions: [
+          { q: "Hva hviler vitenskapen på?", opts: ["Filosofiske antakelser", "Religiøse dogmer", "Politisk makt"], a: 0 },
+          { q: "Hva er essensielt?", opts: ["Kritisk tenkning", "Akademiske titler", "Publisering"], a: 0 }
+        ]
+      },
+      // ---------- РАНІШЕ БУЛО ЗАЙВИМ, ТЕПЕР ВСЕРЕДИНІ ----------
+      {
+        title: "Filosofi og vitenskap",
+        text: "Vitenskapen hviler på filosofiske antakelser. Spørsmålet om hva som er sant, og hvordan vi kan vite det, er grunnleggende. Vitenskapelig metode gir oss verktøy, men er ikke ufeilbarlig. Kritisk tenkning er essensielt for å vurdere både vitenskapelige og filosofiske påstander.",
+        questions: [
+          { q: "Hva hviler vitenskapen på?", opts: ["Filosofiske antakelser", "Religiøse dogmer", "Politisk makt"], a: 0 },
+          { q: "Hva er essensielt?", opts: ["Kritisk tenkning", "Akademiske titler", "Publisering"], a: 0 }
+        ]
+      }
     ],
     listening: [
       {
@@ -1578,35 +1587,26 @@ const NORSKPROVE_TASKS = {
     writing: [
       { topic: "Analyse av et litterært verk", prompt: "Velg en bok eller et dikt og analyser det (300 ord)." },
       { topic: "Filosofiske perspektiver på teknologi", prompt: "Drøft teknologiens innvirkning på menneskelig eksistens." },
-{ topic: "Analyse av et litterært verk", prompt: "Velg en bok eller et dikt og analyser det (300 ord)." },
-{ topic: "Filosofiske perspektiver på teknologi", prompt: "Drøft teknologiens innvirkning på menneskelig eksistens." }
+      { topic: "Analyse av et litterært verk", prompt: "Velg en bok eller et dikt og analyser det (300 ord)." },
+      { topic: "Filosofiske perspektiver på teknologi", prompt: "Drøft teknologiens innvirkning på menneskelig eksistens." },
+      // ---------- РАНІШЕ БУЛО ЗАЙВИМ, ТЕПЕР ВСЕРЕДИНІ ----------
+      { 
+        topic: "Filosofiske perspektiver på teknologi", 
+        prompt: "Drøft teknologiens innvirkning på menneskelig eksistens og samfunnsutvikling. Skriv et reflekterende essay (300 ord)." 
+      }
     ],
     speaking: [
       { topic: "Filosofisk samtale", prompt: "Hva er meningen med livet?" },
       { topic: "Fremtidens utdanning", prompt: "Hvordan bør skolen tilpasses en digital tidsalder?" },
-{ topic: "Filosofisk samtale", prompt: "Hva er meningen med livet?" },
-{ topic: "Fremtidens utdanning", prompt: "Hvordan bør skolen tilpasses en digital tidsalder?" }
+      { topic: "Filosofisk samtale", prompt: "Hva er meningen med livet?" },
+      { topic: "Fremtidens utdanning", prompt: "Hvordan bør skolen tilpasses en digital tidsalder?" },
+      // ---------- РАНІШЕ БУЛО ЗАЙВИМ, ТЕПЕР ВСЕРЕДИНІ ----------
+      { 
+        topic: "Fremtidens utdanning", 
+        prompt: "Hvordan bør skolen tilpasses en digital tidsalder? Diskuter utfordringer og muligheter." 
+      }
     ]
-  },
-// ---------- C2 – нове завдання на читання ----------
-{
-  title: "Filosofi og vitenskap",
-  text: "Vitenskapen hviler på filosofiske antakelser. Spørsmålet om hva som er sant, og hvordan vi kan vite det, er grunnleggende. Vitenskapelig metode gir oss verktøy, men er ikke ufeilbarlig. Kritisk tenkning er essensielt for å vurdere både vitenskapelige og filosofiske påstander.",
-  questions: [
-    { q: "Hva hviler vitenskapen på?", opts: ["Filosofiske antakelser", "Religiøse dogmer", "Politisk makt"], a: 0 },
-    { q: "Hva er essensielt?", opts: ["Kritisk tenkning", "Akademiske titler", "Publisering"], a: 0 }
-  ]
-},
-// ---------- C2 – нове завдання на письмо ----------
-{ 
-  topic: "Filosofiske perspektiver på teknologi", 
-  prompt: "Drøft teknologiens innvirkning på menneskelig eksistens og samfunnsutvikling. Skriv et reflekterende essay (300 ord)." 
-},
-// ---------- C2 – нове завдання на усну частину ----------
-{ 
-  topic: "Fremtidens utdanning", 
-  prompt: "Hvordan bør skolen tilpasses en digital tidsalder? Diskuter utfordringer og muligheter." 
-},
+  }
 };
 
         // =====================================================================
