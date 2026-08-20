@@ -1422,7 +1422,7 @@ const NORSKPROVE_TASKS = {
     ]
   },
 
-  B2: {
+ B2: {
     reading: [
       {
         title: "Arbeidsliv i fremtiden",
@@ -1431,28 +1431,35 @@ const NORSKPROVE_TASKS = {
           { q: "Hva skjer med noen yrker?", opts: ["De forsvinner", "De blir tryggere", "De lønner bedre"], a: 0 },
           { q: "Hva blir viktig?", opts: ["Fysisk styrke", "Digital kompetanse", "Sosialt nettverk"], a: 1 },
           { q: "Hva kan teknologi forbedre?", opts: ["Lønnen", "Arbeidsmiljøet", "Fritiden"], a: 1 }
- ]
-},
-
-{
-  title: "Arbeidsmarkedet i endring",
-  text: "Automatisering og kunstig intelligens endrer arbeidsmarkedet. Enkelte yrker forsvinner, men nye oppstår. Fremtidens arbeidstakere må være fleksible og ha digital kompetanse.",
-  questions: [
-    { q: "Hva endrer arbeidsmarkedet?", opts: ["Kunstig intelligens", "Politikk", "Skatt"], a: 0 },
-    { q: "Hva må fremtidens arbeidstakere ha?", opts: ["Fysisk styrke", "Digital kompetanse", "Språkkunnskaper"], a: 1 }
-  ]
-},
-{
-  title: "Bærekraftig utvikling",
-  text: "Bærekraft handler om å møte dagens behov uten å ødelegge fremtiden. Dette krever endringer i forbruk, produksjon og politikk. Individuelle valg er viktige.",
-  questions: [
-    { q: "Hva handler bærekraft om?", opts: ["Økt forbruk", "Bevare fremtiden", "Kortsiktig profitt"], a: 1 },
-    { q: "Hva er viktig?", opts: ["Individuelle valg", "Bare politikk", "Bare produksjon"], a: 0 }
-  ]
-}
-         
+        ]
+      },
+      {
+        title: "Arbeidsmarkedet i endring",
+        text: "Automatisering og kunstig intelligens endrer arbeidsmarkedet. Enkelte yrker forsvinner, men nye oppstår. Fremtidens arbeidstakere må være fleksible og ha digital kompetanse.",
+        questions: [
+          { q: "Hva endrer arbeidsmarkedet?", opts: ["Kunstig intelligens", "Politikk", "Skatt"], a: 0 },
+          { q: "Hva må fremtidens arbeidstakere ha?", opts: ["Fysisk styrke", "Digital kompetanse", "Språkkunnskaper"], a: 1 }
+        ]
+      },
+      {
+        title: "Bærekraftig utvikling",
+        text: "Bærekraft handler om å møte dagens behov uten å ødelegge fremtiden. Dette krever endringer i forbruk, produksjon og politikk. Individuelle valg er viktige.",
+        questions: [
+          { q: "Hva handler bærekraft om?", opts: ["Økt forbruk", "Bevare fremtiden", "Kortsiktig profitt"], a: 1 },
+          { q: "Hva er viktig?", opts: ["Individuelle valg", "Bare politikk", "Bare produksjon"], a: 0 }
+        ]
+      }
     ],
     listening: [
+      {
+        title: "Debatt om skole",
+        text: "Mange mener at skolen bør ha mer praktiske fag. Andre prioriterer teoretisk kunnskap. Det er viktig at elevene får prøve seg i ulike felt. Skolen bør forberede elevene på videre studier og arbeidsliv.",
+        questions: [
+          { q: "Hva mener mange?", opts: ["Mer praktiske fag", "Mindre lekse", "Flere lærere"], a: 0 },
+          { q: "Hva bør skolen forberede elevene på?", opts: ["Ferie", "Studier og arbeid", "Idrett"], a: 1 }
+        ]
+      },
+      // Додаткове завдання на аудіювання (воно було винесене поза об'єкт – тепер воно всередині масиву)
       {
         title: "Debatt om skole",
         text: "Mange mener at skolen bør ha mer praktiske fag. Andre prioriterer teoretisk kunnskap. Det er viktig at elevene får prøve seg i ulike felt. Skolen bør forberede elevene på videre studier og arbeidsliv.",
@@ -1465,30 +1472,20 @@ const NORSKPROVE_TASKS = {
     writing: [
       { topic: "Bør alle ha rett til gratis utdanning?", prompt: "Argumenter for eller imot. Skriv 10–15 setninger." },
       { topic: "Fordeler og ulemper ved å bo i by vs. på landet", prompt: "Drøft begge sider." },
-{ topic: "Bør skolen ha mer praktiske fag?", prompt: "Skriv 10–15 setninger med argumenter." },
-{ topic: "Hvordan påvirker sosiale medier samfunnet?", prompt: "Drøft fordeler og ulemper." }
+      { topic: "Bør skolen ha mer praktiske fag?", prompt: "Skriv 10–15 setninger med argumenter." },
+      { topic: "Hvordan påvirker sosiale medier samfunnet?", prompt: "Drøft fordeler og ulemper." },
+      { 
+        topic: "Fordeler og ulemper ved å bo i byen", 
+        prompt: "Skriv 8–10 setninger om fordeler og ulemper ved å bo i en stor by kontra på landet." 
+      }
     ],
     speaking: [
       { topic: "Diskuter teknologiens påvirkning på hverdagen", prompt: "Er teknologien til hjelp eller hindring?" },
       { topic: "Hva er din mening om innvandring?", prompt: "Gi eksempler på fordeler og utfordringer." },
-{ topic: "Teknologiens påvirkning på hverdagen", prompt: "Er teknologien til hjelp eller hindring?" },
-{ topic: "Hva er din mening om innvandring?", prompt: "Gi eksempler på fordeler og utfordringer." }
+      { topic: "Teknologiens påvirkning på hverdagen", prompt: "Er teknologien til hjelp eller hindring?" },
+      { topic: "Hva er din mening om innvandring?", prompt: "Gi eksempler på fordeler og utfordringer." }
     ]
   },
-// ---------- B2 – нове завдання на аудіювання ----------
-{
-  title: "Debatt om skole",
-  text: "Mange mener at skolen bør ha mer praktiske fag. Andre prioriterer teoretisk kunnskap. Det er viktig at elevene får prøve seg i ulike felt. Skolen bør forberede elevene på videre studier og arbeidsliv.",
-  questions: [
-    { q: "Hva mener mange?", opts: ["Mer praktiske fag", "Mindre lekse", "Flere lærere"], a: 0 },
-    { q: "Hva bør skolen forberede elevene på?", opts: ["Ferie", "Studier og arbeid", "Idrett"], a: 1 }
-  ]
-}, 
-// ---------- B2 – нове завдання на письмо ----------
-{ 
-  topic: "Fordeler og ulemper ved å bo i byen", 
-  prompt: "Skriv 8–10 setninger om fordeler og ulemper ved å bo i en stor by kontra på landet." 
-}, 
 
   C1: {
     reading: [
