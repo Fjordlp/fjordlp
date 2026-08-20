@@ -1487,7 +1487,7 @@ const NORSKPROVE_TASKS = {
     ]
   },
 
-    C1: {
+      C1: {
     reading: [
       {
         title: "Kunstig intelligens og etikk",
