@@ -667,6 +667,111 @@
     ];
 
     // =====================================================================
+    //  ALPHABET — АБЕТКА (німецька)
+    // =====================================================================
+    const ALPHABET = [
+        { letter: "A a", name: "а", sound: "як українське «а»", example: "Apfel", example_uk: "яблуко" },
+        { letter: "B b", name: "бе", sound: "як українське «б»", example: "Buch", example_uk: "книга" },
+        { letter: "C c", name: "це", sound: "здебільшого в поєднаннях: ch, sch; окремо рідко (як «ц» або «к»)", example: "Café", example_uk: "кафе" },
+        { letter: "D d", name: "де", sound: "як українське «д»", example: "Dorf", example_uk: "село" },
+        { letter: "E e", name: "е", sound: "як українське «е»", example: "Ende", example_uk: "кінець" },
+        { letter: "F f", name: "еф", sound: "як українське «ф»", example: "Fisch", example_uk: "риба" },
+        { letter: "G g", name: "ге", sound: "як українське «ґ»", example: "Garten", example_uk: "сад" },
+        { letter: "H h", name: "га", sound: "легке «г», як в англ. house; після голосної подовжує її й не вимовляється", example: "Haus", example_uk: "будинок" },
+        { letter: "I i", name: "і", sound: "як українське «і»", example: "Insel", example_uk: "острів" },
+        { letter: "J j", name: "йот", sound: "як українське «й»", example: "Jahr", example_uk: "рік" },
+        { letter: "K k", name: "ка", sound: "як українське «к»", example: "Katze", example_uk: "кіт" },
+        { letter: "L l", name: "ель", sound: "як українське «л»", example: "Licht", example_uk: "світло" },
+        { letter: "M m", name: "ем", sound: "як українське «м»", example: "Mutter", example_uk: "мама" },
+        { letter: "N n", name: "ен", sound: "як українське «н»", example: "Nacht", example_uk: "ніч" },
+        { letter: "O o", name: "о", sound: "як українське «о»", example: "Onkel", example_uk: "дядько" },
+        { letter: "P p", name: "пе", sound: "як українське «п»", example: "Papier", example_uk: "папір" },
+        { letter: "Q q", name: "ку", sound: "як «к» (завжди разом з «u»: qu — «кв»)", example: "Quelle", example_uk: "джерело" },
+        { letter: "R r", name: "ер", sound: "гортанне «р», вимовляється у горлі (не як українське)", example: "rot", example_uk: "червоний" },
+        { letter: "S s", name: "ес", sound: "перед голосною — як «з»; в кінці слова — як «с»", example: "Sonne", example_uk: "сонце" },
+        { letter: "T t", name: "те", sound: "як українське «т»", example: "Tisch", example_uk: "стіл" },
+        { letter: "U u", name: "у", sound: "як українське «у»", example: "Uhr", example_uk: "годинник" },
+        { letter: "V v", name: "фау", sound: "як «ф» (у власних і запозичених словах — як «в»)", example: "Vater", example_uk: "тато" },
+        { letter: "W w", name: "ве", sound: "як українське «в»", example: "Wasser", example_uk: "вода" },
+        { letter: "X x", name: "ікс", sound: "як «кс»", example: "Taxi", example_uk: "таксі" },
+        { letter: "Y y", name: "іпсилон", sound: "заокруглене «і», немає аналога в українській (як нім. ü)", example: "Typ", example_uk: "тип" },
+        { letter: "Z z", name: "цет", sound: "як українське «ц»", example: "Zeit", example_uk: "час" },
+        { letter: "Ä ä", name: "а-умляут", sound: "як українське «е», трохи ширше", example: "Mädchen", example_uk: "дівчинка" },
+        { letter: "Ö ö", name: "о-умляут", sound: "заокруглене, як нім. ö — немає аналога в українській", example: "schön", example_uk: "гарний" },
+        { letter: "Ü ü", name: "у-умляут", sound: "заокруглене «і», немає аналога в українській", example: "Tür", example_uk: "двері" },
+        { letter: "ß", name: "ес-цет", sound: "як подвоєне «с» (заміна на «ss», якщо великих літер немає)", example: "Straße", example_uk: "вулиця" },
+    ];
+
+    // =====================================================================
+    //  LESSONS — УРОКИ (німецька)
+    // =====================================================================
+    const LESSONS = [
+        {
+            id: 1,
+            level: 'A1',
+            title: 'Знайомство: "Ich heiße..."',
+            title_en: 'Introducing yourself: "Ich heiße..."',
+            title_ru: 'Знакомство: "Ich heiße..."',
+            content: 'У німецькій мові, щоб представитися, кажуть "Ich heiße..." (Мене звати...). ' +
+                'Наприклад: "Ich heiße Anna" — Мене звати Анна.\n\n' +
+                'Є й простіший варіант: "Ich bin Anna" (Я Анна) — дієслово "sein" (бути).\n\n' +
+                'Щоб запитати ім\'я співрозмовника: "Wie heißt du?" (Як тебе звати? — неформально) або "Wie heißen Sie?" (формально).\n\n' +
+                'Приємно познайомитись — "Freut mich" або повніше "Es freut mich, dich kennenzulernen".',
+            content_en: 'In German, to introduce yourself you say "Ich heiße..." (My name is...). ' +
+                'For example: "Ich heiße Anna" — My name is Anna.\n\n' +
+                'There\'s also a simpler option: "Ich bin Anna" (I am Anna) — using the verb "sein" (to be).\n\n' +
+                'To ask for someone\'s name: "Wie heißt du?" (informal) or "Wie heißen Sie?" (formal).\n\n' +
+                'Nice to meet you — "Freut mich" or the fuller "Es freut mich, dich kennenzulernen".',
+            content_ru: 'В немецком языке, чтобы представиться, говорят "Ich heiße..." (Меня зовут...). ' +
+                'Например: "Ich heiße Anna" — Меня зовут Анна.\n\n' +
+                'Есть и более простой вариант: "Ich bin Anna" (Я Анна) — глагол "sein" (быть).\n\n' +
+                'Чтобы спросить имя собеседника: "Wie heißt du?" (неформально) или "Wie heißen Sie?" (формально).\n\n' +
+                'Приятно познакомиться — "Freut mich" или полнее "Es freut mich, dich kennenzulernen".',
+            tasks: [
+                {
+                    q: 'Як сказати "Мене звати Олена" німецькою?',
+                    q_en: 'How do you say "My name is Olena" in German?',
+                    q_ru: 'Как сказать "Меня зовут Елена" по-немецки?',
+                    opts: ['Ich heiße Olena', 'Du heißt Olena', 'Er heißt Olena'],
+                    a: 0,
+                },
+                {
+                    q: 'Що означає "Wie heißt du?"',
+                    q_en: 'What does "Wie heißt du?" mean?',
+                    q_ru: 'Что означает "Wie heißt du?"',
+                    opts: ['Скільки тобі років?', 'Як тебе звати?', 'Звідки ти?'],
+                    a: 1,
+                },
+                {
+                    q: 'Яке дієслово використовується у "Ich bin Anna"?',
+                    q_en: 'Which verb is used in "Ich bin Anna"?',
+                    q_ru: 'Какой глагол используется в "Ich bin Anna"?',
+                    opts: ['heißen', 'sein', 'haben'],
+                    a: 1,
+                },
+            ],
+        },
+
+        {
+            id: 2,
+            level: 'A1',
+            title: 'Алфавіт і вимова',
+            content: 'Німецький алфавіт має 26 стандартних латинських літер + чотири додаткові: ~ä~, ~ö~, ~ü~, ~ß~.\n\n| ä | як українське "е", трохи ширше | Mädchen (дівчинка) |\n| ö | заокруглене, аналога в українській немає | schön (гарний) |\n| ü | заокруглене "і" | Tür (двері) |\n| ß | подвоєне "с" (заміна — "ss") | Straße (вулиця) |\n\nОсобливості вимови буквосполучень:\n\n| ch | гортанний звук (як після a,o,u) або м\'яке "хь" (після e,i) | ich (я), Buch (книга) |\n| sch | тверде "ш" | Schule (школа) |\n| ei | "ай" | mein (мій) |\n| ie | довге "і" | sie (вона/вони) |\n\n> Порада: усі іменники в німецькій пишуться з великої літери — навіть посеред речення (das Buch, die Katze). Це не помилка, а правило.\n\nПрактика: спробуй прочитати вголос ~Ich heiße Anna~ (мене звати Анна) — зверни увагу на "ei", яке звучить як "ай".',
+            tasks: [],
+        },
+        {
+            id: 3,
+            level: 'A1',
+            title: 'Привітання і знайомство',
+            content: 'Найпоширеніше привітання — просте ~Hallo~ (привіт), яке підходить у більшості ситуацій.\n\n| Guten Morgen | Доброго ранку |\n| Guten Tag | Доброго дня |\n| Guten Abend | Доброго вечора |\n| Auf Wiedersehen | До побачення |\n| Tschüss | Бувай (неформально) |\n\nЩоб представитися, використовуй дієслово ~heißen~ (називатися):\n\n| Ich heiße Anna. | Мене звати Анна. |\n| Wie heißt du? | Як тебе звати? |\n| Freut mich. | Приємно познайомитись. |\n\nЗапитати, як справи:\n\n| Wie geht es dir? | Як у тебе справи? |\n| Gut, danke! Und dir? | Добре, дякую! А в тебе? |\n\n> Порада: ~danke~ (дякую) та ~bitte~ (будь ласка / прошу) — одні з найуживаніших слів у німецькій мові.\n\nПрактика: складіть коротенький діалог знайомства з двох-трьох реплік, використовуючи фрази вище.',
+            tasks: [],
+        },
+
+        // === УРОК 4 — встав сюди, скопіювавши шаблон вище ===
+
+    ];
+
+    // =====================================================================
     //  РЕЄСТРАЦІЯ ДАНИХ У ГЛОБАЛЬНИЙ ОБ'ЄКТ
     // =====================================================================
     window.LANG_DATA = window.LANG_DATA || {};
@@ -675,5 +780,7 @@
         GRAMMAR,
         NORSKPROVE_TASKS,
         LEVEL_TEST,
+        ALPHABET,
+        LESSONS,
     };
 })();

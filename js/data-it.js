@@ -547,6 +547,110 @@
     ];
 
     // =====================================================================
+    //  ALPHABET — АБЕТКА (італійська)
+    // =====================================================================
+    // Традиційна італійська абетка — 21 літера (без J, K, W, X, Y, які
+    // вживаються лише в запозичених словах); ці 5 додано окремо нижче з
+    // поміткою.
+    const ALPHABET = [
+        { letter: "A a", name: "а", sound: "як українське «а»", example: "amico", example_uk: "друг" },
+        { letter: "B b", name: "бі", sound: "як українське «б»", example: "bello", example_uk: "гарний" },
+        { letter: "C c", name: "чі", sound: "перед a/o/u — як «к»; перед e/i — як «ч»", example: "casa", example_uk: "будинок" },
+        { letter: "D d", name: "ді", sound: "як українське «д»", example: "dove", example_uk: "де" },
+        { letter: "E e", name: "е", sound: "як українське «е»", example: "elefante", example_uk: "слон" },
+        { letter: "F f", name: "еффе", sound: "як українське «ф»", example: "fiore", example_uk: "квітка" },
+        { letter: "G g", name: "джі", sound: "перед a/o/u — як «ґ»; перед e/i — як «дж»", example: "gatto", example_uk: "кіт" },
+        { letter: "H h", name: "акка", sound: "не вимовляється взагалі (німа)", example: "ho", example_uk: "маю" },
+        { letter: "I i", name: "і", sound: "як українське «і»", example: "isola", example_uk: "острів" },
+        { letter: "L l", name: "елле", sound: "як українське «л»", example: "luna", example_uk: "місяць" },
+        { letter: "M m", name: "емме", sound: "як українське «м»", example: "mare", example_uk: "море" },
+        { letter: "N n", name: "енне", sound: "як українське «н»", example: "notte", example_uk: "ніч" },
+        { letter: "O o", name: "о", sound: "як українське «о»", example: "oro", example_uk: "золото" },
+        { letter: "P p", name: "пі", sound: "як українське «п»", example: "pane", example_uk: "хліб" },
+        { letter: "Q q", name: "ку", sound: "як «к» (завжди разом з «u»: qu)", example: "questo", example_uk: "цей" },
+        { letter: "R r", name: "ерре", sound: "легко розкотисте «р»", example: "rosso", example_uk: "червоний" },
+        { letter: "S s", name: "ессе", sound: "як українське «с»; між голосними іноді як «з»", example: "sole", example_uk: "сонце" },
+        { letter: "T t", name: "ті", sound: "як українське «т»", example: "tempo", example_uk: "час/погода" },
+        { letter: "U u", name: "у", sound: "як українське «у»", example: "uva", example_uk: "виноград" },
+        { letter: "V v", name: "ву", sound: "як українське «в»", example: "vita", example_uk: "життя" },
+        { letter: "Z z", name: "дзета", sound: "як «дз» або «тц» залежно від слова", example: "zero", example_uk: "нуль" },
+        { letter: "J j*", name: "і лунга", sound: "*лише в запозиченнях, як «й»", example: "jeans", example_uk: "джинси" },
+        { letter: "K k*", name: "каппа", sound: "*лише в запозиченнях, як «к»", example: "kiwi", example_uk: "ківі" },
+        { letter: "W w*", name: "доппіа ву", sound: "*лише в запозиченнях, як «в»", example: "weekend", example_uk: "вихідні" },
+        { letter: "X x*", name: "ікс", sound: "*лише в запозиченнях, як «кс»", example: "taxi", example_uk: "таксі" },
+        { letter: "Y y*", name: "іпсилон", sound: "*лише в запозиченнях, як «і»", example: "yoga", example_uk: "йога" },
+    ];
+
+    // =====================================================================
+    //  LESSONS — УРОКИ (італійська)
+    // =====================================================================
+    const LESSONS = [
+        {
+            id: 1,
+            level: 'A1',
+            title: 'Знайомство: "Mi chiamo..."',
+            title_en: 'Introducing yourself: "Mi chiamo..."',
+            title_ru: 'Знакомство: "Mi chiamo..."',
+            content: 'В італійській мові, щоб представитися, кажуть "Mi chiamo..." (Мене звати..., буквально "я себе називаю"). ' +
+                'Наприклад: "Mi chiamo Anna" — Мене звати Анна.\n\n' +
+                'Є й простіший варіант: "Sono Anna" (Я Анна) — дієслово "essere" (бути).\n\n' +
+                'Щоб запитати ім\'я співрозмовника: "Come ti chiami?" (Як тебе звати? — неформально) або "Come si chiama?" (формально).\n\n' +
+                'Приємно познайомитись — "Piacere" (найпростіший і найпоширеніший варіант).',
+            content_en: 'In Italian, to introduce yourself you say "Mi chiamo..." (My name is..., literally "I call myself"). ' +
+                'For example: "Mi chiamo Anna" — My name is Anna.\n\n' +
+                'There\'s also a simpler option: "Sono Anna" (I am Anna) — using the verb "essere" (to be).\n\n' +
+                'To ask for someone\'s name: "Come ti chiami?" (informal) or "Come si chiama?" (formal).\n\n' +
+                'Nice to meet you — "Piacere" (the simplest and most common option).',
+            content_ru: 'В итальянском языке, чтобы представиться, говорят "Mi chiamo..." (Меня зовут..., буквально "я себя называю"). ' +
+                'Например: "Mi chiamo Anna" — Меня зовут Анна.\n\n' +
+                'Есть и более простой вариант: "Sono Anna" (Я Анна) — глагол "essere" (быть).\n\n' +
+                'Чтобы спросить имя собеседника: "Come ti chiami?" (неформально) или "Come si chiama?" (формально).\n\n' +
+                'Приятно познакомиться — "Piacere" (самый простой и распространённый вариант).',
+            tasks: [
+                {
+                    q: 'Як сказати "Мене звати Олена" італійською?',
+                    q_en: 'How do you say "My name is Olena" in Italian?',
+                    q_ru: 'Как сказать "Меня зовут Елена" по-итальянски?',
+                    opts: ['Mi chiamo Olena', 'Ti chiami Olena', 'Si chiama Olena'],
+                    a: 0,
+                },
+                {
+                    q: 'Що означає "Come ti chiami?"',
+                    q_en: 'What does "Come ti chiami?" mean?',
+                    q_ru: 'Что означает "Come ti chiami?"',
+                    opts: ['Скільки тобі років?', 'Як тебе звати?', 'Звідки ти?'],
+                    a: 1,
+                },
+                {
+                    q: 'Яке дієслово використовується у "Sono Anna"?',
+                    q_en: 'Which verb is used in "Sono Anna"?',
+                    q_ru: 'Какой глагол используется в "Sono Anna"?',
+                    opts: ['chiamarsi', 'essere', 'avere'],
+                    a: 1,
+                },
+            ],
+        },
+
+        {
+            id: 2,
+            level: 'A1',
+            title: 'Алфавіт і вимова',
+            content: 'Традиційна італійська абетка має 21 літеру — літери J, K, W, X, Y зустрічаються лише в запозичених словах.\n\n| c перед e/i | "ч" | ciao (привіт) |\n| c перед a/o/u | "к" | casa (будинок) |\n| g перед e/i | "дж" | gelato (морозиво) |\n| g перед a/o/u | "ґ" | gatto (кіт) |\n\nОсобливі буквосполучення:\n\n| gli | м\'яке "лі" | famiglia (родина) |\n| gn | "нь" | gnocchi (ньокі) |\n| sc перед e/i | "ш" | pesce (риба) |\n| h | не вимовляється взагалі | ho (маю) |\n\n> Порада: в італійській майже кожне слово читається саме так, як пишеться — на відміну від французької чи англійської. Це робить вимову однією з найлегших частин мови для новачків.\n\nПрактика: спробуй прочитати вголос ~Mi chiamo Anna~ (мене звати Анна) — усі літери вимовляються чітко.',
+            tasks: [],
+        },
+        {
+            id: 3,
+            level: 'A1',
+            title: 'Привітання і знайомство',
+            content: 'Найпоширеніше привітання — універсальне ~Ciao~ (привіт/бувай), яке підходить у неформальних ситуаціях у будь-який час.\n\n| Buongiorno | Доброго ранку/дня |\n| Buonasera | Доброго вечора |\n| Buonanotte | На добраніч |\n| Arrivederci | До побачення (формально) |\n| A presto | До скорого |\n\nЩоб представитися, використовуй зворотне дієслово ~chiamarsi~ (називатися):\n\n| Mi chiamo Anna. | Мене звати Анна. |\n| Come ti chiami? | Як тебе звати? |\n| Piacere. | Приємно познайомитись. |\n\nЗапитати, як справи:\n\n| Come stai? | Як у тебе справи? |\n| Bene, grazie! E tu? | Добре, дякую! А в тебе? |\n\n> Порада: ~grazie~ (дякую) та ~prego~ (будь ласка / прошу, у відповідь на подяку) — обов\'язкові слова в будь-якій розмові італійською.\n\nПрактика: складіть коротенький діалог знайомства з двох-трьох реплік, використовуючи фрази вище.',
+            tasks: [],
+        },
+
+        // === УРОК 4 — встав сюди, скопіювавши шаблон вище ===
+
+    ];
+
+    // =====================================================================
     //  РЕЄСТРАЦІЯ ДАНИХ У ГЛОБАЛЬНИЙ ОБ'ЄКТ
     // =====================================================================
     window.LANG_DATA = window.LANG_DATA || {};
@@ -555,5 +659,7 @@
         GRAMMAR,
         NORSKPROVE_TASKS,
         LEVEL_TEST,
+        ALPHABET,
+        LESSONS,
     };
 })();

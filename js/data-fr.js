@@ -1,3 +1,4 @@
+```javascript
 // =====================================================================
 //  js/data-fr.js — ФРАНЦУЗЬКА МОВА (ПОВНИЙ НАБІР)
 //  Повністю сумісний з js/data.js для норвезької.
@@ -590,6 +591,107 @@
     ];
 
     // =====================================================================
+    //  ALPHABET — АБЕТКА (французька)
+    // =====================================================================
+    const ALPHABET = [
+        { letter: "A a", name: "а", sound: "як українське «а»", example: "ami", example_uk: "друг" },
+        { letter: "B b", name: "бе", sound: "як українське «б»", example: "bonjour", example_uk: "добрий день" },
+        { letter: "C c", name: "се", sound: "перед a/o/u — як «к»; перед e/i/y — як «с»", example: "chat", example_uk: "кіт" },
+        { letter: "D d", name: "де", sound: "як українське «д»", example: "deux", example_uk: "два" },
+        { letter: "E e", name: "е (неме)", sound: "часто ледь чутне «е»; з наголосом звучить чіткіше (é, è)", example: "elle", example_uk: "вона" },
+        { letter: "F f", name: "еф", sound: "як українське «ф»", example: "femme", example_uk: "жінка" },
+        { letter: "G g", name: "же", sound: "перед a/o/u — як «ґ»; перед e/i/y — як «ж»", example: "garçon", example_uk: "хлопчик" },
+        { letter: "H h", name: "аш", sound: "не вимовляється взагалі (німа)", example: "homme", example_uk: "чоловік" },
+        { letter: "I i", name: "і", sound: "як українське «і»", example: "île", example_uk: "острів" },
+        { letter: "J j", name: "жі", sound: "як українське «ж»", example: "jour", example_uk: "день" },
+        { letter: "K k", name: "ка", sound: "як українське «к» (рідко, лише в запозиченнях)", example: "kilo", example_uk: "кілограм" },
+        { letter: "L l", name: "ель", sound: "як українське «л»", example: "livre", example_uk: "книга" },
+        { letter: "M m", name: "ем", sound: "як українське «м»", example: "maison", example_uk: "будинок" },
+        { letter: "N n", name: "ен", sound: "як українське «н»; носовий звук у поєднанні з голосною (an, on, in)", example: "nuit", example_uk: "ніч" },
+        { letter: "O o", name: "о", sound: "як українське «о»", example: "eau", example_uk: "вода" },
+        { letter: "P p", name: "пе", sound: "як українське «п»", example: "pain", example_uk: "хліб" },
+        { letter: "Q q", name: "кю", sound: "як «к» (завжди разом з «u»: qu)", example: "quatre", example_uk: "чотири" },
+        { letter: "R r", name: "ер", sound: "гортанне «р», вимовляється у горлі (не як українське)", example: "rouge", example_uk: "червоний" },
+        { letter: "S s", name: "ес", sound: "як українське «с»; між голосними — як «з»", example: "soleil", example_uk: "сонце" },
+        { letter: "T t", name: "те", sound: "як українське «т»", example: "table", example_uk: "стіл" },
+        { letter: "U u", name: "ю", sound: "заокруглене «і», немає аналога в українській (як нім. ü)", example: "une", example_uk: "одна" },
+        { letter: "V v", name: "ве", sound: "як українське «в»", example: "ville", example_uk: "місто" },
+        { letter: "W w", name: "дубль-ве", sound: "як «в» (лише в запозиченнях)", example: "wagon", example_uk: "вагон" },
+        { letter: "X x", name: "ікс", sound: "як «кс» або «гз»", example: "exemple", example_uk: "приклад" },
+        { letter: "Y y", name: "і грек", sound: "як «і» або як «й» перед голосною", example: "yeux", example_uk: "очі" },
+        { letter: "Z z", name: "зед", sound: "як українське «з»", example: "zéro", example_uk: "нуль" },
+    ];
+
+    // =====================================================================
+    //  LESSONS — УРОКИ (французька)
+    // =====================================================================
+    const LESSONS = [
+        {
+            id: 1,
+            level: 'A1',
+            title: 'Знайомство: "Je m\'appelle..."',
+            title_en: 'Introducing yourself: "Je m\'appelle..."',
+            title_ru: 'Знакомство: "Je m\'appelle..."',
+            content: 'У французькій мові, щоб представитися, кажуть "Je m\'appelle..." (Мене звати..., буквально "я себе називаю"). ' +
+                'Наприклад: "Je m\'appelle Marie" — Мене звати Марі.\n\n' +
+                'Є й простіший варіант: "Je suis Marie" (Я Марі) — дієслово "être" (бути).\n\n' +
+                'Щоб запитати ім\'я співрозмовника: "Comment tu t\'appelles?" (Як тебе звати? — неформально) або "Comment vous appelez-vous?" (формально).\n\n' +
+                'Приємно познайомитись — "Enchanté" (якщо говорить чоловік) або "Enchantée" (якщо жінка).',
+            content_en: 'In French, to introduce yourself you say "Je m\'appelle..." (My name is..., literally "I call myself"). ' +
+                'For example: "Je m\'appelle Marie" — My name is Marie.\n\n' +
+                'There\'s also a simpler option: "Je suis Marie" (I am Marie) — using the verb "être" (to be).\n\n' +
+                'To ask for someone\'s name: "Comment tu t\'appelles?" (informal) or "Comment vous appelez-vous?" (formal).\n\n' +
+                'Nice to meet you — "Enchanté" (if the speaker is male) or "Enchantée" (if female).',
+            content_ru: 'Во французском языке, чтобы представиться, говорят "Je m\'appelle..." (Меня зовут..., буквально "я себя называю"). ' +
+                'Например: "Je m\'appelle Marie" — Меня зовут Мари.\n\n' +
+                'Есть и более простой вариант: "Je suis Marie" (Я Мари) — глагол "être" (быть).\n\n' +
+                'Чтобы спросить имя собеседника: "Comment tu t\'appelles?" (неформально) или "Comment vous appelez-vous?" (формально).\n\n' +
+                'Приятно познакомиться — "Enchanté" (если говорит мужчина) или "Enchantée" (если женщина).',
+            tasks: [
+                {
+                    q: 'Як сказати "Мене звати Олена" французькою?',
+                    q_en: 'How do you say "My name is Olena" in French?',
+                    q_ru: 'Как сказать "Меня зовут Елена" по-французски?',
+                    opts: ["Je m'appelle Olena", "Tu t'appelles Olena", "Il s'appelle Olena"],
+                    a: 0,
+                },
+                {
+                    q: 'Що означає "Comment tu t\'appelles?"',
+                    q_en: 'What does "Comment tu t\'appelles?" mean?',
+                    q_ru: 'Что означает "Comment tu t\'appelles?"',
+                    opts: ['Скільки тобі років?', 'Як тебе звати?', 'Звідки ти?'],
+                    a: 1,
+                },
+                {
+                    q: 'Яке дієслово використовується у "Je suis Marie"?',
+                    q_en: 'Which verb is used in "Je suis Marie"?',
+                    q_ru: 'Какой глагол используется в "Je suis Marie"?',
+                    opts: ["s'appeler", 'être', 'avoir'],
+                    a: 1,
+                },
+            ],
+        },
+
+        {
+            id: 2,
+            level: 'A1',
+            title: 'Алфавіт і вимова',
+            content: 'Французький алфавіт — стандартні 26 латинських літер, але вимова сильно залежить від діакритичних знаків над голосними.\n\n| é | закрите "е" | café (кава) |\n| è, ê | відкрите "е" | mère (мати) |\n| ç | "с" (навіть перед a/o/u) | garçon (хлопчик) |\n\nОсобливості французької вимови:\n\n| h | не вимовляється взагалі | homme (чоловік) |\n| an, on, in | носові звуки (голосна + "н" одночасно) | maison (будинок) |\n| ou | "у" | vous (ви) |\n| eau | "о" | eau (вода) |\n\n> Порада: більшість приголосних у кінці слова НЕ вимовляються (petit звучить як "пті", не "петіт"). Це головна складність французької вимови для новачків.\n\nПрактика: спробуй прочитати вголос ~Je m\'appelle Marie~ (мене звати Марі) — зверни увагу, що кінцеве "e" майже не чутне.',
+            tasks: [],
+        },
+        {
+            id: 3,
+            level: 'A1',
+            title: 'Привітання і знайомство',
+            content: 'Найпоширеніше привітання — просте ~Bonjour~ (добрий день), яке підходить у більшості ситуацій вдень. Увечері кажуть ~Bonsoir~.\n\n| Salut | Привіт (неформально) |\n| Au revoir | До побачення |\n| Bonne nuit | На добраніч |\n| À bientôt | До скорого |\n| À demain | До завтра |\n\nЩоб представитися, використовуй зворотне дієслово ~s\'appeler~ (називатися):\n\n| Je m\'appelle Marie. | Мене звати Марі. |\n| Comment tu t\'appelles? | Як тебе звати? |\n| Enchanté(e). | Приємно познайомитись. |\n\nЗапитати, як справи:\n\n| Comment ça va? | Як справи? |\n| Ça va bien, merci. Et toi? | Добре, дякую! А в тебе? |\n\n> Порада: ~merci~ (дякую) та ~s\'il te plaît~ (будь ласка) — обов\'язкові слова в будь-якій розмові французькою, навіть найкоротшій.\n\nПрактика: складіть коротенький діалог знайомства з двох-трьох реплік, використовуючи фрази вище.',
+            tasks: [],
+        },
+
+        // === УРОК 4 — встав сюди, скопіювавши шаблон вище ===
+
+    ];
+
+    // =====================================================================
     //  РЕЄСТРАЦІЯ ДАНИХ У ГЛОБАЛЬНИЙ ОБ'ЄКТ
     // =====================================================================
     window.LANG_DATA = window.LANG_DATA || {};
@@ -598,6 +700,8 @@
         GRAMMAR,
         NORSKPROVE_TASKS,
         LEVEL_TEST,
+        ALPHABET,
+        LESSONS,
     };
 })();
 ```

@@ -597,6 +597,112 @@
     ];
 
     // =====================================================================
+    //  ALPHABET — АБЕТКА (іспанська)
+    // =====================================================================
+    const ALPHABET = [
+        { letter: "A a", name: "а", sound: "як українське «а»", example: "amor", example_uk: "любов" },
+        { letter: "B b", name: "бе", sound: "як українське «б»", example: "bueno", example_uk: "хороший" },
+        { letter: "C c", name: "се", sound: "перед a/o/u — як «к»; перед e/i — як англ. «th» (Іспанія) або «с» (Лат. Америка)", example: "casa", example_uk: "будинок" },
+        { letter: "D d", name: "де", sound: "як українське «д»", example: "día", example_uk: "день" },
+        { letter: "E e", name: "е", sound: "як українське «е»", example: "elefante", example_uk: "слон" },
+        { letter: "F f", name: "efе", sound: "як українське «ф»", example: "familia", example_uk: "родина" },
+        { letter: "G g", name: "хе", sound: "перед a/o/u — як «г» твердо; перед e/i — гортанне «х»", example: "gato", example_uk: "кіт" },
+        { letter: "H h", name: "аче", sound: "не вимовляється взагалі (німа)", example: "hola", example_uk: "привіт" },
+        { letter: "I i", name: "і", sound: "як українське «і»", example: "isla", example_uk: "острів" },
+        { letter: "J j", name: "хота", sound: "гортанне «х», як в «ага»", example: "jugar", example_uk: "грати" },
+        { letter: "K k", name: "ка", sound: "як українське «к» (рідко, лише в запозиченнях)", example: "kilo", example_uk: "кілограм" },
+        { letter: "L l", name: "еле", sound: "як українське «л»", example: "libro", example_uk: "книга" },
+        { letter: "M m", name: "еме", sound: "як українське «м»", example: "mesa", example_uk: "стіл" },
+        { letter: "N n", name: "ене", sound: "як українське «н»", example: "noche", example_uk: "ніч" },
+        { letter: "Ñ ñ", name: "енье", sound: "як українське «нь» (м'яке н)", example: "niño", example_uk: "хлопчик" },
+        { letter: "O o", name: "о", sound: "як українське «о»", example: "oso", example_uk: "ведмідь" },
+        { letter: "P p", name: "пе", sound: "як українське «п»", example: "perro", example_uk: "собака" },
+        { letter: "Q q", name: "ку", sound: "як «к» (завжди разом з немою «u»: que, qui)", example: "queso", example_uk: "сир" },
+        { letter: "R r", name: "ере", sound: "легко розкотисте «р»", example: "río", example_uk: "річка" },
+        { letter: "S s", name: "есе", sound: "як українське «с»", example: "sol", example_uk: "сонце" },
+        { letter: "T t", name: "те", sound: "як українське «т»", example: "tiempo", example_uk: "час/погода" },
+        { letter: "U u", name: "у", sound: "як українське «у»", example: "uva", example_uk: "виноград" },
+        { letter: "V v", name: "уве", sound: "вимовляється як «б» (звучить майже однаково з B)", example: "vaca", example_uk: "корова" },
+        { letter: "W w", name: "уве добле", sound: "як англ. «w» (лише в запозиченнях)", example: "web", example_uk: "мережа" },
+        { letter: "X x", name: "екіс", sound: "як «кс»", example: "examen", example_uk: "іспит" },
+        { letter: "Y y", name: "йе / і гріега", sound: "як українське «й»; окремо — як «і»", example: "yo", example_uk: "я" },
+        { letter: "Z z", name: "сета", sound: "як англ. «th» (Іспанія) або «с» (Лат. Америка)", example: "zapato", example_uk: "черевик" },
+    ];
+
+    // =====================================================================
+    //  LESSONS — УРОКИ (іспанська)
+    // =====================================================================
+    // Порядок проходження визначає поле id (1, 2, 3...), а не позиція в
+    // масиві. tasks необов'язкові, але якщо є — усі мають бути
+    // multiple-choice. Шаблон для нового уроку — дивись js/data.js
+    // (норвезька) або будь-який інший файл цієї серії, урок 1.
+    const LESSONS = [
+        {
+            id: 1,
+            level: 'A1',
+            title: 'Знайомство: "Me llamo..."',
+            title_en: 'Introducing yourself: "Me llamo..."',
+            title_ru: 'Знакомство: "Me llamo..."',
+            content: 'В іспанській мові, щоб представитися, кажуть "Me llamo..." (Мене звати..., буквально "я себе називаю"). ' +
+                'Наприклад: "Me llamo Ana" — Мене звати Ана.\n\n' +
+                'Є й простіший варіант: "Soy Ana" (Я Ана) — дієслово "ser" (бути).\n\n' +
+                'Щоб запитати ім\'я співрозмовника: "¿Cómo te llamas?" (Як тебе звати?).\n\n' +
+                'Приємно познайомитись — "Mucho gusto" або "Encantado/Encantada" (форма залежить від статі того, хто говорить).',
+            content_en: 'In Spanish, to introduce yourself you say "Me llamo..." (My name is..., literally "I call myself"). ' +
+                'For example: "Me llamo Ana" — My name is Ana.\n\n' +
+                'There is also a simpler option: "Soy Ana" (I am Ana) — using the verb "ser" (to be).\n\n' +
+                'To ask for someone\'s name: "¿Cómo te llamas?" (What is your name?).\n\n' +
+                'Nice to meet you — "Mucho gusto" or "Encantado/Encantada" (the form depends on the speaker\'s gender).',
+            content_ru: 'В испанском языке, чтобы представиться, говорят "Me llamo..." (Меня зовут..., буквально "я себя называю"). ' +
+                'Например: "Me llamo Ana" — Меня зовут Ана.\n\n' +
+                'Есть и более простой вариант: "Soy Ana" (Я Ана) — глагол "ser" (быть).\n\n' +
+                'Чтобы спросить имя собеседника: "¿Cómo te llamas?" (Как тебя зовут?).\n\n' +
+                'Приятно познакомиться — "Mucho gusto" или "Encantado/Encantada" (форма зависит от пола говорящего).',
+            tasks: [
+                {
+                    q: 'Як сказати "Мене звати Олена" іспанською?',
+                    q_en: 'How do you say "My name is Olena" in Spanish?',
+                    q_ru: 'Как сказать "Меня зовут Елена" по-испански?',
+                    opts: ['Me llamo Olena', 'Te llamas Olena', 'Se llama Olena'],
+                    a: 0,
+                },
+                {
+                    q: 'Що означає "¿Cómo te llamas?"',
+                    q_en: 'What does "¿Cómo te llamas?" mean?',
+                    q_ru: 'Что означает "¿Cómo te llamas?"',
+                    opts: ['Скільки тобі років?', 'Як тебе звати?', 'Звідки ти?'],
+                    a: 1,
+                },
+                {
+                    q: 'Яке дієслово використовується у "Soy Ana"?',
+                    q_en: 'Which verb is used in "Soy Ana"?',
+                    q_ru: 'Какой глагол используется в "Soy Ana"?',
+                    opts: ['llamar', 'ser', 'tener'],
+                    a: 1,
+                },
+            ],
+        },
+
+        {
+            id: 2,
+            level: 'A1',
+            title: 'Алфавіт і вимова',
+            content: 'Іспанський алфавіт має 27 літер — усі латинські + одна додаткова: ~ñ~. Вона йде одразу після ~n~.\n\n| ñ | "нь", як українське м\'яке н | niño (хлопчик) |\n| ll | "й" (у більшості діалектів) | llamar (звати) |\n| rr | розкотисте "р" | perro (собака) |\n\nКілька літер звучать не так, як у більшості інших мов:\n\n| h | не вимовляється взагалі | hola (привіт) |\n| j | гортанне "х" | jugar (грати) |\n| c перед e/i | "th" (Іспанія) або "с" (Лат. Америка) | cielo (небо) |\n\n> Порада: наголос зазвичай падає на передостанній склад, якщо слово закінчується на голосну, ~n~ або ~s~ — інакше на останній. Винятки позначаються знаком наголосу (´).\n\nПрактика: спробуй прочитати вголос ~Me llamo Ana~ (мене звати Ана) — зверни увагу на подвоєне "ll".',
+            tasks: [],
+        },
+        {
+            id: 3,
+            level: 'A1',
+            title: 'Привітання і знайомство',
+            content: 'Найпоширеніше привітання — просте ~Hola~ (привіт), яке підходить у будь-якій ситуації.\n\n| Buenos días | Доброго ранку |\n| Buenas tardes | Доброго дня |\n| Buenas noches | Доброго вечора / на добраніч |\n| Adiós / Hasta luego | До побачення / До зустрічі |\n| Hasta pronto | До скорого |\n\nЩоб представитися, використовуй дієслово ~llamarse~ (називатися):\n\n| Me llamo Ana. | Мене звати Ана. |\n| ¿Cómo te llamas? | Як тебе звати? |\n| Mucho gusto. | Приємно познайомитись. |\n\nЗапитати, як справи:\n\n| ¿Cómo estás? | Як у тебе справи? |\n| Bien, gracias. ¿Y tú? | Добре, дякую! А в тебе? |\n\n> Порада: ~gracias~ (дякую) — одне з найуживаніших слів іспанською. Не забувай про нього навіть у дрібницях.\n\nПрактика: складіть коротенький діалог знайомства з двох-трьох реплік, використовуючи фрази вище.',
+            tasks: [],
+        },
+
+        // === УРОК 4 — встав сюди, скопіювавши шаблон вище ===
+
+    ];
+
+    // =====================================================================
     //  РЕЄСТРАЦІЯ ДАНИХ У ГЛОБАЛЬНИЙ ОБ'ЄКТ
     // =====================================================================
     window.LANG_DATA = window.LANG_DATA || {};
@@ -605,5 +711,7 @@
         GRAMMAR,
         NORSKPROVE_TASKS,
         LEVEL_TEST,
+        ALPHABET,
+        LESSONS,
     };
 })();
