@@ -196,34 +196,51 @@ async function saveToFirestore(uid, data) {
   }, FIRESTORE_SAVE_DEBOUNCE_MS);
 }
 
-// Якщо потрібна агресивніша версія (наприклад, для екстреного випадку)
 function prepareDataForFirestore(data, aggressive = false) {
   const clean = JSON.parse(JSON.stringify(data));
-  // Агресивно обрізаємо до 5 повідомлень
-  if (Array.isArray(clean.assistantChat) && clean.assistantChat.length > 5) {
-    clean.assistantChat = clean.assistantChat.slice(-5);
+
+  // Обрізаємо історію чату
+  if (Array.isArray(clean.assistantChat) && clean.assistantChat.length > 20) {
+    clean.assistantChat = clean.assistantChat.slice(-20);
   }
-  if (clean.stats && clean.stats.wordsSeen) {
+
+  // Обрізаємо статистику слів
+  if (clean.stats?.wordsSeen && typeof clean.stats.wordsSeen === 'object') {
     const keys = Object.keys(clean.stats.wordsSeen);
-    if (keys.length > 50) {
-      const sorted = keys.sort();
-      const recentKeys = sorted.slice(-50);
+    if (keys.length > 200) {
       const limited = {};
-      recentKeys.forEach(k => { limited[k] = clean.stats.wordsSeen[k]; });
+      keys.slice(-200).forEach(k => { limited[k] = clean.stats.wordsSeen[k]; });
       clean.stats.wordsSeen = limited;
     }
   }
-  if (Array.isArray(clean.customWords) && clean.customWords.length > 100) {
-    clean.customWords = clean.customWords.slice(-100);
-  }
-  delete clean._onboardingDone;
-  // Також можна видалити великі кеші, якщо вони є
+
+  // 🔥 НОВЕ: видаляємо великі кеші, які не потрібні в Firestore
   delete clean.generatedVocab;
   delete clean.generatedTasks;
   delete clean.wordTranslations;
+  delete clean.generatedGrammar;
+
+  // Якщо агресивний режим – ще сильніше обрізаємо
+  if (aggressive) {
+    if (Array.isArray(clean.assistantChat)) {
+      clean.assistantChat = clean.assistantChat.slice(-5);
+    }
+    if (clean.stats?.wordsSeen) {
+      const keys = Object.keys(clean.stats.wordsSeen);
+      if (keys.length > 50) {
+        const limited = {};
+        keys.slice(-50).forEach(k => { limited[k] = clean.stats.wordsSeen[k]; });
+        clean.stats.wordsSeen = limited;
+      }
+    }
+    if (Array.isArray(clean.customWords)) {
+      clean.customWords = clean.customWords.slice(-100);
+    }
+  }
+
+  delete clean._onboardingDone;
   return clean;
 }
-
 // ---- Функції входу/реєстрації (без змін) ----
 async function signUpWithFirebase(email, password) {
   try {
