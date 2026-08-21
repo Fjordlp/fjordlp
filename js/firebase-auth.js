@@ -118,53 +118,114 @@ async function loadFromFirestore(uid) {
 }
 
 // ------------------------------------------------------------
-//  🔥 ВИПРАВЛЕННЯ: підготовка даних для Firestore (обрізка великих полів)
+//  🔥 АГРЕСИВНЕ ОБРІЗАННЯ ДАНИХ ДЛЯ FIRESTORE
 // ------------------------------------------------------------
-function prepareDataForFirestore(data) {
-  // Глибока копія, щоб не змінювати оригінальний STATE
+function prepareDataForFirestore(data, aggressive = false) {
   const clean = JSON.parse(JSON.stringify(data));
 
-  // 1. Обрізаємо історію чату до 20 останніх повідомлень
-  if (Array.isArray(clean.assistantChat) && clean.assistantChat.length > 20) {
-    clean.assistantChat = clean.assistantChat.slice(-20);
+  // 1. Обрізаємо історію чату (залишаємо тільки останні повідомлення)
+  const chatLimit = aggressive ? 5 : 15;
+  if (Array.isArray(clean.assistantChat) && clean.assistantChat.length > chatLimit) {
+    clean.assistantChat = clean.assistantChat.slice(-chatLimit);
   }
 
-  // 2. Обмежуємо кількість слів у stats.wordsSeen до 200 останніх (щоб не роздувати документ)
-  if (clean.stats && clean.stats.wordsSeen && typeof clean.stats.wordsSeen === 'object') {
+  // 2. Обрізаємо статистику слів (верхній рівень)
+  const wordLimit = aggressive ? 50 : 150;
+  if (clean.stats?.wordsSeen && typeof clean.stats.wordsSeen === 'object') {
     const keys = Object.keys(clean.stats.wordsSeen);
-    if (keys.length > 200) {
-      // Сортуємо за ключем (якщо ключі містять дату/час, то це будуть найновіші)
-      const sorted = keys.sort(); // або за бажанням можна сортувати за часом додавання
-      const recentKeys = sorted.slice(-200);
+    if (keys.length > wordLimit) {
       const limited = {};
-      recentKeys.forEach(k => { limited[k] = clean.stats.wordsSeen[k]; });
+      keys.slice(-wordLimit).forEach(k => { limited[k] = clean.stats.wordsSeen[k]; });
       clean.stats.wordsSeen = limited;
     }
   }
 
-  // 3. (Опціонально) Обрізаємо інші масиви, що можуть рости, наприклад customWords
-  if (Array.isArray(clean.customWords) && clean.customWords.length > 500) {
-    clean.customWords = clean.customWords.slice(-500);
+  // 3. Обрізаємо власні слова (customWords)
+  const customLimit = aggressive ? 50 : 200;
+  if (Array.isArray(clean.customWords) && clean.customWords.length > customLimit) {
+    clean.customWords = clean.customWords.slice(-customLimit);
   }
 
-  // 4. Видаляємо зайві тимчасові поля, які не потрібні в хмарі (наприклад, _onboardingDone тощо)
-  //    (залишаємо їх локально, але не зберігаємо)
+  // 4. Обрізаємо історію пригод (story)
+  if (clean.story?.history && Array.isArray(clean.story.history)) {
+    const storyLimit = aggressive ? 3 : 8;
+    if (clean.story.history.length > storyLimit) {
+      clean.story.history = clean.story.history.slice(-storyLimit);
+    }
+  }
+
+  // 5. Обрізаємо прогрес читання книг
+  if (clean.booksProgress && typeof clean.booksProgress === 'object') {
+    const keys = Object.keys(clean.booksProgress);
+    if (keys.length > 20) {
+      const limited = {};
+      keys.slice(-20).forEach(k => { limited[k] = clean.booksProgress[k]; });
+      clean.booksProgress = limited;
+    }
+  }
+
+  // 6. ВИДАЛЯЄМО ВЕЛИКІ КЕШІ (генеруються повторно при потребі)
+  delete clean.generatedVocab;
+  delete clean.generatedTasks;
+  delete clean.wordTranslations;
+  delete clean.generatedGrammar;
   delete clean._onboardingDone;
-  // Якщо є ще якісь службові поля, можна додати сюди
+  delete clean._dismissedRec;
+  delete clean._targetLangChosen;
+
+  // 7. Обрізаємо langData (основні дані по мовах)
+  if (clean.langData && typeof clean.langData === 'object') {
+    for (const lang in clean.langData) {
+      const langData = clean.langData[lang];
+      // Обрізаємо SRS (інтервали повторення) до 200 останніх
+      if (langData.srs && typeof langData.srs === 'object') {
+        const srsKeys = Object.keys(langData.srs);
+        if (srsKeys.length > 200) {
+          const limited = {};
+          srsKeys.slice(-200).forEach(k => { limited[k] = langData.srs[k]; });
+          langData.srs = limited;
+        }
+      }
+      // Обрізаємо статистику слів у langData
+      if (langData.stats?.wordsSeen && typeof langData.stats.wordsSeen === 'object') {
+        const keys = Object.keys(langData.stats.wordsSeen);
+        if (keys.length > wordLimit) {
+          const limited = {};
+          keys.slice(-wordLimit).forEach(k => { limited[k] = langData.stats.wordsSeen[k]; });
+          langData.stats.wordsSeen = limited;
+        }
+      }
+      // Обрізаємо власні слова у langData
+      if (Array.isArray(langData.customWords) && langData.customWords.length > customLimit) {
+        langData.customWords = langData.customWords.slice(-customLimit);
+      }
+      // Видаляємо великі кеші завдань у langData (якщо є)
+      if (langData.customNorskTasks && typeof langData.customNorskTasks === 'object') {
+        // Обрізаємо до 5 завдань на рівень/режим
+        for (const level in langData.customNorskTasks) {
+          for (const mode in langData.customNorskTasks[level]) {
+            if (Array.isArray(langData.customNorskTasks[level][mode]) && langData.customNorskTasks[level][mode].length > 5) {
+              langData.customNorskTasks[level][mode] = langData.customNorskTasks[level][mode].slice(-5);
+            }
+          }
+        }
+      }
+    }
+  }
 
   return clean;
 }
 
 // ------------------------------------------------------------
-//  Дебаунс із використанням підготовлених даних
+//  ЗБЕРЕЖЕННЯ З ДЕБАУНСОМ
 // ------------------------------------------------------------
 const FIRESTORE_SAVE_DEBOUNCE_MS = 300;
 let _firestoreSaveTimer = null;
 let _firestoreSavePending = null;
 
 async function saveToFirestore(uid, data) {
-  // Готуємо дані – обрізаємо великі поля
-  const preparedData = prepareDataForFirestore(data);
+  // Використовуємо агресивне обрізання завжди
+  const preparedData = prepareDataForFirestore(data, true);
 
   _firestoreSavePending = { uid, data: preparedData };
   if (_firestoreSaveTimer) return;
@@ -181,10 +242,15 @@ async function saveToFirestore(uid, data) {
       console.log('💾 Дані збережено у Firestore (розмір зменшено)');
     } catch (e) {
       console.error('❌ Помилка збереження у Firestore:', e);
-      // Якщо помилка знову через розмір, можна спробувати обрізати ще сильніше
+      // Якщо все ще завеликий – робимо ще більш агресивне обрізання
       if (e.code === 'resource-exhausted' || e.message.includes('exceeds maximum allowed size')) {
         console.warn('⚠️ Документ все ще завеликий, спроба екстремального обрізання...');
-        const emergencyData = prepareDataForFirestore(pendingData, true); // true = агресивне обрізання
+        const emergencyData = prepareDataForFirestore(pendingData, true);
+        // Додатково видаляємо ще більше полів
+        delete emergencyData.langData;
+        delete emergencyData.stats;
+        delete emergencyData.story;
+        delete emergencyData.booksProgress;
         try {
           await docRef.set(emergencyData, { merge: true });
           console.log('💾 Дані збережено після екстремального обрізання');
@@ -196,51 +262,6 @@ async function saveToFirestore(uid, data) {
   }, FIRESTORE_SAVE_DEBOUNCE_MS);
 }
 
-function prepareDataForFirestore(data, aggressive = false) {
-  const clean = JSON.parse(JSON.stringify(data));
-
-  // Обрізаємо історію чату
-  if (Array.isArray(clean.assistantChat) && clean.assistantChat.length > 20) {
-    clean.assistantChat = clean.assistantChat.slice(-20);
-  }
-
-  // Обрізаємо статистику слів
-  if (clean.stats?.wordsSeen && typeof clean.stats.wordsSeen === 'object') {
-    const keys = Object.keys(clean.stats.wordsSeen);
-    if (keys.length > 200) {
-      const limited = {};
-      keys.slice(-200).forEach(k => { limited[k] = clean.stats.wordsSeen[k]; });
-      clean.stats.wordsSeen = limited;
-    }
-  }
-
-  // 🔥 НОВЕ: видаляємо великі кеші, які не потрібні в Firestore
-  delete clean.generatedVocab;
-  delete clean.generatedTasks;
-  delete clean.wordTranslations;
-  delete clean.generatedGrammar;
-
-  // Якщо агресивний режим – ще сильніше обрізаємо
-  if (aggressive) {
-    if (Array.isArray(clean.assistantChat)) {
-      clean.assistantChat = clean.assistantChat.slice(-5);
-    }
-    if (clean.stats?.wordsSeen) {
-      const keys = Object.keys(clean.stats.wordsSeen);
-      if (keys.length > 50) {
-        const limited = {};
-        keys.slice(-50).forEach(k => { limited[k] = clean.stats.wordsSeen[k]; });
-        clean.stats.wordsSeen = limited;
-      }
-    }
-    if (Array.isArray(clean.customWords)) {
-      clean.customWords = clean.customWords.slice(-100);
-    }
-  }
-
-  delete clean._onboardingDone;
-  return clean;
-}
 // ---- Функції входу/реєстрації (без змін) ----
 async function signUpWithFirebase(email, password) {
   try {
