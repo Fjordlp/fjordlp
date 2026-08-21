@@ -117,20 +117,21 @@ async function loadFromFirestore(uid) {
   }
 }
 
-// ------------------------------------------------------------
-//  🔥 АГРЕСИВНЕ ОБРІЗАННЯ ДАНИХ ДЛЯ FIRESTORE
-// ------------------------------------------------------------
 function prepareDataForFirestore(data, aggressive = false) {
   const clean = JSON.parse(JSON.stringify(data));
 
-  // 1. Обрізаємо історію чату (залишаємо тільки останні повідомлення)
-  const chatLimit = aggressive ? 5 : 15;
+  // Мінімальні ліміти – майже нічого не зберігаємо
+  const chatLimit = aggressive ? 3 : 10;
+  const wordLimit = aggressive ? 30 : 100;
+  const customLimit = aggressive ? 20 : 100;
+  const storyLimit = aggressive ? 2 : 5;
+
+  // 1. Чат – тільки останні повідомлення
   if (Array.isArray(clean.assistantChat) && clean.assistantChat.length > chatLimit) {
     clean.assistantChat = clean.assistantChat.slice(-chatLimit);
   }
 
-  // 2. Обрізаємо статистику слів (верхній рівень)
-  const wordLimit = aggressive ? 50 : 150;
+  // 2. Статистика слів
   if (clean.stats?.wordsSeen && typeof clean.stats.wordsSeen === 'object') {
     const keys = Object.keys(clean.stats.wordsSeen);
     if (keys.length > wordLimit) {
@@ -140,31 +141,29 @@ function prepareDataForFirestore(data, aggressive = false) {
     }
   }
 
-  // 3. Обрізаємо власні слова (customWords)
-  const customLimit = aggressive ? 50 : 200;
+  // 3. Власні слова
   if (Array.isArray(clean.customWords) && clean.customWords.length > customLimit) {
     clean.customWords = clean.customWords.slice(-customLimit);
   }
 
-  // 4. Обрізаємо історію пригод (story)
+  // 4. Історія пригод
   if (clean.story?.history && Array.isArray(clean.story.history)) {
-    const storyLimit = aggressive ? 3 : 8;
     if (clean.story.history.length > storyLimit) {
       clean.story.history = clean.story.history.slice(-storyLimit);
     }
   }
 
-  // 5. Обрізаємо прогрес читання книг
+  // 5. Прогрес книг – обрізаємо до 5 останніх
   if (clean.booksProgress && typeof clean.booksProgress === 'object') {
     const keys = Object.keys(clean.booksProgress);
-    if (keys.length > 20) {
+    if (keys.length > 5) {
       const limited = {};
-      keys.slice(-20).forEach(k => { limited[k] = clean.booksProgress[k]; });
+      keys.slice(-5).forEach(k => { limited[k] = clean.booksProgress[k]; });
       clean.booksProgress = limited;
     }
   }
 
-  // 6. ВИДАЛЯЄМО ВЕЛИКІ КЕШІ (генеруються повторно при потребі)
+  // 6. ВИДАЛЯЄМО ВСІ ВЕЛИКІ КЕШІ (вони відновляться при потребі)
   delete clean.generatedVocab;
   delete clean.generatedTasks;
   delete clean.wordTranslations;
@@ -172,21 +171,25 @@ function prepareDataForFirestore(data, aggressive = false) {
   delete clean._onboardingDone;
   delete clean._dismissedRec;
   delete clean._targetLangChosen;
+  delete clean.dailyGoal; // не критично
+  delete clean.dailyTasksCompleted; // не критично
 
-  // 7. Обрізаємо langData (основні дані по мовах)
+  // 7. Агресивно обрізаємо langData (основне джерело великого розміру)
   if (clean.langData && typeof clean.langData === 'object') {
     for (const lang in clean.langData) {
       const langData = clean.langData[lang];
-      // Обрізаємо SRS (інтервали повторення) до 200 останніх
+      
+      // SRS – залишаємо тільки 100 останніх
       if (langData.srs && typeof langData.srs === 'object') {
         const srsKeys = Object.keys(langData.srs);
-        if (srsKeys.length > 200) {
+        if (srsKeys.length > 100) {
           const limited = {};
-          srsKeys.slice(-200).forEach(k => { limited[k] = langData.srs[k]; });
+          srsKeys.slice(-100).forEach(k => { limited[k] = langData.srs[k]; });
           langData.srs = limited;
         }
       }
-      // Обрізаємо статистику слів у langData
+      
+      // Статистика слів у langData
       if (langData.stats?.wordsSeen && typeof langData.stats.wordsSeen === 'object') {
         const keys = Object.keys(langData.stats.wordsSeen);
         if (keys.length > wordLimit) {
@@ -195,21 +198,37 @@ function prepareDataForFirestore(data, aggressive = false) {
           langData.stats.wordsSeen = limited;
         }
       }
-      // Обрізаємо власні слова у langData
+      
+      // Власні слова в langData
       if (Array.isArray(langData.customWords) && langData.customWords.length > customLimit) {
         langData.customWords = langData.customWords.slice(-customLimit);
       }
-      // Видаляємо великі кеші завдань у langData (якщо є)
+      
+      // Завдання Norskprøve – тільки 2 останні на рівень/режим
       if (langData.customNorskTasks && typeof langData.customNorskTasks === 'object') {
-        // Обрізаємо до 5 завдань на рівень/режим
         for (const level in langData.customNorskTasks) {
           for (const mode in langData.customNorskTasks[level]) {
-            if (Array.isArray(langData.customNorskTasks[level][mode]) && langData.customNorskTasks[level][mode].length > 5) {
-              langData.customNorskTasks[level][mode] = langData.customNorskTasks[level][mode].slice(-5);
+            if (Array.isArray(langData.customNorskTasks[level][mode]) && langData.customNorskTasks[level][mode].length > 2) {
+              langData.customNorskTasks[level][mode] = langData.customNorskTasks[level][mode].slice(-2);
             }
           }
         }
       }
+      
+      // Видаляємо великі кеші завдань (якщо є)
+      delete langData.testHistory; // історія тестів – зберігається окремо в localStorage
+    }
+  }
+
+  // 8. Якщо все ще завеликий – видаляємо langData повністю (останній крок)
+  if (aggressive) {
+    // Перевіряємо розмір приблизно (JSON.stringify)
+    if (JSON.stringify(clean).length > 900000) {
+      console.warn('⚠️ Документ все ще завеликий, видаляємо langData');
+      delete clean.langData;
+      delete clean.stats;
+      delete clean.story;
+      delete clean.booksProgress;
     }
   }
 
