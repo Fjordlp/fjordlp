@@ -117,136 +117,131 @@ async function loadFromFirestore(uid) {
   }
 }
 
+// =====================================================================
+//  ПІДГОТОВКА ДАНИХ ДЛЯ FIRESTORE (обрізка великих полів)
+// =====================================================================
+// ВИПРАВЛЕНО: попередня версія обрізала лише КОРЕНЕВІ clean.stats.wordsSeen
+// та clean.customWords — застарілі поля з тих часів, коли прогрес ще не
+// був ізольований по мовах. Відтоді весь реальний прогрес (SRS-картки,
+// побачені слова, власні слова) переїхав у STATE.langData[мова].*, і ця
+// функція його просто НІКОЛИ не торкалась — документ міг необмежено
+// рости для кожної мови, якою людина коли-небудь користувалась (особливо
+// швидко — через "Хроніки Тролля", яка щорозділу сама додає нові слова в
+// колоду). Саме це й спричинило перевищення ліміту 1 МБ у Firestore.
+//
+// Також виправлено:
+//  - було ДВІ функції з однаковою назвою prepareDataForFirestore в
+//    одному файлі — друге оголошення тихо перекривало перше (мертвий
+//    код). Тепер лише одна, повна версія.
+//  - keys.sort() для "останніх" слів сортував їх АЛФАВІТНО, а не за
+//    часом — це вибирало довільні слова, не найновіші. Замінено на
+//    порядок вставки об'єкта (JS гарантує порядок ключів-рядків), що
+//    хоча б приблизно відповідає хронології.
+//  - _onboardingDone видалявся перед збереженням у хмару — через це
+//    людина, яка заходить з іншого пристрою (чи просто після очищення
+//    локальних даних браузера), бачила б онбординг ЗНОВУ, бо в хмарі
+//    цього прапорця просто не було. Прапорець більше не видаляється —
+//    це не тимчасове службове поле, а постійний стан користувача (як і
+//    _targetLangChosen поруч).
+function trimWordMap(obj, limit) {
+  if (!obj || typeof obj !== 'object') return obj;
+  const keys = Object.keys(obj);
+  if (keys.length <= limit) return obj;
+  const kept = keys.slice(-limit); // порядок вставки ≈ хронологія додавання
+  const limited = {};
+  kept.forEach(k => { limited[k] = obj[k]; });
+  return limited;
+}
+
+function trimArray(arr, limit) {
+  return Array.isArray(arr) && arr.length > limit ? arr.slice(-limit) : arr;
+}
+
 function prepareDataForFirestore(data, aggressive = false) {
+  // Глибока копія, щоб не змінювати оригінальний STATE.
   const clean = JSON.parse(JSON.stringify(data));
 
-  // Мінімальні ліміти – майже нічого не зберігаємо
-  const chatLimit = aggressive ? 3 : 10;
-  const wordLimit = aggressive ? 30 : 100;
-  const customLimit = aggressive ? 20 : 100;
-  const storyLimit = aggressive ? 2 : 5;
+  const wordsSeenLimit = aggressive ? 50 : 200;
+  const customWordsLimit = aggressive ? 100 : 500;
+  const srsLimit = aggressive ? 150 : 600;
+  const chatLimit = aggressive ? 5 : 20;
 
-  // 1. Чат – тільки останні повідомлення
-  if (Array.isArray(clean.assistantChat) && clean.assistantChat.length > chatLimit) {
-    clean.assistantChat = clean.assistantChat.slice(-chatLimit);
+  // ---- Головне виправлення: обрізаємо ВСЕРЕДИНІ кожної мови в langData ----
+  if (clean.langData && typeof clean.langData === 'object') {
+    Object.keys(clean.langData).forEach(lang => {
+      const ld = clean.langData[lang];
+      if (!ld || typeof ld !== 'object') return;
+
+      if (ld.stats && ld.stats.wordsSeen) {
+        ld.stats.wordsSeen = trimWordMap(ld.stats.wordsSeen, wordsSeenLimit);
+      }
+      if (ld.srs) {
+        ld.srs = trimWordMap(ld.srs, srsLimit);
+      }
+      if (Array.isArray(ld.customWords)) {
+        ld.customWords = trimArray(ld.customWords, customWordsLimit);
+      }
+      // testHistory тут — лише легкі метадані (тип/рівень/дата/бал), самі
+      // деталі питань зберігаються локально в localStorage, тож 50
+      // записів — це вже й так невеликий обсяг; обрізаємо про всяк
+      // випадок, якщо колись зміниться формат запису.
+      if (Array.isArray(ld.testHistory)) {
+        ld.testHistory = trimArray(ld.testHistory, aggressive ? 20 : 50);
+      }
+      // Історія "Хроніки Тролля" — повний текст розділів обрізається до
+      // 30 і на клієнті (js/story.js), але дублюємо обмеження й тут як
+      // страховку на випадок старих збережених станів, де цього ще не
+      // було.
+      if (ld.story && Array.isArray(ld.story.history)) {
+        ld.story.history = trimArray(ld.story.history, aggressive ? 10 : 30);
+      }
+    });
   }
 
-  // 2. Статистика слів
-  if (clean.stats?.wordsSeen && typeof clean.stats.wordsSeen === 'object') {
-    const keys = Object.keys(clean.stats.wordsSeen);
-    if (keys.length > wordLimit) {
-      const limited = {};
-      keys.slice(-wordLimit).forEach(k => { limited[k] = clean.stats.wordsSeen[k]; });
-      clean.stats.wordsSeen = limited;
-    }
+  // ---- Ті самі поля на кореневому рівні (застарілий формат, лишаємо
+  // обрізку про всяк випадок — раптом десь ще лишились дані звідти
+  // до міграції на langData) ----
+  if (clean.stats && clean.stats.wordsSeen) {
+    clean.stats.wordsSeen = trimWordMap(clean.stats.wordsSeen, wordsSeenLimit);
+  }
+  if (clean.srs) {
+    clean.srs = trimWordMap(clean.srs, srsLimit);
+  }
+  if (Array.isArray(clean.customWords)) {
+    clean.customWords = trimArray(clean.customWords, customWordsLimit);
   }
 
-  // 3. Власні слова
-  if (Array.isArray(clean.customWords) && clean.customWords.length > customLimit) {
-    clean.customWords = clean.customWords.slice(-customLimit);
+  // ---- Історія чату асистента ----
+  if (Array.isArray(clean.assistantChat)) {
+    clean.assistantChat = trimArray(clean.assistantChat, chatLimit);
   }
 
-  // 4. Історія пригод
-  if (clean.story?.history && Array.isArray(clean.story.history)) {
-    if (clean.story.history.length > storyLimit) {
-      clean.story.history = clean.story.history.slice(-storyLimit);
-    }
-  }
-
-  // 5. Прогрес книг – обрізаємо до 5 останніх
-  if (clean.booksProgress && typeof clean.booksProgress === 'object') {
-    const keys = Object.keys(clean.booksProgress);
-    if (keys.length > 5) {
-      const limited = {};
-      keys.slice(-5).forEach(k => { limited[k] = clean.booksProgress[k]; });
-      clean.booksProgress = limited;
-    }
-  }
-
-  // 6. ВИДАЛЯЄМО ВСІ ВЕЛИКІ КЕШІ (вони відновляться при потребі)
+  // ---- Великі кеші, яким узагалі нема чого робити в Firestore: це не
+  // прогрес користувача, а тимчасовий кеш уже згенерованого AI-контенту
+  // (словник/граматика/завдання/переклади), який і так підвантажується
+  // заново з sharedVocab/sharedGrammar чи власною AI-генерацією при
+  // потребі ----
   delete clean.generatedVocab;
   delete clean.generatedTasks;
-  delete clean.wordTranslations;
   delete clean.generatedGrammar;
-  delete clean._onboardingDone;
-  delete clean._dismissedRec;
-  delete clean._targetLangChosen;
-  delete clean.dailyGoal; // не критично
-  delete clean.dailyTasksCompleted; // не критично
-
-  // 7. Агресивно обрізаємо langData (основне джерело великого розміру)
-  if (clean.langData && typeof clean.langData === 'object') {
-    for (const lang in clean.langData) {
-      const langData = clean.langData[lang];
-      
-      // SRS – залишаємо тільки 100 останніх
-      if (langData.srs && typeof langData.srs === 'object') {
-        const srsKeys = Object.keys(langData.srs);
-        if (srsKeys.length > 100) {
-          const limited = {};
-          srsKeys.slice(-100).forEach(k => { limited[k] = langData.srs[k]; });
-          langData.srs = limited;
-        }
-      }
-      
-      // Статистика слів у langData
-      if (langData.stats?.wordsSeen && typeof langData.stats.wordsSeen === 'object') {
-        const keys = Object.keys(langData.stats.wordsSeen);
-        if (keys.length > wordLimit) {
-          const limited = {};
-          keys.slice(-wordLimit).forEach(k => { limited[k] = langData.stats.wordsSeen[k]; });
-          langData.stats.wordsSeen = limited;
-        }
-      }
-      
-      // Власні слова в langData
-      if (Array.isArray(langData.customWords) && langData.customWords.length > customLimit) {
-        langData.customWords = langData.customWords.slice(-customLimit);
-      }
-      
-      // Завдання Norskprøve – тільки 2 останні на рівень/режим
-      if (langData.customNorskTasks && typeof langData.customNorskTasks === 'object') {
-        for (const level in langData.customNorskTasks) {
-          for (const mode in langData.customNorskTasks[level]) {
-            if (Array.isArray(langData.customNorskTasks[level][mode]) && langData.customNorskTasks[level][mode].length > 2) {
-              langData.customNorskTasks[level][mode] = langData.customNorskTasks[level][mode].slice(-2);
-            }
-          }
-        }
-      }
-      
-      // Видаляємо великі кеші завдань (якщо є)
-      delete langData.testHistory; // історія тестів – зберігається окремо в localStorage
-    }
-  }
-
-  // 8. Якщо все ще завеликий – видаляємо langData повністю (останній крок)
-  if (aggressive) {
-    // Перевіряємо розмір приблизно (JSON.stringify)
-    if (JSON.stringify(clean).length > 900000) {
-      console.warn('⚠️ Документ все ще завеликий, видаляємо langData');
-      delete clean.langData;
-      delete clean.stats;
-      delete clean.story;
-      delete clean.booksProgress;
-    }
-  }
+  delete clean.wordTranslations;
 
   return clean;
 }
 
 // ------------------------------------------------------------
-//  ЗБЕРЕЖЕННЯ З ДЕБАУНСОМ
+//  Дебаунс збереження
 // ------------------------------------------------------------
 const FIRESTORE_SAVE_DEBOUNCE_MS = 300;
 let _firestoreSaveTimer = null;
 let _firestoreSavePending = null;
 
 async function saveToFirestore(uid, data) {
-  // Використовуємо агресивне обрізання завжди
-  const preparedData = prepareDataForFirestore(data, true);
-
-  _firestoreSavePending = { uid, data: preparedData };
+  // Зберігаємо ОРИГІНАЛЬНІ (ще не обрізані) дані в черзі — так, якщо
+  // знадобиться агресивніше обрізання після невдалої спроби, воно
+  // застосовується до повних даних, а не до вже раз обрізаних (щоб не
+  // накопичувати похибку від подвійного обрізання).
+  _firestoreSavePending = { uid, data };
   if (_firestoreSaveTimer) return;
 
   _firestoreSaveTimer = setTimeout(async () => {
@@ -255,24 +250,23 @@ async function saveToFirestore(uid, data) {
     _firestoreSavePending = null;
     await waitForFirebase();
     if (!firebaseDb) return;
+
+    const preparedData = prepareDataForFirestore(pendingData, false);
     try {
       const docRef = firebaseDb.collection('users').doc(pendingUid);
-      await docRef.set(pendingData, { merge: true });
-      console.log('💾 Дані збережено у Firestore (розмір зменшено)');
+      await docRef.set(preparedData, { merge: true });
+      console.log('💾 Дані збережено у Firestore');
     } catch (e) {
       console.error('❌ Помилка збереження у Firestore:', e);
-      // Якщо все ще завеликий – робимо ще більш агресивне обрізання
-      if (e.code === 'resource-exhausted' || e.message.includes('exceeds maximum allowed size')) {
-        console.warn('⚠️ Документ все ще завеликий, спроба екстремального обрізання...');
+      const tooLarge = e.code === 'resource-exhausted' ||
+        (e.message && e.message.includes('exceeds maximum allowed size'));
+      if (tooLarge) {
+        console.warn('⚠️ Документ все ще завеликий, спроба агресивнішого обрізання...');
         const emergencyData = prepareDataForFirestore(pendingData, true);
-        // Додатково видаляємо ще більше полів
-        delete emergencyData.langData;
-        delete emergencyData.stats;
-        delete emergencyData.story;
-        delete emergencyData.booksProgress;
         try {
+          const docRef = firebaseDb.collection('users').doc(pendingUid);
           await docRef.set(emergencyData, { merge: true });
-          console.log('💾 Дані збережено після екстремального обрізання');
+          console.log('💾 Дані збережено після агресивного обрізання');
         } catch (e2) {
           console.error('❌ Навіть після обрізання не вдалося зберегти:', e2);
         }
