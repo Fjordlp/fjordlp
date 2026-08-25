@@ -398,7 +398,5 @@ const VOCAB_PL = {
         { t: "Прикметники", pl: "ciekawe", uk: "цікаве", ex_pl: "To jest ciekawe pytanie.", ex_uk: "Це цікаве питання.", en: "interesting", en_ex: "This is an interesting question.", ru: "интересное", ru_ex: "Это интересный вопрос." },
         { t: "Прикметники", pl: "ważny", uk: "важливий", ex_pl: "To jest ważna informacja.", ex_uk: "Це важлива інформація.", en: "important", en_ex: "This is important information.", ru: "важный", ru_ex: "Это важная информация." },
         { t: "Прикметники", pl: "łatwy", uk: "легкий", ex_pl: "To ćwiczenie jest łatwe.", ex_uk: "Ця вправа легка.", en: "easy", en_ex: "This exercise is easy.", ru: "лёгкий", ru_ex: "Это упражнение лёгкое." }
-    ],
-    A2: [
-        
-};
+    ]
+        };
