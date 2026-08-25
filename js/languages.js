@@ -33,7 +33,6 @@ const LANGUAGES = [
     { code: 'zh', flag: '🇨🇳', native: '中文', name: { uk: 'Китайська', en: 'Chinese', ru: 'Китайский' }, builtin: false },
     { code: 'ko', flag: '🇰🇷', native: '한국어', name: { uk: 'Корейська', en: 'Korean', ru: 'Корейский' }, builtin: false },
     { code: 'ar', flag: '🇸🇦', native: 'العربية', name: { uk: 'Арабська', en: 'Arabic', ru: 'Арабский' }, builtin: false },
-    { code: 'he', flag: '🇮🇱', native: 'עברית', name: { uk: 'Іврит', en: 'Hebrew', ru: 'Иврит' }, builtin: false },
     { code: 'hi', flag: '🇮🇳', native: 'हिन्दी', name: { uk: 'Гінді', en: 'Hindi', ru: 'Хинди' }, builtin: false },
     { code: 'vi', flag: '🇻🇳', native: 'Tiếng Việt', name: { uk: 'В\'єтнамська', en: 'Vietnamese', ru: 'Вьетнамский' }, builtin: false },
     { code: 'th', flag: '🇹🇭', native: 'ไทย', name: { uk: 'Тайська', en: 'Thai', ru: 'Тайский' }, builtin: false },
