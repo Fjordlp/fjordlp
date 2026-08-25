@@ -1,7 +1,7 @@
 {
-  "name": "Fjord — вивчай норвезьку",
+  "name": "Fjordlp — вивчай мови",
   "short_name": "Fjord",
-  "description": "Вивчай норвезьку з AI-тролем: словник, картки, тести, Norskprøve Academy",
+  "description": "Вивчай мови з AI-тролем: словник, картки, тести",
   "start_url": "/?source=pwa",
   "id": "/",
   "scope": "/",
