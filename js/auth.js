@@ -124,7 +124,7 @@ function initAuth() {
         initAssistantWidget();
         checkAndApplyStreakFreeze();
         navigate(getInitialRoute());
-        toast('🎮 Ласкаво просимо! Ви в режимі гостя. Дані зберігаються локально.');
+        toast('Ласкаво просимо! Ви в режимі гостя. Дані зберігаються локально.');
     };
 
     // ---- Скидання пароля ----
