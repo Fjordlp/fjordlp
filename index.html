@@ -48,6 +48,14 @@
     <!-- ============ Стилі ============ -->
     <link rel="stylesheet" href="css/style.css">
 
+    <!-- ============ Прапори (SVG, не emoji) ============ -->
+    <!-- Фікс: у Windows/Edge emoji-прапори (пара regional-indicator symbols)
+         часто не склеюються шрифтом Segoe UI Emoji в картинку прапора, а
+         показуються як літерні квадратики (виглядає як "NO", "PL" тощо).
+         flag-icons — SVG-спрайти, тому прапор виглядає однаково у всіх
+         браузерах/ОС, без залежності від emoji-шрифту системи. -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.3.2/css/flag-icons.min.css">
+
     <!-- ============ Firebase SDK ============ -->
     <script defer src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
     <script defer src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
