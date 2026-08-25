@@ -261,6 +261,144 @@ const VOCAB_PL = {
         { t: "Корисні фрази", pl: "proszę powtórzyć", uk: "повторіть, будь ласка", ex_pl: "Proszę powtórzyć jeszcze raz.", ex_uk: "Повторіть ще раз, будь ласка.", en: "please repeat", en_ex: "Please repeat it again.", ru: "повторите, пожалуйста", ru_ex: "Повторите ещё раз, пожалуйста." },
         { t: "Корисні фрази", pl: "mówię trochę po polsku", uk: "я трохи говорю польською", ex_pl: "Mówię trochę po polsku.", ex_uk: "Я трохи говорю польською.", en: "I speak a little Polish", en_ex: "I speak a little Polish.", ru: "я немного говорю по-польски", ru_ex: "Я немного говорю по-польски." },
         { t: "Корисні фрази", pl: "jak się masz?", uk: "як ти?", ex_pl: "Cześć, jak się masz?", ex_uk: "Привіт, як ти?", en: "how are you?", en_ex: "Hi, how are you?", ru: "как ты?", ru_ex: "Привет, как ты?" },
-        { t: "Корисні фрази", pl: "wszystko dobrze", uk: "все добре", ex_pl: "Tak, wszystko dobrze.", ex_uk: "Так, все добре.", en: "everything is fine", en_ex: "Yes, everything is fine.", ru: "всё хорошо", ru_ex: "Да, всё хорошо." }
-    ]
+        { t: "Корисні фрази", pl: "wszystko dobrze", uk: "все добре", ex_pl: "Tak, wszystko dobrze.", ex_uk: "Так, все добре.", en: "everything is fine", en_ex: "Yes, everything is fine.", ru: "всё хорошо", ru_ex: "Да, всё хорошо." },
+          // =========================
+        // НОВІ СЛОВА A1 — ОСОБИСТЕ
+        // =========================
+        { t: "Особисте", pl: "imię", uk: "ім'я", ex_pl: "Jak masz na imię?", ex_uk: "Як тебе звати?", en: "name", en_ex: "What is your name?", ru: "имя", ru_ex: "Как тебя зовут?" },
+        { t: "Особисте", pl: "nazwisko", uk: "прізвище", ex_pl: "Jak masz na nazwisko?", ex_uk: "Яке у вас прізвище?", en: "surname", en_ex: "What is your surname?", ru: "фамилия", ru_ex: "Какая у вас фамилия?" },
+        { t: "Особисте", pl: "wiek", uk: "вік", ex_pl: "Jaki masz wiek?", ex_uk: "Скільки тобі років?", en: "age", en_ex: "How old are you?", ru: "возраст", ru_ex: "Сколько тебе лет?" },
+        { t: "Особисте", pl: "adres", uk: "адреса", ex_pl: "Jaki jest twój adres?", ex_uk: "Яка твоя адреса?", en: "address", en_ex: "What is your address?", ru: "адрес", ru_ex: "Какой у тебя адрес?" },
+        { t: "Особисте", pl: "numer telefonu", uk: "номер телефону", ex_pl: "Jaki masz numer telefonu?", ex_uk: "Який у тебе номер телефону?", en: "phone number", en_ex: "What is your phone number?", ru: "номер телефона", ru_ex: "Какой у тебя номер телефона?" },
+
+        // =========================
+        // СІМ'Я — ДОДАТКОВО
+        // =========================
+        { t: "Сім'я", pl: "rodzice", uk: "батьки", ex_pl: "Moi rodzice mieszkają w Polsce.", ex_uk: "Мої батьки живуть у Польщі.", en: "parents", en_ex: "My parents live in Poland.", ru: "родители", ru_ex: "Мои родители живут в Польше." },
+        { t: "Сім'я", pl: "mąż", uk: "чоловік / чоловік у шлюбі", ex_pl: "Mój mąż pracuje w Warszawie.", ex_uk: "Мій чоловік працює у Варшаві.", en: "husband", en_ex: "My husband works in Warsaw.", ru: "муж", ru_ex: "Мой муж работает в Варшаве." },
+        { t: "Сім'я", pl: "żona", uk: "дружина", ex_pl: "Moja żona jest w domu.", ex_uk: "Моя дружина вдома.", en: "wife", en_ex: "My wife is at home.", ru: "жена", ru_ex: "Моя жена дома." },
+        { t: "Сім'я", pl: "dziadek", uk: "дідусь", ex_pl: "Mój dziadek mieszka na wsi.", ex_uk: "Мій дідусь живе в селі.", en: "grandfather", en_ex: "My grandfather lives in the countryside.", ru: "дедушка", ru_ex: "Мой дедушка живёт в деревне." },
+        { t: "Сім'я", pl: "babcia", uk: "бабуся", ex_pl: "Moja babcia robi ciasto.", ex_uk: "Моя бабуся пече пиріг.", en: "grandmother", en_ex: "My grandmother makes a cake.", ru: "бабушка", ru_ex: "Моя бабушка печёт пирог." },
+        { t: "Сім'я", pl: "rodzeństwo", uk: "брати і сестри", ex_pl: "Mam dużo rodzeństwa.", ex_uk: "У мене багато братів і сестер.", en: "siblings", en_ex: "I have many siblings.", ru: "братья и сёстры", ru_ex: "У меня много братьев и сестёр." },
+
+        // =========================
+        // ЇЖА — ДОДАТКОВО
+        // =========================
+        { t: "Їжа", pl: "jajko", uk: "яйце", ex_pl: "Jem jajko na śniadanie.", ex_uk: "Я їм яйце на сніданок.", en: "egg", en_ex: "I eat an egg for breakfast.", ru: "яйцо", ru_ex: "Я ем яйцо на завтрак." },
+        { t: "Їжа", pl: "zupa", uk: "суп", ex_pl: "Zupa jest bardzo dobra.", ex_uk: "Суп дуже смачний.", en: "soup", en_ex: "The soup is very good.", ru: "суп", ru_ex: "Суп очень вкусный." },
+        { t: "Їжа", pl: "ryż", uk: "рис", ex_pl: "Lubię ryż z warzywami.", ex_uk: "Я люблю рис з овочами.", en: "rice", en_ex: "I like rice with vegetables.", ru: "рис", ru_ex: "Я люблю рис с овощами." },
+        { t: "Їжа", pl: "ziemniak", uk: "картопля", ex_pl: "Gotuję ziemniaki.", ex_uk: "Я варю картоплю.", en: "potato", en_ex: "I am cooking potatoes.", ru: "картофель", ru_ex: "Я варю картофель." },
+        { t: "Їжа", pl: "warzywo", uk: "овоч", ex_pl: "To jest zdrowe warzywo.", ex_uk: "Це корисний овоч.", en: "vegetable", en_ex: "This is a healthy vegetable.", ru: "овощ", ru_ex: "Это полезный овощ." },
+        { t: "Їжа", pl: "owoc", uk: "фрукт", ex_pl: "Lubię świeże owoce.", ex_uk: "Я люблю свіжі фрукти.", en: "fruit", en_ex: "I like fresh fruit.", ru: "фрукт", ru_ex: "Я люблю свежие фрукты." },
+        { t: "Їжа", pl: "cukier", uk: "цукор", ex_pl: "Nie piję kawy z cukrem.", ex_uk: "Я не п'ю каву з цукром.", en: "sugar", en_ex: "I don't drink coffee with sugar.", ru: "сахар", ru_ex: "Я не пью кофе с сахаром." },
+        { t: "Їжа", pl: "sól", uk: "сіль", ex_pl: "Dodaj trochę soli.", ex_uk: "Додай трохи солі.", en: "salt", en_ex: "Add a little salt.", ru: "соль", ru_ex: "Добавь немного соли." },
+        { t: "Їжа", pl: "śniadanie", uk: "сніданок", ex_pl: "Jem śniadanie o ósmej.", ex_uk: "Я снідаю о восьмій.", en: "breakfast", en_ex: "I have breakfast at eight.", ru: "завтрак", ru_ex: "Я завтракаю в восемь." },
+        { t: "Їжа", pl: "obiad", uk: "обід", ex_pl: "Obiad jest gotowy.", ex_uk: "Обід готовий.", en: "lunch / dinner", en_ex: "Lunch is ready.", ru: "обед", ru_ex: "Обед готов." },
+        { t: "Їжа", pl: "kolacja", uk: "вечеря", ex_pl: "Jemy kolację razem.", ex_uk: "Ми вечеряємо разом.", en: "dinner", en_ex: "We have dinner together.", ru: "ужин", ru_ex: "Мы ужинаем вместе." },
+
+        // =========================
+        // НАПОЇ
+        // =========================
+        { t: "Напої", pl: "sok", uk: "сік", ex_pl: "Poproszę sok pomarańczowy.", ex_uk: "Апельсиновий сік, будь ласка.", en: "juice", en_ex: "Orange juice, please.", ru: "сок", ru_ex: "Апельсиновый сок, пожалуйста." },
+        { t: "Напої", pl: "napój", uk: "напій", ex_pl: "Jaki chcesz napój?", ex_uk: "Який напій ти хочеш?", en: "drink / beverage", en_ex: "What drink do you want?", ru: "напиток", ru_ex: "Какой напиток ты хочешь?" },
+        { t: "Напої", pl: "woda gazowana", uk: "газована вода", ex_pl: "Poproszę wodę gazowaną.", ex_uk: "Газовану воду, будь ласка.", en: "sparkling water", en_ex: "Sparkling water, please.", ru: "газированная вода", ru_ex: "Газированную воду, пожалуйста." },
+
+        // =========================
+        // КІМНАТА / ДІМ
+        // =========================
+        { t: "Дім", pl: "salon", uk: "вітальня", ex_pl: "Oglądam telewizję w salonie.", ex_uk: "Я дивлюся телевізор у вітальні.", en: "living room", en_ex: "I watch TV in the living room.", ru: "гостиная", ru_ex: "Я смотрю телевизор в гостиной." },
+        { t: "Дім", pl: "sypialnia", uk: "спальня", ex_pl: "Sypialnia jest na górze.", ex_uk: "Спальня нагорі.", en: "bedroom", en_ex: "The bedroom is upstairs.", ru: "спальня", ru_ex: "Спальня наверху." },
+        { t: "Дім", pl: "łazienka", uk: "ванна кімната", ex_pl: "Biorę prysznic w łazience.", ex_uk: "Я приймаю душ у ванній.", en: "bathroom", en_ex: "I take a shower in the bathroom.", ru: "ванная", ru_ex: "Я принимаю душ в ванной." },
+        { t: "Дім", pl: "podłoga", uk: "підлога", ex_pl: "Książka leży na podłodze.", ex_uk: "Книга лежить на підлозі.", en: "floor", en_ex: "The book is on the floor.", ru: "пол", ru_ex: "Книга лежит на полу." },
+        { t: "Дім", pl: "ściana", uk: "стіна", ex_pl: "Obraz jest na ścianie.", ex_uk: "Картина на стіні.", en: "wall", en_ex: "The picture is on the wall.", ru: "стена", ru_ex: "Картина на стене." },
+        { t: "Дім", pl: "lampa", uk: "лампа", ex_pl: "Lampa jest na stole.", ex_uk: "Лампа на столі.", en: "lamp", en_ex: "The lamp is on the table.", ru: "лампа", ru_ex: "Лампа на столе." },
+        { t: "Дім", pl: "telewizor", uk: "телевізор", ex_pl: "Oglądam telewizor wieczorem.", ex_uk: "Я дивлюся телевізор увечері.", en: "television", en_ex: "I watch television in the evening.", ru: "телевизор", ru_ex: "Я смотрю телевизор вечером." },
+
+        // =========================
+        // МІСТО — ДОДАТКОВО
+        // =========================
+        { t: "Місто", pl: "centrum", uk: "центр", ex_pl: "Mieszkam blisko centrum.", ex_uk: "Я живу біля центру.", en: "city center", en_ex: "I live near the city center.", ru: "центр", ru_ex: "Я живу рядом с центром." },
+        { t: "Місто", pl: "park", uk: "парк", ex_pl: "Spaceruję w parku.", ex_uk: "Я гуляю в парку.", en: "park", en_ex: "I walk in the park.", ru: "парк", ru_ex: "Я гуляю в парке." },
+        { t: "Місто", pl: "restauracja", uk: "ресторан", ex_pl: "Jemy w restauracji.", ex_uk: "Ми їмо в ресторані.", en: "restaurant", en_ex: "We eat at a restaurant.", ru: "ресторан", ru_ex: "Мы едим в ресторане." },
+        { t: "Місто", pl: "hotel", uk: "готель", ex_pl: "Mieszkamy w hotelu.", ex_uk: "Ми живемо в готелі.", en: "hotel", en_ex: "We are staying at a hotel.", ru: "отель", ru_ex: "Мы живём в отеле." },
+        { t: "Місто", pl: "poczta", uk: "пошта", ex_pl: "Poczta jest niedaleko.", ex_uk: "Пошта недалеко.", en: "post office", en_ex: "The post office is nearby.", ru: "почта", ru_ex: "Почта недалеко." },
+        { t: "Місто", pl: "policja", uk: "поліція", ex_pl: "Gdzie jest policja?", ex_uk: "Де поліція?", en: "police", en_ex: "Where is the police?", ru: "полиция", ru_ex: "Где полиция?" },
+        { t: "Місто", pl: "szpital", uk: "лікарня", ex_pl: "Szpital jest blisko.", ex_uk: "Лікарня поруч.", en: "hospital", en_ex: "The hospital is nearby.", ru: "больница", ru_ex: "Больница рядом." },
+
+        // =========================
+        // ТРАНСПОРТ — ДОДАТКОВО
+        // =========================
+        { t: "Транспорт", pl: "tramwaj", uk: "трамвай", ex_pl: "Jadę tramwajem do centrum.", ex_uk: "Я їду трамваєм до центру.", en: "tram", en_ex: "I am taking the tram to the center.", ru: "трамвай", ru_ex: "Я еду на трамвае в центр." },
+        { t: "Транспорт", pl: "metro", uk: "метро", ex_pl: "Jadę metrem do pracy.", ex_uk: "Я їду метро на роботу.", en: "subway / metro", en_ex: "I take the metro to work.", ru: "метро", ru_ex: "Я еду на метро на работу." },
+        { t: "Транспорт", pl: "taksówka", uk: "таксі", ex_pl: "Zamawiam taksówkę.", ex_uk: "Я замовляю таксі.", en: "taxi", en_ex: "I am ordering a taxi.", ru: "такси", ru_ex: "Я заказываю такси." },
+        { t: "Транспорт", pl: "rower", uk: "велосипед", ex_pl: "Jeżdżę rowerem do pracy.", ex_uk: "Я їжджу велосипедом на роботу.", en: "bicycle", en_ex: "I ride a bicycle to work.", ru: "велосипед", ru_ex: "Я езжу на велосипеде на работу." },
+        { t: "Транспорт", pl: "przystanek", uk: "зупинка", ex_pl: "Gdzie jest przystanek autobusowy?", ex_uk: "Де автобусна зупинка?", en: "stop", en_ex: "Where is the bus stop?", ru: "остановка", ru_ex: "Где автобусная остановка?" },
+
+        // =========================
+        // ЧАС — ДНІ ТИЖНЯ
+        // =========================
+        { t: "Час", pl: "poniedziałek", uk: "понеділок", ex_pl: "W poniedziałek pracuję.", ex_uk: "У понеділок я працюю.", en: "Monday", en_ex: "I work on Monday.", ru: "понедельник", ru_ex: "В понедельник я работаю." },
+        { t: "Час", pl: "wtorek", uk: "вівторок", ex_pl: "We wtorek mam lekcję.", ex_uk: "У вівторок у мене урок.", en: "Tuesday", en_ex: "I have a lesson on Tuesday.", ru: "вторник", ru_ex: "Во вторник у меня урок." },
+        { t: "Час", pl: "środa", uk: "середа", ex_pl: "W środę idę do pracy.", ex_uk: "У середу я йду на роботу.", en: "Wednesday", en_ex: "I go to work on Wednesday.", ru: "среда", ru_ex: "В среду я иду на работу." },
+        { t: "Час", pl: "czwartek", uk: "четвер", ex_pl: "W czwartek mam wolne.", ex_uk: "У четвер я вільний.", en: "Thursday", en_ex: "I am free on Thursday.", ru: "четверг", ru_ex: "В четверг я свободен." },
+        { t: "Час", pl: "piątek", uk: "п'ятниця", ex_pl: "W piątek kończę pracę wcześniej.", ex_uk: "У п'ятницю я закінчую роботу раніше.", en: "Friday", en_ex: "I finish work earlier on Friday.", ru: "пятница", ru_ex: "В пятницу я заканчиваю работу раньше." },
+        { t: "Час", pl: "sobota", uk: "субота", ex_pl: "W sobotę odpoczywam.", ex_uk: "У суботу я відпочиваю.", en: "Saturday", en_ex: "I rest on Saturday.", ru: "суббота", ru_ex: "В субботу я отдыхаю." },
+        { t: "Час", pl: "niedziela", uk: "неділя", ex_pl: "W niedzielę jestem w domu.", ex_uk: "У неділю я вдома.", en: "Sunday", en_ex: "I am at home on Sunday.", ru: "воскресенье", ru_ex: "В воскресенье я дома." },
+        { t: "Час", pl: "tydzień", uk: "тиждень", ex_pl: "Mam dużo pracy w tym tygodniu.", ex_uk: "У мене багато роботи цього тижня.", en: "week", en_ex: "I have a lot of work this week.", ru: "неделя", ru_ex: "У меня много работы на этой неделе." },
+        { t: "Час", pl: "miesiąc", uk: "місяць", ex_pl: "Pracuję tutaj od miesiąca.", ex_uk: "Я працюю тут місяць.", en: "month", en_ex: "I have worked here for a month.", ru: "месяц", ru_ex: "Я работаю здесь месяц." },
+        { t: "Час", pl: "rok", uk: "рік", ex_pl: "Mam dwadzieścia lat.", ex_uk: "Мені двадцять років.", en: "year", en_ex: "I am twenty years old.", ru: "год", ru_ex: "Мне двадцать лет." },
+
+        // =========================
+        // ЧИСЛА 11–20
+        // =========================
+        { t: "Числа", pl: "jedenaście", uk: "одинадцять", ex_pl: "Mam jedenaście lat.", ex_uk: "Мені одинадцять років.", en: "eleven", en_ex: "I am eleven years old.", ru: "одиннадцать", ru_ex: "Мне одиннадцать лет." },
+        { t: "Числа", pl: "dwanaście", uk: "дванадцять", ex_pl: "Jest dwanaście osób.", ex_uk: "Є дванадцять людей.", en: "twelve", en_ex: "There are twelve people.", ru: "двенадцать", ru_ex: "Есть двенадцать человек." },
+        { t: "Числа", pl: "trzynaście", uk: "тринадцять", ex_pl: "Mam trzynaście złotych.", ex_uk: "У мене є тринадцять злотих.", en: "thirteen", en_ex: "I have thirteen zloty.", ru: "тринадцать", ru_ex: "У меня есть тринадцать злотых." },
+        { t: "Числа", pl: "czternaście", uk: "чотирнадцять", ex_pl: "Mam czternaście lat.", ex_uk: "Мені чотирнадцять років.", en: "fourteen", en_ex: "I am fourteen years old.", ru: "четырнадцать", ru_ex: "Мне четырнадцать лет." },
+        { t: "Числа", pl: "piętnaście", uk: "п'ятнадцять", ex_pl: "Czekam piętnaście minut.", ex_uk: "Я чекаю п'ятнадцять хвилин.", en: "fifteen", en_ex: "I wait fifteen minutes.", ru: "пятнадцать", ru_ex: "Я жду пятнадцать минут." },
+        { t: "Числа", pl: "szesnaście", uk: "шістнадцять", ex_pl: "Mam szesnaście książek.", ex_uk: "У мене шістнадцять книг.", en: "sixteen", en_ex: "I have sixteen books.", ru: "шестнадцать", ru_ex: "У меня шестнадцать книг." },
+        { t: "Числа", pl: "siedemnaście", uk: "сімнадцять", ex_pl: "Mam siedemnaście lat.", ex_uk: "Мені сімнадцять років.", en: "seventeen", en_ex: "I am seventeen years old.", ru: "семнадцать", ru_ex: "Мне семнадцать лет." },
+        { t: "Числа", pl: "osiemnaście", uk: "вісімнадцять", ex_pl: "Mam osiemnaście lat.", ex_uk: "Мені вісімнадцять років.", en: "eighteen", en_ex: "I am eighteen years old.", ru: "восемнадцать", ru_ex: "Мне восемнадцать лет." },
+        { t: "Числа", pl: "dziewiętnaście", uk: "дев'ятнадцять", ex_pl: "Mam dziewiętnaście lat.", ex_uk: "Мені дев'ятнадцять років.", en: "nineteen", en_ex: "I am nineteen years old.", ru: "девятнадцать", ru_ex: "Мне девятнадцать лет." },
+        { t: "Числа", pl: "dwadzieścia", uk: "двадцять", ex_pl: "Mam dwadzieścia lat.", ex_uk: "Мені двадцять років.", en: "twenty", en_ex: "I am twenty years old.", ru: "двадцать", ru_ex: "Мне двадцать лет." },
+
+        // =========================
+        // ДІЄСЛОВА — НОВІ
+        // =========================
+        { t: "Дієслова", pl: "spaść", uk: "пасти", ex_pl: "Liść może spaść z drzewa.", ex_uk: "Листок може впасти з дерева.", en: "to fall", en_ex: "A leaf can fall from a tree.", ru: "падать", ru_ex: "Лист может упасть с дерева." },
+        { t: "Дієслова", pl: "spaść", uk: "впасти", ex_pl: "Piłka spadła na podłogę.", ex_uk: "М'яч впав на підлогу.", en: "to fall", en_ex: "The ball fell on the floor.", ru: "упасть", ru_ex: "Мяч упал на пол." },
+        { t: "Дієслова", pl: "siedzieć", uk: "сидіти", ex_pl: "Siedzę przy stole.", ex_uk: "Я сиджу за столом.", en: "to sit", en_ex: "I am sitting at the table.", ru: "сидеть", ru_ex: "Я сижу за столом." },
+        { t: "Дієслова", pl: "stać", uk: "стояти", ex_pl: "Stoję przed domem.", ex_uk: "Я стою перед будинком.", en: "to stand", en_ex: "I am standing in front of the house.", ru: "стоять", ru_ex: "Я стою перед домом." },
+        { t: "Дієслова", pl: "spać", uk: "спати", ex_pl: "Muszę iść spać.", ex_uk: "Мені треба йти спати.", en: "to sleep", en_ex: "I need to go to sleep.", ru: "спать", ru_ex: "Мне нужно идти спать." },
+        { t: "Дієслова", pl: "wstać", uk: "встати", ex_pl: "Muszę wcześnie wstać.", ex_uk: "Мені треба рано встати.", en: "to get up", en_ex: "I have to get up early.", ru: "встать", ru_ex: "Мне нужно рано встать." },
+        { t: "Дієслова", pl: "myć", uk: "мити", ex_pl: "Myję ręce.", ex_uk: "Я мию руки.", en: "to wash", en_ex: "I wash my hands.", ru: "мыть", ru_ex: "Я мою руки." },
+        { t: "Дієслова", pl: "otwierać", uk: "відкривати", ex_pl: "Otwieram okno.", ex_uk: "Я відкриваю вікно.", en: "to open", en_ex: "I open the window.", ru: "открывать", ru_ex: "Я открываю окно." },
+        { t: "Дієслова", pl: "zamykać", uk: "закривати", ex_pl: "Zamykam drzwi.", ex_uk: "Я закриваю двері.", en: "to close", en_ex: "I close the door.", ru: "закрывать", ru_ex: "Я закрываю дверь." },
+        { t: "Дієслова", pl: "czekać", uk: "чекати", ex_pl: "Czekam na autobus.", ex_uk: "Я чекаю на автобус.", en: "to wait", en_ex: "I am waiting for the bus.", ru: "ждать", ru_ex: "Я жду автобус." },
+        { t: "Дієслова", pl: "szukać", uk: "шукати", ex_pl: "Szukam mojego telefonu.", ex_uk: "Я шукаю свій телефон.", en: "to look for", en_ex: "I am looking for my phone.", ru: "искать", ru_ex: "Я ищу свой телефон." },
+        { t: "Дієслова", pl: "znaleźć", uk: "знайти", ex_pl: "Nie mogę znaleźć kluczy.", ex_uk: "Я не можу знайти ключі.", en: "to find", en_ex: "I can't find the keys.", ru: "найти", ru_ex: "Я не могу найти ключи." },
+        { t: "Дієслова", pl: "dawać", uk: "давати", ex_pl: "Daj mi proszę wodę.", ex_uk: "Дай мені, будь ласка, воду.", en: "to give", en_ex: "Give me some water, please.", ru: "давать", ru_ex: "Дай мне воды, пожалуйста." },
+        { t: "Дієслова", pl: "brać", uk: "брати", ex_pl: "Biorę książkę.", ex_uk: "Я беру книгу.", en: "to take", en_ex: "I take the book.", ru: "брать", ru_ex: "Я беру книгу." },
+        { t: "Дієслова", pl: "kupować", uk: "купувати", ex_pl: "Kupuję chleb.", ex_uk: "Я купую хліб.", en: "to buy", en_ex: "I am buying bread.", ru: "покупать", ru_ex: "Я покупаю хлеб." },
+        { t: "Дієслова", pl: "gotować", uk: "готувати", ex_pl: "Gotuję obiad.", ex_uk: "Я готую обід.", en: "to cook", en_ex: "I am cooking dinner.", ru: "готовить", ru_ex: "Я готовлю обед." },
+        { t: "Дієслова", pl: "oglądać", uk: "дивитися", ex_pl: "Oglądam film.", ex_uk: "Я дивлюся фільм.", en: "to watch", en_ex: "I am watching a movie.", ru: "смотреть", ru_ex: "Я смотрю фильм." },
+        { t: "Дієслова", pl: "słuchać", uk: "слухати", ex_pl: "Słucham muzyki.", ex_uk: "Я слухаю музику.", en: "to listen", en_ex: "I listen to music.", ru: "слушать", ru_ex: "Я слушаю музыку." },
+        { t: "Дієслова", pl: "uczyć się", uk: "вчитися", ex_pl: "Uczę się polskiego.", ex_uk: "Я вчу польську.", en: "to learn / study", en_ex: "I am learning Polish.", ru: "учиться", ru_ex: "Я учу польский." },
+
+        // =========================
+        // ПРИКМЕТНИКИ — НОВІ
+        // =========================
+        { t: "Прикметники", pl: "młody", uk: "молодий", ex_pl: "To jest młody człowiek.", ex_uk: "Це молода людина.", en: "young", en_ex: "This is a young person.", ru: "молодой", ru_ex: "Это молодой человек." },
+        { t: "Прикметники", pl: "wysoki", uk: "високий", ex_pl: "Mój brat jest wysoki.", ex_uk: "Мій брат високий.", en: "tall / high", en_ex: "My brother is tall.", ru: "высокий", ru_ex: "Мой брат высокий." },
+        { t: "Прикметники", pl: "niski", uk: "низький / невисокий", ex_pl: "Ten stół jest niski.", ex_uk: "Цей стіл низький.", en: "low / short", en_ex: "This table is low.", ru: "низкий", ru_ex: "Этот стол низкий." },
+        { t: "Прикметники", pl: "długi", uk: "довгий", ex_pl: "To jest długa ulica.", ex_uk: "Це довга вулиця.", en: "long", en_ex: "This is a long street.", ru: "длинный", ru_ex: "Это длинная улица." },
+        { t: "Прикметники", pl: "krótki", uk: "короткий", ex_pl: "Film jest krótki.", ex_uk: "Фільм короткий.", en: "short", en_ex: "The movie is short.", ru: "короткий", ru_ex: "Фильм короткий." },
+        { t: "Прикметники", pl: "szybki", uk: "швидкий", ex_pl: "Ten samochód jest szybki.", ex_uk: "Цей автомобіль швидкий.", en: "fast", en_ex: "This car is fast.", ru: "быстрый", ru_ex: "Эта машина быстрая." },
+        { t: "Прикметники", pl: "wolny", uk: "повільний / вільний", ex_pl: "Autobus jest bardzo wolny.", ex_uk: "Автобус дуже повільний.", en: "slow / free", en_ex: "The bus is very slow.", ru: "медленный / свободный", ru_ex: "Автобус очень медленный." },
+        { t: "Прикметники", pl: "ciekawe", uk: "цікаве", ex_pl: "To jest ciekawe pytanie.", ex_uk: "Це цікаве питання.", en: "interesting", en_ex: "This is an interesting question.", ru: "интересное", ru_ex: "Это интересный вопрос." },
+        { t: "Прикметники", pl: "ważny", uk: "важливий", ex_pl: "To jest ważna informacja.", ex_uk: "Це важлива інформація.", en: "important", en_ex: "This is important information.", ru: "важный", ru_ex: "Это важная информация." },
+        { t: "Прикметники", pl: "łatwy", uk: "легкий", ex_pl: "To ćwiczenie jest łatwe.", ex_uk: "Ця вправа легка.", en: "easy", en_ex: "This exercise is easy.", ru: "лёгкий", ru_ex: "Это упражнение лёгкое." }
+    ],
+    A2: [
+        
 };
