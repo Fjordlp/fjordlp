@@ -400,3 +400,4 @@ const VOCAB_PL = {
         { t: "Прикметники", pl: "łatwy", uk: "легкий", ex_pl: "To ćwiczenie jest łatwe.", ex_uk: "Ця вправа легка.", en: "easy", en_ex: "This exercise is easy.", ru: "лёгкий", ru_ex: "Это упражнение лёгкое." }
     ]
         };
+window.LANG_DATA.pl = { VOCAB, GRAMMAR, LEVEL_TEST, ALPHABET, LESSONS };
