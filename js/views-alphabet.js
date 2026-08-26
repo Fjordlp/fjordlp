@@ -29,7 +29,7 @@ function viewAlphabet() {
 
     const wrap = el(`
         <div class="view">
-            <h1>🔤 ${t('h_alphabet')}</h1>
+            <h1> ${t('h_alphabet')}</h1>
             <p style="color:var(--ink-soft);margin-bottom:16px;">${tf('alphabet_intro', {lang: langName})}</p>
             <div id="alphaContent"></div>
         </div>
@@ -68,7 +68,7 @@ function viewAlphabet() {
     }
 
     if (numbers.length) {
-        content.appendChild(el(`<h2 style="margin-top:8px;">🔢 ${t('h_numbers')}</h2>`));
+        content.appendChild(el(`<h2 style="margin-top:8px;"> ${t('h_numbers')}</h2>`));
         const numGrid = el(`<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;"></div>`);
         numbers.forEach(w => {
             const card = el(`
