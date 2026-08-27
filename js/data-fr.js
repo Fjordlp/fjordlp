@@ -593,34 +593,424 @@
     // =====================================================================
     //  ALPHABET — АБЕТКА (французька)
     // =====================================================================
-    const ALPHABET = [
-        { letter: "A a", name: "а", sound: "як українське «а»", example: "ami", example_uk: "друг" },
-        { letter: "B b", name: "бе", sound: "як українське «б»", example: "bonjour", example_uk: "добрий день" },
-        { letter: "C c", name: "се", sound: "перед a/o/u — як «к»; перед e/i/y — як «с»", example: "chat", example_uk: "кіт" },
-        { letter: "D d", name: "де", sound: "як українське «д»", example: "deux", example_uk: "два" },
-        { letter: "E e", name: "е (неме)", sound: "часто ледь чутне «е»; з наголосом звучить чіткіше (é, è)", example: "elle", example_uk: "вона" },
-        { letter: "F f", name: "еф", sound: "як українське «ф»", example: "femme", example_uk: "жінка" },
-        { letter: "G g", name: "же", sound: "перед a/o/u — як «ґ»; перед e/i/y — як «ж»", example: "garçon", example_uk: "хлопчик" },
-        { letter: "H h", name: "аш", sound: "не вимовляється взагалі (німа)", example: "homme", example_uk: "чоловік" },
-        { letter: "I i", name: "і", sound: "як українське «і»", example: "île", example_uk: "острів" },
-        { letter: "J j", name: "жі", sound: "як українське «ж»", example: "jour", example_uk: "день" },
-        { letter: "K k", name: "ка", sound: "як українське «к» (рідко, лише в запозиченнях)", example: "kilo", example_uk: "кілограм" },
-        { letter: "L l", name: "ель", sound: "як українське «л»", example: "livre", example_uk: "книга" },
-        { letter: "M m", name: "ем", sound: "як українське «м»", example: "maison", example_uk: "будинок" },
-        { letter: "N n", name: "ен", sound: "як українське «н»; носовий звук у поєднанні з голосною (an, on, in)", example: "nuit", example_uk: "ніч" },
-        { letter: "O o", name: "о", sound: "як українське «о»", example: "eau", example_uk: "вода" },
-        { letter: "P p", name: "пе", sound: "як українське «п»", example: "pain", example_uk: "хліб" },
-        { letter: "Q q", name: "кю", sound: "як «к» (завжди разом з «u»: qu)", example: "quatre", example_uk: "чотири" },
-        { letter: "R r", name: "ер", sound: "гортанне «р», вимовляється у горлі (не як українське)", example: "rouge", example_uk: "червоний" },
-        { letter: "S s", name: "ес", sound: "як українське «с»; між голосними — як «з»", example: "soleil", example_uk: "сонце" },
-        { letter: "T t", name: "те", sound: "як українське «т»", example: "table", example_uk: "стіл" },
-        { letter: "U u", name: "ю", sound: "заокруглене «і», немає аналога в українській (як нім. ü)", example: "une", example_uk: "одна" },
-        { letter: "V v", name: "ве", sound: "як українське «в»", example: "ville", example_uk: "місто" },
-        { letter: "W w", name: "дубль-ве", sound: "як «в» (лише в запозиченнях)", example: "wagon", example_uk: "вагон" },
-        { letter: "X x", name: "ікс", sound: "як «кс» або «гз»", example: "exemple", example_uk: "приклад" },
-        { letter: "Y y", name: "і грек", sound: "як «і» або як «й» перед голосною", example: "yeux", example_uk: "очі" },
-        { letter: "Z z", name: "зед", sound: "як українське «з»", example: "zéro", example_uk: "нуль" },
-    ];
+   const ALPHABET = [
+    {
+        letter: "A a",
+        name: {
+            uk: "а",
+            en: "ah"
+        },
+        sound: {
+            uk: "Як українське «а».",
+            en: "Like the 'a' in 'father'."
+        },
+        example: "ami",
+        meaning: {
+            uk: "друг",
+            en: "friend"
+        }
+    },
+    {
+        letter: "B b",
+        name: {
+            uk: "бе",
+            en: "bay"
+        },
+        sound: {
+            uk: "Як українське «б».",
+            en: "Like the English 'b' sound."
+        },
+        example: "bonjour",
+        meaning: {
+            uk: "добрий день",
+            en: "hello"
+        }
+    },
+    {
+        letter: "C c",
+        name: {
+            uk: "се",
+            en: "say"
+        },
+        sound: {
+            uk: "Перед a, o, u — як «к». Перед e, i, y — як «с».",
+            en: "Before a, o, u — like 'k'. Before e, i, y — like 's'."
+        },
+        example: "chat",
+        meaning: {
+            uk: "кіт",
+            en: "cat"
+        }
+    },
+    {
+        letter: "D d",
+        name: {
+            uk: "де",
+            en: "day"
+        },
+        sound: {
+            uk: "Як українське «д».",
+            en: "Like the English 'd' sound."
+        },
+        example: "deux",
+        meaning: {
+            uk: "два",
+            en: "two"
+        }
+    },
+    {
+        letter: "E e",
+        name: {
+            uk: "е",
+            en: "euh"
+        },
+        sound: {
+            uk: "Може звучати як слабке «е». É звучить як чітке «е», а è — як відкрите «е».",
+            en: "It can sound like a weak 'uh'. É has a clear 'ay' sound, while è has a more open 'eh' sound."
+        },
+        example: "elle",
+        meaning: {
+            uk: "вона",
+            en: "she"
+        }
+    },
+    {
+        letter: "F f",
+        name: {
+            uk: "еф",
+            en: "eff"
+        },
+        sound: {
+            uk: "Як українське «ф».",
+            en: "Like the English 'f' sound."
+        },
+        example: "femme",
+        meaning: {
+            uk: "жінка",
+            en: "woman"
+        }
+    },
+    {
+        letter: "G g",
+        name: {
+            uk: "же",
+            en: "zhay"
+        },
+        sound: {
+            uk: "Перед a, o, u — твердий звук «ґ». Перед e, i, y — як «ж».",
+            en: "Before a, o, u — a hard 'g' sound. Before e, i, y — like the 's' in 'measure'."
+        },
+        example: "garçon",
+        meaning: {
+            uk: "хлопчик",
+            en: "boy"
+        }
+    },
+    {
+        letter: "H h",
+        name: {
+            uk: "аш",
+            en: "ahsh"
+        },
+        sound: {
+            uk: "У французькій мові зазвичай не вимовляється.",
+            en: "It is normally silent in French."
+        },
+        example: "homme",
+        meaning: {
+            uk: "чоловік",
+            en: "man"
+        }
+    },
+    {
+        letter: "I i",
+        name: {
+            uk: "і",
+            en: "ee"
+        },
+        sound: {
+            uk: "Як українське «і».",
+            en: "Like the 'ee' sound in 'see'."
+        },
+        example: "île",
+        meaning: {
+            uk: "острів",
+            en: "island"
+        }
+    },
+    {
+        letter: "J j",
+        name: {
+            uk: "жі",
+            en: "zhee"
+        },
+        sound: {
+            uk: "Як українське «ж».",
+            en: "Like the 's' in the English word 'measure'."
+        },
+        example: "jour",
+        meaning: {
+            uk: "день",
+            en: "day"
+        }
+    },
+    {
+        letter: "K k",
+        name: {
+            uk: "ка",
+            en: "kah"
+        },
+        sound: {
+            uk: "Як українське «к». Використовується переважно в іншомовних словах.",
+            en: "Like the English 'k' sound. It is mostly used in borrowed words."
+        },
+        example: "kilo",
+        meaning: {
+            uk: "кілограм",
+            en: "kilogram"
+        }
+    },
+    {
+        letter: "L l",
+        name: {
+            uk: "ель",
+            en: "ell"
+        },
+        sound: {
+            uk: "Як українське «л».",
+            en: "Like the English 'l' sound."
+        },
+        example: "livre",
+        meaning: {
+            uk: "книга",
+            en: "book"
+        }
+    },
+    {
+        letter: "M m",
+        name: {
+            uk: "ем",
+            en: "emm"
+        },
+        sound: {
+            uk: "Як українське «м».",
+            en: "Like the English 'm' sound."
+        },
+        example: "maison",
+        meaning: {
+            uk: "будинок",
+            en: "house"
+        }
+    },
+    {
+        letter: "N n",
+        name: {
+            uk: "ен",
+            en: "enn"
+        },
+        sound: {
+            uk: "Як українське «н». У поєднаннях an, en, on, in може створювати носові голосні звуки.",
+            en: "Like the English 'n' sound. In combinations such as an, en, on and in, it can create nasal vowel sounds."
+        },
+        example: "nuit",
+        meaning: {
+            uk: "ніч",
+            en: "night"
+        }
+    },
+    {
+        letter: "O o",
+        name: {
+            uk: "о",
+            en: "oh"
+        },
+        sound: {
+            uk: "Як українське «о», хоча французьке «o» може мати різну вимову залежно від слова.",
+            en: "Similar to the 'o' sound in English, although French 'o' can have different pronunciations depending on the word."
+        },
+        example: "orange",
+        meaning: {
+            uk: "апельсин",
+            en: "orange"
+        }
+    },
+    {
+        letter: "P p",
+        name: {
+            uk: "пе",
+            en: "pay"
+        },
+        sound: {
+            uk: "Як українське «п».",
+            en: "Like the English 'p' sound."
+        },
+        example: "pain",
+        meaning: {
+            uk: "хліб",
+            en: "bread"
+        }
+    },
+    {
+        letter: "Q q",
+        name: {
+            uk: "кю",
+            en: "koo"
+        },
+        sound: {
+            uk: "Майже завжди використовується разом з «u» — qu. Зазвичай звучить як «к».",
+            en: "Almost always appears with 'u' as 'qu'. It usually sounds like 'k'."
+        },
+        example: "quatre",
+        meaning: {
+            uk: "чотири",
+            en: "four"
+        }
+    },
+    {
+        letter: "R r",
+        name: {
+            uk: "ер",
+            en: "air"
+        },
+        sound: {
+            uk: "Гортанне «р», яке вимовляється в задній частині горла.",
+            en: "A French guttural 'r', produced in the back of the throat."
+        },
+        example: "rouge",
+        meaning: {
+            uk: "червоний",
+            en: "red"
+        }
+    },
+    {
+        letter: "S s",
+        name: {
+            uk: "ес",
+            en: "ess"
+        },
+        sound: {
+            uk: "Зазвичай як «с». Між двома голосними часто звучить як «з».",
+            en: "Usually like 's'. Between two vowels, it often sounds like 'z'."
+        },
+        example: "soleil",
+        meaning: {
+            uk: "сонце",
+            en: "sun"
+        }
+    },
+    {
+        letter: "T t",
+        name: {
+            uk: "те",
+            en: "tay"
+        },
+        sound: {
+            uk: "Як українське «т». У кінці слова часто не вимовляється.",
+            en: "Like the English 't' sound. At the end of a word, it is often silent."
+        },
+        example: "table",
+        meaning: {
+            uk: "стіл",
+            en: "table"
+        }
+    },
+    {
+        letter: "U u",
+        name: {
+            uk: "ю",
+            en: "u"
+        },
+        sound: {
+            uk: "Особливий французький звук. Приблизно як «і», але з округленими губами.",
+            en: "A special French sound. It is somewhat like 'ee', but with rounded lips."
+        },
+        example: "une",
+        meaning: {
+            uk: "одна",
+            en: "one"
+        }
+    },
+    {
+        letter: "V v",
+        name: {
+            uk: "ве",
+            en: "vay"
+        },
+        sound: {
+            uk: "Як українське «в».",
+            en: "Like the English 'v' sound."
+        },
+        example: "ville",
+        meaning: {
+            uk: "місто",
+            en: "city"
+        }
+    },
+    {
+        letter: "W w",
+        name: {
+            uk: "дубль-ве",
+            en: "double-vay"
+        },
+        sound: {
+            uk: "Використовується переважно в іншомовних словах. Вимова залежить від слова.",
+            en: "Mostly used in foreign or borrowed words. Its pronunciation depends on the word."
+        },
+        example: "wagon",
+        meaning: {
+            uk: "вагон",
+            en: "wagon"
+        }
+    },
+    {
+        letter: "X x",
+        name: {
+            uk: "ікс",
+            en: "eeks"
+        },
+        sound: {
+            uk: "Може звучати як «кс» або «ґз». У деяких словах може бути німою.",
+            en: "It can sound like 'ks' or 'gz'. In some words, it can be silent."
+        },
+        example: "exemple",
+        meaning: {
+            uk: "приклад",
+            en: "example"
+        }
+    },
+    {
+        letter: "Y y",
+        name: {
+            uk: "і грек",
+            en: "ee grec"
+        },
+        sound: {
+            uk: "Може звучати як «і» або бути частиною звука «й».",
+            en: "It can sound like 'ee' or form part of a 'y' sound."
+        },
+        example: "yeux",
+        meaning: {
+            uk: "очі",
+            en: "eyes"
+        }
+    },
+    {
+        letter: "Z z",
+        name: {
+            uk: "зед",
+            en: "zed"
+        },
+        sound: {
+            uk: "Як українське «з».",
+            en: "Like the English 'z' sound."
+        },
+        example: "zéro",
+        meaning: {
+            uk: "нуль",
+            en: "zero"
+        }
+    }
+];
 
     // =====================================================================
     //  LESSONS — УРОКИ (французька)
