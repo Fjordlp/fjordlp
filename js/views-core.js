@@ -1097,12 +1097,12 @@ function viewTestsHub() {
         </div>
     `);
     const items = [
-        ["test-mc", "🔤", t('test_mc_title'), t('test_mc_desc')],
-        ["test-cloze", "✏️", t('test_cloze_title'), t('test_cloze_desc')],
-        ["test-order", "🧩", t('test_order_title'), t('test_order_desc')],
-        ["test-listen", "🎧", t('test_listen_title'), t('test_listen_desc')],
-        ["test-translate", "🌐", t('test_translate_title'), t('test_translate_desc')],
-        ["sentence-builder", "🧱", t('sb_title'), t('sb_tap_hint')],
+        ["test-mc", t('test_mc_title'), t('test_mc_desc')],
+        ["test-cloze", t('test_cloze_title'), t('test_cloze_desc')],
+        ["test-order", t('test_order_title'), t('test_order_desc')],
+        ["test-listen", t('test_listen_title'), t('test_listen_desc')],
+        ["test-translate", t('test_translate_title'), t('test_translate_desc')],
+        ["sentence-builder", t('sb_title'), t('sb_tap_hint')],
     ];
     const grid = wrap.querySelector('#thub');
     items.forEach(([r, icon, title, desc]) => {
