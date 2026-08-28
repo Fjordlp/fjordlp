@@ -199,7 +199,7 @@ function viewHome() {
         storyState.history.length === 0 ? `
             <div class="card" style="margin-top:16px;border:2px solid var(--teal);">
                 <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-                    <span style="font-size:1.6rem;">🧌</span>
+                    <span style="font-size:1.6rem;"></span>
                     <div style="flex:1;min-width:180px;">
                         <strong>${t('home_story_new_title')}</strong>
                         <p style="color:var(--ink-soft);font-size:.85rem;margin:2px 0 0;">${t('home_story_new_desc')}</p>
@@ -210,7 +210,7 @@ function viewHome() {
         ` : `
             <div class="card" style="margin-top:16px;border:2px solid var(--teal);">
                 <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-                    <span style="font-size:1.6rem;">🧌</span>
+                    <span style="font-size:1.6rem;"></span>
                     <div style="flex:1;min-width:180px;">
                         <strong>${t('home_story_continue_title')}</strong>
                         <p style="color:var(--ink-soft);font-size:.85rem;margin:2px 0 0;">${tf('home_story_continue_desc', {n: storyState.history.length})}</p>
