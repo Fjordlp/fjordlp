@@ -190,8 +190,8 @@ function viewHome() {
         </div>
     `);
 
-    // " Хроніки Тролля" — тизер на головній, той самий принцип, що й
-    // " Складні слова" нижче: нагадує повернутись саме туди, де людина
+    // "🧌 Хроніки Тролля" — тизер на головній, той самий принцип, що й
+    // "🩹 Складні слова" нижче: нагадує повернутись саме туди, де людина
     // зупинилась, замість того, щоб пригода існувала лише як пункт
     // навбару, про який легко забути.
     const storyState = ensureStoryState();
@@ -223,14 +223,14 @@ function viewHome() {
     storyTeaser.querySelector('#homeStoryBtn').onclick = () => navigate('story');
     wrap.appendChild(storyTeaser);
 
-    // " Складні слова" — теж показуємо на головній, якщо такі є, щоб
+    // "🩹 Складні слова" — теж показуємо на головній, якщо такі є, щоб
     // людина не забувала повертатись і закріплювати саме те, що не йде.
     const leechWords = collectLeechWords(STATE.targetLang || 'no');
     if (leechWords.length > 0) {
         const leechTeaser = el(`
             <div class="card" style="margin-top:16px;border:2px solid var(--rose);">
                 <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-                    <span style="font-size:1.6rem;"></span>
+                    <span style="font-size:1.6rem;">🩹</span>
                     <div style="flex:1;min-width:180px;">
                         <strong>${t('leech_deck_label')}</strong>
                         <p style="color:var(--ink-soft);font-size:.85rem;margin:2px 0 0;">${tf('leech_deck_count', {n: leechWords.length})}</p>
@@ -654,7 +654,7 @@ function viewFlashDeckPicker(lang) {
         </div>
     `);
 
-    // " Складні слова" — окрема тренувальна колода зі слів, які
+    // "🩹 Складні слова" — окрема тренувальна колода зі слів, які
     // користувач провалював 4+ рази поспіль (isLeech). Показуємо лише
     // коли такі слова реально є, і незалежно від обраного рівня/теми,
     // бо складне слово могло лишитись ще з A1, поки людина вже на B1.
@@ -766,7 +766,7 @@ function requeueIfMissed(item) {
 function viewFlashSession() {
     if (!SUBSTATE.queue) {
         if (SUBSTATE.leechMode) {
-            // Слова " Складні слова" можуть належати різним рівням —
+            // Слова "🩹 Складні слова" можуть належати різним рівням —
             // тому для кожного слова беремо саме його власний рівень
             // (записаний у collectLeechWords), а не SUBSTATE.level.
             SUBSTATE.queue = shuffle(SUBSTATE.deckWords.map(w => {
@@ -1097,11 +1097,12 @@ function viewTestsHub() {
         </div>
     `);
     const items = [
-        ["test-mc", t('test_mc_title'), t('test_mc_desc')],
-        ["test-cloze", t('test_cloze_title'), t('test_cloze_desc')],
-        ["test-order" , t('test_order_title'), t('test_order_desc')],
-        ["test-listen",  t('test_listen_title'), t('test_listen_desc')],
-        ["test-translate", t('test_translate_title'), t('test_translate_desc')],
+        ["test-mc", "🔤", t('test_mc_title'), t('test_mc_desc')],
+        ["test-cloze", "✏️", t('test_cloze_title'), t('test_cloze_desc')],
+        ["test-order", "🧩", t('test_order_title'), t('test_order_desc')],
+        ["test-listen", "🎧", t('test_listen_title'), t('test_listen_desc')],
+        ["test-translate", "🌐", t('test_translate_title'), t('test_translate_desc')],
+        ["sentence-builder", "🧱", t('sb_title'), t('sb_tap_hint')],
     ];
     const grid = wrap.querySelector('#thub');
     items.forEach(([r, icon, title, desc]) => {
