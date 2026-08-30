@@ -1,9 +1,8 @@
 // =====================================================================
-//  АДМІН-ПАНЕЛЬ (найпростіша версія)
+//  АДМІН-ПАНЕЛЬ (тільки ручне керування)
 // =====================================================================
 
 function viewAdmin() {
-    // Перевіряємо, чи користувач адмін
     if (!STATE || !STATE.admin) {
         return `<div class="view"><div class="empty-state"><h3>⛔ Доступ заборонено</h3><p>Ви не маєте прав адміністратора.</p></div></div>`;
     }
@@ -36,30 +35,6 @@ function viewAdmin() {
                     <div style="font-size:2rem;margin-bottom:8px;">👥</div>
                     <h3>Користувачі</h3>
                     <p style="color:var(--ink-soft);font-size:.85rem;">Список усіх користувачів платформи</p>
-                </div>
-
-                <div class="card admin-card" onclick="navigate('admin-vocab-gen')" style="cursor:pointer;transition:all .2s;">
-                    <div style="font-size:2rem;margin-bottom:8px;">🌐</div>
-                    <h3>Спільні словники</h3>
-                    <p style="color:var(--ink-soft);font-size:.85rem;">Згенерувати й опублікувати словник для будь-якої мови — одразу для всіх користувачів</p>
-                </div>
-
-                <div class="card admin-card" onclick="navigate('admin-grammar-gen')" style="cursor:pointer;transition:all .2s;">
-                    <div style="font-size:2rem;margin-bottom:8px;">📖</div>
-                    <h3>Спільна граматика</h3>
-                    <p style="color:var(--ink-soft);font-size:.85rem;">Згенерувати й опублікувати граматичні правила для будь-якої мови й рівня</p>
-                </div>
-
-                <div class="card admin-card" onclick="navigate('admin-alphabet-gen')" style="cursor:pointer;transition:all .2s;">
-                    <div style="font-size:2rem;margin-bottom:8px;">🔤</div>
-                    <h3>Спільна абетка</h3>
-                    <p style="color:var(--ink-soft);font-size:.85rem;">Згенерувати й опублікувати абетку (літери + вимова + приклади) для будь-якої мови</p>
-                </div>
-
-                <div class="card admin-card" onclick="navigate('admin-books')" style="cursor:pointer;transition:all .2s;">
-                    <div style="font-size:2rem;margin-bottom:8px;">📚</div>
-                    <h3>Книги</h3>
-                    <p style="color:var(--ink-soft);font-size:.85rem;">Додати книгу суспільного надбання для читання (текст вставляється вручну)</p>
                 </div>
 
                 <div class="card admin-card" onclick="navigate('admin-daily-word')" style="cursor:pointer;transition:all .2s;">
@@ -268,8 +243,7 @@ function viewAdminUsers() {
     `;
 }
 
-// Завантажити список користувачів з Firestore. Раніше ця функція взагалі
-// не існувала — сторінка просто назавжди показувала "Завантаження...".
+// ---- Користувачі ----
 async function loadUserList(query) {
     const container = document.getElementById('userList');
     if (!container) return;
@@ -290,13 +264,8 @@ async function loadUserList(query) {
             const name = d.name || doc.id;
             const email = d.email || '';
             if (query && !name.toLowerCase().includes(query) && !email.toLowerCase().includes(query) && !doc.id.toLowerCase().includes(query)) {
-                return; // не збігається з пошуком — пропускаємо
+                return;
             }
-            // xp/level тепер зберігаються ізольовано по мові в
-            // langData[targetLang] — читаємо саме той запис, що відповідає
-            // мові, яку ця людина зараз вивчає. Старі, ще не мігровані
-            // документи (без langData) підстраховані фолбеком на плоскі
-            // d.xp/d.level.
             const uLang = d.targetLang || 'no';
             const uLD = (d.langData && d.langData[uLang]) || {};
             rows.push({ id: doc.id, name, email, level: uLD.level || d.level || '—', xp: uLD.xp || d.xp || 0, admin: !!d.admin, targetLang: uLang });
@@ -308,7 +277,7 @@ async function loadUserList(query) {
         let html = `<p style="color:var(--ink-soft);font-size:.8rem;margin-bottom:8px;">Знайдено: ${rows.length}</p>`;
         html += '<table class="vocab-table"><thead><tr><th>Ім\'я</th><th>Рівень</th><th>Мова</th><th>XP</th><th>Адмін</th><th>Дія</th></tr></thead><tbody>';
         rows.forEach(u => {
-            const lang = (typeof getLanguage === 'function') ? getLanguage(u.targetLang) : null;
+            const lang = getLanguage(u.targetLang);
             html += `<tr>
                 <td><strong>${u.name}</strong>${u.email ? `<br><span style="font-size:.72rem;color:var(--ink-soft);">${u.email}</span>` : ''}</td>
                 <td><span class="tag level-${u.level}">${u.level}</span></td>
@@ -326,11 +295,9 @@ async function loadUserList(query) {
     }
 }
 
-// Прив'язка пошуку користувачів — так само, як initAdminWords, викликається
-// одразу після реального рендеру сторінки (не через DOMContentLoaded).
 function initAdminUsers() {
     const searchInput = document.getElementById('userSearch');
-    if (!searchInput) return; // не та сторінка
+    if (!searchInput) return;
     loadUserList();
     let debounceTimer;
     searchInput.addEventListener('input', function() {
@@ -340,7 +307,6 @@ function initAdminUsers() {
     });
 }
 
-// Надати/забрати права адміністратора іншому користувачу.
 window.adminToggleUserAdmin = async function(uid, makeAdmin) {
     if (!firebaseReady || !firebaseDb) return;
     try {
@@ -354,10 +320,9 @@ window.adminToggleUserAdmin = async function(uid, makeAdmin) {
 };
 
 // =====================================================================
-//  АДМІН-ФУНКЦІЇ (для onclick)
+//  АДМІН-ФУНКЦІЇ
 // =====================================================================
 
-// Додати слово
 window.adminAddWord = async function() {
     const no = document.getElementById('wordNo').value.trim();
     const uk = document.getElementById('wordUk').value.trim();
@@ -388,7 +353,6 @@ window.adminAddWord = async function() {
     }
 };
 
-// Створити турнір
 window.adminCreateTournament = async function() {
     const name = document.getElementById('tournamentName').value.trim();
     const desc = document.getElementById('tournamentDesc').value.trim();
@@ -396,12 +360,6 @@ window.adminCreateTournament = async function() {
     const end = document.getElementById('tournamentEnd').value;
     const numQuestions = parseInt(document.getElementById('tournamentQuestions').value) || 20;
     const level = document.getElementById('tournamentLevel').value;
-    // Раніше мова турніру не обиралась явно — vocabForLevel(level) без
-    // другого аргументу мовчки брав STATE.targetLang АДМІНА на момент
-    // створення (яку мову він сам зараз вчить), а не свідомо обрану мову
-    // турніру. Хтось, хто вчить іспанську, міг побачити в списку турнір,
-    // складений з норвезьких слів — просто тому, що адмін у той момент
-    // сам вчив норвезьку.
     const lang = document.getElementById('tournamentLang').value;
 
     if (!name) {
@@ -452,7 +410,6 @@ window.adminCreateTournament = async function() {
     }
 };
 
-// Створити завдання дня
 window.adminCreateDaily = async function() {
     const lang = document.getElementById('dailyLang').value;
     const question = document.getElementById('dailyQuestion').value.trim();
@@ -472,10 +429,6 @@ window.adminCreateDaily = async function() {
     }
     
     const today = new Date().toISOString().slice(0, 10);
-    // Раніше документ мав id === today, спільний для АБСОЛЮТНО ВСІХ мов —
-    // людина, що вчить англійську, бачила те саме (найчастіше норвезьке)
-    // завдання, що й той, хто вчить норвезьку. Тепер id включає мову, і
-    // кожна мова має власне завдання дня.
     const docId = `${lang}_${today}`;
     
     try {
@@ -506,16 +459,11 @@ function errorAccessDenied() {
     return `<div class="view"><div class="empty-state"><h3>⛔ Доступ заборонено</h3><p>Ви не маєте прав адміністратора.</p></div></div>`;
 }
 
-// Завантажити список слів — тепер шукає і серед 731 вбудованого норвезького
-// слова (VOCAB з data.js), і серед слів, які адмін додав вручну через
-// Firestore. Раніше перевірялась ТІЛЬКИ колекція Firestore 'words', тому
-// жодне з вбудованих слів узагалі не можна було знайти чи побачити тут.
 async function loadWordList(query) {
     const container = document.getElementById('wordList');
     if (!container) return;
     query = (query || '').trim().toLowerCase();
     try {
-        // 1) Вбудовані слова з data.js (усі рівні одразу)
         const builtin = [];
         if (typeof VOCAB === 'object' && VOCAB) {
             Object.keys(VOCAB).forEach(level => {
@@ -526,7 +474,6 @@ async function loadWordList(query) {
                 });
             });
         }
-        // 2) Слова, додані адміном через Firestore
         let adminWords = [];
         if (firebaseReady && firebaseDb) {
             const snap = await firebaseDb.collection('words').limit(200).get();
@@ -538,7 +485,7 @@ async function loadWordList(query) {
             });
         }
 
-        const all = [...adminWords, ...builtin].slice(0, 300); // адмінські — першими (їх можна редагувати/видаляти)
+        const all = [...adminWords, ...builtin].slice(0, 300);
         if (!all.length) {
             container.innerHTML = '<p style="color:var(--ink-soft);">' + (query ? 'Нічого не знайдено.' : 'Немає слів у словнику.') + '</p>';
             return;
@@ -562,7 +509,6 @@ async function loadWordList(query) {
     }
 }
 
-// Видалити слово
 window.adminDeleteWord = async function(docId) {
     if (!confirm('Ви впевнені?')) return;
     try {
@@ -575,11 +521,6 @@ window.adminDeleteWord = async function(docId) {
     }
 };
 
-// Завантажити турніри
-// Кількість учасників рахуємо з підколекції tournaments/{id}/participants —
-// саме туди пишуться реальні результати гравців. Поле participants у
-// самому документі турніру ніколи не заповнюється, тож рахувати з нього
-// людей не можна.
 async function loadTournamentList() {
     const container = document.getElementById('tournamentList');
     if (!container) return;
@@ -633,17 +574,14 @@ async function loadTournamentList() {
     } catch (e) {
         console.error('Помилка завантаження турнірів:', e);
         container.innerHTML = '<p style="color:var(--rose);">Помилка завантаження.</p>';
-
     }
 }
 
-// Показати/сховати список учасників конкретного турніру
 window.toggleTournamentParticipants = function(docId) {
     const box = document.getElementById(`tournParticipants-${docId}`);
     if (box) box.style.display = box.style.display === 'none' ? 'block' : 'none';
 };
 
-// Видалити турнір
 window.adminDeleteTournament = async function(docId) {
     if (!confirm('Ви впевнені?')) return;
     try {
@@ -656,7 +594,6 @@ window.adminDeleteTournament = async function(docId) {
     }
 };
 
-// Завантажити завдання дня
 async function loadDailyList() {
     const container = document.getElementById('dailyList');
     if (!container) return;
@@ -690,7 +627,6 @@ async function loadDailyList() {
     }
 }
 
-// Видалити завдання дня
 window.adminDeleteDaily = async function(docId) {
     if (!confirm('Ви впевнені?')) return;
     try {
@@ -703,20 +639,10 @@ window.adminDeleteDaily = async function(docId) {
     }
 };
 
-// =====================================================================
-//  ПОШУК СЛІВ
-// =====================================================================
-// Раніше це було прив'язано через document.addEventListener('DOMContentLoaded', ...),
-// яка спрацьовує ОДИН РАЗ при першому завантаженні сторінки — а оскільки
-// сторінка "Слова" рендериться пізніше через navigate() (SPA-навігація, без
-// повного перезавантаження), DOMContentLoaded вже давно відбувся і ніколи
-// не спрацює повторно. Тому пошук у полі #wordSearch просто ніколи не
-// прив'язувався. initAdminWords() тепер викликається одразу після того, як
-// розмітка сторінки реально в DOM (див. router.js).
 function initAdminWords() {
     const searchInput = document.getElementById('wordSearch');
-    if (!searchInput) return; // не та сторінка
-    loadWordList(); // початкове завантаження (усі слова)
+    if (!searchInput) return;
+    loadWordList();
     let debounceTimer;
     searchInput.addEventListener('input', function() {
         clearTimeout(debounceTimer);
@@ -726,838 +652,8 @@ function initAdminWords() {
 }
 
 // =====================================================================
-//  СТОРІНКА: Спільні словники (для мов, окрім норвезької)
-// =====================================================================
-// На відміну від "Слова" вище (яка керує лише вбудованим норвезьким
-// словником по одному слову), ця сторінка генерує ВЕЛИКИЙ словник одразу
-// для будь-якої іншої мови+рівня через AI, і публікує його в спільну
-// колекцію Firestore (sharedVocab) — після цього словник одразу бачать
-// УСІ користувачі сайту, без жодної дії з їхнього боку.
-function viewAdminSharedVocab() {
-    if (!STATE || !STATE.admin) return errorAccessDenied();
-
-    const preset = (typeof SUBSTATE !== 'undefined' && SUBSTATE) || {};
-    const allLangs = LANGUAGES; // тепер включно з норвезькою — можна доповнювати вбудований словник
-
-    return `
-        <div class="view">
-            <h1>🌐 Спільні словники</h1>
-            <p style="color:var(--ink-soft);margin-bottom:16px;">
-                Згенеруйте словник для мови й рівня, перегляньте результат і опублікуйте —
-                після цього його одразу побачать усі користувачі сайту, які вчать цю мову.
-                Для норвезької це ДОДАЄ слова поверх уже наявного вбудованого словника
-                (не замінює його) — зручно, щоб розширити конкретну тему чи рівень.
-            </p>
-
-            <div class="card" style="margin-bottom:16px;">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                    <div class="field">
-                        <label>Мова</label>
-                        <select id="avLang">
-                            ${allLangs.map(l => `<option value="${l.code}" ${preset.presetLang===l.code?'selected':''}>${l.flag} ${l.name.uk}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label>Рівень</label>
-                        <select id="avLevel">
-                            ${['A1','A2','B1','B2','C1','C2'].map(l => `<option value="${l}" ${preset.presetLevel===l?'selected':''}>${l}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label>Кількість пакетів (~60 слів кожен)</label>
-                        <select id="avBatches">
-                            <option value="3">3 (~180 слів)</option>
-                            <option value="5" selected>5 (~300 слів)</option>
-                            <option value="8">8 (~480 слів)</option>
-                        </select>
-                    </div>
-                    <div class="field" style="display:flex;align-items:flex-end;">
-                        <button class="btn btn-primary btn-block" id="avGenerateBtn">✨ Згенерувати</button>
-                    </div>
-                </div>
-                <p id="avStatus" style="color:var(--ink-soft);font-size:.85rem;margin-top:10px;"></p>
-            </div>
-
-            <div class="card" id="avExistingCard" style="margin-bottom:16px;">
-                <h3>📦 Уже опубліковані словники</h3>
-                <div id="avExistingList" style="color:var(--ink-soft);font-size:.85rem;">Завантаження…</div>
-            </div>
-
-            <div class="card" id="avPreviewCard" style="display:none;">
-                <h3>👀 Прев'ю згенерованого набору (<span id="avPreviewCount">0</span> слів)</h3>
-                <div id="avPreviewList" style="max-height:340px;overflow-y:auto;margin:12px 0;"></div>
-                <button class="btn btn-primary" id="avPublishBtn">📤 Опублікувати для всіх користувачів</button>
-                <button class="btn btn-ghost" id="avDiscardBtn">🗑️ Відхилити</button>
-            </div>
-
-            <button class="btn btn-ghost btn-sm" onclick="navigate('admin')" style="margin-top:12px;">← Назад до панелі</button>
-        </div>
-    `;
-}
-
-// Ініціалізація сторінки — прив'язка обробників і завантаження списку вже
-// опублікованих словників. Викликається після рендеру (див. паттерн нижче,
-// такий самий, як initAdminWords тощо).
-function initAdminSharedVocab() {
-    const genBtn = document.getElementById('avGenerateBtn');
-    const statusEl = document.getElementById('avStatus');
-    const previewCard = document.getElementById('avPreviewCard');
-    const previewList = document.getElementById('avPreviewList');
-    const previewCount = document.getElementById('avPreviewCount');
-    const existingList = document.getElementById('avExistingList');
-    if (!genBtn) return; // не та сторінка
-
-    let pendingWords = null;
-    let pendingLang = null;
-    let pendingLevel = null;
-
-    async function refreshExisting() {
-        if (!firebaseReady || !firebaseDb) {
-            existingList.textContent = 'Firestore недоступний.';
-            return;
-        }
-        try {
-            const snap = await firebaseDb.collection('sharedVocab').get();
-            if (snap.empty) {
-                existingList.textContent = 'Ще нічого не опубліковано.';
-                return;
-            }
-            const rows = [];
-            snap.forEach(doc => {
-                const d = doc.data();
-                const lang = getLanguage(d.lang);
-                rows.push(`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line-soft);">
-                    <span>${lang.flag} ${lang.name.uk} — <span class="tag level-${d.level}">${d.level}</span></span>
-                    <span>${d.count || (d.words||[]).length} слів</span>
-                </div>`);
-            });
-            existingList.innerHTML = rows.join('');
-        } catch (e) {
-            console.error('[Адмін] Помилка завантаження списку словників:', e);
-            existingList.textContent = 'Помилка завантаження.';
-        }
-    }
-    refreshExisting();
-
-    genBtn.onclick = async () => {
-        const lang = document.getElementById('avLang').value;
-        const level = document.getElementById('avLevel').value;
-        const batches = parseInt(document.getElementById('avBatches').value, 10);
-        genBtn.disabled = true;
-        const original = genBtn.textContent;
-        try {
-            const words = await generateBulkVocab(lang, level, batches, (done, total, count) => {
-                statusEl.textContent = `Генерую… пакет ${done}/${total}, слів зібрано: ${count}`;
-            });
-            pendingWords = words;
-            pendingLang = lang;
-            pendingLevel = level;
-            previewCount.textContent = words.length;
-            previewList.innerHTML = words.map(w => `
-                <div style="padding:6px 0;border-bottom:1px solid var(--line-soft);font-size:.85rem;">
-                    <strong>${w.no}</strong> — ${w.uk}${w.en ? ` · en: ${w.en}` : ''}${w.ru ? ` · ru: ${w.ru}` : ''} <span style="color:var(--ink-soft);">(${w.t || ''})</span>
-                </div>
-            `).join('');
-            previewCard.style.display = 'block';
-            statusEl.textContent = `Готово: ${words.length} слів. Перевірте прев'ю нижче й опублікуйте.`;
-        } catch (e) {
-            console.error('[Адмін] Помилка генерації словника:', e);
-            // Раніше показувався лише загальний текст без причини — не було
-            // видно, чи це ліміт запитів (429), заблокований origin (403),
-            // мережева помилка, чи AI повернув не-JSON. Тепер показуємо код і
-            // деталь помилки, щоб можна було одразу зрозуміти причину.
-            let reason = e && e.message || 'невідома помилка';
-            if (e && e.code === 'PROXY_ERROR') {
-                reason = `код ${e.status}` + (e.detail ? `: ${String(e.detail).slice(0, 200)}` : '');
-                if (e.status === 429) reason += ' (забагато запитів підряд — зачекайте хвилину й спробуйте знову)';
-                if (e.status === 403) reason += ' (Worker не дозволяє цей сайт як джерело запиту — перевірте ALLOWED_ORIGINS)';
-            } else if (e && e.code === 'NETWORK_ERROR') {
-                reason = 'не вдалось з'+"'"+'єднатися з AI-проксі (мережа/CORS/URL Worker'+"'"+'а)';
-            } else if (e && e.code === 'NOT_CONFIGURED') {
-                reason = 'адреса AI-проксі (AI_PROXY_URL) не налаштована на сайті';
-            }
-            statusEl.textContent = `⚠️ Помилка генерації: ${reason}`;
-        } finally {
-            genBtn.disabled = false;
-            genBtn.textContent = original;
-        }
-    };
-
-    const publishBtn = document.getElementById('avPublishBtn');
-    if (publishBtn) publishBtn.onclick = async () => {
-        if (!pendingWords || !pendingWords.length) return;
-        publishBtn.disabled = true;
-        try {
-            await saveSharedVocab(pendingLang, pendingLevel, pendingWords);
-            toast(`✅ Опубліковано ${pendingWords.length} слів для ${getLanguage(pendingLang).name.uk} (${pendingLevel})`);
-            previewCard.style.display = 'none';
-            pendingWords = null;
-            refreshExisting();
-        } catch (e) {
-            console.error('[Адмін] Помилка публікації:', e);
-            toast('⚠️ Не вдалося опублікувати. Перевірте доступ до Firestore.');
-        } finally {
-            publishBtn.disabled = false;
-        }
-    };
-
-    const discardBtn = document.getElementById('avDiscardBtn');
-    if (discardBtn) discardBtn.onclick = () => {
-        pendingWords = null;
-        previewCard.style.display = 'none';
-    };
-}
-
-// =====================================================================
-//  СТОРІНКА: Спільна граматика (адмін генерує й публікує для всіх)
-// =====================================================================
-function viewAdminSharedGrammar() {
-    if (!STATE || !STATE.admin) return errorAccessDenied();
-
-    const nonNorwegian = LANGUAGES.filter(l => l.code !== 'no');
-
-    return `
-        <div class="view">
-            <h1>📖 Спільна граматика</h1>
-            <p style="color:var(--ink-soft);margin-bottom:16px;">
-                Згенеруйте граматичні правила для мови й рівня, перегляньте результат і
-                опублікуйте — після цього їх одразу побачать усі користувачі, які вчать цю
-                мову, і у вкладці "Граматика", і серед питань тесту "Multiple Choice".
-                Норвезька тут не потрібна — в неї вже є вбудований набір із 27 правил.
-            </p>
-
-            <div class="card" style="margin-bottom:16px;">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                    <div class="field">
-                        <label>Мова</label>
-                        <select id="agLang">
-                            ${nonNorwegian.map(l => `<option value="${l.code}">${l.flag} ${l.name.uk}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label>Рівень</label>
-                        <select id="agLevel">
-                            ${['A1','A2','B1','B2','C1','C2'].map(l => `<option value="${l}">${l}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label>Кількість пакетів (~4 правила кожен)</label>
-                        <select id="agBatches">
-                            <option value="2" selected>2 (~8 правил)</option>
-                            <option value="4">4 (~16 правил)</option>
-                            <option value="6">6 (~24 правила)</option>
-                        </select>
-                    </div>
-                    <div class="field" style="display:flex;align-items:flex-end;">
-                        <button class="btn btn-primary btn-block" id="agGenerateBtn">✨ Згенерувати</button>
-                    </div>
-                </div>
-                <p id="agStatus" style="color:var(--ink-soft);font-size:.85rem;margin-top:10px;"></p>
-            </div>
-
-            <div class="card" id="agExistingCard" style="margin-bottom:16px;">
-                <h3>📦 Уже опубліковано</h3>
-                <div id="agExistingList" style="color:var(--ink-soft);font-size:.85rem;">Завантаження…</div>
-            </div>
-
-            <div class="card" id="agPreviewCard" style="display:none;">
-                <h3>👀 Прев'ю (<span id="agPreviewCount">0</span> правил)</h3>
-                <div id="agPreviewList" style="max-height:340px;overflow-y:auto;margin:12px 0;"></div>
-                <button class="btn btn-primary" id="agPublishBtn">📤 Опублікувати для всіх користувачів</button>
-                <button class="btn btn-ghost" id="agDiscardBtn">🗑️ Відхилити</button>
-            </div>
-
-            <button class="btn btn-ghost btn-sm" onclick="navigate('admin')" style="margin-top:12px;">← Назад до панелі</button>
-        </div>
-    `;
-}
-
-function initAdminSharedGrammar() {
-    const genBtn = document.getElementById('agGenerateBtn');
-    const statusEl = document.getElementById('agStatus');
-    const previewCard = document.getElementById('agPreviewCard');
-    const previewList = document.getElementById('agPreviewList');
-    const previewCount = document.getElementById('agPreviewCount');
-    const existingList = document.getElementById('agExistingList');
-    if (!genBtn) return; // не та сторінка
-
-    let pendingRules = null;
-    let pendingLang = null;
-    let pendingLevel = null;
-
-    async function refreshExisting() {
-        if (!firebaseReady || !firebaseDb) {
-            existingList.textContent = 'Firestore недоступний.';
-            return;
-        }
-        try {
-            const snap = await firebaseDb.collection('sharedGrammar').get();
-            if (snap.empty) {
-                existingList.textContent = 'Ще нічого не опубліковано.';
-                return;
-            }
-            const rows = [];
-            snap.forEach(doc => {
-                const d = doc.data();
-                const lang = getLanguage(d.lang);
-                rows.push(`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line-soft);">
-                    <span>${lang.flag} ${lang.name.uk} — <span class="tag level-${d.level}">${d.level}</span></span>
-                    <span>${d.count || (d.rules||[]).length} правил</span>
-                </div>`);
-            });
-            existingList.innerHTML = rows.join('');
-        } catch (e) {
-            console.error('[Адмін] Помилка завантаження списку граматики:', e);
-            existingList.textContent = 'Помилка завантаження.';
-        }
-    }
-    refreshExisting();
-
-    genBtn.onclick = async () => {
-        const lang = document.getElementById('agLang').value;
-        const level = document.getElementById('agLevel').value;
-        const batches = parseInt(document.getElementById('agBatches').value, 10);
-        genBtn.disabled = true;
-        const original = genBtn.textContent;
-        try {
-            const rules = await generateBulkGrammar(lang, level, batches, (done, total, count) => {
-                statusEl.textContent = `Генерую… пакет ${done}/${total}, правил зібрано: ${count}`;
-            });
-            pendingRules = rules;
-            pendingLang = lang;
-            pendingLevel = level;
-            previewCount.textContent = rules.length;
-            previewList.innerHTML = rules.map(g => `
-                <div style="padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:.85rem;">
-                    <strong>${g.title}</strong>
-                    <div style="color:var(--ink-soft);">${g.exp}</div>
-                </div>
-            `).join('');
-            previewCard.style.display = 'block';
-            statusEl.textContent = `Готово: ${rules.length} правил. Перевірте прев'ю нижче й опублікуйте.`;
-        } catch (e) {
-            console.error('[Адмін] Помилка генерації граматики:', e);
-            // Той самий діагностичний фікс, що й для генерації словника —
-            // конкретна причина (rate-limit, CORS, не налаштовано) замість
-            // загального "спробуйте ще раз".
-            let reason = e && e.message || 'невідома помилка';
-            if (e && e.code === 'PROXY_ERROR') {
-                reason = `код ${e.status}` + (e.detail ? `: ${String(e.detail).slice(0, 200)}` : '');
-                if (e.status === 429) reason += ' (забагато запитів підряд — зачекайте хвилину й спробуйте знову)';
-                if (e.status === 403) reason += ' (Worker не дозволяє цей сайт як джерело запиту — перевірте ALLOWED_ORIGINS)';
-            } else if (e && e.code === 'NETWORK_ERROR') {
-                reason = 'не вдалось з'+"'"+'єднатися з AI-проксі (мережа/CORS/URL Worker'+"'"+'а)';
-            } else if (e && e.code === 'NOT_CONFIGURED') {
-                reason = 'адреса AI-проксі (AI_PROXY_URL) не налаштована на сайті';
-            }
-            statusEl.textContent = `⚠️ Помилка генерації: ${reason}`;
-        } finally {
-            genBtn.disabled = false;
-            genBtn.textContent = original;
-        }
-    };
-
-    const publishBtn = document.getElementById('agPublishBtn');
-    if (publishBtn) publishBtn.onclick = async () => {
-        if (!pendingRules || !pendingRules.length) return;
-        publishBtn.disabled = true;
-        try {
-            await saveSharedGrammar(pendingLang, pendingLevel, pendingRules);
-            toast(`✅ Опубліковано ${pendingRules.length} правил для ${getLanguage(pendingLang).name.uk} (${pendingLevel})`);
-            previewCard.style.display = 'none';
-            pendingRules = null;
-            refreshExisting();
-        } catch (e) {
-            console.error('[Адмін] Помилка публікації:', e);
-            toast('⚠️ Не вдалося опублікувати. Перевірте доступ до Firestore.');
-        } finally {
-            publishBtn.disabled = false;
-        }
-    };
-
-    const discardBtn = document.getElementById('agDiscardBtn');
-    if (discardBtn) discardBtn.onclick = () => {
-        pendingRules = null;
-        previewCard.style.display = 'none';
-    };
-}
-
-// =====================================================================
-//  СТОРІНКА: Спільна абетка (адмін генерує й публікує через AI, одна
-//  абетка на мову — на відміну від граматики/словника, тут нема поділу
-//  по рівнях)
-// =====================================================================
-function viewAdminSharedAlphabet() {
-    if (!STATE || !STATE.admin) return errorAccessDenied();
-
-    const nonNorwegian = LANGUAGES.filter(l => l.code !== 'no');
-
-    return `
-        <div class="view">
-            <h1>🔤 Спільна абетка</h1>
-            <p style="color:var(--ink-soft);margin-bottom:16px;">
-                Згенеруйте абетку для мови, перегляньте результат і опублікуйте — після
-                цього її одразу побачать усі користувачі, які вчать цю мову, у розділі
-                "Основи". На відміну від граматики й словника, тут нема поділу по рівнях —
-                одна абетка на мову.
-            </p>
-
-            <div class="card" style="margin-bottom:16px;">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                    <div class="field">
-                        <label>Мова</label>
-                        <select id="aaLang">
-                            ${nonNorwegian.map(l => `<option value="${l.code}">${l.flag} ${l.name.uk}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="field" style="display:flex;align-items:flex-end;">
-                        <button class="btn btn-primary btn-block" id="aaGenerateBtn">✨ Згенерувати</button>
-                    </div>
-                </div>
-                <p id="aaStatus" style="color:var(--ink-soft);font-size:.85rem;margin-top:10px;"></p>
-            </div>
-
-            <div class="card" id="aaExistingCard" style="margin-bottom:16px;">
-                <h3>📚 Уже опубліковано</h3>
-                <div id="aaExistingList" style="color:var(--ink-soft);font-size:.85rem;">Завантаження…</div>
-            </div>
-
-            <div class="card" id="aaPreviewCard" style="display:none;">
-                <h3>👀 Прев'ю (<span id="aaPreviewCount">0</span> літер)</h3>
-                <div id="aaPreviewList" style="max-height:340px;overflow-y:auto;margin:12px 0;"></div>
-                <button class="btn btn-primary" id="aaPublishBtn">📤 Опублікувати для всіх користувачів</button>
-                <button class="btn btn-ghost" id="aaDiscardBtn">🗑️ Відхилити</button>
-            </div>
-
-            <button class="btn btn-ghost btn-sm" onclick="navigate('admin')" style="margin-top:12px;">← Назад до панелі</button>
-        </div>
-    `;
-}
-
-function initAdminSharedAlphabet() {
-    const genBtn = document.getElementById('aaGenerateBtn');
-    const statusEl = document.getElementById('aaStatus');
-    const previewCard = document.getElementById('aaPreviewCard');
-    const previewList = document.getElementById('aaPreviewList');
-    const previewCount = document.getElementById('aaPreviewCount');
-    const existingList = document.getElementById('aaExistingList');
-    if (!genBtn) return; // не та сторінка
-
-    let pendingLetters = null;
-    let pendingLang = null;
-
-    async function refreshExisting() {
-        if (!firebaseReady || !firebaseDb) {
-            existingList.textContent = 'Firestore недоступний.';
-            return;
-        }
-        try {
-            const snap = await firebaseDb.collection('sharedAlphabet').get();
-            if (snap.empty) {
-                existingList.textContent = 'Ще нічого не опубліковано.';
-                return;
-            }
-            const rows = [];
-            snap.forEach(doc => {
-                const d = doc.data();
-                const lang = getLanguage(d.lang);
-                rows.push(`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line-soft);">
-                    <span>${lang.flag} ${lang.name.uk}</span>
-                    <span>${d.count || (d.letters||[]).length} літер</span>
-                </div>`);
-            });
-            existingList.innerHTML = rows.join('');
-        } catch (e) {
-            console.error('[Адмін] Помилка завантаження списку абеток:', e);
-            existingList.textContent = 'Помилка завантаження.';
-        }
-    }
-    refreshExisting();
-
-    genBtn.onclick = async () => {
-        const lang = document.getElementById('aaLang').value;
-        genBtn.disabled = true;
-        const original = genBtn.textContent;
-        statusEl.textContent = 'Генерую абетку…';
-        try {
-            const letters = await generateAlphabetWithAI(lang);
-            if (!Array.isArray(letters) || !letters.length) {
-                throw new Error('AI повернула порожній або некоректний результат');
-            }
-            pendingLetters = letters;
-            pendingLang = lang;
-            previewCount.textContent = letters.length;
-            previewList.innerHTML = letters.map(l => `
-                <div style="padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:.85rem;">
-                    <strong>${escHtml(l.letter)}</strong> — ${escHtml(l.name)}
-                    <div style="color:var(--ink-soft);">${escHtml(l.sound)}</div>
-                </div>
-            `).join('');
-            previewCard.style.display = 'block';
-            statusEl.textContent = `Готово: ${letters.length} літер. Перевірте прев'ю нижче й опублікуйте.`;
-        } catch (e) {
-            console.error('[Адмін] Помилка генерації абетки:', e);
-            let reason = e && e.message || 'невідома помилка';
-            if (e && e.code === 'PROXY_ERROR') {
-                reason = `код ${e.status}` + (e.detail ? `: ${String(e.detail).slice(0, 200)}` : '');
-                if (e.status === 429) reason += ' (забагато запитів підряд — зачекайте хвилину й спробуйте знову)';
-                if (e.status === 403) reason += ' (Worker не дозволяє цей сайт як джерело запиту — перевірте ALLOWED_ORIGINS)';
-            } else if (e && e.code === 'NETWORK_ERROR') {
-                reason = 'не вдалось з\'єднатися з AI-проксі (мережа/CORS/URL Worker\'а)';
-            } else if (e && e.code === 'NOT_CONFIGURED') {
-                reason = 'адреса AI-проксі (AI_PROXY_URL) не налаштована на сайті';
-            }
-            statusEl.textContent = `⚠️ Помилка генерації: ${reason}`;
-        } finally {
-            genBtn.disabled = false;
-            genBtn.textContent = original;
-        }
-    };
-
-    const publishBtn = document.getElementById('aaPublishBtn');
-    if (publishBtn) publishBtn.onclick = async () => {
-        if (!pendingLetters || !pendingLetters.length) return;
-        publishBtn.disabled = true;
-        try {
-            await saveSharedAlphabet(pendingLang, pendingLetters);
-            toast(`✅ Опубліковано абетку (${pendingLetters.length} літер) для ${getLanguage(pendingLang).name.uk}`);
-            previewCard.style.display = 'none';
-            pendingLetters = null;
-            refreshExisting();
-        } catch (e) {
-            console.error('[Адмін] Помилка публікації абетки:', e);
-            toast('⚠️ Не вдалося опублікувати. Перевірте доступ до Firestore.');
-        } finally {
-            publishBtn.disabled = false;
-        }
-    };
-
-    const discardBtn = document.getElementById('aaDiscardBtn');
-    if (discardBtn) discardBtn.onclick = () => {
-        pendingLetters = null;
-        previewCard.style.display = 'none';
-    };
-}
-
-// =====================================================================
-//  СТОРІНКА: Книги (адмін вручну вставляє текст суспільного надбання)
-// =====================================================================
-// НАГАДУВАННЯ ПРО АВТОРСЬКЕ ПРАВО: на відміну від словника й граматики,
-// текст книги AI НЕ генерує — його вставляє сюди сам адмін. Публікуй лише
-// тексти, які точно є суспільним надбанням (автор помер >70 років тому —
-// залежно від юрисдикції; Project Gutenberg, nb.no/bokhylla з позначкою
-// вільного доступу тощо) або на які в тебе є права. AI тут лише допомагає
-// з двома речами ПІСЛЯ того, як текст уже вставлено: переклад слів по
-// кліку під час читання і завдання на розуміння прочитаного.
-let _abEditingBookId = null;
-
-function viewAdminBooks() {
-    if (!STATE || !STATE.admin) return errorAccessDenied();
-    const nonNorwegian = LANGUAGES; // книги можна додавати й норвезькою (це не GRAMMAR-конфлікт, окрема колекція)
-
-    return `
-        <div class="view">
-            <h1>📚 Книги</h1>
-            <p style="color:var(--ink-soft);margin-bottom:16px;">
-                Встав текст книги суспільного надбання по розділах. Для кожного розділу можна
-                одразу згенерувати завдання на розуміння прочитаного (AI спирається САМЕ на цей
-                текст, а не вигадує від себе).
-            </p>
-
-            <div class="card" style="margin-bottom:16px;">
-                <h3 id="abFormTitle" style="margin-top:0;">➕ Нова книга</h3>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                    <div class="field">
-                        <label>Мова</label>
-                        <select id="abLang">
-                            ${nonNorwegian.map(l => `<option value="${l.code}">${l.flag} ${l.name.uk}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label>Рівень</label>
-                        <select id="abLevel">
-                            ${['A1','A2','B1','B2','C1','C2'].map(l => `<option value="${l}">${l}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label>Тема/жанр</label>
-                        <select id="abGenre">
-                            ${BOOK_GENRES.map(g => `<option value="${g.code}">${g.label}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label>Назва книги</label>
-                        <input type="text" id="abTitle" placeholder="напр. Peter Pan">
-                    </div>
-                    <div class="field">
-                        <label>Автор</label>
-                        <input type="text" id="abAuthor" placeholder="напр. J. M. Barrie">
-                    </div>
-                </div>
-                <div class="field" style="margin-top:10px;">
-                    <label>Джерело / підтвердження суспільного надбання</label>
-                    <input type="text" id="abSource" placeholder="напр. Project Gutenberg, gutenberg.org/ebooks/16">
-                </div>
-                <div class="field" style="margin-top:10px;">
-                    <label>Обкладинка (посилання на зображення)</label>
-                    <input type="text" id="abCover" placeholder="https://…jpg — необов'язково">
-                </div>
-                <div class="field" style="margin-top:10px;">
-                    <label>Опис книги</label>
-                    <textarea id="abDescription" placeholder="Коротко про що книга, для бібліотеки й сторінки читання" style="width:100%;min-height:70px;font-family:inherit;font-size:.9rem;padding:8px;border:1px solid var(--line);border-radius:8px;resize:vertical;"></textarea>
-                </div>
-
-                <h4 style="margin:18px 0 8px;">Розділи</h4>
-                <p style="color:var(--ink-soft);font-size:.8rem;margin:0 0 10px;">
-                    💡 Щоб вставити ілюстрацію прямо в текст розділу, напиши в окремому абзаці
-                    <code>[img: посилання_на_картинку]</code> або з підписом —
-                    <code>[img: посилання | підпис]</code>.
-                </p>
-                <div id="abChapters"></div>
-                <button class="btn btn-ghost btn-sm" id="abAddChapterBtn">+ Додати розділ</button>
-
-                <div style="display:flex;gap:10px;margin-top:18px;">
-                    <button class="btn btn-primary" id="abPublishBtn">📤 Опублікувати книгу</button>
-                    <button class="btn btn-ghost" id="abResetBtn" style="display:none;">Скасувати редагування</button>
-                </div>
-                <p id="abStatus" style="color:var(--ink-soft);font-size:.85rem;margin-top:10px;"></p>
-            </div>
-
-            <div class="card" id="abExistingCard">
-                <h3>📦 Опубліковані книги</h3>
-                <div id="abExistingList" style="color:var(--ink-soft);font-size:.85rem;">Завантаження…</div>
-            </div>
-
-            <button class="btn btn-ghost btn-sm" onclick="navigate('admin')" style="margin-top:12px;">← Назад до панелі</button>
-        </div>
-    `;
-}
-
-function _abChapterEditorHtml(idx, chapter) {
-    chapter = chapter || {};
-    const tasksCount = (chapter.tasks || []).length;
-    return `
-        <div class="book-chapter-editor" data-chapter-idx="${idx}">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                <strong>Розділ ${idx + 1}</strong>
-                <button class="btn btn-ghost btn-sm ab-remove-chapter" data-idx="${idx}" type="button">🗑️ Прибрати</button>
-            </div>
-            <div class="field" style="margin-bottom:8px;">
-                <label>Назва розділу</label>
-                <input type="text" class="ab-chapter-title" data-idx="${idx}" value="${escHtml(chapter.title || '')}" placeholder="напр. Розділ 1: Пітер порушує домашній спокій">
-            </div>
-            <div class="field">
-                <label>Текст розділу (порожній рядок = новий абзац)</label>
-                <textarea class="ab-chapter-text" data-idx="${idx}">${escHtml(chapter.text || '')}</textarea>
-            </div>
-            <div style="display:flex;gap:10px;align-items:center;margin-top:8px;">
-                <button class="btn btn-ghost btn-sm ab-gen-tasks" data-idx="${idx}" type="button">🎯 Згенерувати завдання</button>
-                <span class="ab-tasks-status" data-idx="${idx}" style="font-size:.8rem;color:var(--ink-soft);">${tasksCount ? `✅ ${tasksCount} завдань` : 'Завдань ще нема'}</span>
-            </div>
-        </div>
-    `;
-}
-
-function initAdminBooks() {
-    const chaptersEl = document.getElementById('abChapters');
-    const addBtn = document.getElementById('abAddChapterBtn');
-    const publishBtn = document.getElementById('abPublishBtn');
-    const resetBtn = document.getElementById('abResetBtn');
-    const statusEl = document.getElementById('abStatus');
-    const existingList = document.getElementById('abExistingList');
-    if (!chaptersEl) return; // не та сторінка
-
-    // КРИТИЧНО: раніше _abEditingBookId скидався лише кнопкою "Скасувати
-    // редагування", а не при звичайному відкритті сторінки. Тобто після
-    // публікації книги A її ID лишався в _abEditingBookId; якщо потім
-    // просто заходили на "Книги" знову й заповнювали форму для ЗОВСІМ
-    // нової книги B, публікація B передавала в saveSharedBook() СТАРИЙ ID
-    // книги A — і Firestore-документ книги A тихо ПЕРЕЗАПИСУВАВСЯ вмістом
-    // книги B (set() з merge:false). Тепер кожне відкриття сторінки
-    // гарантовано починається в режимі "нова книга".
-    _abEditingBookId = null;
-
-    // Локальна модель розділів поточної форми (тримаємо тут, а не тільки в
-    // DOM, щоб зберегти tasks[] між рендерами — вони не мають свого поля вводу).
-    let chapters = [];
-
-    function renderChapters() {
-        chaptersEl.innerHTML = chapters.map((c, i) => _abChapterEditorHtml(i, c)).join('');
-        chaptersEl.querySelectorAll('.ab-remove-chapter').forEach(btn => {
-            btn.onclick = () => { chapters.splice(parseInt(btn.dataset.idx, 10), 1); renderChapters(); };
-        });
-        chaptersEl.querySelectorAll('.ab-chapter-title').forEach(inp => {
-            inp.oninput = () => { chapters[parseInt(inp.dataset.idx, 10)].title = inp.value; };
-        });
-        chaptersEl.querySelectorAll('.ab-chapter-text').forEach(ta => {
-            ta.oninput = () => { chapters[parseInt(ta.dataset.idx, 10)].text = ta.value; };
-        });
-        chaptersEl.querySelectorAll('.ab-gen-tasks').forEach(btn => {
-            btn.onclick = async () => {
-                const idx = parseInt(btn.dataset.idx, 10);
-                const ch = chapters[idx];
-                if (!ch.text || ch.text.trim().length < 200) {
-                    toast('⚠️ Спершу встав текст розділу (щонайменше кілька абзаців) — на його основі AI складе завдання.');
-                    return;
-                }
-                const statusSpan = chaptersEl.querySelector(`.ab-tasks-status[data-idx="${idx}"]`);
-                const lang = document.getElementById('abLang').value;
-                const level = document.getElementById('abLevel').value;
-                btn.disabled = true;
-                statusSpan.textContent = 'Генерую…';
-                try {
-                    const tasks = await generateChapterTasksAI(lang, level, ch.title || `Розділ ${idx + 1}`, ch.text);
-                    ch.tasks = tasks;
-                    statusSpan.textContent = tasks.length ? `✅ ${tasks.length} завдань` : '⚠️ AI не повернув завдань, спробуй ще раз';
-                } catch (e) {
-                    console.error('[Адмін] Помилка генерації завдань для розділу:', e);
-                    let reason = e && e.message || 'невідома помилка';
-                    if (e && e.code === 'PROXY_ERROR') {
-                        reason = `код ${e.status}` + (e.status === 429 ? ' (забагато запитів підряд — зачекай хвилину)' : '');
-                    } else if (e && e.code === 'NETWORK_ERROR') {
-                        reason = 'мережа/CORS/URL Worker\'а';
-                    } else if (e && e.code === 'NOT_CONFIGURED') {
-                        reason = 'AI_PROXY_URL не налаштований';
-                    }
-                    statusSpan.textContent = `⚠️ Помилка: ${reason}`;
-                } finally {
-                    btn.disabled = false;
-                }
-            };
-        });
-    }
-
-    function resetForm() {
-        _abEditingBookId = null;
-        chapters = [];
-        document.getElementById('abFormTitle').textContent = '➕ Нова книга';
-        document.getElementById('abLang').value = document.getElementById('abLang').options[0].value;
-        document.getElementById('abLevel').value = 'A1';
-        document.getElementById('abGenre').value = BOOK_GENRES[0].code;
-        document.getElementById('abTitle').value = '';
-        document.getElementById('abAuthor').value = '';
-        document.getElementById('abSource').value = '';
-        document.getElementById('abCover').value = '';
-        document.getElementById('abDescription').value = '';
-        resetBtn.style.display = 'none';
-        statusEl.textContent = '';
-        renderChapters();
-    }
-
-    addBtn.onclick = () => { chapters.push({ title: '', text: '', tasks: [] }); renderChapters(); };
-    resetBtn.onclick = resetForm;
-    renderChapters(); // порожня форма при першому відкритті
-
-    async function refreshExisting() {
-        if (!firebaseReady || !firebaseDb) { existingList.textContent = 'Firestore недоступний.'; return; }
-        try {
-            const snap = await firebaseDb.collection('sharedBooks').get();
-            if (snap.empty) { existingList.textContent = 'Ще нічого не опубліковано.'; return; }
-            existingList.innerHTML = '';
-            snap.forEach(doc => {
-                const d = doc.data();
-                const lang = getLanguage(d.lang);
-                const genre = getBookGenre(d.genre);
-                const row = el(`
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line-soft);">
-                        <span>${lang.flag} ${escHtml(d.title)} — <span class="tag level-${d.level}">${d.level}</span> · ${genre.label} · ${(d.chapters||[]).length} розд.</span>
-                        <span>
-                            <button class="btn btn-ghost btn-sm ab-edit-book" data-id="${doc.id}">✏️</button>
-                            <button class="btn btn-ghost btn-sm ab-delete-book" data-id="${doc.id}">🗑️</button>
-                        </span>
-                    </div>
-                `);
-                row.querySelector('.ab-edit-book').onclick = () => loadBookIntoForm(doc.id, d);
-                row.querySelector('.ab-delete-book').onclick = async () => {
-                    if (!confirm(`Видалити книгу "${d.title}"? Це незворотно.`)) return;
-                    try {
-                        await deleteSharedBook(doc.id, d.lang);
-                        toast('🗑️ Книгу видалено');
-                        refreshExisting();
-                        if (_abEditingBookId === doc.id) resetForm();
-                    } catch (e) {
-                        console.error('[Адмін] Помилка видалення книги:', e);
-                        toast('⚠️ Не вдалося видалити.');
-                    }
-                };
-                existingList.appendChild(row);
-            });
-        } catch (e) {
-            console.error('[Адмін] Помилка завантаження списку книг:', e);
-            existingList.textContent = 'Помилка завантаження.';
-        }
-    }
-
-    function loadBookIntoForm(id, data) {
-        _abEditingBookId = id;
-        document.getElementById('abFormTitle').textContent = `✏️ Редагування: ${data.title}`;
-        document.getElementById('abLang').value = data.lang;
-        document.getElementById('abLevel').value = data.level;
-        document.getElementById('abGenre').value = data.genre || 'other';
-        document.getElementById('abTitle').value = data.title || '';
-        document.getElementById('abAuthor').value = data.author || '';
-        document.getElementById('abSource').value = data.sourceNote || '';
-        document.getElementById('abCover').value = data.coverUrl || '';
-        document.getElementById('abDescription').value = data.description || '';
-        chapters = (data.chapters || []).map(c => Object.assign({}, c));
-        resetBtn.style.display = 'inline-block';
-        renderChapters();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    refreshExisting();
-
-    publishBtn.onclick = async () => {
-        const lang = document.getElementById('abLang').value;
-        const level = document.getElementById('abLevel').value;
-        const genre = document.getElementById('abGenre').value;
-        const title = document.getElementById('abTitle').value.trim();
-        const author = document.getElementById('abAuthor').value.trim();
-        const sourceNote = document.getElementById('abSource').value.trim();
-        const coverUrl = document.getElementById('abCover').value.trim();
-        const description = document.getElementById('abDescription').value.trim();
-        if (!title) { toast('⚠️ Введи назву книги.'); return; }
-        if (!chapters.length || !chapters.some(c => c.text && c.text.trim().length > 0)) {
-            toast('⚠️ Додай хоча б один розділ із текстом.');
-            return;
-        }
-        if (!sourceNote) {
-            toast('⚠️ Вкажи джерело/підтвердження, що це суспільне надбання — це важливо з юридичної точки зору.');
-            return;
-        }
-        publishBtn.disabled = true;
-        statusEl.textContent = 'Публікую…';
-        try {
-            const cleanChapters = chapters
-                .filter(c => c.text && c.text.trim())
-                .map(c => ({ title: c.title || '', text: c.text, tasks: c.tasks || [] }));
-            const id = await saveSharedBook(_abEditingBookId, { lang, level, genre, title, author, sourceNote, coverUrl, description, chapters: cleanChapters });
-            _abEditingBookId = id;
-            toast(`✅ Опубліковано "${title}"`);
-            statusEl.textContent = `Опубліковано (${cleanChapters.length} розділів).`;
-            resetBtn.style.display = 'inline-block';
-            refreshExisting();
-        } catch (e) {
-            console.error('[Адмін] Помилка публікації книги:', e);
-            statusEl.textContent = '⚠️ Не вдалося опублікувати. Перевірте доступ до Firestore.';
-        } finally {
-            publishBtn.disabled = false;
-        }
-    };
-}
-
-// =====================================================================
 //  СТОРІНКА: Слово дня (адмін обирає конкретне слово для головної)
 // =====================================================================
-// "Завдання дня" (daily_tasks) — це квіз-питання з варіантами відповіді.
-// "Слово дня" — інша, простіша річ: картка на головній (dw у viewHome),
-// раніше вибиралась ЛИШЕ автоматично — детермінований прохід по словнику
-// поточного рівня (pickDailyWord() у views-core.js), без жодної можливості
-// для адміна вплинути на вибір. Тепер адмін може опублікувати конкретне
-// слово на сьогодні для обраної мови (daily_words/{lang}_{today}) — і воно
-// перекриє автоматичний вибір саме для тих, хто вчить цю мову. Якщо на
-// сьогодні для мови нічого не опубліковано — просто працює як раніше,
-// автоматичний вибір.
 function viewAdminDailyWord() {
     if (!STATE || !STATE.admin) return errorAccessDenied();
 
@@ -1625,7 +721,7 @@ function viewAdminDailyWord() {
 
 function initAdminDailyWord() {
     const publishBtn = document.getElementById('dwPublishBtn');
-    if (!publishBtn) return; // не та сторінка
+    if (!publishBtn) return;
 
     const statusEl = document.getElementById('dwStatus');
     const listEl = document.getElementById('dwTodayList');

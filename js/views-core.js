@@ -1,5 +1,5 @@
 // =====================================================================
-//  VIEWS – повний набір сторінок
+//  VIEWS – повний набір сторінок (без AI-генерації)
 // =====================================================================
 
 // Розмітка картки "Слово дня" — винесена в окрему функцію, бо
@@ -26,12 +26,7 @@ function viewHome() {
     ensureStateDefaults(STATE);
     const level = LD().level || "A1";
     const meta = LEVEL_META[level];
-    // Раніше слова для головної (прогрес + "Слово дня") підвантажувались
-    // лише як побічний ефект відвідування Карток/Словника/Тестів — якщо
-    // людина щойно обрала нову мову і одразу лишилась на головній, для неї
-    // просто не було з чого взяти слово дня (порожній стан, хоча мова вже
-    // обрана). Той самий "тихий" self-serve виклик, що й в інших розділах.
-    ensureVocabAvailable(STATE.targetLang || 'no', level);
+    // ----- Слова беруться з вбудованого VOCAB та customWords (без AI) -----
     const vocab = vocabForLevel(level) || [];
     const total = vocab.length;
 
@@ -61,21 +56,7 @@ function viewHome() {
         ru: { title: '🎯 Дневная цель', done: 'Готово! Сегодняшняя серия в безопасности. Приходите завтра 🔥', progress: (c,t)=>`${c}/${t} — ещё немного, и серия за сегодня в безопасности`, cont: 'Продолжить →', freezeTitle: 'Заморозки серии — спасают стрик, если пропустите день' },
     }[dgLang] || { title: '🎯 Щоденна ціль', done: 'Виконано! Сьогоднішня серія в безпеці. Приходьте завтра 🔥', progress: (c,t)=>`${c}/${t} — ще трохи, і серія за сьогодні в безпеці`, cont: 'Продовжити →', freezeTitle: 'Заморозки серії — рятують стрік, якщо пропустите день' };
 
-    // ----- ВИБІР МОВИ (швидкий перемикач на головній) -----
-    // Раніше тут був окремий, непов'язаний перемикач на полі
-    // STATE.learningLang з onclick="..." прямо в HTML — CSP сайту
-    // (без unsafe-inline) його тихо блокувала, тож кнопки не працювали,
-    // і, навіть якби працювали, вони керували полем, яке ніде більше не
-    // використовувалось. Тепер це той самий STATE.targetLang, що й у
-    // Налаштуваннях, з робочими обробниками подій.
     // ----- ВИБІР МОВИ (посилання на окремий екран вибору мови) -----
-    // Раніше тут одразу на головній був ряд чіпів із 6 мовами + кнопка
-    // "більше" — цілий міні-перемикач просто серед іншого контенту
-    // дашборду. Тепер вибір мови — окремий, самодостатній екран
-    // (viewChooseLanguage), а тут лишається лише один компактний
-    // рядок-посилання з поточною мовою: головне меню відображає саме ту
-    // мову, яку вже вибрано, а не пропонує постійно перемикати її просто
-    // серед іншого вмісту.
     const currentLang = getLanguage(STATE.targetLang || 'no');
     const langOptions = `
         <div style="display:flex;justify-content:center;margin:12px 0;">
@@ -190,10 +171,7 @@ function viewHome() {
         </div>
     `);
 
-    // "🧌 Хроніки Тролля" — тизер на головній, той самий принцип, що й
-    // "🩹 Складні слова" нижче: нагадує повернутись саме туди, де людина
-    // зупинилась, замість того, щоб пригода існувала лише як пункт
-    // навбару, про який легко забути.
+    // "🧌 Хроніки Тролля" — тизер на головній
     const storyState = ensureStoryState();
     const storyTeaser = el(
         storyState.history.length === 0 ? `
@@ -223,8 +201,7 @@ function viewHome() {
     storyTeaser.querySelector('#homeStoryBtn').onclick = () => navigate('story');
     wrap.appendChild(storyTeaser);
 
-    // "🩹 Складні слова" — теж показуємо на головній, якщо такі є, щоб
-    // людина не забувала повертатись і закріплювати саме те, що не йде.
+    // "🩹 Складні слова" — теж показуємо на головній, якщо такі є
     const leechWords = collectLeechWords(STATE.targetLang || 'no');
     if (leechWords.length > 0) {
         const leechTeaser = el(`
@@ -250,10 +227,7 @@ function viewHome() {
     wrap.querySelectorAll('[data-r]').forEach(b => b.onclick = () => navigate(b.dataset.r));
     const changeLangBtn = wrap.querySelector('#homeChangeLangBtn');
     if (changeLangBtn) changeLangBtn.onclick = () => navigate('choose-language', { switchMode: true });
-    // Прив'язка кнопки озвучення винесена в окрему функцію, бо картку
-    // "Слово дня" може бути перемальовано вдруге (див. loadDailyWordOverride
-    // нижче), і тоді #dwSound — вже новий DOM-елемент, який треба
-    // прив'язати заново.
+    
     function wireDailyWordSound(word) {
         const snd = wrap.querySelector('#dwSound');
         if (snd && word) snd.onclick = () => speak(word.no, STATE.targetLang);
@@ -296,16 +270,8 @@ function viewHome() {
         try {
             const today = new Date().toISOString().slice(0, 10);
             const lang = STATE.targetLang || 'no';
-            // Раніше завдання зберігалось під id === today (одне на весь
-            // сайт) — людина, що вчить англійську, бачила те саме (як
-            // правило, норвезьке) завдання, що й та, яка вчить норвезьку.
-            // Тепер шукаємо саме за мовою користувача; якщо для неї на
-            // сьогодні ще нічого не опубліковано — картка просто не
-            // з'являється (замість показу чужомовного завдання).
             let doc = await firebaseDb.collection('daily_tasks').doc(`${lang}_${today}`).get();
             if (!doc.exists) {
-                // Фолбек на старі записи без мови (створені до цього фіксу) —
-                // лише для норвезької, щоб не "зникали" вже опубліковані раніше.
                 if (lang === 'no') doc = await firebaseDb.collection('daily_tasks').doc(today).get();
                 if (!doc.exists) { container.innerHTML = ''; return; }
             }
@@ -343,10 +309,6 @@ function viewHome() {
     loadDailyTask();
 
     // ---- Перевірка, чи адмін опублікував конкретне "Слово дня" ----
-    // dw (обраний автоматично) уже показаний у розмітці вище — це дає
-    // миттєвий, невблокований рендер. Якщо для сьогодні й поточної мови
-    // є адмінська публікація в daily_words, підміняємо вміст картки на
-    // неї (як і loadDailyTask, "тихо", без переходу на нову сторінку).
     async function loadDailyWordOverride() {
         const body = wrap.querySelector('#dailyWordCardBody');
         if (!body || !firebaseReady || !firebaseDb) return;
@@ -354,13 +316,12 @@ function viewHome() {
             const today = new Date().toISOString().slice(0, 10);
             const lang = STATE.targetLang || 'no';
             const doc = await firebaseDb.collection('daily_words').doc(`${lang}_${today}`).get();
-            if (!doc.exists) return; // нічого не опубліковано — лишаємо автоматичний вибір
+            if (!doc.exists) return;
             const override = doc.data();
             body.innerHTML = dailyWordCardBody(override, level);
             wireDailyWordSound(override);
         } catch (e) {
             console.error('Помилка завантаження слова дня:', e);
-            // мовчки лишаємо автоматичний вибір, який уже показаний
         }
     }
     loadDailyWordOverride();
@@ -476,95 +437,23 @@ function viewLevels() {
     return wrap;
 }
 
-// Раніше вхідний тест на рівень для БУДЬ-ЯКОЇ мови навчання показував
-// один і той самий вбудований LEVEL_TEST — а це набір питань про
-// НОРВЕЗЬКІ слова. Людина, що вчить іспанську чи японську, отримувала
-// тест про норвезьку. Для норвезької (STATE.targetLang === 'no')
-// лишаємо цей вручну складений тест (найкраща якість, включно з
-// граматикою). Для решти мов питання тепер генеруються "на льоту" з
-// реального словника обраної мови (той самий пул слів, що й у
-// картках/тестах: currentLevelWords()/vocabForLevel()) — той самий
-// принцип перекладних питань, що й у viewTestMC().
-async function buildDynamicLevelTest(lang) {
-    // Крок 1: спершу ДЕШЕВО перевіряємо спільний словник (просте читання з
-    // Firestore, без AI) для всіх рівнів одразу — паралельно, це швидко і
-    // ліміту запитів до Worker'а не займає.
-    await Promise.all(LEVELS.map(level =>
-        ensureSharedVocabLoaded(lang, level).catch(e =>
-            console.error('[Тест на рівень] Спільний словник недоступний для', lang, level, e))
-    ));
-    // Крок 2: лише рівні, для яких спільного словника не знайшлось,
-    // довантажуємо через AI-генерацію (ensureVocabAvailable) — ПОСЛІДОВНО,
-    // а не паралельно. Кожен такий рівень сам по собі шле 2 запити до
-    // Worker'а; якщо запускати всі 6 рівнів одночасно (як було раніше), це
-    // до 12 запитів за одну мить — і Worker миттєво впирався у ліміт
-    // запитів/хв (RATE_LIMIT_PER_MIN), через що генерація слів мовчки
-    // провалювалась, і мова лишалась без жодного слова для тесту.
-    for (const level of LEVELS) {
-        const already = STATE.generatedVocab[lang] && STATE.generatedVocab[lang][level];
-        if (already && already.length) continue;
-        await ensureVocabAvailable(lang, level).catch(e =>
-            console.error('[Тест на рівень] Не вдалося підготувати словник для', lang, level, e));
-    }
-    const groups = [];
-    for (const level of LEVELS) {
-        const words = vocabForLevel(level, lang);
-        if (!words || words.length < 4) continue; // замало слів для рівня — пропускаємо, а не показуємо порожні/непарні питання
-        const pool = shuffle(words).slice(0, 5);
-        pool.forEach(w => {
-            const correct = wordTranslation(w, level, STATE.vocabLang);
-            const distractors = shuffle(words.filter(x => x.no !== w.no)).slice(0, 2).map(x => wordTranslation(x, level, STATE.vocabLang));
-            if (distractors.length < 2 || !correct) return;
-            const opts = shuffle([correct, ...distractors]);
-            groups.push({ lvl: level, q: `${t('how_translate')} «${w.no}»?`, opts, a: opts.indexOf(correct) });
-        });
-    }
-    return groups;
-}
-
 function viewLevelTest() {
     const lang = STATE.targetLang || 'no';
-    const langFile = window.LANG_DATA && window.LANG_DATA[lang];
-    const hasBuiltinTest = !!(langFile && langFile.LEVEL_TEST && langFile.LEVEL_TEST.length);
+    const langData = window.LANG_DATA && window.LANG_DATA[lang];
+    const hasBuiltinTest = !!(langData && langData.LEVEL_TEST && langData.LEVEL_TEST.length);
 
+    // Якщо для цієї мови немає вбудованого тесту – пропонуємо обрати рівень вручну
     if (!hasBuiltinTest) {
-        // Питання ще не готові — запускаємо (один раз) асинхронну
-        // побудову й показуємо заглушку, доки вона не завершиться.
-        if (!SUBSTATE.testQuestions && !SUBSTATE.testLoading) {
-            SUBSTATE.testLoading = true;
-            buildDynamicLevelTest(lang).then(qs => {
-                SUBSTATE.testQuestions = qs;
-                SUBSTATE.testLoading = false;
-                if (ROUTE === 'leveltest') render();
-            }).catch(e => {
-                console.error('[Тест на рівень] Помилка побудови тесту:', e);
-                SUBSTATE.testQuestions = [];
-                SUBSTATE.testLoading = false;
-                if (ROUTE === 'leveltest') render();
-            });
-        }
-        if (SUBSTATE.testLoading || !SUBSTATE.testQuestions) {
-            return el(`
-                <div class="view onb-wrap" style="max-width:500px;margin:30px auto;text-align:center;">
-                    <h1>${t('onb_test_title')}</h1>
-                    <p style="color:var(--ink-soft);">${t('level_test_preparing')}</p>
-                </div>
-            `);
-        }
-        if (SUBSTATE.testQuestions.length === 0) {
-            const wrap = el(`
-                <div class="view onb-wrap" style="max-width:500px;margin:30px auto;text-align:center;">
-                    <h1>${t('onb_test_title')}</h1>
-                    <p style="color:var(--ink-soft);">${t('level_test_no_words')}</p>
-                    <button class="btn btn-primary" id="goLevels" style="margin-top:12px;">${t('pick_level_manually_btn')}</button>
-                </div>
-            `);
-            wrap.querySelector('#goLevels').onclick = () => navigate('levels');
-            return wrap;
-        }
+        return el(`
+            <div class="view onb-wrap" style="max-width:500px;margin:30px auto;text-align:center;">
+                <h1>${t('onb_test_title')}</h1>
+                <p style="color:var(--ink-soft);">${t('level_test_not_available', {lang: targetLangName(lang)})}</p>
+                <button class="btn btn-primary" id="goLevels" style="margin-top:12px;">${t('pick_level_manually_btn')}</button>
+            </div>
+        `);
     }
 
-    const questions = hasBuiltinTest ? langFile.LEVEL_TEST : SUBSTATE.testQuestions;
+    const questions = langData.LEVEL_TEST;
 
     if (!SUBSTATE.i) { SUBSTATE.i = 0; SUBSTATE.answers = []; }
     const i = SUBSTATE.i;
@@ -589,17 +478,7 @@ function viewLevelTest() {
         resultView.querySelector('#goHome').onclick = () => navigate('home');
         return resultView;
     }
-    // Для норвезької в LEVEL_TEST є ручні переклади питання/варіантів
-    // (q_en/opts_en, q_ru/opts_ru) — раніше вони взагалі не
-    // застосовувались, і тест завжди показувався українською незалежно
-    // від мови інтерфейсу. Для згенерованих (не норвезьких) питань
-    // текст уже будується мовою інтерфейсу на етапі генерації, тож
-    // localizedField тут просто поверне q.q/q.opts як є.
-    const q = hasBuiltinTest ? {
-        ...questions[i],
-        q: localizedField(questions[i], 'q'),
-        opts: (STATE.uiLang !== 'uk' && questions[i]['opts_' + STATE.uiLang]) || questions[i].opts,
-    } : questions[i];
+    const q = questions[i];
     const wrap = el(`
         <div class="view" style="max-width:500px;margin:20px auto;text-align:center;">
             <div class="qcounter">${t('question_word')} ${i+1} ${t('of_word')} ${questions.length}</div>
@@ -628,11 +507,9 @@ function viewLevelTest() {
 function viewFlashDeckPicker(lang) {
     lang = lang || STATE.targetLang || 'no';
     const level = SUBSTATE.level || LD().level || "A1";
-    ensureVocabAvailable(lang, level); // не блокує рендер; підвантажить і сама перемалює, якщо знайде/згенерує слова
+    // ----- Слова беруться з вбудованого VOCAB та customWords (без AI) -----
     const words = vocabForLevel(level, lang);
     const topics = [...new Set(words.map(w => w.t))];
-    // Внутрішній ключ "усі теми" — навмисно НЕ україномовний рядок (як
-    //  було раніше), щоб не залежати від мови інтерфейсу для порівнянь.
     const ALL_TOPICS_SENTINEL = "__ALL__";
     const topic = SUBSTATE.topic || ALL_TOPICS_SENTINEL;
     const mode = SUBSTATE.mode || "flip";
@@ -654,10 +531,7 @@ function viewFlashDeckPicker(lang) {
         </div>
     `);
 
-    // "🩹 Складні слова" — окрема тренувальна колода зі слів, які
-    // користувач провалював 4+ рази поспіль (isLeech). Показуємо лише
-    // коли такі слова реально є, і незалежно від обраного рівня/теми,
-    // бо складне слово могло лишитись ще з A1, поки людина вже на B1.
+    // "🩹 Складні слова" — окрема тренувальна колода
     const leechWords = collectLeechWords(lang);
     if (leechWords.length > 0) {
         const leechCard = el(`
@@ -747,13 +621,6 @@ function buildQueue(deckWords, level, allMode) {
     return shuffle(due).concat(shuffle(fresh)).slice(0, 20);
 }
 
-// Одразу після провалу ("Ще раз") SRS відкладає слово на завтра — це
-// правильно для довгострокової пам'яті, але психологічно погано: людина
-// провалила слово і більше його в цій сесії не бачить, тобто не встигає
-// одразу закріпити правильну відповідь. Тому, як в Anki/Duolingo, провалене
-// слово повертається в ЦЮ Ж чергу трохи пізніше (через кілька карток) —
-// для негайного повторного закріплення. Робимо це не більше одного разу
-// на слово за сесію, щоб не зациклити чергу.
 function requeueIfMissed(item) {
     if (item._requeued) return;
     item._requeued = true;
@@ -766,9 +633,6 @@ function requeueIfMissed(item) {
 function viewFlashSession() {
     if (!SUBSTATE.queue) {
         if (SUBSTATE.leechMode) {
-            // Слова "🩹 Складні слова" можуть належати різним рівням —
-            // тому для кожного слова беремо саме його власний рівень
-            // (записаний у collectLeechWords), а не SUBSTATE.level.
             SUBSTATE.queue = shuffle(SUBSTATE.deckWords.map(w => {
                 const lvl = w._leechLevel || SUBSTATE.level;
                 const key = wordKey(Object.assign({ level: lvl }, w));
@@ -920,10 +784,6 @@ function renderMCCard(item, deckWords, level) {
     holder.appendChild(head);
     head.querySelector('#mcSound').onclick = () => speak(item.w.no, STATE.targetLang);
 
-    // Раніше варіанти відповіді завжди показувались українською (w.uk)
-    // незалежно від мови інтерфейсу — тепер, як і решта картки,
-    // враховують STATE.vocabLang через wordTranslation() (другий
-    // аргумент — рівень, той самий патерн, що й у renderFlipCard вище).
     const lvl = item.key.split('|')[0];
     const correctTranslation = wordTranslation(item.w, lvl);
     const distractors = shuffle(deckWords.filter(w => w.no !== item.w.no)).slice(0, 3).map(w => wordTranslation(w, lvl));
@@ -993,7 +853,7 @@ function renderTypeCard(item) {
 function viewVocabulary() {
     const lang = STATE.targetLang || 'no';
     const level = LD().level || "A1";
-    ensureVocabAvailable(lang, level);
+    // ----- Слова беруться з вбудованого VOCAB та customWords (без AI) -----
     const words = vocabForLevel(level, lang);
     const statusLabels = {
         uk: { new: 'нове', due: 'на повторення', mastered: 'засвоєне' },
@@ -1010,7 +870,7 @@ function viewVocabulary() {
                     <option value="all">${t('all_topics')}</option>
                     ${[...new Set(words.map(w=>w.t))].map(tp=>`<option value="${escHtml(tp)}">${escHtml(translateTopic(tp))}</option>`).join('')}
                 </select>
-                <button class="btn btn-ghost btn-sm" id="vocabGenBtn" style="white-space:nowrap;">${t('gen_words_btn')}</button>
+                <!-- 🚫 ВИДАЛЕНО КНОПКУ AI-ГЕНЕРАЦІЇ -->
             </div>
             <div class="card" style="padding:0;overflow-x:auto;">
                 <table class="vocab-table">
@@ -1052,35 +912,6 @@ function viewVocabulary() {
     search.oninput = renderList;
     topicFilter.onchange = renderList;
 
-    const genBtn = wrap.querySelector('#vocabGenBtn');
-    genBtn.onclick = async () => {
-        genBtn.disabled = true;
-        const originalLabel = genBtn.textContent;
-        genBtn.textContent = t('gen_words_loading');
-        try {
-            // Беремо актуальний список слів саме зараз (а не той, що був
-            // на момент відкриття екрана) — важливо, якщо це вже не перше
-            // натискання кнопки поспіль: щойно додані слова теж мають
-            // потрапити у список "уникати".
-            const freshWords = vocabForLevel(level, lang);
-            const newWords = await generateVocabWordsAI(level, freshWords);
-            const added = addCustomWords(level, Array.isArray(newWords) ? newWords : []);
-            if (added > 0) {
-                toast(tf('gen_words_added_toast', {n: added}));
-                navigate('vocabulary');
-            } else {
-                toast(t('gen_words_none_toast'));
-                genBtn.disabled = false;
-                genBtn.textContent = originalLabel;
-            }
-        } catch (e) {
-            console.error('[Словник] Помилка генерації слів:', e);
-            toast(t('gen_words_error_toast'));
-            genBtn.disabled = false;
-            genBtn.textContent = originalLabel;
-        }
-    };
-
     return wrap;
 }
 
@@ -1118,25 +949,14 @@ function viewTestsHub() {
 function currentLevelWords() {
     const lang = STATE.targetLang || 'no';
     const level = LD().level || "A1";
-    ensureVocabAvailable(lang, level);
+    // ----- Слова беруться з вбудованого VOCAB та customWords (без AI) -----
     const words = vocabForLevel(level, lang);
-    // Раніше тут був фолбек на VOCAB.A1 (норвезькі слова) для БУДЬ-ЯКОЇ
-    // мови, якщо для неї ще нема слів — тобто той, хто вчить іспанську,
-    // міг раптом побачити норвезькі картки. Фолбек лишаємо лише для
-    // самої норвезької (вбудований словник має бути не порожнім завжди);
-    // для решти мов повертаємо порожній список — виклики цієї функції вже
-    // мають порожній стан на цей випадок (і ensureVocabAvailable вище
-    // саме зараз намагається підвантажити/згенерувати слова).
     if (words.length) return words;
     return lang === 'no' ? VOCAB.A1 : [];
 }
 
 function runQuiz(sub, route, title) {
     if (!sub.qs || sub.qs.length === 0) {
-        // Порожньо буває, коли для щойно обраної мови ще нема слів на
-        // цьому рівні — ensureVocabAvailable() (викликається зі
-        // currentLevelWords()) саме зараз намагається їх підвантажити чи
-        // згенерувати; коли це станеться, render() перемалює екран.
         const v = el(
             `<div class="view"><div class="empty-state"><h3>${t('quiz_preparing_title')}</h3>` +
             `<p>${t('quiz_preparing_desc')}</p>` +
@@ -1224,10 +1044,6 @@ function runQuiz(sub, route, title) {
         questionContainer.appendChild(progress);
 
         if (q.audio) {
-            // Аудіо-питання (test-listen): замість тексту показуємо кнопку
-            // прослуховування й автоматично програємо слово одразу при
-            // відкритті питання — так це справді перевіряє аудіювання, а
-            // не читання (раніше тут не було НІЧОГО — ні тексту, ні звуку).
             const audioBox = el(`
                 <div style="margin-bottom:16px;">
                     <button class="soundbtn" id="quizListenBtn" style="font-size:1.3rem;padding:14px 22px;">🔊 ${t('btn_listen')}</button>
@@ -1236,7 +1052,7 @@ function runQuiz(sub, route, title) {
             questionContainer.appendChild(audioBox);
             const playAudio = () => speak(q.audio, STATE.targetLang);
             audioBox.querySelector('#quizListenBtn').onclick = playAudio;
-            setTimeout(playAudio, 300); // невелика затримка, щоб голоси встигли підвантажитись
+            setTimeout(playAudio, 300);
         } else {
             const qText = el(`<div class="question-text" style="font-size:1.1rem;margin-bottom:16px;">${escHtml(q.q)}</div>`);
             questionContainer.appendChild(qText);
@@ -1321,10 +1137,10 @@ function viewTestMC() {
     if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
         const level = LD().level || "A1";
         const lang = STATE.targetLang || 'no';
-        if (lang !== 'no') ensureGrammarAvailable(lang, level); // тихо; якщо не встигне — цього разу просто без граматичних питань
         const words = shuffle(currentLevelWords()).slice(0, 6);
-        const gramQs = grammarForLevel(level, lang).map(g => ({ q: grammarLocalizedQ(g), opts: g.ex
-                .opts, a: g.ex.a }));
+        const langData = window.LANG_DATA && window.LANG_DATA[lang];
+        // Граматика – тільки якщо є вбудована для цієї мови
+        const gramQs = (langData && langData.GRAMMAR) ? langData.GRAMMAR.filter(g => g.level === level).map(g => ({ q: grammarLocalizedQ(g), opts: g.ex.opts, a: g.ex.a })) : [];
         const wordQs = words.map(w => {
             const correctTranslation = wordTranslation(w, level, STATE.vocabLang);
             const distractors = shuffle(currentLevelWords().filter(x => x.no !== w.no)).slice(0, 3).map(x => wordTranslation(x, level, STATE.vocabLang));
@@ -1673,16 +1489,6 @@ function viewTestOrder() {
 function viewTestListen() {
     if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
         const words = shuffle(currentLevelWords()).slice(0, 6);
-        // Раніше варіанти відповіді завжди були українською (w.uk) —
-        // тепер локалізуються через wordTranslation(), як і решта тестів.
-        // КРИТИЧНО: об'єкт питання раніше не мав поля "q" (текст питання),
-        // яке runQuiz() показує через escHtml(q.q) — а escHtml(undefined)
-        // повертає порожній рядок. Тобто "тест на аудіювання" показував
-        // ПОРОЖНЄ питання без жодного звуку чи тексту: просто 4 варіанти
-        // відповіді без жодного контексту, що вгадувати. Тепер question
-        // явно позначений як аудіо-питання (audio: слово, яке треба
-        // прослухати) — runQuiz() рендерить для нього кнопку "🔊 Слухати"
-        // замість тексту питання.
         SUBSTATE.qs = words.map(w => {
             const correctTranslation = wordTranslation(w, LD().level);
             const distractors = shuffle(currentLevelWords().filter(x => x.no !== w.no)).slice(0, 3).map(x => wordTranslation(x, LD().level));
@@ -1758,12 +1564,6 @@ function viewTestTranslate() {
         );
         container.appendChild(progress);
 
-        // Раніше тут було жорстко закодовано "норвезькою"/"українською" —
-        // тобто напрямок перекладу завжди називався норвезьким, навіть
-        // якщо STATE.targetLang був іспанською чи будь-якою іншою мовою.
-        // Раніше підказка й очікувана відповідь завжди були українською
-        // (w.uk) — тепер локалізуються через wordTranslation(), як і
-        // решта тестів.
         const translated = wordTranslation(w, LD().level);
         const promptLangName = dirToNo ? targetLangDisplayName(STATE.targetLang || 'no') : interfaceLangName(STATE.vocabLang || 'uk');
         const promptWord = dirToNo ? translated : w.no;
@@ -1849,27 +1649,32 @@ function viewTestTranslate() {
 
 function viewGrammar() {
     const lang = STATE.targetLang || 'no';
-    const userLevel = LD().level || 'A1';
+    const langData = window.LANG_DATA && window.LANG_DATA[lang];
+    const hasBuiltinGrammar = !!(langData && langData.GRAMMAR && langData.GRAMMAR.length);
 
-    // Раніше показувались правила ЛИШЕ поточного рівня користувача —
-    // хтось на A1 взагалі не бачив, що в граматиці є, наприклад, на B1.
-    // Тепер вкладка одразу показує правила ВСІХ рівнів (A1–C2), а фільтр
-    // рівнів зверху — це лише зручність навігації по довгому списку, не
-    // обмеження: за замовчуванням обрано "Усі".
-    const hasBuiltinGrammar = !!(window.LANG_DATA && window.LANG_DATA[lang] && window.LANG_DATA[lang].GRAMMAR);
-    if (!hasBuiltinGrammar) LEVELS.forEach(lvl => ensureGrammarAvailable(lang, lvl));
+    if (!hasBuiltinGrammar) {
+        return el(`
+            <div class="view">
+                <h1>${t('h_grammar')}</h1>
+                <div class="card" style="text-align:center;padding:40px 24px;">
+                    <p style="color:var(--ink-soft);">${t('grammar_not_available', {lang: targetLangName(lang)})}</p>
+                </div>
+            </div>
+        `);
+    }
 
+    const grammarRules = langData.GRAMMAR;
     const rulesByLevel = {};
-    LEVELS.forEach(lvl => { rulesByLevel[lvl] = grammarForLevel(lvl, lang); });
+    LEVELS.forEach(lvl => {
+        rulesByLevel[lvl] = grammarRules.filter(g => g.level === lvl);
+    });
     const allRules = LEVELS.flatMap(lvl => rulesByLevel[lvl]);
-    const totalMissing = LEVELS.filter(lvl => rulesByLevel[lvl].length === 0).length;
 
     const wrap = el(`
         <div class="view">
             <h1>${t('h_grammar')}</h1>
             <input class="type-input" id="gsearch" placeholder="${t('search_placeholder')}" style="max-width:100%;margin-bottom:12px;padding:10px 14px;font-size:.9rem;">
             <div id="gramLevelFilter" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;"></div>
-            <div id="gramNotice"></div>
             <div id="gramlist"></div>
         </div>
     `);
@@ -1891,20 +1696,6 @@ function viewGrammar() {
         };
         filterBar.appendChild(chip);
     });
-
-    if (lang !== 'no') {
-        const langName = targetLangName(lang);
-        const notice = el(totalMissing > 0 ? `
-            <div class="card" style="margin-bottom:16px;color:var(--ink-soft);font-size:.9rem;">
-                🤖 ${tf('grammar_generating_notice_all', {lang: langName})}
-            </div>
-        ` : `
-            <div class="card" style="margin-bottom:16px;color:var(--ink-soft);font-size:.85rem;">
-                🤖 ${tf('grammar_ai_generated_notice_all', {lang: langName})}
-            </div>
-        `);
-        wrap.querySelector('#gramNotice').appendChild(notice);
-    }
 
     function renderList(filter) {
         list.innerHTML = "";

@@ -133,9 +133,13 @@ function ensureStateDefaults(state) {
     if (typeof state._targetLangChosen === 'undefined') {
         state._targetLangChosen = !!state._onboardingDone || Object.keys(state.langData || {}).length > 0;
     }
-    if (!state.generatedVocab || typeof state.generatedVocab !== 'object') state.generatedVocab = {};
-    if (!state.generatedGrammar || typeof state.generatedGrammar !== 'object') state.generatedGrammar = {};
-    if (!state.generatedTasks || typeof state.generatedTasks !== 'object') state.generatedTasks = {};
+
+    // 🔥 ВИДАЛЕНО: generatedVocab, generatedGrammar, generatedTasks
+    // Більше не використовуються – слово AI-генерації повністю прибрано.
+    // if (!state.generatedVocab || typeof state.generatedVocab !== 'object') state.generatedVocab = {};
+    // if (!state.generatedGrammar || typeof state.generatedGrammar !== 'object') state.generatedGrammar = {};
+    // if (!state.generatedTasks || typeof state.generatedTasks !== 'object') state.generatedTasks = {};
+
     if (!state.wordTranslations || typeof state.wordTranslations !== 'object') state.wordTranslations = {};
     if (typeof state.admin !== 'boolean') state.admin = false;
     if (!state.langData || typeof state.langData !== 'object') state.langData = {};
