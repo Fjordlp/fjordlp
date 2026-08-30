@@ -4,7 +4,7 @@
 //  STATE.targetLang — ЯКУ мову користувач вивчає.
 // =====================================================================
 
-export const LANGUAGES = [
+window.LANGUAGES = [
     { code: 'no', flag: '🇳🇴', native: 'Norsk', name: { uk: 'Норвезька', en: 'Norwegian', ru: 'Норвежский' }, builtin: true },
     { code: 'en', flag: '🇬🇧', native: 'English', name: { uk: 'Англійська', en: 'English', ru: 'Английский' }, builtin: true },
     { code: 'de', flag: '🇩🇪', native: 'Deutsch', name: { uk: 'Німецька', en: 'German', ru: 'Немецкий' }, builtin: false },
@@ -39,14 +39,14 @@ export const LANGUAGES = [
     { code: 'id', flag: '🇮🇩', native: 'Bahasa Indonesia', name: { uk: 'Індонезійська', en: 'Indonesian', ru: 'Индонезийский' }, builtin: false },
 ];
 
-export function getLanguage(code) {
-    return LANGUAGES.find(l => l.code === code) || LANGUAGES[0];
-}
+window.getLanguage = function(code) {
+    return (window.LANGUAGES || []).find(l => l.code === code) || window.LANGUAGES[0];
+};
 
 // =====================================================================
 //  ГОЛОСИ ДЛЯ ОЗВУЧЕННЯ (TTS) — ПО КОЖНІЙ МОВІ ОКРЕМО
 // =====================================================================
-const TTS_VOICES = {
+window.TTS_VOICES = {
     no: { edge: 'nb-NO-FridaNeural', bcp47: 'nb' },
     en: { edge: 'en-US-AriaNeural', bcp47: 'en' },
     de: { edge: 'de-DE-KatjaNeural', bcp47: 'de' },
@@ -81,34 +81,33 @@ const TTS_VOICES = {
     id: { edge: 'id-ID-GadisNeural', bcp47: 'id' },
 };
 
-export function getTtsVoice(lang) {
-    return TTS_VOICES[lang] || TTS_VOICES.no;
-}
+window.getTtsVoice = function(lang) {
+    return window.TTS_VOICES[lang] || window.TTS_VOICES.no;
+};
 
-export function targetLangName(code) {
-    const lang = getLanguage(code || (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no');
+window.targetLangName = function(code) {
+    const lang = window.getLanguage(code || (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no');
     const uiLang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
     return lang.name[uiLang] || lang.name.uk;
-}
+};
 
-export function isBuiltinLang() {
+window.isBuiltinLang = function() {
     const code = (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
-    return getLanguage(code).builtin;
-}
+    return window.getLanguage(code).builtin;
+};
 
-// Заголовок/пункт меню для розділу підготовки до іспиту
-export function examSectionLabel() {
+window.examSectionLabel = function() {
     const targetLang = (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
     const uiLang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
     if (targetLang === 'no') {
         return { uk: 'Norskprøve Academy', en: 'Norskprøve Academy', ru: 'Norskprøve Academy' }[uiLang];
     }
     return { uk: 'Тренажер завдань', en: 'Exam Prep', ru: 'Тренажёр заданий' }[uiLang] || 'Тренажер завдань';
-}
+};
 
-export function examSectionNavLabel() {
+window.examSectionNavLabel = function() {
     const targetLang = (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
     const uiLang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
     if (targetLang === 'no') return 'Norskprøve';
     return { uk: 'Завдання', en: 'Exam Prep', ru: 'Задания' }[uiLang] || 'Завдання';
-}
+};
