@@ -307,4 +307,3 @@
         ALPHABET,
         LESSONS,
     };
-})();
