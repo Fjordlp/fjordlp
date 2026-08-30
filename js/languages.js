@@ -33,6 +33,7 @@ const LANGUAGES = [
     { code: 'zh', flag: '🇨🇳', native: '中文', name: { uk: 'Китайська', en: 'Chinese', ru: 'Китайский' }, builtin: false },
     { code: 'ko', flag: '🇰🇷', native: '한국어', name: { uk: 'Корейська', en: 'Korean', ru: 'Корейский' }, builtin: false },
     { code: 'ar', flag: '🇸🇦', native: 'العربية', name: { uk: 'Арабська', en: 'Arabic', ru: 'Арабский' }, builtin: false },
+    { code: 'he', flag: '🇮🇱', native: 'עברית', name: { uk: 'Іврит', en: 'Hebrew', ru: 'Иврит' }, builtin: false },
     { code: 'hi', flag: '🇮🇳', native: 'हिन्दी', name: { uk: 'Гінді', en: 'Hindi', ru: 'Хинди' }, builtin: false },
     { code: 'vi', flag: '🇻🇳', native: 'Tiếng Việt', name: { uk: 'В\'єтнамська', en: 'Vietnamese', ru: 'Вьетнамский' }, builtin: false },
     { code: 'th', flag: '🇹🇭', native: 'ไทย', name: { uk: 'Тайська', en: 'Thai', ru: 'Тайский' }, builtin: false },
@@ -123,6 +124,21 @@ const VOCAB_TOPIC_HINTS = {
     C2: ['ідіоми та сталі вирази', 'стилістика, літературна мова', 'рідкісна й вишукана лексика, розмовні частки'],
 };
 
+// Список тем, для яких на сайті вже ГАРАНТОВАНО є переклад (TOPIC_TRANSLATIONS
+// в i18n.js). AI просимо СПОЧАТКУ намагатись підібрати тему звідси, а не
+// вигадувати нову щоразу — тоді кнопки тем на сторінці карток не плодяться
+// (кожна нова "унікальна" тема від AI — це ще одна нова кнопка).
+const KNOWN_VOCAB_TOPICS = [
+    "Привітання", "Числа", "Родина", "Кольори", "Базова їжа", "Їжа", "Дім", "Одяг",
+    "Тіло", "Дні тижня", "Місяці", "Дієслова руху та дії", "Дієслова", "Погода",
+    "Транспорт", "Покупки", "Робота", "Хобі", "Емоції", "Подорожі", "Ресторан",
+    "Місто", "Напрямки", "Технології", "Спорт", "Освіта", "Здоров'я", "Стосунки",
+    "Медіа", "Довкілля", "Кар'єра", "Політика", "Економіка", "Бізнес", "Наука",
+    "Медицина", "Культура", "Право", "Академічна", "Дискурс", "Філософія",
+    "Психологія", "Соціологія", "Риторика", "Нюанси", "Ідіоми", "Стилістика",
+    "Рідкісна лексика", "Тварини", "Меблі", "Природа", "Свята", "Школа",
+];
+
 async function generateStarterVocab(langCode, level, batchIndex, existingWords) {
     const langName = getLanguage(langCode).name.uk;
     const sys = "Ти генеруєш словниковий набір для вивчення іноземної мови " +
@@ -140,12 +156,25 @@ async function generateStarterVocab(langCode, level, batchIndex, existingWords) 
     // "падав" назад на українську. Тепер просимо всі три переклади одразу.
     const userMsg =
         `Мова вивчення: ${langName}. Рівень: ${level}. ` +
-        `Згенеруй 60 корисних слів цією мовою для цього рівня. Фокус на темах: ${topicHint}. ` +
+        `Згенеруй 60 корисних слів цією мовою для цього рівня. Загальний фокус (орієнтир, не список тем як є): ${topicHint}. ` +
         (avoidList ? `НЕ повторюй ці вже наявні слова: ${avoidList}. ` : '') +
         `Формат масиву: [{"t": "тема українською", "no": "слово мовою вивчення", ` +
         `"uk": "переклад українською", "en": "переклад англійською", "ru": "переклад російською", ` +
         `"ex_no": "приклад речення мовою вивчення (мінімум 4 слова, містить це слово)", ` +
-        `"ex_uk": "переклад прикладу українською", "en_ex": "переклад прикладу англійською", "ru_ex": "переклад прикладу російською"}, ...]`;
+        `"ex_uk": "переклад прикладу українською", "en_ex": "переклад прикладу англійською", "ru_ex": "переклад прикладу російською"}, ...] ` +
+        // Три явні правила для поля "t" (тема), бо раніше AI: (1) писав тему
+        // з малої літери ("дім" замість "Дім"), (2) копіював ВЕСЬ рядок
+        // підказки цілком як одну тему замість короткої категорії, (3)
+        // вигадував нову тему там, де вже була підходяща — і на сторінці
+        // карток одна й та сама категорія плодилась у кілька кнопок,
+        // частина з яких лишалась неперекладеною.
+        `ВАЖЛИВО про поле "t" (тема): 1) це КОРОТКА назва категорії з 1-2 слів ` +
+        `(наприклад "Дім", "Дні тижня"), а НЕ весь рядок фокусу вище — розбий ` +
+        `слова на кілька різних тем за змістом, не вигадуй одну довгу тему на всі 60 слів; ` +
+        `2) завжди з ВЕЛИКОЇ літери; ` +
+        `3) якщо слово підходить під одну з цих уже наявних тем — використай ЇЇ ТОЧНО ` +
+        `в такому написанні: ${KNOWN_VOCAB_TOPICS.join(', ')}. ` +
+        `Нову тему вигадуй лише якщо жодна з наявних справді не підходить.`;
     const reply = await callAiRaw('gen_vocab', sys, userMsg, []);
     return parseAiJson(reply);
 }
@@ -452,6 +481,91 @@ async function ensureGrammarAvailable(lang, level) {
 
 function isGrammarLoading(lang, level) {
     return !!_grammarAutoGenLoading[lang + '|' + level];
+}
+
+// =====================================================================
+//  КОНСТРУКТОР РЕЧЕНЬ ("блоки" -> повне речення) — той самий принцип
+//  публікації, що й sharedGrammar/sharedAlphabet вище: адмін один раз
+//  генерує набір речень для мови+рівня і публікує його в Firestore,
+//  після чого його бачать усі користувачі. Педагогічна ідея (загальний,
+//  нічий не запатентований принцип): людина не заучує готові фрази
+//  напам'ять, а бачить речення розбитим на смислові шматки ("блоки") у
+//  переплутаному порядку і сама складає їх у правильну послідовність —
+//  від найпростіших речень (2-3 блоки) до дедалі довших у межах рівня,
+//  з природним повторенням уже відомих блоків у нових комбінаціях.
+// =====================================================================
+function sharedSentenceBuilderDocId(lang, level) { return `${lang}_${level}`; }
+
+async function loadSharedSentenceBuilder(lang, level) {
+    if (!firebaseReady || !firebaseDb) return null;
+    try {
+        const doc = await firebaseDb.collection('sharedSentenceBuilder').doc(sharedSentenceBuilderDocId(lang, level)).get();
+        if (doc.exists && Array.isArray(doc.data().sentences)) return doc.data().sentences;
+        return null;
+    } catch (e) {
+        console.error('[Конструктор речень] Помилка завантаження:', e);
+        return null;
+    }
+}
+
+async function saveSharedSentenceBuilder(lang, level, sentences) {
+    if (!firebaseReady || !firebaseDb) throw new Error('Firestore недоступний');
+    await firebaseDb.collection('sharedSentenceBuilder').doc(sharedSentenceBuilderDocId(lang, level)).set({
+        sentences, lang, level, updatedAt: new Date().toISOString(), count: sentences.length,
+    });
+}
+
+// Дзеркало ensureGrammarAvailable: тільки опубліковане адміном (або
+// нічого) — жодної особистої AI-генерації "про запас" на кожного
+// користувача, щоб не витрачати AI-квоту непередбачувано.
+let _sentenceBuilderLoading = {};
+async function ensureSentenceBuilderAvailable(lang, level) {
+    if (!lang) return;
+    if (!STATE.generatedSentenceSets) STATE.generatedSentenceSets = {};
+    if (!STATE.generatedSentenceSets[lang]) STATE.generatedSentenceSets[lang] = {};
+    if (STATE.generatedSentenceSets[lang][level] && STATE.generatedSentenceSets[lang][level].length) return;
+    const key = lang + '|' + level;
+    if (_sentenceBuilderLoading[key]) return;
+    _sentenceBuilderLoading[key] = true;
+    try {
+        const shared = await loadSharedSentenceBuilder(lang, level);
+        if (shared && shared.length) {
+            STATE.generatedSentenceSets[lang][level] = shared;
+            if (typeof render === 'function' && STATE.targetLang === lang &&
+                typeof ROUTE !== 'undefined' && ROUTE === 'sentence-builder') render();
+        }
+    } catch (e) {
+        console.error('[Конструктор речень] Не вдалося підготувати набір для', lang, level, e);
+    } finally {
+        _sentenceBuilderLoading[key] = false;
+    }
+}
+
+function isSentenceBuilderLoading(lang, level) {
+    return !!_sentenceBuilderLoading[lang + '|' + level];
+}
+
+// Генерація через AI — викликається лише з адмінки (initAdminSharedSentenceBuilder).
+async function generateSentenceBuilderWithAI(lang, level) {
+    const targetLangName = typeof getLanguage === 'function' ? getLanguage(lang).name.uk : lang;
+    const userMsg =
+        `Мова вивчення: "${targetLangName}". Рівень CEFR: ${level}. ` +
+        `Склади набір із 15 речень цією мовою для вправи "збери речення з блоків": ` +
+        `учень отримує розкидані шматки речення (blocks) і складає їх у правильному ` +
+        `порядку. Впорядкуй речення від НАЙПРОСТІШИХ (2-3 блоки) до дедалі складніших ` +
+        `(6-8 блоків) у межах рівня ${level}, і зроби так, щоб пізніші речення природно ` +
+        `повторювали слова й конструкції з попередніх у нових комбінаціях (а не щоразу ` +
+        `зовсім нову лексику). Речення мають бути практичними фразами з реального життя. ` +
+        `Розбивай на блоки за СМИСЛОВИМИ частинами, а не по одному слову — там, де це ` +
+        `природно, стійке словосполучення має бути ОДНИМ блоком (наприклад "в Осло", а не ` +
+        `"в" і "Осло" окремо). Масив "blocks" — у ПРАВИЛЬНОМУ порядку (переплутає сайт). ` +
+        `Формат масиву: [{"no": "повне речення мовою вивчення", "uk": "переклад українською", ` +
+        `"blocks": ["блок1", "блок2", ...]}, ...].`;
+    const sys = `Ти — досвідчений викладач мови "${targetLangName}", який складає вправи ` +
+        `на побудову речень із блоків для рівня CEFR. Відповідай ЛИШЕ чистим JSON-масивом ` +
+        `без жодного тексту навколо, без markdown-огорожі.`;
+    const reply = await callAiRaw('gen_sentence_builder', sys, userMsg, [], 'uk');
+    return parseAiJson(reply);
 }
 
 // =====================================================================
