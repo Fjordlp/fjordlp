@@ -85,7 +85,8 @@ function viewStory() {
         const newWordsList = chapterCard.querySelector('#storyNewWordsList');
         if (newWordsList && last.newWords) {
             last.newWords.forEach(w => {
-                const item = el(`<span style="display:inline-flex;align-items:center;gap:4px;"><strong>${escHtml(w.no)}</strong> — ${escHtml(w.uk)}</span>`);
+                const pron = wordPron(w);
+                const item = el(`<span style="display:inline-flex;align-items:center;gap:4px;"><strong>${escHtml(w.no)}</strong>${pron ? ` <span style="color:var(--ink-soft);font-size:.8rem;">[${escHtml(pron)}]</span>` : ''} — ${escHtml(w.uk)}</span>`);
                 const mic = renderMicButton(w.no, STATE.targetLang);
                 if (mic) { mic.style.padding = '2px 6px'; mic.style.fontSize = '.8rem'; item.appendChild(mic); }
                 newWordsList.appendChild(item);
