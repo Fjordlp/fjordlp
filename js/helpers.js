@@ -32,7 +32,6 @@ function shouldShowOnboarding() {
         if (STATE.stats && STATE.stats.wordsSeen && Object.keys(STATE.stats.wordsSeen).length > 0) return true;
         if (STATE.stats && STATE.stats.testsCompleted > 0) return true;
         if (STATE.customWords && STATE.customWords.length > 0) return true;
-        if (STATE.targetLang && STATE.targetLang !== 'no') return true;
         if (STATE.name && STATE.name !== 'Гість') return true;
         return false;
     })();
