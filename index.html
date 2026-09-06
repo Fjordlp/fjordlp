@@ -93,7 +93,56 @@
 <body>
    <!-- ===== AUTH PAGE ===== -->
    <div id="authPage" class="auth-page">
-      <!-- ... ваш код не змінюється ... -->
+
+       <!-- ---- Hero-секція лендингу ---- -->
+       <section class="auth-hero">
+           <div id="heroTroll" class="auth-hero-troll"></div>
+           <h1 class="auth-hero-title">FjordLP</h1>
+           <p class="auth-hero-subtitle">Картки, тести, граматика та AI-помічник. Створено для людей. Безкоштовно.</p>
+           <div class="auth-hero-actions">
+               <button id="heroTryBtn" class="btn btn-primary">Спробувати безкоштовно</button>
+               <button id="heroLoginBtn" class="btn btn-secondary">Увійти</button>
+           </div>
+       </section>
+
+       <!-- ---- Форма входу/реєстрації ---- -->
+       <div id="authBox" class="auth-box">
+           <h2 id="authTitle" class="auth-title">Вхід</h2>
+
+           <input
+               type="text"
+               id="authLogin"
+               class="auth-input"
+               placeholder="Email або ім'я користувача"
+               autocomplete="username"
+           >
+
+           <input
+               type="password"
+               id="authPassword"
+               class="auth-input"
+               placeholder="Пароль"
+               autocomplete="current-password"
+           >
+
+           <div id="authError" class="auth-error"></div>
+
+           <button id="authSubmit" class="btn btn-primary auth-submit">Увійти</button>
+
+           <a id="forgotPasswordLink" class="auth-link auth-forgot" href="#">Забули пароль?</a>
+
+           <div class="auth-divider">
+               <span>або</span>
+           </div>
+
+           <button id="guestBtn" class="btn btn-outline auth-guest">Продовжити як гість</button>
+
+           <p class="auth-toggle-text">
+               Немає акаунту?
+               <a id="authToggle" class="auth-link" href="#">Зареєструватися</a>
+           </p>
+       </div>
+
    </div>
 
    <!-- ===== APP ===== -->
