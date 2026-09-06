@@ -1,4 +1,3 @@
-
 // =====================================================================
 //  js/data-fr.js — ФРАНЦУЗЬКА МОВА (ПОВНИЙ НАБІР)
 //  Повністю сумісний з js/data.js для норвезької.
@@ -109,6 +108,30 @@
             { t: "Транспорт", no: "le bus", uk: "автобус", en: "bus", ru: "автобус", ex_no: "Je prends le bus pour aller à l'école.", ex_uk: "Я їду автобусом до школи.", en_ex: "I take the bus to school.", ru_ex: "Я еду автобусом в школу." },
             { t: "Транспорт", no: "le train", uk: "поїзд", en: "train", ru: "поезд", ex_no: "Le train part à huit heures.", ex_uk: "Поїзд відправляється о восьмій.", en_ex: "The train leaves at eight.", ru_ex: "Поезд отправляется в восемь." },
             { t: "Транспорт", no: "le vélo", uk: "велосипед", en: "bicycle", ru: "велосипед", ex_no: "Je vais au travail à vélo.", ex_uk: "Я їду на велосипеді на роботу.", en_ex: "I ride my bicycle to work.", ru_ex: "Я еду на велосипеде на работу." },
+            // Animals
+            { t: "Тварини", no: "le chat", uk: "кіт", en: "cat", ru: "кот", ex_no: "Mon chat dort sur le canapé.", ex_uk: "Мій кіт спить на дивані.", en_ex: "My cat sleeps on the couch.", ru_ex: "Мой кот спит на диване." },
+            { t: "Тварини", no: "le chien", uk: "собака", en: "dog", ru: "собака", ex_no: "Le chien court dans le jardin.", ex_uk: "Собака бігає в саду.", en_ex: "The dog runs in the garden.", ru_ex: "Собака бегает в саду." },
+            { t: "Тварини", no: "l'oiseau", uk: "птах", en: "bird", ru: "птица", ex_no: "L'oiseau chante le matin.", ex_uk: "Птах співає вранці.", en_ex: "The bird sings in the morning.", ru_ex: "Птица поёт утром." },
+            { t: "Тварини", no: "le cheval", uk: "кінь", en: "horse", ru: "лошадь", ex_no: "Le cheval mange de l'herbe.", ex_uk: "Кінь їсть траву.", en_ex: "The horse eats grass.", ru_ex: "Лошадь ест траву." },
+            { t: "Тварини", no: "le poisson", uk: "риба", en: "fish", ru: "рыба", ex_no: "Le poisson nage dans l'aquarium.", ex_uk: "Риба плаває в акваріумі.", en_ex: "The fish swims in the aquarium.", ru_ex: "Рыба плавает в аквариуме." },
+            // Clothes
+            { t: "Одяг", no: "la chemise", uk: "сорочка", en: "shirt", ru: "рубашка", ex_no: "Il porte une chemise bleue.", ex_uk: "Він носить синю сорочку.", en_ex: "He is wearing a blue shirt.", ru_ex: "Он носит синюю рубашку." },
+            { t: "Одяг", no: "le pantalon", uk: "штани", en: "trousers", ru: "брюки", ex_no: "Ce pantalon est trop long.", ex_uk: "Ці штани надто довгі.", en_ex: "These trousers are too long.", ru_ex: "Эти брюки слишком длинные." },
+            { t: "Одяг", no: "la robe", uk: "сукня", en: "dress", ru: "платье", ex_no: "Elle achète une nouvelle robe.", ex_uk: "Вона купує нову сукню.", en_ex: "She is buying a new dress.", ru_ex: "Она покупает новое платье." },
+            { t: "Одяг", no: "les chaussures", uk: "взуття", en: "shoes", ru: "обувь", ex_no: "Mes chaussures sont neuves.", ex_uk: "Моє взуття нове.", en_ex: "My shoes are new.", ru_ex: "Моя обувь новая." },
+            { t: "Одяг", no: "le manteau", uk: "пальто", en: "coat", ru: "пальто", ex_no: "Prends ton manteau, il fait froid.", ex_uk: "Візьми пальто, надворі холодно.", en_ex: "Take your coat, it's cold outside.", ru_ex: "Возьми пальто, на улице холодно." },
+            // School
+            { t: "Школа", no: "l'école", uk: "школа", en: "school", ru: "школа", ex_no: "Les enfants vont à l'école à pied.", ex_uk: "Діти йдуть до школи пішки.", en_ex: "The children walk to school.", ru_ex: "Дети идут в школу пешком." },
+            { t: "Школа", no: "le livre", uk: "книга", en: "book", ru: "книга", ex_no: "Je lis un livre intéressant.", ex_uk: "Я читаю цікаву книгу.", en_ex: "I'm reading an interesting book.", ru_ex: "Я читаю интересную книгу." },
+            { t: "Школа", no: "le stylo", uk: "ручка", en: "pen", ru: "ручка", ex_no: "Peux-tu me prêter un stylo?", ex_uk: "Можеш позичити мені ручку?", en_ex: "Can you lend me a pen?", ru_ex: "Можешь одолжить мне ручку?" },
+            { t: "Школа", no: "le professeur", uk: "вчитель", en: "teacher", ru: "учитель", ex_no: "Le professeur explique la leçon.", ex_uk: "Вчитель пояснює урок.", en_ex: "The teacher explains the lesson.", ru_ex: "Учитель объясняет урок." },
+            { t: "Школа", no: "l'élève", uk: "учень", en: "student", ru: "ученик", ex_no: "L'élève pose une question.", ex_uk: "Учень ставить запитання.", en_ex: "The student asks a question.", ru_ex: "Ученик задаёт вопрос." },
+            // Nature & weather (basics)
+            { t: "Природа", no: "le soleil", uk: "сонце", en: "sun", ru: "солнце", ex_no: "Le soleil brille aujourd'hui.", ex_uk: "Сьогодні світить сонце.", en_ex: "The sun is shining today.", ru_ex: "Сегодня светит солнце." },
+            { t: "Природа", no: "la pluie", uk: "дощ", en: "rain", ru: "дождь", ex_no: "J'aime le bruit de la pluie.", ex_uk: "Мені подобається звук дощу.", en_ex: "I like the sound of rain.", ru_ex: "Мне нравится звук дождя." },
+            { t: "Природа", no: "l'arbre", uk: "дерево", en: "tree", ru: "дерево", ex_no: "Il y a un grand arbre devant la maison.", ex_uk: "Перед будинком росте велике дерево.", en_ex: "There is a big tree in front of the house.", ru_ex: "Перед домом растёт большое дерево." },
+            { t: "Природа", no: "la fleur", uk: "квітка", en: "flower", ru: "цветок", ex_no: "Elle offre une fleur à sa mère.", ex_uk: "Вона дарує квітку мамі.", en_ex: "She gives a flower to her mother.", ru_ex: "Она дарит цветок маме." },
+            { t: "Природа", no: "la mer", uk: "море", en: "sea", ru: "море", ex_no: "Nous passons l'été au bord de la mer.", ex_uk: "Ми проводимо літо біля моря.", en_ex: "We spend the summer by the sea.", ru_ex: "Мы проводим лето у моря." },
         ],
         // -------------------- A2 --------------------
         A2: [
@@ -162,6 +185,16 @@
             { t: "Здоров'я", no: "le médecin", uk: "лікар", en: "doctor", ru: "врач", ex_no: "Je dois voir un médecin.", ex_uk: "Мені потрібно піти до лікаря.", en_ex: "I need to see a doctor.", ru_ex: "Мне нужно пойти к врачу." },
             { t: "Здоров'я", no: "le médicament", uk: "ліки", en: "medicine", ru: "лекарство", ex_no: "Prends ce médicament trois fois par jour.", ex_uk: "Приймай ці ліки тричі на день.", en_ex: "Take this medicine three times a day.", ru_ex: "Принимай это лекарство три раза в день." },
             { t: "Здоров'я", no: "la fièvre", uk: "температура", en: "fever", ru: "температура", ex_no: "Il a de la fièvre.", ex_uk: "У нього температура.", en_ex: "He has a fever.", ru_ex: "У него температура." },
+            // Sport
+            { t: "Спорт", no: "le football", uk: "футбол", en: "football", ru: "футбол", ex_no: "Il joue au football tous les week-ends.", ex_uk: "Він грає у футбол щовихідних.", en_ex: "He plays football every weekend.", ru_ex: "Он играет в футбол каждые выходные." },
+            { t: "Спорт", no: "nager", uk: "плавати", en: "to swim", ru: "плавать", ex_no: "Elle aime nager le matin.", ex_uk: "Вона любить плавати вранці.", en_ex: "She likes to swim in the morning.", ru_ex: "Она любит плавать по утрам." },
+            { t: "Спорт", no: "courir", uk: "бігати", en: "to run", ru: "бегать", ex_no: "Je cours cinq kilomètres chaque jour.", ex_uk: "Я бігаю п'ять кілометрів щодня.", en_ex: "I run five kilometers every day.", ru_ex: "Я бегаю пять километров каждый день." },
+            { t: "Спорт", no: "l'équipe", uk: "команда", en: "team", ru: "команда", ex_no: "Notre équipe a gagné le match.", ex_uk: "Наша команда виграла матч.", en_ex: "Our team won the match.", ru_ex: "Наша команда выиграла матч." },
+            // Furniture
+            { t: "Меблі", no: "la table", uk: "стіл", en: "table", ru: "стол", ex_no: "Les clés sont sur la table.", ex_uk: "Ключі на столі.", en_ex: "The keys are on the table.", ru_ex: "Ключи на столе." },
+            { t: "Меблі", no: "la chaise", uk: "стілець", en: "chair", ru: "стул", ex_no: "Assieds-toi sur cette chaise.", ex_uk: "Сідай на цей стілець.", en_ex: "Sit on this chair.", ru_ex: "Садись на этот стул." },
+            { t: "Меблі", no: "le lit", uk: "ліжко", en: "bed", ru: "кровать", ex_no: "Le chat dort sur le lit.", ex_uk: "Кіт спить на ліжку.", en_ex: "The cat is sleeping on the bed.", ru_ex: "Кот спит на кровати." },
+            { t: "Меблі", no: "l'armoire", uk: "шафа", en: "wardrobe", ru: "шкаф", ex_no: "Range tes vêtements dans l'armoire.", ex_uk: "Поклади свій одяг у шафу.", en_ex: "Put your clothes in the wardrobe.", ru_ex: "Положи свою одежду в шкаф." },
         ],
         // -------------------- B1 --------------------
         B1: [
@@ -206,6 +239,13 @@
             { t: "Кар'єра", no: "l'entretien", uk: "співбесіда", en: "interview", ru: "собеседование", ex_no: "L'entretien s'est bien passé.", ex_uk: "Співбесіда пройшла добре.", en_ex: "The interview went well.", ru_ex: "Собеседование прошло хорошо." },
             { t: "Кар'єра", no: "le collègue", uk: "колега", en: "colleague", ru: "коллега", ex_no: "Mes collègues sont sympathiques.", ex_uk: "Мої колеги привітні.", en_ex: "My colleagues are friendly.", ru_ex: "Мои коллеги приветливы." },
             { t: "Кар'єра", no: "la candidature", uk: "заявка", en: "application", ru: "заявка", ex_no: "J'ai envoyé ma candidature hier.", ex_uk: "Я подав заявку вчора.", en_ex: "I submitted my application yesterday.", ru_ex: "Я подал заявку вчера." },
+            // Nature & environment (extra B1 depth)
+            { t: "Довкілля", no: "le climat", uk: "клімат", en: "climate", ru: "климат", ex_no: "Le climat change rapidement.", ex_uk: "Клімат швидко змінюється.", en_ex: "The climate is changing rapidly.", ru_ex: "Климат быстро меняется." },
+            { t: "Довкілля", no: "la forêt", uk: "ліс", en: "forest", ru: "лес", ex_no: "Nous nous promenons souvent dans la forêt.", ex_uk: "Ми часто гуляємо в лісі.", en_ex: "We often walk in the forest.", ru_ex: "Мы часто гуляем в лесу." },
+            // Everyday life
+            { t: "Побут", no: "faire le ménage", uk: "прибирати", en: "to do the housework", ru: "убирать дом", ex_no: "Je fais le ménage le samedi matin.", ex_uk: "Я прибираю в суботу вранці.", en_ex: "I do the housework on Saturday morning.", ru_ex: "Я убираю дом в субботу утром." },
+            { t: "Побут", no: "la lessive", uk: "прання", en: "laundry", ru: "стирка", ex_no: "Il fait la lessive une fois par semaine.", ex_uk: "Він прає одяг раз на тиждень.", en_ex: "He does the laundry once a week.", ru_ex: "Он стирает раз в неделю." },
+            { t: "Побут", no: "la facture", uk: "рахунок", en: "bill", ru: "счёт", ex_no: "Je dois payer la facture d'électricité.", ex_uk: "Мені треба сплатити рахунок за електрику.", en_ex: "I need to pay the electricity bill.", ru_ex: "Мне нужно оплатить счёт за электричество." },
         ],
         // -------------------- B2 --------------------
         B2: [
@@ -243,6 +283,10 @@
             { t: "Медицина", no: "chronique", uk: "хронічний", en: "chronic", ru: "хронический", ex_no: "Il a une maladie chronique.", ex_uk: "Він має хронічну хворобу.", en_ex: "He has a chronic illness.", ru_ex: "У него хроническое заболевание." },
             { t: "Медицина", no: "l'épidémie", uk: "епідемія", en: "epidemic", ru: "эпидемия", ex_no: "L'épidémie s'est propagée rapidement.", ex_uk: "Епідемія швидко поширилася.", en_ex: "The epidemic spread quickly.", ru_ex: "Эпидемия быстро распространилась." },
             { t: "Медицина", no: "la prévention", uk: "профілактика", en: "prevention", ru: "профилактика", ex_no: "La prévention vaut mieux que la guérison.", ex_uk: "Профілактика краща за лікування.", en_ex: "Prevention is better than cure.", ru_ex: "Профилактика лучше лечения." },
+            // Technology (extra B2 depth)
+            { t: "Технології", no: "le logiciel", uk: "програмне забезпечення", en: "software", ru: "программное обеспечение", ex_no: "Cette entreprise développe des logiciels.", ex_uk: "Ця компанія розробляє програмне забезпечення.", en_ex: "This company develops software.", ru_ex: "Эта компания разрабатывает программное обеспечение." },
+            { t: "Технології", no: "le réseau", uk: "мережа", en: "network", ru: "сеть", ex_no: "Le réseau est instable aujourd'hui.", ex_uk: "Сьогодні мережа нестабільна.", en_ex: "The network is unstable today.", ru_ex: "Сегодня сеть нестабильна." },
+            { t: "Технології", no: "sécurisé", uk: "захищений", en: "secure", ru: "защищённый", ex_no: "Assure-toi que ton mot de passe est sécurisé.", ex_uk: "Переконайся, що твій пароль захищений.", en_ex: "Make sure your password is secure.", ru_ex: "Убедись, что твой пароль защищён." },
         ],
         // -------------------- C1 --------------------
         C1: [
@@ -279,6 +323,10 @@
             { t: "Психологія", no: "l'émotion", uk: "емоція", en: "emotion", ru: "эмоция", ex_no: "Les émotions influencent nos décisions.", ex_uk: "Емоції впливають на наш вибір.", en_ex: "Emotions influence our choices.", ru_ex: "Эмоции влияют на наш выбор." },
             { t: "Психологія", no: "le comportement", uk: "поведінка", en: "behavior", ru: "поведение", ex_no: "Son comportement était inattendu.", ex_uk: "Його поведінка була несподіваною.", en_ex: "His behavior was unexpected.", ru_ex: "Его поведение было неожиданным." },
             { t: "Психологія", no: "la motivation", uk: "мотивація", en: "motivation", ru: "мотивация", ex_no: "La motivation vient de l'intérieur.", ex_uk: "Мотивація походить зсередини.", en_ex: "Motivation comes from within.", ru_ex: "Мотивация исходит изнутри." },
+            // Additional C1 vocabulary (rhetoric & argumentation)
+            { t: "Дискурс", no: "néanmoins", uk: "проте", en: "nevertheless", ru: "тем не менее", ex_no: "Néanmoins, il a décidé de continuer.", ex_uk: "Проте він вирішив продовжити.", en_ex: "Nevertheless, he decided to continue.", ru_ex: "Тем не менее, он решил продолжить." },
+            { t: "Дискурс", no: "par conséquent", uk: "отже", en: "consequently", ru: "следовательно", ex_no: "Il n'a pas étudié, par conséquent il a échoué.", ex_uk: "Він не вчився, отже провалив іспит.", en_ex: "He didn't study, consequently he failed.", ru_ex: "Он не учился, следовательно провалил экзамен." },
+            { t: "Нюанси", no: "nuancé", uk: "виважений", en: "nuanced", ru: "взвешенный", ex_no: "Son analyse est nuancée et bien argumentée.", ex_uk: "Його аналіз виважений і добре аргументований.", en_ex: "His analysis is nuanced and well argued.", ru_ex: "Его анализ взвешен и хорошо аргументирован." },
         ],
         // -------------------- C2 --------------------
         C2: [
@@ -289,6 +337,7 @@
             { t: "Ідіоми", no: "avoir une grande influence", uk: "мати великий вплив", en: "to hold great sway", ru: "иметь большое влияние", ex_no: "Il a une grande influence dans le secteur.", ex_uk: "Він має величезний вплив у галузі.", en_ex: "He holds great sway in the industry.", ru_ex: "Он имеет большое влияние в отрасли." },
             { t: "Ідіоми", no: "peindre un tableau sombre", uk: "згущувати фарби", en: "to paint a bleak picture", ru: "сгущать краски", ex_no: "Ne peins pas un tableau sombre; tout s'arrangera.", ex_uk: "Не згущуй фарби; все владнається.", en_ex: "Don't paint a bleak picture; it'll work out.", ru_ex: "Не сгущай краски; всё уладится." },
             { t: "Ідіоми", no: "jeter l'éponge", uk: "здатися", en: "to throw in the towel", ru: "сдаться", ex_no: "Après plusieurs défaites, il a jeté l'éponge.", ex_uk: "Після кількох поразок він здався.", en_ex: "After several defeats, he threw in the towel.", ru_ex: "После нескольких поражений он сдался." },
+            { t: "Ідіоми", no: "avoir le cœur sur la main", uk: "мати добре серце", en: "to wear one's heart on one's sleeve", ru: "иметь доброе сердце", ex_no: "Elle a le cœur sur la main, elle aide toujours les autres.", ex_uk: "Вона має добре серце, завжди допомагає іншим.", en_ex: "She wears her heart on her sleeve, always helping others.", ru_ex: "У неё доброе сердце, она всегда помогает другим." },
             // Stylistics
             { t: "Стилістика", no: "la fiction", uk: "художня література", en: "fiction", ru: "художественная литература", ex_no: "Elle préfère la fiction à la non-fiction.", ex_uk: "Вона надає перевагу художній літературі перед науковою.", en_ex: "She prefers fiction to non-fiction.", ru_ex: "Она предпочитает художественную литературу научной." },
             { t: "Стилістика", no: "la satire", uk: "сатира", en: "satire", ru: "сатира", ex_no: "L'émission utilise la satire pour commenter la politique.", ex_uk: "Шоу використовує сатиру для коментування політики.", en_ex: "The show uses satire to comment on politics.", ru_ex: "Шоу использует сатиру для комментирования политики." },
@@ -335,6 +384,21 @@
             q_en: "Je ___ étudiant.",
             q_ru: "Je ___ étudiant.",
         },
+        {
+            id: "fr_gr1b", level: "A1",
+            title: "Les articles (un, une, des / le, la, les)",
+            exp: "Le français distingue le masculin et le féminin. Les articles indéfinis (un, une, des) présentent une chose non précise; les articles définis (le, la, les) désignent une chose précise déjà connue.",
+            table: { head: ["Genre", "Indéfini", "Défini"], rows: [["masculin", "un livre", "le livre"], ["féminin", "une pomme", "la pomme"], ["pluriel", "des amis", "les amis"]] },
+            ex: { q: "J'ai ___ chat noir.", opts: ["un", "une", "des"], a: 0 },
+            title_en: "Articles (un, une, des / le, la, les)",
+            title_ru: "Артикли (un, une, des / le, la, les)",
+            exp_en: "French distinguishes masculine and feminine. Indefinite articles (un, une, des) introduce something unspecified; definite articles (le, la, les) refer to something specific already known.",
+            exp_ru: "Французский язык различает мужской и женский род. Неопределённые артикли (un, une, des) вводят что-то неконкретное; определённые (le, la, les) — что-то конкретное, уже известное.",
+            head_en: ["Gender", "Indefinite", "Definite"],
+            head_ru: ["Род", "Неопределённый", "Определённый"],
+            q_en: "J'ai ___ chat noir.",
+            q_ru: "J'ai ___ chat noir.",
+        },
         // A2
         {
             id: "fr_gr2", level: "A2",
@@ -351,6 +415,36 @@
             q_en: "J'___ (manger) une pomme.",
             q_ru: "J'___ (manger) une pomme.",
         },
+        {
+            id: "fr_gr2b", level: "A2",
+            title: "Le futur proche (aller + infinitif)",
+            exp: "Le futur proche exprime une action prévue dans un avenir proche. Il se forme avec le verbe aller au présent + l'infinitif du verbe principal.",
+            table: { head: ["Pronom", "Aller", "Exemple"], rows: [["je", "vais", "je vais partir"], ["tu", "vas", "tu vas partir"], ["il/elle", "va", "il va partir"], ["nous", "allons", "nous allons partir"]] },
+            ex: { q: "Demain, je ___ visiter le musée.", opts: ["vais", "suis", "ai"], a: 0 },
+            title_en: "The near future (aller + infinitive)",
+            title_ru: "Ближайшее будущее время (aller + инфинитив)",
+            exp_en: "The near future expresses an action planned for the near future. It is formed with the present tense of aller + the infinitive of the main verb.",
+            exp_ru: "Ближайшее будущее выражает действие, запланированное на ближайшее будущее. Образуется глаголом aller в настоящем времени + инфинитив основного глагола.",
+            head_en: ["Pronoun", "Aller", "Example"],
+            head_ru: ["Местоимение", "Aller", "Пример"],
+            q_en: "Demain, je ___ visiter le musée.",
+            q_ru: "Demain, je ___ visiter le musée.",
+        },
+        {
+            id: "fr_gr3b", level: "B1",
+            title: "Les pronoms relatifs (qui, que, où)",
+            exp: "Les pronoms relatifs relient deux phrases. Qui remplace le sujet, que remplace le complément d'objet direct, où remplace un lieu ou un moment.",
+            table: { head: ["Pronom", "Fonction", "Exemple"], rows: [["qui", "sujet", "La femme qui parle"], ["que", "complément", "Le livre que je lis"], ["où", "lieu/temps", "La ville où j'habite"]] },
+            ex: { q: "C'est la maison ___ j'ai grandi.", opts: ["où", "qui", "que"], a: 0 },
+            title_en: "Relative pronouns (qui, que, où)",
+            title_ru: "Относительные местоимения (qui, que, où)",
+            exp_en: "Relative pronouns connect two clauses. Qui replaces the subject, que replaces the direct object, où replaces a place or time.",
+            exp_ru: "Относительные местоимения соединяют два предложения. Qui заменяет подлежащее, que — прямое дополнение, où — место или время.",
+            head_en: ["Pronoun", "Function", "Example"],
+            head_ru: ["Местоимение", "Функция", "Пример"],
+            q_en: "C'est la maison ___ j'ai grandi.",
+            q_ru: "C'est la maison ___ j'ai grandi.",
+        },
         // B1
         {
             id: "fr_gr3", level: "B1",
@@ -366,6 +460,21 @@
             head_ru: ["Местоимение", "Parler"],
             q_en: "Quand j'étais jeune, je ___ (jouer) au football.",
             q_ru: "Quand j'étais jeune, je ___ (jouer) au football.",
+        },
+        {
+            id: "fr_gr4b", level: "B2",
+            title: "Le subjonctif présent",
+            exp: "Le subjonctif exprime le doute, le souhait, l'obligation ou l'émotion. Il apparaît après des expressions comme il faut que, je veux que, je doute que.",
+            table: { head: ["Pronom", "Parler (subj.)", "Finir (subj.)"], rows: [["que je", "parle", "finisse"], ["que tu", "parles", "finisses"], ["qu'il/elle", "parle", "finisse"], ["que nous", "parlions", "finissions"]] },
+            ex: { q: "Il faut que tu ___ (finir) ce travail.", opts: ["finisses", "finis", "finiras"], a: 0 },
+            title_en: "The present subjunctive",
+            title_ru: "Настоящее время сослагательного наклонения (subjonctif)",
+            exp_en: "The subjunctive expresses doubt, wish, obligation, or emotion. It appears after expressions like il faut que, je veux que, je doute que.",
+            exp_ru: "Сослагательное наклонение выражает сомнение, желание, обязанность или эмоцию. Оно появляется после выражений типа il faut que, je veux que, je doute que.",
+            head_en: ["Pronoun", "Parler (subj.)", "Finir (subj.)"],
+            head_ru: ["Местоимение", "Parler (subj.)", "Finir (subj.)"],
+            q_en: "Il faut que tu ___ (finir) ce travail.",
+            q_ru: "Il faut que tu ___ (finir) ce travail.",
         },
         // B2
         {
@@ -398,6 +507,21 @@
             head_ru: ["Местоимение", "Parler"],
             q_en: "Il aurait souhaité que je ___ (venir).",
             q_ru: "Il aurait souhaité que je ___ (venir).",
+        },
+        {
+            id: "fr_gr5b", level: "C1",
+            title: "La voix passive",
+            exp: "La voix passive met en avant l'objet de l'action plutôt que le sujet qui l'exécute. Elle se forme avec être + participe passé, souvent suivi de par + agent.",
+            table: { head: ["Voix active", "Voix passive"], rows: [["Le chat mange la souris.", "La souris est mangée par le chat."], ["On construit la maison.", "La maison est construite."]] },
+            ex: { q: "Le livre ___ (écrire) par un auteur célèbre.", opts: ["a été écrit", "a écrit", "écrit"], a: 0 },
+            title_en: "The passive voice",
+            title_ru: "Страдательный залог",
+            exp_en: "The passive voice emphasizes the object of the action rather than the subject performing it. It is formed with être + past participle, often followed by par + agent.",
+            exp_ru: "Страдательный залог подчёркивает объект действия, а не того, кто его совершает. Образуется глаголом être + причастие прошедшего времени, часто с par + деятель.",
+            head_en: ["Active voice", "Passive voice"],
+            head_ru: ["Действительный залог", "Страдательный залог"],
+            q_en: "Le livre ___ (écrire) par un auteur célèbre.",
+            q_ru: "Le livre ___ (écrire) par un auteur célèbre.",
         },
         // C2
         {
@@ -676,14 +800,22 @@
             id: 2,
             level: 'A1',
             title: 'Алфавіт і вимова',
+            title_en: 'Alphabet and pronunciation',
+            title_ru: 'Алфавит и произношение',
             content: 'Французький алфавіт — стандартні 26 латинських літер, але вимова сильно залежить від діакритичних знаків над голосними.\n\n| é | закрите "е" | café (кава) |\n| è, ê | відкрите "е" | mère (мати) |\n| ç | "с" (навіть перед a/o/u) | garçon (хлопчик) |\n\nОсобливості французької вимови:\n\n| h | не вимовляється взагалі | homme (чоловік) |\n| an, on, in | носові звуки (голосна + "н" одночасно) | maison (будинок) |\n| ou | "у" | vous (ви) |\n| eau | "о" | eau (вода) |\n\n> Порада: більшість приголосних у кінці слова НЕ вимовляються (petit звучить як "пті", не "петіт"). Це головна складність французької вимови для новачків.\n\nПрактика: спробуй прочитати вголос ~Je m\'appelle Marie~ (мене звати Марі) — зверни увагу, що кінцеве "e" майже не чутне.',
+            content_en: 'The French alphabet has the standard 26 Latin letters, but pronunciation depends heavily on the diacritical marks above vowels.\n\n| é | closed "e" | café (coffee) |\n| è, ê | open "e" | mère (mother) |\n| ç | "s" sound (even before a/o/u) | garçon (boy) |\n\nOther quirks of French pronunciation:\n\n| h | never pronounced | homme (man) |\n| an, on, in | nasal sounds (vowel + "n" pronounced together) | maison (house) |\n| ou | "oo" | vous (you) |\n| eau | "o" | eau (water) |\n\n> Tip: most consonants at the end of a word are NOT pronounced (petit sounds like "ptee", not "peh-teet"). This is the main pronunciation challenge for beginners.\n\nPractice: try reading ~Je m\'appelle Marie~ (my name is Marie) out loud — notice how the final "e" is almost silent.',
+            content_ru: 'Французский алфавит — стандартные 26 латинских букв, но произношение сильно зависит от диакритических знаков над гласными.\n\n| é | закрытое "е" | café (кофе) |\n| è, ê | открытое "е" | mère (мать) |\n| ç | "с" (даже перед a/o/u) | garçon (мальчик) |\n\nОсобенности французского произношения:\n\n| h | не произносится вообще | homme (мужчина) |\n| an, on, in | носовые звуки (гласная + "н" одновременно) | maison (дом) |\n| ou | "у" | vous (вы) |\n| eau | "о" | eau (вода) |\n\n> Совет: большинство согласных в конце слова НЕ произносятся (petit звучит как "пти", не "петит"). Это главная сложность французского произношения для новичков.\n\nПрактика: попробуй прочитать вслух ~Je m\'appelle Marie~ (меня зовут Мари) — обрати внимание, что конечное "e" почти не слышно.',
             tasks: [],
         },
         {
             id: 3,
             level: 'A1',
             title: 'Привітання і знайомство',
+            title_en: 'Greetings and introductions',
+            title_ru: 'Приветствия и знакомство',
             content: 'Найпоширеніше привітання — просте ~Bonjour~ (добрий день), яке підходить у більшості ситуацій вдень. Увечері кажуть ~Bonsoir~.\n\n| Salut | Привіт (неформально) |\n| Au revoir | До побачення |\n| Bonne nuit | На добраніч |\n| À bientôt | До скорого |\n| À demain | До завтра |\n\nЩоб представитися, використовуй зворотне дієслово ~s\'appeler~ (називатися):\n\n| Je m\'appelle Marie. | Мене звати Марі. |\n| Comment tu t\'appelles? | Як тебе звати? |\n| Enchanté(e). | Приємно познайомитись. |\n\nЗапитати, як справи:\n\n| Comment ça va? | Як справи? |\n| Ça va bien, merci. Et toi? | Добре, дякую! А в тебе? |\n\n> Порада: ~merci~ (дякую) та ~s\'il te plaît~ (будь ласка) — обов\'язкові слова в будь-якій розмові французькою, навіть найкоротшій.\n\nПрактика: складіть коротенький діалог знайомства з двох-трьох реплік, використовуючи фрази вище.',
+            content_en: 'The most common greeting is simply ~Bonjour~ (good day), which fits most daytime situations. In the evening, people say ~Bonsoir~.\n\n| Salut | Hi (informal) |\n| Au revoir | Goodbye |\n| Bonne nuit | Good night |\n| À bientôt | See you soon |\n| À demain | See you tomorrow |\n\nTo introduce yourself, use the reflexive verb ~s\'appeler~ (to be called):\n\n| Je m\'appelle Marie. | My name is Marie. |\n| Comment tu t\'appelles? | What is your name? |\n| Enchanté(e). | Nice to meet you. |\n\nTo ask how someone is doing:\n\n| Comment ça va? | How are you? |\n| Ça va bien, merci. Et toi? | Good, thanks! And you? |\n\n> Tip: ~merci~ (thank you) and ~s\'il te plaît~ (please) are essential words in any French conversation, even the shortest one.\n\nPractice: write a short two-or-three-line introduction dialogue using the phrases above.',
+            content_ru: 'Самое распространённое приветствие — простое ~Bonjour~ (добрый день), которое подходит для большинства ситуаций днём. Вечером говорят ~Bonsoir~.\n\n| Salut | Привет (неформально) |\n| Au revoir | До свидания |\n| Bonne nuit | Спокойной ночи |\n| À bientôt | До скорого |\n| À demain | До завтра |\n\nЧтобы представиться, используй возвратный глагол ~s\'appeler~ (называться):\n\n| Je m\'appelle Marie. | Меня зовут Мари. |\n| Comment tu t\'appelles? | Как тебя зовут? |\n| Enchanté(e). | Приятно познакомиться. |\n\nСпросить, как дела:\n\n| Comment ça va? | Как дела? |\n| Ça va bien, merci. Et toi? | Хорошо, спасибо! А у тебя? |\n\n> Совет: ~merci~ (спасибо) и ~s\'il te plaît~ (пожалуйста) — обязательные слова в любом разговоре по-французски, даже самом коротком.\n\nПрактика: составь короткий диалог знакомства из двух-трёх реплик, используя фразы выше.',
             tasks: [],
         },
 

@@ -21,6 +21,19 @@ const UI_STRINGS = {
         toggle_to_login: 'Вже є акаунт? Увійти',
         guest_btn: 'Продовжити як гість', or_divider: 'або',
         footer_note: 'Fjord · ваш прогрес зберігається локально під вашим логіном',
+        fill_both_fields: 'Заповніть обидва поля', please_wait: '⏳ Зачекайте...',
+        firebase_not_ready_retry: '⏳ Firebase ще не готовий, зачекайте кілька секунд і спробуйте знову.',
+        firebase_not_ready_toast: '⏳ Firebase ще не готовий, спробуйте пізніше.',
+        auth_generic_error: '⏳ Помилка авторизації, перезавантажте сторінку.',
+        invalid_login_password: 'Невірний логін або пароль', register_error_generic: 'Помилка реєстрації',
+        welcome_guest_toast: 'Ласкаво просимо! Ви в режимі гостя. Дані зберігаються локально.',
+        welcome_user_toast: 'Ласкаво просимо, {name}!', register_success_toast: 'Реєстрація успішна! Тепер увійдіть.',
+        logged_out_toast: 'Ви вийшли з акаунта',
+        reset_email_prompt: 'Введіть вашу електронну пошту, щоб отримати посилання для скидання пароля:',
+        reset_email_sent: '✅ Посилання для скидання пароля надіслано на вашу пошту!',
+        reset_error_prefix: '❌ Помилка: ', reset_user_not_found: 'Користувача з такою поштою не знайдено.',
+        reset_invalid_email: 'Невірний формат електронної пошти.',
+        guest_name: 'Гість', player_name: 'Гравець',
         save_btn: 'Зберегти', cancel_btn: 'Скасувати', clear_chat: 'Очистити чат',
         assistant_title: 'Тролль-помічник', assistant_placeholder: 'Напиши повідомлення тролю…',
         assistant_sub: 'Онлайн-тролль, одягнений так само, як у вкладці «Тролль». Запитай про граматику, слова, переклад чи просто попроси підказку — і продовжуй те, чим займався.',
@@ -118,6 +131,10 @@ const UI_STRINGS = {
         test_mc_title: 'Вибір форми', test_mc_desc: 'Оберіть правильний переклад або форму.',
         test_cloze_title: 'Заповни пропуск', test_cloze_desc: 'Вставте пропущене слово.',
         test_order_title: 'Склади речення', test_order_desc: 'Розташуйте слова у правильному порядку.',
+        sb_title: 'Конструктор речень', sb_loading: 'Завантажуємо набір речень для вашої мови…',
+        sb_empty: 'Для {lang} (рівень {level}) ще не опубліковано набір речень — зазирни пізніше.',
+        sb_tap_hint: 'Тапни блоки знизу, щоб скласти речення', sb_check_btn: 'Перевірити',
+        sb_correct_was: 'Правильно було', sb_correct_label: '✅ Правильно!',
         test_listen_title: 'Аудіювання', test_listen_desc: 'Прослухайте слово і оберіть переклад.',
         test_translate_title: 'Переклад', test_translate_desc: 'Напишіть переклад слова.',
         start_test_btn: 'Почати', quiz_preparing_title: 'Готуємо слова…',
@@ -158,6 +175,19 @@ const UI_STRINGS = {
         toggle_to_login: 'Already have an account? Log in',
         guest_btn: 'Continue as guest', or_divider: 'or',
         footer_note: 'Fjord · your progress is stored locally under your login',
+        fill_both_fields: 'Fill in both fields', please_wait: '⏳ Please wait...',
+        firebase_not_ready_retry: '⏳ Firebase is not ready yet, wait a few seconds and try again.',
+        firebase_not_ready_toast: '⏳ Firebase is not ready yet, try again later.',
+        auth_generic_error: '⏳ Authorization error, please reload the page.',
+        invalid_login_password: 'Incorrect username or password', register_error_generic: 'Registration error',
+        welcome_guest_toast: "Welcome! You're in guest mode. Your data is stored locally.",
+        welcome_user_toast: 'Welcome, {name}!', register_success_toast: 'Registration successful! Now log in.',
+        logged_out_toast: 'You have been logged out',
+        reset_email_prompt: 'Enter your email to receive a password reset link:',
+        reset_email_sent: '✅ Password reset link sent to your email!',
+        reset_error_prefix: '❌ Error: ', reset_user_not_found: 'No user found with that email.',
+        reset_invalid_email: 'Invalid email format.',
+        guest_name: 'Guest', player_name: 'Player',
         save_btn: 'Save', cancel_btn: 'Cancel', clear_chat: 'Clear chat',
         assistant_title: 'Troll assistant', assistant_placeholder: 'Write a message to the troll…',
         assistant_sub: "An online troll, dressed the same way as in the \"Troll\" tab. Ask about grammar, words, translation, or just ask for a hint — and get back to what you were doing.",
@@ -255,6 +285,10 @@ const UI_STRINGS = {
         test_mc_title: 'Multiple choice', test_mc_desc: 'Pick the correct translation or form.',
         test_cloze_title: 'Fill in the blank', test_cloze_desc: 'Insert the missing word.',
         test_order_title: 'Build the sentence', test_order_desc: 'Arrange the words in the correct order.',
+        sb_title: 'Sentence Builder', sb_loading: 'Loading a sentence set for your language…',
+        sb_empty: 'No sentence set has been published yet for {lang} (level {level}) — check back later.',
+        sb_tap_hint: 'Tap the blocks below to build the sentence', sb_check_btn: 'Check',
+        sb_correct_was: 'The correct sentence was', sb_correct_label: '✅ Correct!',
         test_listen_title: 'Listening', test_listen_desc: 'Listen to the word and choose the translation.',
         test_translate_title: 'Translation', test_translate_desc: 'Write the translation of the word.',
         start_test_btn: 'Start', quiz_preparing_title: 'Preparing words…',
@@ -295,6 +329,19 @@ const UI_STRINGS = {
         toggle_to_login: 'Уже есть аккаунт? Войти',
         guest_btn: 'Продолжить как гость', or_divider: 'или',
         footer_note: 'Fjord · ваш прогресс сохраняется локально под вашим логином',
+        fill_both_fields: 'Заполните оба поля', please_wait: '⏳ Подождите...',
+        firebase_not_ready_retry: '⏳ Firebase ещё не готов, подождите несколько секунд и попробуйте снова.',
+        firebase_not_ready_toast: '⏳ Firebase ещё не готов, попробуйте позже.',
+        auth_generic_error: '⏳ Ошибка авторизации, перезагрузите страницу.',
+        invalid_login_password: 'Неверный логин или пароль', register_error_generic: 'Ошибка регистрации',
+        welcome_guest_toast: 'Добро пожаловать! Вы в режиме гостя. Данные сохраняются локально.',
+        welcome_user_toast: 'Добро пожаловать, {name}!', register_success_toast: 'Регистрация успешна! Теперь войдите.',
+        logged_out_toast: 'Вы вышли из аккаунта',
+        reset_email_prompt: 'Введите вашу электронную почту, чтобы получить ссылку для сброса пароля:',
+        reset_email_sent: '✅ Ссылка для сброса пароля отправлена на вашу почту!',
+        reset_error_prefix: '❌ Ошибка: ', reset_user_not_found: 'Пользователь с такой почтой не найден.',
+        reset_invalid_email: 'Неверный формат электронной почты.',
+        guest_name: 'Гость', player_name: 'Игрок',
         save_btn: 'Сохранить', cancel_btn: 'Отмена', clear_chat: 'Очистить чат',
         assistant_title: 'Тролль-помощник', assistant_placeholder: 'Напиши сообщение тролю…',
         assistant_sub: 'Онлайн-тролль, одетый так же, как во вкладке «Тролль». Спроси о грамматике, словах, переводе или просто попроси подсказку — и продолжай то, чем занимался.',
@@ -392,6 +439,10 @@ const UI_STRINGS = {
         test_mc_title: 'Выбор формы', test_mc_desc: 'Выберите правильный перевод или форму.',
         test_cloze_title: 'Заполни пропуск', test_cloze_desc: 'Вставьте пропущенное слово.',
         test_order_title: 'Составь предложение', test_order_desc: 'Расположите слова в правильном порядке.',
+        sb_title: 'Конструктор предложений', sb_loading: 'Загружаем набор предложений для вашего языка…',
+        sb_empty: 'Для {lang} (уровень {level}) ещё не опубликован набор предложений — загляните позже.',
+        sb_tap_hint: 'Тапни блоки снизу, чтобы составить предложение', sb_check_btn: 'Проверить',
+        sb_correct_was: 'Правильно было', sb_correct_label: '✅ Правильно!',
         test_listen_title: 'Аудирование', test_listen_desc: 'Прослушайте слово и выберите перевод.',
         test_translate_title: 'Перевод', test_translate_desc: 'Напишите перевод слова.',
         start_test_btn: 'Начать', quiz_preparing_title: 'Готовим слова…',
@@ -443,6 +494,18 @@ function tf(key, vars) {
 // Для uk завжди є w.uk (вбудований). Для en/ru спершу шукаємо кеш
 // STATE.wordTranslations (заповнюється кнопкою "Перекласти" через AI),
 // і лише якщо нічого нема — відкат на українську, щоб інтерфейс не ламався.
+// Ім'я користувача для показу в інтерфейсі. 'Гість' — внутрішнє
+// службове значення за замовчуванням для гостьових акаунтів (НЕ чіпати
+// в порівняннях типу STATE.name !== 'Гість' — це б зламало визначення
+// "чи це новий гість" в auth.js/helpers.js). Тут воно лише перекладається
+// для показу, щоб гість з англійським чи російським інтерфейсом не бачив
+// українське слово "Гість" серед свого тексту.
+function displayName(fallback) {
+    if (typeof STATE === 'undefined' || !STATE || !STATE.name) return fallback !== undefined ? fallback : t('guest_name');
+    if (STATE.name === 'Гість') return t('guest_name');
+    return STATE.name;
+}
+
 function wordTranslation(word, level, lang) {
     lang = lang || (typeof STATE !== 'undefined' && STATE && STATE.vocabLang) || 'uk';
     if (lang === 'uk') return word.uk;
@@ -466,6 +529,20 @@ function applyStaticTranslations() {
         authTitle: 'login_title', authSubmit: 'submit_login', guestBtn: 'guest_btn',
         forgotPasswordLink: 'forgot_password', logoutBtn: 'logout',
     };
+    // authTitle/authSubmit вище виставляють текст РЕЖИМУ "Вхід" за замовчуванням.
+    // Якщо зараз відкрито режим "Реєстрація" (isLogin === false), одразу
+    // перевизначаємо трьома нижче — інакше після зміни мови текст форми
+    // "стрибне" назад на "Вхід", хоча користувач лишається в реєстрації.
+    const authToggleEl = document.getElementById('authToggle');
+    if (typeof isLogin !== 'undefined' && !isLogin) {
+        const titleEl = document.getElementById('authTitle');
+        const submitEl = document.getElementById('authSubmit');
+        if (titleEl) titleEl.textContent = t('register_title');
+        if (submitEl) submitEl.textContent = t('submit_register');
+        if (authToggleEl) authToggleEl.textContent = t('toggle_to_login');
+    } else if (authToggleEl) {
+        authToggleEl.textContent = t('toggle_to_register');
+    }
     Object.keys(map).forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -613,11 +690,38 @@ const TOPIC_TRANSLATIONS = {
     'Хобі': { en: 'Hobbies', ru: 'Хобби' },
     'Числа': { en: 'Numbers', ru: 'Числа' },
     'Школа': { en: 'School', ru: 'Школа' },
+    // Нижче — теми, яких не було у фіксованому списку вище, але AI уже
+    // згенерував слова з ними (побачено "живцем" на сайті: деякі теми
+    // не перекладались і показувались українською навіть при en/ru
+    // інтерфейсі).
+    'Базова їжа': { en: 'Basic food', ru: 'Базовая еда' },
+    'Дієслова руху та дії': { en: 'Verbs of motion and action', ru: 'Глаголы движения и действия' },
 };
+
+// Пошук перекладу теми БЕЗ урахування регістру та зайвих пробілів.
+// Причина: AI, що генерує нові слова, не завжди повторює тему symbol-в-symbol
+// так, як вона записана тут (наприклад повертає "дім" замість "Дім") — і
+// раніше translateTopic() шукав ТОЧНИЙ збіг рядка, тому такі теми ніколи
+// не перекладались і показувались українською навіть при англійському чи
+// російському інтерфейсі. Мапу будуємо один раз при першому виклику.
+let _topicTranslationsNormalized = null;
+function _normalizedTopicKey(s) { return String(s || '').trim().toLowerCase(); }
+function _getNormalizedTopicMap() {
+    if (_topicTranslationsNormalized) return _topicTranslationsNormalized;
+    _topicTranslationsNormalized = {};
+    Object.keys(TOPIC_TRANSLATIONS).forEach(key => {
+        _topicTranslationsNormalized[_normalizedTopicKey(key)] = TOPIC_TRANSLATIONS[key];
+    });
+    return _topicTranslationsNormalized;
+}
 function translateTopic(topic, lang) {
     lang = lang || (typeof STATE !== 'undefined' && STATE && STATE.vocabLang) || 'uk';
     if (lang === 'uk' || !topic) return topic;
-    const entry = TOPIC_TRANSLATIONS[topic];
+    // Спершу точний збіг (швидко, найчастіший випадок), потім — без
+    // урахування регістру/пробілів (рятує теми, які AI записав інакше,
+    // ніж вони є в TOPIC_TRANSLATIONS, напр. "дім" замість "Дім").
+    let entry = TOPIC_TRANSLATIONS[topic];
+    if (!entry) entry = _getNormalizedTopicMap()[_normalizedTopicKey(topic)];
     return (entry && entry[lang]) || topic; // немає перекладу — показуємо як є, а не порожньо
 }
 
