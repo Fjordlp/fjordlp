@@ -141,7 +141,7 @@ function initAuth() {
         toast(t('welcome_guest_toast'));
     };
 
-    // ---- Скидання пароля ----
+       // ---- Скидання пароля ----
     const forgotPasswordLinkEl = document.getElementById('forgotPasswordLink');
     if (forgotPasswordLinkEl) forgotPasswordLinkEl.onclick = async () => {
         const email = prompt(t('reset_email_prompt'));
