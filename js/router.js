@@ -26,7 +26,7 @@ function render() {
     main.innerHTML = '';
     main.appendChild(renderView());
     updateNav();
-    document.getElementById('userNameDisplay').textContent = STATE.name || currentUser;
+    document.getElementById('userNameDisplay').textContent = displayName(currentUser);
     
     // Деякі адмін-сторінки потребують ініціалізації після рендерингу
     // (їхні view-функції повертають рядок HTML, а не DOM-елемент із вже

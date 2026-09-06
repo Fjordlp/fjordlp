@@ -16,7 +16,7 @@
                 </div>
                 <div class="card">
                   <h3>${t('settings_title')}</h3>
-                  <div class="field"><label>${t('field_name')}</label><input id="setName" value="${escHtml(STATE.name||'')}"></div>
+                  <div class="field"><label>${t('field_name')}</label><input id="setName" value="${escHtml(displayName(''))}"></div>
                   <div class="field"><label>${t('field_learn_lang')}</label>
                     <select id="setTargetLang">
                       ${LANGUAGES.map(l => `<option value="${l.code}" ${STATE.targetLang===l.code?'selected':''}>${l.flag} ${l.name[STATE.uiLang]||l.name.uk}</option>`).join('')}
@@ -81,7 +81,7 @@
                 STATE.targetLang = newTargetLang;
                 updateState();
                 toast(t('settings_saved'));
-                document.getElementById('userNameDisplay').textContent = STATE.name;
+                document.getElementById('userNameDisplay').textContent = displayName(currentUser);
                 if (targetLangChanged) navigate('home'); // словник/картки/тести залежать від мови — оновлюємо вкладку
             };
             return wrap;
@@ -989,7 +989,7 @@ function viewTournamentPlay() {
             if (uid) {
                 try {
                     await firebaseDb.collection('tournaments').doc(tr.id).collection('participants').doc(uid).set({
-                        name: STATE.name || 'Гравець',
+                        name: displayName(t('player_name')),
                         score: correct, // для сортування таблиці (Firestore не вміє сортувати за "correct/total" напряму)
                         correct,
                         total,
