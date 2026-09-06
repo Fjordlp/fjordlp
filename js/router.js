@@ -26,7 +26,7 @@ function render() {
     main.innerHTML = '';
     main.appendChild(renderView());
     updateNav();
-    document.getElementById('userNameDisplay').textContent = displayName(currentUser);
+    document.getElementById('userNameDisplay').textContent = STATE.name || currentUser;
     
     // Деякі адмін-сторінки потребують ініціалізації після рендерингу
     // (їхні view-функції повертають рядок HTML, а не DOM-елемент із вже
@@ -40,6 +40,9 @@ function render() {
     }
     if (ROUTE === 'admin-alphabet-gen' && typeof initAdminSharedAlphabet === 'function') {
         initAdminSharedAlphabet();
+    }
+    if (ROUTE === 'admin-sentence-gen' && typeof initAdminSharedSentenceBuilder === 'function') {
+        initAdminSharedSentenceBuilder();
     }
     if (ROUTE === 'admin-books' && typeof initAdminBooks === 'function') {
         initAdminBooks();
@@ -69,13 +72,13 @@ function render() {
 // сторінки/під-сторінки, які до нього належать.
 const NAV_ROUTE_GROUPS = {
     flashcards: ['flashcards', 'flashsession'],
-    tests: ['tests', 'test-mc', 'test-cloze', 'test-order', 'test-listen', 'test-translate'],
+    tests: ['tests', 'test-mc', 'test-cloze', 'test-order', 'test-listen', 'test-translate', 'sentence-builder'],
     profile: ['profile', 'levels', 'leveltest', 'test-history'],
     tournaments: ['tournaments', 'tournament-play'],
     books: ['books', 'book-read'],
     lessons: ['lessons', 'lesson-read'],
     story: ['story'],
-    admin: ['admin', 'admin-words', 'admin-tournaments', 'admin-daily', 'admin-users', 'admin-vocab-gen', 'admin-grammar-gen', 'admin-alphabet-gen', 'admin-books', 'admin-daily-word'],
+    admin: ['admin', 'admin-words', 'admin-tournaments', 'admin-daily', 'admin-users', 'admin-vocab-gen', 'admin-grammar-gen', 'admin-alphabet-gen', 'admin-sentence-gen', 'admin-books', 'admin-daily-word'],
 };
 
 function updateNav() {
@@ -162,6 +165,8 @@ function renderView() {
             return viewTestListen();
         case 'test-translate':
             return viewTestTranslate();
+        case 'sentence-builder':
+            return viewSentenceBuilder();
         case 'grammar':
             return viewGrammar();
         case 'books':
@@ -208,6 +213,8 @@ function renderView() {
             return el(viewAdminSharedGrammar());
         case 'admin-alphabet-gen':
             return el(viewAdminSharedAlphabet());
+        case 'admin-sentence-gen':
+            return el(viewAdminSharedSentenceBuilder());
         case 'admin-books':
             return el(viewAdminBooks());
         case 'admin-daily-word':

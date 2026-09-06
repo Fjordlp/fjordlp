@@ -1,3 +1,4 @@
+
 // =====================================================================
 //  js/data-fr.js — ФРАНЦУЗЬКА МОВА (ПОВНИЙ НАБІР)
 //  Повністю сумісний з js/data.js для норвезької.
@@ -539,6 +540,21 @@
             q_en: "Si tu m'avais écouté, tu ___ (réussir).",
             q_ru: "Si tu m'avais écouté, tu ___ (réussir).",
         },
+        {
+            id: "fr_gr6b", level: "C2",
+            title: "L'inversion littéraire (peut-être, à peine, sans doute)",
+            exp: "Après certains adverbes en tête de phrase (peut-être, à peine, sans doute, aussi au sens de 'donc'), le sujet et le verbe s'inversent en style soutenu.",
+            table: { head: ["Style courant", "Style soutenu (inversion)"], rows: [["Peut-être il viendra.", "Peut-être viendra-t-il."], ["À peine il était arrivé...", "À peine était-il arrivé..."]] },
+            ex: { q: "Peut-être ___-il raison.", opts: ["a", "il a", "avait"], a: 0 },
+            title_en: "Literary inversion (peut-être, à peine, sans doute)",
+            title_ru: "Литературная инверсия (peut-être, à peine, sans doute)",
+            exp_en: "After certain adverbs at the start of a sentence (peut-être, à peine, sans doute, aussi meaning 'therefore'), the subject and verb invert in formal style.",
+            exp_ru: "После некоторых наречий в начале предложения (peut-être, à peine, sans doute, aussi в значении 'поэтому') подлежащее и глагол меняются местами в книжном стиле.",
+            head_en: ["Everyday style", "Formal style (inversion)"],
+            head_ru: ["Обычный стиль", "Книжный стиль (инверсия)"],
+            q_en: "Peut-être ___-il raison.",
+            q_ru: "Peut-être ___-il raison.",
+        },
     ];
 
     // =====================================================================
@@ -818,8 +834,34 @@
             content_ru: 'Самое распространённое приветствие — простое ~Bonjour~ (добрый день), которое подходит для большинства ситуаций днём. Вечером говорят ~Bonsoir~.\n\n| Salut | Привет (неформально) |\n| Au revoir | До свидания |\n| Bonne nuit | Спокойной ночи |\n| À bientôt | До скорого |\n| À demain | До завтра |\n\nЧтобы представиться, используй возвратный глагол ~s\'appeler~ (называться):\n\n| Je m\'appelle Marie. | Меня зовут Мари. |\n| Comment tu t\'appelles? | Как тебя зовут? |\n| Enchanté(e). | Приятно познакомиться. |\n\nСпросить, как дела:\n\n| Comment ça va? | Как дела? |\n| Ça va bien, merci. Et toi? | Хорошо, спасибо! А у тебя? |\n\n> Совет: ~merci~ (спасибо) и ~s\'il te plaît~ (пожалуйста) — обязательные слова в любом разговоре по-французски, даже самом коротком.\n\nПрактика: составь короткий диалог знакомства из двух-трёх реплик, используя фразы выше.',
             tasks: [],
         },
-
-        // === УРОК 4 — встав сюди, скопіювавши шаблон вище ===
+        {
+            id: 4,
+            level: 'A1',
+            title: 'Числа і час',
+            title_en: 'Numbers and time',
+            title_ru: 'Числа и время',
+            content: 'Французькі числа мають кілька особливостей, які варто запам\'ятати одразу.\n\n| un, deux, trois... | 1, 2, 3... |\n| dix, onze, douze... | 10, 11, 12... |\n| vingt | 20 |\n| soixante-dix (буквально "шістдесят-десять") | 70 |\n| quatre-vingts (буквально "чотири-двадцять") | 80 |\n| quatre-vingt-dix | 90 |\n\n> Порада: 70-99 у французькій рахуються "по-старому" — множенням і додаванням, а не окремими словами, як в українській. Це найбільша складність для новачків.\n\nЩоб запитати чи сказати час:\n\n| Quelle heure est-il? | Котра година? |\n| Il est trois heures. | Третя година. |\n| Il est midi. | Полудень. |\n| Il est minuit. | Північ. |\n\nПрактика: спробуй сказати вголос числа від 60 до 90 десятками.',
+            content_en: 'French numbers have a few quirks worth memorizing right away.\n\n| un, deux, trois... | 1, 2, 3... |\n| dix, onze, douze... | 10, 11, 12... |\n| vingt | 20 |\n| soixante-dix (literally "sixty-ten") | 70 |\n| quatre-vingts (literally "four-twenty") | 80 |\n| quatre-vingt-dix | 90 |\n\n> Tip: 70-99 are counted the "old" way in French — by multiplying and adding, rather than having separate words like in English. This is the biggest hurdle for beginners.\n\nTo ask or say the time:\n\n| Quelle heure est-il? | What time is it? |\n| Il est trois heures. | It\'s three o\'clock. |\n| Il est midi. | It\'s noon. |\n| Il est minuit. | It\'s midnight. |\n\nPractice: try saying the numbers from 60 to 90 out loud, ten by ten.',
+            content_ru: 'Французские числа имеют несколько особенностей, которые стоит запомнить сразу.\n\n| un, deux, trois... | 1, 2, 3... |\n| dix, onze, douze... | 10, 11, 12... |\n| vingt | 20 |\n| soixante-dix (буквально "шестьдесят-десять") | 70 |\n| quatre-vingts (буквально "четыре-двадцать") | 80 |\n| quatre-vingt-dix | 90 |\n\n> Совет: 70-99 считаются "по-старому" во французском — умножением и сложением, а не отдельными словами, как в русском. Это самая большая сложность для новичков.\n\nЧтобы спросить или сказать время:\n\n| Quelle heure est-il? | Который час? |\n| Il est trois heures. | Три часа. |\n| Il est midi. | Полдень. |\n| Il est minuit. | Полночь. |\n\nПрактика: попробуй сказать вслух числа от 60 до 90 десятками.',
+            tasks: [
+                { q: 'Як сказати "80" французькою?', q_en: 'How do you say "80" in French?', opts: ['quatre-vingts', 'huit-dix', 'octante'], a: 0 },
+                { q: 'Що означає "Quelle heure est-il?"', q_en: 'What does "Quelle heure est-il?" mean?', opts: ['Котра година?', 'Де ти?', 'Як справи?'], a: 0 },
+            ],
+        },
+        {
+            id: 5,
+            level: 'A1',
+            title: 'Їжа і замовлення в кафе',
+            title_en: 'Food and ordering at a café',
+            title_ru: 'Еда и заказ в кафе',
+            content: 'У французькому кафе чи ресторані знадобляться кілька базових фраз.\n\n| Je voudrais... | Я хотів(-ла) би... |\n| L\'addition, s\'il vous plaît. | Рахунок, будь ласка. |\n| C\'est combien? | Скільки коштує? |\n| Un café, s\'il vous plaît. | Каву, будь ласка. |\n\nБазова їжа й напої:\n\n| le pain | хліб |\n| le fromage | сир |\n| l\'eau | вода |\n| le vin | вино |\n| le dessert | десерт |\n\n> Порада: ~Je voudrais~ (умовний спосіб від vouloir) звучить чемніше, ніж просто ~Je veux~ (я хочу) — французи цінують ввічливі форми навіть у побутових проханнях.\n\nПрактика: склади коротке замовлення в кафе з трьох речень: привітання, замовлення, подяка.',
+            content_en: 'At a French café or restaurant, a few basic phrases will get you far.\n\n| Je voudrais... | I would like... |\n| L\'addition, s\'il vous plaît. | The bill, please. |\n| C\'est combien? | How much is it? |\n| Un café, s\'il vous plaît. | A coffee, please. |\n\nBasic food and drinks:\n\n| le pain | bread |\n| le fromage | cheese |\n| l\'eau | water |\n| le vin | wine |\n| le dessert | dessert |\n\n> Tip: ~Je voudrais~ (the conditional of vouloir) sounds more polite than plain ~Je veux~ (I want) — French speakers value polite forms even in everyday requests.\n\nPractice: write a short three-line café order: greeting, order, thanks.',
+            content_ru: 'Во французском кафе или ресторане пригодится несколько базовых фраз.\n\n| Je voudrais... | Я хотел(-а) бы... |\n| L\'addition, s\'il vous plaît. | Счёт, пожалуйста. |\n| C\'est combien? | Сколько стоит? |\n| Un café, s\'il vous plaît. | Кофе, пожалуйста. |\n\nБазовая еда и напитки:\n\n| le pain | хлеб |\n| le fromage | сыр |\n| l\'eau | вода |\n| le vin | вино |\n| le dessert | десерт |\n\n> Совет: ~Je voudrais~ (условное наклонение от vouloir) звучит вежливее, чем просто ~Je veux~ (я хочу) — французы ценят вежливые формы даже в бытовых просьбах.\n\nПрактика: составь короткий заказ в кафе из трёх предложений: приветствие, заказ, благодарность.',
+            tasks: [
+                { q: 'Як ввічливо попросити рахунок?', q_en: 'How do you politely ask for the bill?', opts: ["L'addition, s'il vous plaît.", 'Donne-moi ça!', 'Combien?'], a: 0 },
+                { q: 'Що означає "Je voudrais"?', q_en: 'What does "Je voudrais" mean?', opts: ['Я хотів(-ла) би', 'Я їм', 'Я плачу'], a: 0 },
+            ],
+        },
 
     ];
 
