@@ -15,7 +15,6 @@ function dailyWordCardBody(w, level) {
             <span id="dwMicSlot"></span>
             <div>
                 <div class="word-no">${escHtml(w.no)}</div>
-                ${wordPron(w) ? `<div class="word-pron" style="color:var(--ink-soft);font-size:.8rem;">[${escHtml(wordPron(w))}]</div>` : ''}
                 <div class="word-uk">${escHtml(wordTranslation(w, level))}</div>
             </div>
         </div>
@@ -200,7 +199,7 @@ function viewHome() {
         storyState.history.length === 0 ? `
             <div class="card" style="margin-top:16px;border:2px solid var(--teal);">
                 <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-                    <span style="font-size:1.6rem;">🧌</span>
+                    <span style="font-size:1.6rem;"></span>
                     <div style="flex:1;min-width:180px;">
                         <strong>${t('home_story_new_title')}</strong>
                         <p style="color:var(--ink-soft);font-size:.85rem;margin:2px 0 0;">${t('home_story_new_desc')}</p>
@@ -211,7 +210,7 @@ function viewHome() {
         ` : `
             <div class="card" style="margin-top:16px;border:2px solid var(--teal);">
                 <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-                    <span style="font-size:1.6rem;">🧌</span>
+                    <span style="font-size:1.6rem;"></span>
                     <div style="flex:1;min-width:180px;">
                         <strong>${t('home_story_continue_title')}</strong>
                         <p style="color:var(--ink-soft);font-size:.85rem;margin:2px 0 0;">${tf('home_story_continue_desc', {n: storyState.history.length})}</p>
@@ -856,7 +855,6 @@ function renderFlipCard(item) {
             <div class="flip-inner">
                 <div class="flip-face flip-front">
                     <div class="no-word">${escHtml(item.w.no)}</div>
-                    ${wordPron(item.w) ? `<div class="word-pron" style="color:var(--ink-soft);font-size:.85rem;">[${escHtml(wordPron(item.w))}]</div>` : ''}
                     <button class="soundbtn" id="fSound">🔊</button>
                     <span id="fMicSlot"></span>
                     <div class="flip-hint">${t('flip_hint')}</div>
@@ -915,7 +913,6 @@ function renderMCCard(item, deckWords, level) {
         <div class="flip-card" style="height:160px;">
             <div class="flip-face flip-front" style="position:static;box-shadow:var(--shadow);">
                 <div class="no-word">${escHtml(item.w.no)}</div>
-                ${wordPron(item.w) ? `<div class="word-pron" style="color:var(--ink-soft);font-size:.8rem;">[${escHtml(wordPron(item.w))}]</div>` : ''}
                 <button class="soundbtn" id="mcSound">🔊</button>
             </div>
         </div>
@@ -1039,7 +1036,7 @@ function viewVocabulary() {
             const status = getWordStatus(w, level);
             const translated = wordTranslation(w, level, STATE.vocabLang);
             return `<tr>
-                <td><strong>${escHtml(w.no)}</strong>${wordPron(w) ? `<div style="color:var(--ink-soft);font-size:.75rem;font-weight:normal;">[${escHtml(wordPron(w))}]</div>` : ''}</td>
+                <td><strong>${escHtml(w.no)}</strong></td>
                 <td>${escHtml(translated)}</td>
                 <td><span style="font-size:.7rem;background:var(--line-soft);padding:2px 8px;border-radius:999px;">${escHtml(translateTopic(w.t))}</span></td>
                 <td><span class="status ${status}">${statusLabels[status]}</span></td>
@@ -1100,17 +1097,17 @@ function viewTestsHub() {
         </div>
     `);
     const items = [
-        ["test-mc", "🔤", t('test_mc_title'), t('test_mc_desc')],
-        ["test-cloze", "✏️", t('test_cloze_title'), t('test_cloze_desc')],
-        ["test-order", "🧩", t('test_order_title'), t('test_order_desc')],
-        ["test-listen", "🎧", t('test_listen_title'), t('test_listen_desc')],
-        ["test-translate", "🌐", t('test_translate_title'), t('test_translate_desc')],
-        ["sentence-builder", "🧱", t('sb_title'), t('sb_tap_hint')],
+        ["test-mc", t('test_mc_title'), t('test_mc_desc')],
+        ["test-cloze", t('test_cloze_title'), t('test_cloze_desc')],
+        ["test-order", t('test_order_title'), t('test_order_desc')],
+        ["test-listen", t('test_listen_title'), t('test_listen_desc')],
+        ["test-translate", t('test_translate_title'), t('test_translate_desc')],
+        ["sentence-builder", t('sb_title'), t('sb_tap_hint')],
     ];
     const grid = wrap.querySelector('#thub');
-    items.forEach(([r, icon, title, desc]) => {
+    items.forEach(([r, title, desc]) => {
         const c = el(
-            `<div class="card test-type-card"><div class="icon">${icon}</div><h3>${title}</h3><p>${desc}</p><button class="btn btn-primary btn-sm">${t('start_test_btn')}</button></div>`
+            `<div class="card test-type-card"><h3>${title}</h3><p>${desc}</p><button class="btn btn-primary btn-sm">${t('start_test_btn')}</button></div>`
         );
         c.querySelector('button').onclick = () => navigate(r);
         grid.appendChild(c);
