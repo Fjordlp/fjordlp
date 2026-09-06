@@ -116,7 +116,7 @@ function viewHome() {
             <!-- hero -->
             <div class="hero">
                 <div class="sunarc-wrap">${sunArcSvg(pct)}</div>
-                <div class="eyebrow">${t('greeting_hi')}, ${escHtml(STATE.name || t('student_word'))} · ${t('level_word')} <span class="tag level-${level}" style="vertical-align:middle;">${level}</span></div>
+                <div class="eyebrow">${t('greeting_hi')}, ${escHtml(displayName(t('student_word')))} · ${t('level_word')} <span class="tag level-${level}" style="vertical-align:middle;">${level}</span></div>
                 <h1>${metaLoc.name}: ${pct}% ${t('words_viewed')}</h1>
                 <p>${metaLoc.desc}</p>
                 <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;">
