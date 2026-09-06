@@ -55,14 +55,30 @@ function initAuth() {
                 STATE._onboardingDone = true;
                 STATE._targetLangChosen = true;
                 updateState();
-                return 'home';
+                // Тепер /flashcards, /vocabulary тощо — справжні URL
+                // (js/router.js). Якщо користувач перезавантажив сторінку
+                // або відкрив застосунок у новій вкладці саме на такому
+                // посиланні, відкриваємо саме ЇЇ, а не завжди "Головну" —
+                // інакше "справжній" URL був би справжнім лише на вигляд.
+                const urlRoute = (typeof routeFromLocation === 'function') ? routeFromLocation() : null;
+                return urlRoute || 'home';
             }
         }
 
+        // Онбординг і вибір мови навчання завжди в пріоритеті над URL —
+        // їх не можна "перестрибнути" прямим посиланням на іншу сторінку.
         if (shouldShowLanguageChoice()) return 'choose-language';
         if (shouldShowOnboarding()) return 'onboarding';
         return 'home';
     }
+    // Раніше onAuthStateChanged (js/firebase-auth.js) на відновлену сесію
+    // завжди робив navigate('home') напряму, в обхід цієї ж таки
+    // getInitialRoute() — тож зареєстрований користувач, який ще не
+    // пройшов вибір мови/онбординг, при перезавантаженні сторінки
+    // потрапляв одразу на Головну, минаючи обов'язкові перші екрани.
+    // Експортуємо функцію, щоб обидва місця входу використовували ту
+    // саму логіку визначення першого маршруту.
+    window.getInitialRoute = getInitialRoute;
 
     function switchMode() {
         isLogin = !isLogin;
@@ -242,6 +258,7 @@ document.getElementById('logoutBtn').onclick = async () => {
         clearSession();
         document.getElementById('app').classList.remove('active');
         document.getElementById('authPage').style.display = 'flex';
+        resetRouterForLogout();
         toast('Ви вийшли з акаунта');
     }
 };
@@ -253,3 +270,18 @@ applyStaticTranslations();
 // Експортуємо navigate для використання в onclick
 window.navigate = navigate;
 window.toast = toast;
+
+// ---- Вихід (гостьовий, без перезавантаження сторінки) ----
+// На відміну від виходу через Firebase (signOutFromFirebase() робить
+// повний location.reload(), який сам скидає й URL, і історію), тут
+// сторінка НЕ перезавантажується — тож треба вручну повернути адресний
+// рядок і стан навігації до "чистого" вигляду, інакше після виходу
+// URL міг би й далі показувати, наприклад, /vocabulary поверх екрана
+// входу, а наступний вхід почав би історію не з чистого аркуша.
+function resetRouterForLogout() {
+    ROUTE = 'home';
+    SUBSTATE = {};
+    _historyInitialized = false;
+    try { history.replaceState(null, '', '/'); } catch (e) { /* ignore */ }
+}
+window.resetRouterForLogout = resetRouterForLogout;
