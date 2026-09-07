@@ -71,7 +71,11 @@ function initFirebase() {
               authPage.style.display = 'none';
               document.getElementById('app').classList.add('active');
               initAssistantWidget();
-              navigate('home');
+              // navigate('home') раніше ігнорував вибір мови/онбординг і
+              // "справжній" URL, на якому могла бути перезавантажена
+              // сторінка (js/router.js) — тепер та сама логіка, що й для
+              // гостя/входу через пароль.
+              navigate((typeof window.getInitialRoute === 'function') ? window.getInitialRoute() : 'home');
             } else if (STATE && !isGuest && currentUser !== 'guest' && currentUser === user.email) {
               await loadFromFirestore(user.uid);
             }
