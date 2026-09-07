@@ -27,6 +27,19 @@ function initAuth() {
     const toggleLink = document.getElementById('authToggle');
     const titleEl = document.getElementById('authTitle');
 
+    // Захист: якщо якогось ключового елемента форми входу немає в DOM
+    // (розбіжність id між HTML і цим скриптом), далі йдуть звернення до
+    // .onclick/.value/.textContent на цих змінних, які кинули б помилку
+    // і зупинили б initAuth() на півдорозі — сторінка входу лишилась би
+    // напівпорожньою чи взагалі нерпацездатною без жодного пояснення в
+    // інтерфейсі. Тому виходимо одразу з чітким повідомленням у консоль.
+    const required = { authPage, app, loginInput, passwordInput, errorEl, submitBtn, toggleLink, titleEl };
+    const missing = Object.keys(required).filter(k => !required[k]);
+    if (missing.length) {
+        console.error('[auth] Не знайдено елемент(и) форми входу в HTML:', missing, '— initAuth() перервано.');
+        return;
+    }
+
     function getInitialRoute() {
         if (STATE) {
             const hasData = (function checkData() {
@@ -67,9 +80,9 @@ function initAuth() {
 
     function switchMode() {
         isLogin = !isLogin;
-        titleEl.textContent = isLogin ? 'Вхід' : 'Реєстрація';
-        submitBtn.textContent = isLogin ? 'Увійти' : 'Зареєструватися';
-        toggleLink.textContent = isLogin ? 'Ще немає акаунта? Зареєструватися' : 'Вже є акаунт? Увійти';
+        titleEl.textContent = isLogin ? t('login_title') : t('register_title');
+        submitBtn.textContent = isLogin ? t('submit_login') : t('submit_register');
+        toggleLink.textContent = isLogin ? t('toggle_to_register') : t('toggle_to_login');
         errorEl.textContent = '';
         loginInput.value = '';
         passwordInput.value = '';
@@ -95,7 +108,8 @@ function initAuth() {
     }
 
     // ---- Гостьовий вхід ----
-    document.getElementById('guestBtn').onclick = () => {
+    const guestBtnEl = document.getElementById('guestBtn');
+    if (guestBtnEl) guestBtnEl.onclick = () => {
         let guestState = getGuestState();
         if (!guestState) {
             guestState = ensureStateDefaults({
@@ -124,28 +138,29 @@ function initAuth() {
         initAssistantWidget();
         checkAndApplyStreakFreeze();
         navigate(getInitialRoute());
-        toast('Ласкаво просимо! Ви в режимі гостя. Дані зберігаються локально.');
+        toast(t('welcome_guest_toast'));
     };
 
     // ---- Скидання пароля ----
-    document.getElementById('forgotPasswordLink').onclick = async () => {
-        const email = prompt('Введіть вашу електронну пошту, щоб отримати посилання для скидання пароля:');
+    const forgotPasswordLinkEl = document.getElementById('forgotPasswordLink');
+    if (forgotPasswordLinkEl) forgotPasswordLinkEl.onclick = async () => {
+        const email = prompt(t('reset_email_prompt'));
         if (!email) return;
 
         try {
             await waitForFirebase(5000);
             if (!firebaseAuth) {
-                toast('⏳ Firebase ще не готовий, спробуйте пізніше.');
+                toast(t('firebase_not_ready_toast'));
                 return;
             }
             await firebaseAuth.sendPasswordResetEmail(email);
-            toast('✅ Посилання для скидання пароля надіслано на вашу пошту!');
+            toast(t('reset_email_sent'));
         } catch (e) {
-            let msg = '❌ Помилка: ';
+            let msg = t('reset_error_prefix');
             if (e.code === 'auth/user-not-found') {
-                msg += 'Користувача з такою поштою не знайдено.';
+                msg += t('reset_user_not_found');
             } else if (e.code === 'auth/invalid-email') {
-                msg += 'Невірний формат електронної пошти.';
+                msg += t('reset_invalid_email');
             } else {
                 msg += e.message;
             }
@@ -158,36 +173,36 @@ function initAuth() {
         const login = loginInput.value.trim();
         const password = passwordInput.value.trim();
         if (!login || !password) {
-            errorEl.textContent = 'Заповніть обидва поля';
+            errorEl.textContent = t('fill_both_fields');
             return;
         }
 
         submitBtn.disabled = true;
-        submitBtn.textContent = '⏳ Зачекайте...';
+        submitBtn.textContent = t('please_wait');
         errorEl.textContent = '';
 
         try {
             await waitForFirebase(5000);
         } catch (e) {
-            errorEl.textContent = '⏳ Firebase ще не готовий, зачекайте кілька секунд і спробуйте знову.';
+            errorEl.textContent = t('firebase_not_ready_retry');
             submitBtn.disabled = false;
-            submitBtn.textContent = isLogin ? 'Увійти' : 'Зареєструватися';
+            submitBtn.textContent = isLogin ? t('submit_login') : t('submit_register');
             return;
         }
 
         if (!firebaseAuth) {
-            errorEl.textContent = '⏳ Помилка авторизації, перезавантажте сторінку.';
+            errorEl.textContent = t('auth_generic_error');
             submitBtn.disabled = false;
-            submitBtn.textContent = isLogin ? 'Увійти' : 'Зареєструватися';
+            submitBtn.textContent = isLogin ? t('submit_login') : t('submit_register');
             return;
         }
 
         if (isLogin) {
             const result = await signInWithFirebase(login, password);
             if (!result.success) {
-                errorEl.textContent = result.error || 'Невірний логін або пароль';
+                errorEl.textContent = result.error || t('invalid_login_password');
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Увійти';
+                submitBtn.textContent = t('submit_login');
                 return;
             }
             // Успішний вхід – редірект відбудеться в onAuthStateChanged
@@ -199,19 +214,19 @@ function initAuth() {
             initAssistantWidget();
             checkAndApplyStreakFreeze();
             navigate(getInitialRoute());
-            toast(`Ласкаво просимо, ${STATE.name || login}!`);
+            toast(tf('welcome_user_toast', { name: STATE.name || login }));
         } else {
             const result = await signUpWithFirebase(login, password);
             if (!result.success) {
-                errorEl.textContent = result.error || 'Помилка реєстрації';
+                errorEl.textContent = result.error || t('register_error_generic');
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Зареєструватися';
+                submitBtn.textContent = t('submit_register');
                 return;
             }
-            toast('Реєстрація успішна! Тепер увійдіть.');
+            toast(t('register_success_toast'));
             switchMode();
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Увійти';
+            submitBtn.textContent = t('submit_login');
         }
     };
 
@@ -236,16 +251,25 @@ function initAuth() {
 }
 
 // ---- Вихід ----
-document.getElementById('logoutBtn').onclick = async () => {
+// Прив'язуємо клік через делегування на document, а не напряму до
+// #logoutBtn: якщо на момент виконання цього файлу елемента з таким id
+// ще немає в DOM (наприклад, кнопка виходу — частина розмітки #app, яка
+// може підвантажуватись/малюватись окремо), пряме звернення до
+// .onclick на null ламало б ВЕСЬ auth.js — а разом з ним і виклик
+// initAuth() нижче, через що сторінка входу не ініціалізувалась би
+// взагалі (порожній екран без форми входу).
+document.addEventListener('click', async (e) => {
+    const btn = e.target.closest && e.target.closest('#logoutBtn');
+    if (!btn) return;
     if (firebaseReady && firebaseUser) {
         await signOutFromFirebase();
     } else {
         clearSession();
         document.getElementById('app').classList.remove('active');
         document.getElementById('authPage').style.display = 'flex';
-        toast('Ви вийшли з акаунта');
+        toast(t('logged_out_toast'));
     }
-};
+});
 
 // ---- Ініціалізація ----
 initAuth();
