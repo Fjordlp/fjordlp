@@ -133,7 +133,7 @@ function render() {
     main.innerHTML = '';
     main.appendChild(renderView());
     updateNav();
-    document.getElementById('userNameDisplay').textContent = STATE.name || currentUser;
+    document.getElementById('userNameDisplay').textContent = STATE.name && !isDefaultGuestName(STATE.name) ? STATE.name : (currentUser === 'guest' ? t('default_guest_name') : currentUser);
     
     // Деякі адмін-сторінки потребують ініціалізації після рендерингу
     // (їхні view-функції повертають рядок HTML, а не DOM-елемент із вже
@@ -327,6 +327,6 @@ function renderView() {
         case 'admin-daily-word':
             return el(viewAdminDailyWord());
         default:
-            return el('<div class="view"><p>Сторінку не знайдено.</p></div>');
+            return el(`<div class="view"><p>${t('page_not_found')}</p></div>`);
     }
 }
