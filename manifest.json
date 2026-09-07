@@ -1,0 +1,40 @@
+{
+<<<<<<< HEAD
+  "name": "FjordLP — Платформа для вивчення мов",
+  "short_name": "FjordLP",
+  "description": "Картки, тести, граматика та AI-помічник. Створено для людей. Безкоштовно.",
+=======
+  "name": "Fjord — вивчай норвезьку",
+  "short_name": "Fjord",
+  "description": "Вивчай норвезьку з AI-тролем: словник, картки, тести, Norskprøve Academy",
+>>>>>>> f32e6e280b4b9a4bd3c3cc459f3713ec6b980d8a
+  "start_url": "/?source=pwa",
+  "id": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0A1D2B",
+  "theme_color": "#0A1D2B",
+  "lang": "uk",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
