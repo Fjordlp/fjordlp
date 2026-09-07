@@ -16,6 +16,7 @@
   на головний застосунок з ?lang=<код>&ui=en, який на вході одразу
   застосує мову навчання (js/state.js: ensureStateDefaults) і
   пропустить екран вибору мови.
+<<<<<<< HEAD
 
 Мова копірайту на кожній сторінці = мова, яку там вивчають (сторінка
 /learn/german/ написана німецькою, /learn/japanese/ — японською тощо),
@@ -23,12 +24,15 @@
 мови". Виняток — рядок копірайту в підвалі (юридичний текст), який
 свідомо лишається англійською на всіх мовних сторінках, так само як і
 на головній (українській) index.html.
+=======
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
 """
 import os
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 LEARN_DIR = os.path.join(ROOT, "learn")
 
+<<<<<<< HEAD
 # code, slug, flag — технічні поля (URL, параметр ?lang=, іконка).
 # Решта полів — це вже готовий, повністю перекладений текст сторінки
 # мовою, яку вивчають (а не шаблон, що просто підставляє назву мови в
@@ -281,6 +285,24 @@ LANGS = [
 
 TEMPLATE = """<!DOCTYPE html>
 <html lang="{html_lang}">
+=======
+LANGS = [
+    {"code": "en", "slug": "english", "name": "English", "flag": "🇬🇧"},
+    {"code": "de", "slug": "german", "name": "German", "flag": "🇩🇪"},
+    {"code": "es", "slug": "spanish", "name": "Spanish", "flag": "🇪🇸"},
+    {"code": "fr", "slug": "french", "name": "French", "flag": "🇫🇷"},
+    {"code": "it", "slug": "italian", "name": "Italian", "flag": "🇮🇹"},
+    {"code": "ja", "slug": "japanese", "name": "Japanese", "flag": "🇯🇵"},
+    {"code": "nl", "slug": "dutch", "name": "Dutch", "flag": "🇳🇱"},
+    {"code": "pl", "slug": "polish", "name": "Polish", "flag": "🇵🇱"},
+    {"code": "pt", "slug": "portuguese", "name": "Portuguese", "flag": "🇵🇹"},
+    {"code": "sv", "slug": "swedish", "name": "Swedish", "flag": "🇸🇪"},
+    {"code": "uk", "slug": "ukrainian", "name": "Ukrainian", "flag": "🇺🇦"},
+]
+
+TEMPLATE = """<!DOCTYPE html>
+<html lang="en">
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
@@ -296,6 +318,7 @@ TEMPLATE = """<!DOCTYPE html>
     <link rel="icon" type="image/png" sizes="192x192" href="../../icons/icon-192.png">
 
     <!-- ============ SEO ============ -->
+<<<<<<< HEAD
     <title>{seo_title}</title>
     <meta name="description" content="{meta_description}">
     <link rel="canonical" href="https://fjordlp.com/learn/{slug}/">
@@ -303,6 +326,15 @@ TEMPLATE = """<!DOCTYPE html>
     <!-- ============ Open Graph ============ -->
     <meta property="og:title" content="{seo_title}">
     <meta property="og:description" content="{og_description}">
+=======
+    <title>Learn {name} Online for Free — AI Tutor & Games | Fjord</title>
+    <meta name="description" content="Learn {name} for free with Fjord: an AI troll tutor, gamified flashcards, adaptive stories and real practice from A1 to C2. No credit card, no ads.">
+    <link rel="canonical" href="https://fjordlp.com/learn/{slug}/">
+
+    <!-- ============ Open Graph ============ -->
+    <meta property="og:title" content="Learn {name} Online for Free — AI Tutor & Games | Fjord">
+    <meta property="og:description" content="An AI troll tutor, gamified flashcards, adaptive stories and real practice from A1 to C2 — free, no credit card.">
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
     <meta property="og:url" content="https://fjordlp.com/learn/{slug}/">
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://fjordlp.com/og-image.jpg">
@@ -311,8 +343,13 @@ TEMPLATE = """<!DOCTYPE html>
 
     <!-- ============ Twitter Card ============ -->
     <meta name="twitter:card" content="summary_large_image">
+<<<<<<< HEAD
     <meta name="twitter:title" content="{seo_title}">
     <meta name="twitter:description" content="{og_description}">
+=======
+    <meta name="twitter:title" content="Learn {name} Online for Free — AI Tutor & Games | Fjord">
+    <meta name="twitter:description" content="An AI troll tutor, gamified flashcards, adaptive stories and real practice from A1 to C2 — free, no credit card.">
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
     <meta name="twitter:image" content="https://fjordlp.com/og-image.jpg">
 
     <!-- ============ Fonts ============ -->
@@ -328,8 +365,13 @@ TEMPLATE = """<!DOCTYPE html>
     {{
       "@context": "https://schema.org",
       "@type": "Course",
+<<<<<<< HEAD
       "name": "{jsonld_name}",
       "description": "{jsonld_description}",
+=======
+      "name": "Learn {name} with Fjord",
+      "description": "Gamified {name} learning platform with an AI tutor, flashcards, adaptive stories and CEFR A1-C2 progression.",
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
       "provider": {{
         "@type": "Organization",
         "name": "Fjord",
@@ -351,6 +393,7 @@ TEMPLATE = """<!DOCTYPE html>
                     <span class="mark"><svg viewBox="0 0 30 30" width="34" height="34"><circle cx="15" cy="20" r="6" fill="#2FA89B"/><path d="M2 20 A13 13 0 0 1 28 20" stroke="#E8A33D" stroke-width="2" fill="none"/></svg></span>
                     Fjord
                 </div>
+<<<<<<< HEAD
                 <h1 class="hero-title">{h1}</h1>
                 <p class="hero-subtitle">{subtitle}</p>
                 <div class="hero-cta-row">
@@ -358,11 +401,21 @@ TEMPLATE = """<!DOCTYPE html>
                     <a class="btn btn-hero-ghost" href="/?lang={code}&amp;ui=en">{cta_secondary}</a>
                 </div>
                 <p class="hero-microcopy">{microcopy}</p>
+=======
+                <h1 class="hero-title">Learn {name} {flag}<br>the way that actually sticks</h1>
+                <p class="hero-subtitle">An AI troll mentor, gamified progress and real practice —<br class="hero-br">so you enjoy learning {name}, not grind through it.</p>
+                <div class="hero-cta-row">
+                    <a class="btn btn-hero-primary" href="/?lang={code}&amp;ui=en">Start learning {name} free →</a>
+                    <a class="btn btn-hero-ghost" href="/?lang={code}&amp;ui=en">I already have an account</a>
+                </div>
+                <p class="hero-microcopy">No credit card. No forced sign-up — just open it and start learning.</p>
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
             </div>
 
             <div class="hero-features">
                 <div class="hero-feature-card">
                     <div class="hero-feature-icon">🧌</div>
+<<<<<<< HEAD
                     <h3>{feat1_title}</h3>
                     <p>{feat1_desc}</p>
                 </div>
@@ -380,11 +433,34 @@ TEMPLATE = """<!DOCTYPE html>
                     <div class="hero-feature-icon">🌍</div>
                     <h3>{feat4_title}</h3>
                     <p>{feat4_desc}</p>
+=======
+                    <h3>An AI troll by your side</h3>
+                    <p>Explains grammar, checks your sentences, gives examples — just message it like a friend.</p>
+                </div>
+                <div class="hero-feature-card">
+                    <div class="hero-feature-icon">🎮</div>
+                    <h3>XP, levels, gear</h3>
+                    <p>Every word you learn levels up your troll — unlocking new hats, glasses and backgrounds.</p>
+                </div>
+                <div class="hero-feature-card">
+                    <div class="hero-feature-icon">📚</div>
+                    <h3>Real practice, not rote drills</h3>
+                    <p>Flashcards, tests, a sentence builder and books with click-to-translate reading.</p>
+                </div>
+                <div class="hero-feature-card">
+                    <div class="hero-feature-icon">🌍</div>
+                    <h3>Structured CEFR A1 → C2</h3>
+                    <p>Lessons unlock in order, from complete beginner to advanced {name}.</p>
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
                 </div>
             </div>
         </section>
 
+<<<<<<< HEAD
         <p style="margin-top:24px;font-size:.85rem;"><a href="/" style="color:var(--frost);opacity:.75;">{footer_nav}</a></p>
+=======
+        <p style="margin-top:24px;font-size:.85rem;"><a href="/" style="color:var(--frost);opacity:.75;">Looking to learn a different language? →</a></p>
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
 
         <footer class="appfoot" style="width:100%;">© 2026 Fjord. Production by Nazar Maksymenko. All rights reserved.</footer>
     </div>
