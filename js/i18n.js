@@ -43,6 +43,10 @@ const UI_STRINGS = {
         interface_lang: 'Мова інтерфейсу', vocab_lang: 'Мова перекладу слів',
         search_placeholder: 'Пошук...', no_words_found: 'Немає слів за цим критерієм',
         start_btn: 'Почати', check_btn: 'Перевірити', next_btn: 'Далі', back_btn: 'Назад',
+        sb_title: 'Конструктор речень', sb_loading: 'Завантажуємо набір речень для вашої мови…',
+        sb_empty: 'Для {lang} (рівень {level}) ще не опубліковано набір речень — зазирни пізніше.',
+        sb_tap_hint: 'Тапни блоки знизу, щоб скласти речення', sb_check_btn: 'Перевірити',
+        sb_correct_was: 'Правильно було', sb_correct_label: '✅ Правильно!',
         all_topics: 'Усі теми', level_change_note: 'Ви завжди можете змінити рівень пізніше.',
         all_level_words: 'Усі слова вашого рівня', status_label: 'Статус',
         col_word: 'Слово', col_translation: 'Переклад', col_topic: 'Тема', col_status: 'Статус',
@@ -131,10 +135,6 @@ const UI_STRINGS = {
         test_mc_title: 'Вибір форми', test_mc_desc: 'Оберіть правильний переклад або форму.',
         test_cloze_title: 'Заповни пропуск', test_cloze_desc: 'Вставте пропущене слово.',
         test_order_title: 'Склади речення', test_order_desc: 'Розташуйте слова у правильному порядку.',
-        sb_title: 'Конструктор речень', sb_loading: 'Завантажуємо набір речень для вашої мови…',
-        sb_empty: 'Для {lang} (рівень {level}) ще не опубліковано набір речень — зазирни пізніше.',
-        sb_tap_hint: 'Тапни блоки знизу, щоб скласти речення', sb_check_btn: 'Перевірити',
-        sb_correct_was: 'Правильно було', sb_correct_label: '✅ Правильно!',
         test_listen_title: 'Аудіювання', test_listen_desc: 'Прослухайте слово і оберіть переклад.',
         test_translate_title: 'Переклад', test_translate_desc: 'Напишіть переклад слова.',
         start_test_btn: 'Почати', quiz_preparing_title: 'Готуємо слова…',
@@ -197,6 +197,10 @@ const UI_STRINGS = {
         interface_lang: 'Interface language', vocab_lang: 'Word translation language',
         search_placeholder: 'Search...', no_words_found: 'No words match this filter',
         start_btn: 'Start', check_btn: 'Check', next_btn: 'Next', back_btn: 'Back',
+        sb_title: 'Sentence Builder', sb_loading: 'Loading a sentence set for your language…',
+        sb_empty: 'No sentence set has been published yet for {lang} (level {level}) — check back later.',
+        sb_tap_hint: 'Tap the blocks below to build the sentence', sb_check_btn: 'Check',
+        sb_correct_was: 'The correct sentence was', sb_correct_label: '✅ Correct!',
         all_topics: 'All topics', level_change_note: 'You can always change your level later.',
         all_level_words: 'All words for your level', status_label: 'Status',
         col_word: 'Word', col_translation: 'Translation', col_topic: 'Topic', col_status: 'Status',
@@ -285,10 +289,6 @@ const UI_STRINGS = {
         test_mc_title: 'Multiple choice', test_mc_desc: 'Pick the correct translation or form.',
         test_cloze_title: 'Fill in the blank', test_cloze_desc: 'Insert the missing word.',
         test_order_title: 'Build the sentence', test_order_desc: 'Arrange the words in the correct order.',
-        sb_title: 'Sentence Builder', sb_loading: 'Loading a sentence set for your language…',
-        sb_empty: 'No sentence set has been published yet for {lang} (level {level}) — check back later.',
-        sb_tap_hint: 'Tap the blocks below to build the sentence', sb_check_btn: 'Check',
-        sb_correct_was: 'The correct sentence was', sb_correct_label: '✅ Correct!',
         test_listen_title: 'Listening', test_listen_desc: 'Listen to the word and choose the translation.',
         test_translate_title: 'Translation', test_translate_desc: 'Write the translation of the word.',
         start_test_btn: 'Start', quiz_preparing_title: 'Preparing words…',
@@ -351,6 +351,10 @@ const UI_STRINGS = {
         interface_lang: 'Язык интерфейса', vocab_lang: 'Язык перевода слов',
         search_placeholder: 'Поиск...', no_words_found: 'Нет слов по этому критерию',
         start_btn: 'Начать', check_btn: 'Проверить', next_btn: 'Далее', back_btn: 'Назад',
+        sb_title: 'Конструктор предложений', sb_loading: 'Загружаем набор предложений для вашего языка…',
+        sb_empty: 'Для {lang} (уровень {level}) ещё не опубликован набор предложений — загляните позже.',
+        sb_tap_hint: 'Тапни блоки снизу, чтобы составить предложение', sb_check_btn: 'Проверить',
+        sb_correct_was: 'Правильно было', sb_correct_label: '✅ Правильно!',
         all_topics: 'Все темы', level_change_note: 'Вы всегда можете изменить уровень позже.',
         all_level_words: 'Все слова вашего уровня', status_label: 'Статус',
         col_word: 'Слово', col_translation: 'Перевод', col_topic: 'Тема', col_status: 'Статус',
@@ -439,10 +443,6 @@ const UI_STRINGS = {
         test_mc_title: 'Выбор формы', test_mc_desc: 'Выберите правильный перевод или форму.',
         test_cloze_title: 'Заполни пропуск', test_cloze_desc: 'Вставьте пропущенное слово.',
         test_order_title: 'Составь предложение', test_order_desc: 'Расположите слова в правильном порядке.',
-        sb_title: 'Конструктор предложений', sb_loading: 'Загружаем набор предложений для вашего языка…',
-        sb_empty: 'Для {lang} (уровень {level}) ещё не опубликован набор предложений — загляните позже.',
-        sb_tap_hint: 'Тапни блоки снизу, чтобы составить предложение', sb_check_btn: 'Проверить',
-        sb_correct_was: 'Правильно было', sb_correct_label: '✅ Правильно!',
         test_listen_title: 'Аудирование', test_listen_desc: 'Прослушайте слово и выберите перевод.',
         test_translate_title: 'Перевод', test_translate_desc: 'Напишите перевод слова.',
         start_test_btn: 'Начать', quiz_preparing_title: 'Готовим слова…',
@@ -690,38 +690,11 @@ const TOPIC_TRANSLATIONS = {
     'Хобі': { en: 'Hobbies', ru: 'Хобби' },
     'Числа': { en: 'Numbers', ru: 'Числа' },
     'Школа': { en: 'School', ru: 'Школа' },
-    // Нижче — теми, яких не було у фіксованому списку вище, але AI уже
-    // згенерував слова з ними (побачено "живцем" на сайті: деякі теми
-    // не перекладались і показувались українською навіть при en/ru
-    // інтерфейсі).
-    'Базова їжа': { en: 'Basic food', ru: 'Базовая еда' },
-    'Дієслова руху та дії': { en: 'Verbs of motion and action', ru: 'Глаголы движения и действия' },
 };
-
-// Пошук перекладу теми БЕЗ урахування регістру та зайвих пробілів.
-// Причина: AI, що генерує нові слова, не завжди повторює тему symbol-в-symbol
-// так, як вона записана тут (наприклад повертає "дім" замість "Дім") — і
-// раніше translateTopic() шукав ТОЧНИЙ збіг рядка, тому такі теми ніколи
-// не перекладались і показувались українською навіть при англійському чи
-// російському інтерфейсі. Мапу будуємо один раз при першому виклику.
-let _topicTranslationsNormalized = null;
-function _normalizedTopicKey(s) { return String(s || '').trim().toLowerCase(); }
-function _getNormalizedTopicMap() {
-    if (_topicTranslationsNormalized) return _topicTranslationsNormalized;
-    _topicTranslationsNormalized = {};
-    Object.keys(TOPIC_TRANSLATIONS).forEach(key => {
-        _topicTranslationsNormalized[_normalizedTopicKey(key)] = TOPIC_TRANSLATIONS[key];
-    });
-    return _topicTranslationsNormalized;
-}
 function translateTopic(topic, lang) {
     lang = lang || (typeof STATE !== 'undefined' && STATE && STATE.vocabLang) || 'uk';
     if (lang === 'uk' || !topic) return topic;
-    // Спершу точний збіг (швидко, найчастіший випадок), потім — без
-    // урахування регістру/пробілів (рятує теми, які AI записав інакше,
-    // ніж вони є в TOPIC_TRANSLATIONS, напр. "дім" замість "Дім").
-    let entry = TOPIC_TRANSLATIONS[topic];
-    if (!entry) entry = _getNormalizedTopicMap()[_normalizedTopicKey(topic)];
+    const entry = TOPIC_TRANSLATIONS[topic];
     return (entry && entry[lang]) || topic; // немає перекладу — показуємо як є, а не порожньо
 }
 

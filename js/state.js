@@ -92,8 +92,14 @@ function hasExistingData(state) {
     if (state.stats && state.stats.testsCompleted > 0) return true;
     if (state.customWords && state.customWords.length > 0) return true;
     if (state._onboardingDone) return true;
-    if (state._targetLangChosen) return true;
-    if (state.targetLang && state.targetLang !== 'no') return true;
+    // Примітка: раніше тут ще була перевірка
+    // `state.targetLang && state.targetLang !== 'no'` та
+    // `state._targetLangChosen` — обидві хибно розпізнавали "є дані" в
+    // абсолютно нового користувача, який щойно обрав мову навчання на
+    // пікері при вході (targetLang стає не-'no' ще до того, як людина
+    // взагалі щось почала вивчати). Через це онбординг (мета + рівень)
+    // пропускався одразу після вибору мови. Обрана мова сама по собі —
+    // не прогрес, тож більше не рахується тут.
     return false;
 }
 window.hasExistingData = hasExistingData; // експортуємо для інших файлів
@@ -118,7 +124,26 @@ function ensureStateDefaults(state) {
         state.uiLang = stored;
     }
     if (!state.vocabLang) state.vocabLang = state.uiLang;
-    if (!state.targetLang) state.targetLang = 'no';
+    if (!state.targetLang) {
+        // Мову навчання могли вже обрати на екрані-пікері при першому
+        // заході на сайт (index.html) або через параметр ?lang= на
+        // окремій мовній лендинг-сторінці (/learn/<мова>/) — тоді вона
+        // лежить у localStorage ще ДО реєстрації/гостьового входу.
+        // Якщо обрана — одразу позначаємо _targetLangChosen, щоб екран
+        // "choose-language" не показувався вдруге. Але це НЕ означає,
+        // що онбординг (мета + вхідний тест) уже пройдено — раніше тут
+        // помилково позначалось і це теж, і новий користувач, який
+        // просто обрав мову на пікері, потрапляв одразу на "Головну",
+        // жодного разу не побачивши крок з метою/рівнем.
+        let storedTargetLang = null;
+        try { storedTargetLang = localStorage.getItem('fjord_target_lang'); } catch (e) { /* ignore */ }
+        if (storedTargetLang) {
+            state.targetLang = storedTargetLang;
+            state._targetLangChosen = true;
+        } else {
+            state.targetLang = 'no';
+        }
+    }
 
     // Використовуємо глобальну hasExistingData
     if (hasExistingData(state)) {
@@ -126,20 +151,12 @@ function ensureStateDefaults(state) {
         state._targetLangChosen = true;
     }
 
-    if (state._targetLangChosen && !state._onboardingDone) {
-        state._onboardingDone = true;
-    }
-
     if (typeof state._targetLangChosen === 'undefined') {
         state._targetLangChosen = !!state._onboardingDone || Object.keys(state.langData || {}).length > 0;
     }
-
-    // 🔥 ВИДАЛЕНО: generatedVocab, generatedGrammar, generatedTasks
-    // Більше не використовуються – слово AI-генерації повністю прибрано.
-    // if (!state.generatedVocab || typeof state.generatedVocab !== 'object') state.generatedVocab = {};
-    // if (!state.generatedGrammar || typeof state.generatedGrammar !== 'object') state.generatedGrammar = {};
-    // if (!state.generatedTasks || typeof state.generatedTasks !== 'object') state.generatedTasks = {};
-
+    if (!state.generatedVocab || typeof state.generatedVocab !== 'object') state.generatedVocab = {};
+    if (!state.generatedGrammar || typeof state.generatedGrammar !== 'object') state.generatedGrammar = {};
+    if (!state.generatedTasks || typeof state.generatedTasks !== 'object') state.generatedTasks = {};
     if (!state.wordTranslations || typeof state.wordTranslations !== 'object') state.wordTranslations = {};
     if (typeof state.admin !== 'boolean') state.admin = false;
     if (!state.langData || typeof state.langData !== 'object') state.langData = {};
