@@ -9,4 +9,15 @@
   <url><loc>https://fjordlp.com/books</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://fjordlp.com/profile</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://fjordlp.com/norskprove</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://fjordlp.com/learn/english/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://fjordlp.com/learn/german/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://fjordlp.com/learn/spanish/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://fjordlp.com/learn/french/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://fjordlp.com/learn/italian/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://fjordlp.com/learn/japanese/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://fjordlp.com/learn/dutch/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://fjordlp.com/learn/polish/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://fjordlp.com/learn/portuguese/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://fjordlp.com/learn/swedish/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://fjordlp.com/learn/ukrainian/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
 </urlset>

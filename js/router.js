@@ -11,12 +11,119 @@
 let ROUTE = "home";
 let SUBSTATE = {};
 
-function navigate(route, sub) {
+// ---------------------------------------------------------------------
+//  СПРАВЖНІ URL (History API)
+// ---------------------------------------------------------------------
+// Маршрути, які отримують власний, "справжній" шлях в адресному рядку
+// (саме ці — і жодні інші — перелічені в sitemap.xml). Дочірні/сесійні
+// екрани (сесія флеш-карток, конкретне питання тесту, читання книги чи
+// уроку, адмін-підпанелі) НЕ отримують власного шляху: їхній стан
+// (SUBSTATE) зазвичай містить одноразові, невідновлювані на льоту дані
+// (наприклад, вже перемішану колоду карток чи згенеровані AI-задачі), а
+// не щось, що є сенс зберігати в закладці чи ділитись посиланням. Вони
+// все одно потрапляють в історію браузера (щоб "Назад" з них працював),
+// просто видимий шлях лишається на "батьківському" маршруті.
+const ROUTE_PATHS = {
+    'home': '/',
+    'alphabet': '/alphabet',
+    'flashcards': '/flashcards',
+    'vocabulary': '/vocabulary',
+    'tests': '/tests',
+    'grammar': '/grammar',
+    'troll': '/troll',
+    'books': '/books',
+    'lessons': '/lessons',
+    'story': '/story',
+    'profile': '/profile',
+    'onboarding': '/onboarding',
+    'choose-language': '/choose-language',
+    'norskprove': '/norskprove',
+    'tournaments': '/tournaments',
+    'admin': '/admin',
+};
+const PATH_TO_ROUTE = Object.keys(ROUTE_PATHS).reduce((acc, r) => {
+    acc[ROUTE_PATHS[r]] = r;
+    return acc;
+}, {});
+
+// Для маршруту без власного шляху (напр. 'flashsession', 'test-mc',
+// 'admin-words') шукаємо шлях "батька" з NAV_ROUTE_GROUPS (група
+// підсвітки меню, куди він належить) — якщо не знайдено, лишаємось на
+// поточному шляху як є.
+function pathForRoute(route) {
+    if (ROUTE_PATHS[route]) return ROUTE_PATHS[route];
+    for (const parent in NAV_ROUTE_GROUPS) {
+        if (NAV_ROUTE_GROUPS[parent].includes(route) && ROUTE_PATHS[parent]) {
+            return ROUTE_PATHS[parent];
+        }
+    }
+    return null;
+}
+
+// Визначає ROUTE із поточного location.pathname — використовується і
+// при прямому/перезавантаженому заході на "справжній" URL (напр.
+// /vocabulary в новій вкладці), і в обробнику popstate, коли для запису
+// історії з якоїсь причини нема збереженого state (напр. користувач
+// вручну ввів URL рядком і одразу тиснув "Назад").
+function routeFromLocation() {
+    return PATH_TO_ROUTE[location.pathname] || null;
+}
+
+// Перший виклик navigate() після завантаження застосунку (вхід/гість/
+// відновлення сесії) не повинен додавати новий запис в історію поверх
+// того, який браузер і так створив при відкритті сторінки — лише
+// прив'язує до НЬОГО правильні route/sub. Скидається на false при виході
+// з акаунта, щоб наступний вхід знову коректно "проініціалізував" запис.
+let _historyInitialized = false;
+
+function navigate(route, sub, opts) {
+    opts = opts || {};
+    const routeChanged = route !== ROUTE;
     ROUTE = route;
     SUBSTATE = sub || {};
     render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Викликано з обробника popstate (Назад/Вперед) — адресний рядок уже
+    // правильний, історію чіпати не треба, інакше зациклимось.
+    if (opts.fromPopState) return;
+
+    const path = pathForRoute(route) || location.pathname;
+    const historyState = { route: route, sub: SUBSTATE };
+
+    if (!_historyInitialized) {
+        history.replaceState(historyState, '', path);
+        _historyInitialized = true;
+    } else if (routeChanged) {
+        // Справжня зміна сторінки — новий запис в історії.
+        history.pushState(historyState, '', path);
+    } else {
+        // Той самий ROUTE, лише оновлені дані (наприклад, наступна картка
+        // в тій самій сесії флеш-карток чи наступне питання тесту) — це
+        // НЕ нова "сторінка", тож не додаємо новий запис в історію.
+        // Інакше кнопку "Назад" довелось би тиснути стільки ж разів,
+        // скільки карток/питань було в сесії, щоб просто вийти з неї.
+        history.replaceState(historyState, '', path);
+    }
 }
+
+// ---- Кнопки "Назад"/"Вперед" браузера ----
+window.addEventListener('popstate', (e) => {
+    const app = document.getElementById('app');
+    // До входу (застосунок ще не активний) реальної маршрутизації нема —
+    // ігноруємо, щоб не викликати render() у порожнечу.
+    if (!app || !app.classList.contains('active')) return;
+
+    const state = e.state;
+    if (state && state.route) {
+        navigate(state.route, state.sub, { fromPopState: true });
+    } else {
+        // Немає прив'язаного state (напр. запис історії існував ще до
+        // першого navigate(), або користувач ввів URL вручну) —
+        // визначаємо маршрут із самого шляху.
+        navigate(routeFromLocation() || 'home', {}, { fromPopState: true });
+    }
+});
 
 // =====================================================================
 //  RENDER
@@ -26,7 +133,11 @@ function render() {
     main.innerHTML = '';
     main.appendChild(renderView());
     updateNav();
+<<<<<<< HEAD
     document.getElementById('userNameDisplay').textContent = displayName(currentUser);
+=======
+    document.getElementById('userNameDisplay').textContent = STATE.name && !isDefaultGuestName(STATE.name) ? STATE.name : (currentUser === 'guest' ? t('default_guest_name') : currentUser);
+>>>>>>> f32e6e280b4b9a4bd3c3cc459f3713ec6b980d8a
     
     // Деякі адмін-сторінки потребують ініціалізації після рендерингу
     // (їхні view-функції повертають рядок HTML, а не DOM-елемент із вже
@@ -40,6 +151,9 @@ function render() {
     }
     if (ROUTE === 'admin-alphabet-gen' && typeof initAdminSharedAlphabet === 'function') {
         initAdminSharedAlphabet();
+    }
+    if (ROUTE === 'admin-sentence-gen' && typeof initAdminSharedSentenceBuilder === 'function') {
+        initAdminSharedSentenceBuilder();
     }
     if (ROUTE === 'admin-books' && typeof initAdminBooks === 'function') {
         initAdminBooks();
@@ -69,13 +183,13 @@ function render() {
 // сторінки/під-сторінки, які до нього належать.
 const NAV_ROUTE_GROUPS = {
     flashcards: ['flashcards', 'flashsession'],
-    tests: ['tests', 'test-mc', 'test-cloze', 'test-order', 'test-listen', 'test-translate'],
+    tests: ['tests', 'test-mc', 'test-cloze', 'test-order', 'test-listen', 'test-translate', 'sentence-builder'],
     profile: ['profile', 'levels', 'leveltest', 'test-history'],
     tournaments: ['tournaments', 'tournament-play'],
     books: ['books', 'book-read'],
     lessons: ['lessons', 'lesson-read'],
     story: ['story'],
-    admin: ['admin', 'admin-words', 'admin-tournaments', 'admin-daily', 'admin-users', 'admin-vocab-gen', 'admin-grammar-gen', 'admin-alphabet-gen', 'admin-books', 'admin-daily-word'],
+    admin: ['admin', 'admin-words', 'admin-tournaments', 'admin-daily', 'admin-users', 'admin-vocab-gen', 'admin-grammar-gen', 'admin-alphabet-gen', 'admin-sentence-gen', 'admin-books', 'admin-daily-word'],
 };
 
 function updateNav() {
@@ -162,6 +276,8 @@ function renderView() {
             return viewTestListen();
         case 'test-translate':
             return viewTestTranslate();
+        case 'sentence-builder':
+            return viewSentenceBuilder();
         case 'grammar':
             return viewGrammar();
         case 'books':
@@ -208,11 +324,13 @@ function renderView() {
             return el(viewAdminSharedGrammar());
         case 'admin-alphabet-gen':
             return el(viewAdminSharedAlphabet());
+        case 'admin-sentence-gen':
+            return el(viewAdminSharedSentenceBuilder());
         case 'admin-books':
             return el(viewAdminBooks());
         case 'admin-daily-word':
             return el(viewAdminDailyWord());
         default:
-            return el('<div class="view"><p>Сторінку не знайдено.</p></div>');
+            return el(`<div class="view"><p>${t('page_not_found')}</p></div>`);
     }
 }
