@@ -75,8 +75,8 @@
     }
     </script>
 </head>
-
 <body>
+<<<<<<< HEAD
 
    <!-- ===== ENTRY LANGUAGE PICKER ============================================
         Перший екран для НОВИХ відвідувачів (нема ні акаунта, ні гостьової
@@ -105,6 +105,62 @@
        </div>
    </div>
 
+=======
+<<<<<<< HEAD
+
+   <!-- ===== AUTH PAGE ===== -->
+<div id="authPage" class="auth-page">
+
+    <!-- ===== HERO / LANDING ===== -->
+    <section class="hero-landing">
+        <div class="hero-inner">
+            <div class="hero-brand">
+                <span class="mark"><svg viewBox="0 0 30 30" width="34" height="34"><circle cx="15" cy="20" r="6" fill="#2FA89B"/><path d="M2 20 A13 13 0 0 1 28 20" stroke="#E8A33D" stroke-width="2" fill="none"/></svg></span>
+                Fjord
+            </div>
+            <div class="hero-troll" id="heroTroll" aria-hidden="true"></div>
+            <h1 class="hero-title"> Знання, які нарешті<br>триматимусь в голові</h1>
+            <p class="hero-subtitle">AI-тролль-наставник, гейміфікаці —<br class="hero-br">щоб ви вчились із задоволенням, а не через силу.</p>
+            <div class="hero-cta-row">
+                <button class="btn btn-hero-primary" id="heroTryBtn">Спробувати безкоштовно →</button>
+                <button class="btn btn-hero-ghost" id="heroLoginBtn">Увійти в акаунт</button>
+            </div>
+            <p class="hero-microcopy">Без карток. Без обов'язкової реєстрації — просто заходьте і вчіться.</p>
+        </div>
+
+        <div class="hero-features">
+            <div class="hero-feature-card">
+                <div class="hero-feature-icon"></div>
+=======
+
+   <!-- ===== ENTRY LANGUAGE PICKER ============================================
+        Перший екран для НОВИХ відвідувачів (нема ні акаунта, ні гостьової
+        сесії, ні збереженого вибору): спершу — яку мову вчити й якою мовою
+        інтерфейс, і лише потім — вхід/реєстрація/гість. Для тих, хто вже
+        обирав мову раніше (localStorage) або прийшов з мовної лендинг-
+        сторінки /learn/<мова>/?lang=... — пікер пропускається автоматично,
+        одразу видно звичну сторінку входу.
+   ===================================================================== -->
+   <div id="entryPicker" class="auth-page" style="display:none;">
+       <div style="max-width:820px;width:100%;margin:0 auto;padding:40px 16px;">
+           <div class="hero-brand" style="justify-content:center;margin-bottom:20px;">
+               <span class="mark"><svg viewBox="0 0 30 30" width="34" height="34"><circle cx="15" cy="20" r="6" fill="#2FA89B"/><path d="M2 20 A13 13 0 0 1 28 20" stroke="#E8A33D" stroke-width="2" fill="none"/></svg></span>
+               Fjord
+           </div>
+           <div style="display:flex;justify-content:center;gap:6px;margin-bottom:26px;">
+               <button class="chip lang-chip" data-lang="uk">UK</button>
+               <button class="chip lang-chip" data-lang="en">EN</button>
+               <button class="chip lang-chip" data-lang="ru">RU</button>
+           </div>
+           <h1 class="hero-title" style="text-align:center;font-size:clamp(1.6rem,4vw,2.2rem);">Яку мову хочеш вивчати?</h1>
+           <p class="hero-subtitle" style="text-align:center;margin-bottom:26px;">
+               Оберіть мову — далі завжди можна змінити в налаштуваннях.
+           </p>
+           <div id="entryLangGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;"></div>
+       </div>
+   </div>
+
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
    <script>
    (function () {
        // 12 мов, для яких реально є словник/граматика (window.LANG_DATA) —
@@ -194,21 +250,49 @@
         <div class="hero-features">
             <div class="hero-feature-card">
                 <div class="hero-feature-icon">🧌</div>
+<<<<<<< HEAD
+=======
+>>>>>>> f32e6e280b4b9a4bd3c3cc459f3713ec6b980d8a
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
                 <h3>AI-тролль поруч</h3>
                 <p>Пояснить граматику, перевірить речення, підкаже приклад — просто напиши йому, як другу.</p>
             </div>
             <div class="hero-feature-card">
+<<<<<<< HEAD
                 <div class="hero-feature-icon">🎮</div>
+=======
+<<<<<<< HEAD
+                <div class="hero-feature-icon"></div>
+=======
+                <div class="hero-feature-icon">🎮</div>
+>>>>>>> f32e6e280b4b9a4bd3c3cc459f3713ec6b980d8a
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
                 <h3>XP, рівні, спорядження</h3>
                 <p>Кожне вивчене слово наближає тролля до нового рівня — і нових капелюхів, окулярів, фонів.</p>
             </div>
             <div class="hero-feature-card">
+<<<<<<< HEAD
                 <div class="hero-feature-icon">📝</div>
+=======
+<<<<<<< HEAD
+                <div class="hero-feature-icon"></div>
+=======
+                <div class="hero-feature-icon">📝</div>
+>>>>>>> f32e6e280b4b9a4bd3c3cc459f3713ec6b980d8a
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
                 <h3>Norskprøve Academy</h3>
                 <p>Реальні завдання з читання, аудіювання, письма й говоріння — саме як на справжньому іспиті.</p>
             </div>
             <div class="hero-feature-card">
+<<<<<<< HEAD
                 <div class="hero-feature-icon">🌍</div>
+=======
+<<<<<<< HEAD
+                <div class="hero-feature-icon"></div>
+=======
+                <div class="hero-feature-icon">🌍</div>
+>>>>>>> f32e6e280b4b9a4bd3c3cc459f3713ec6b980d8a
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
                 <h3>1500+ слів на 3 мовах</h3>
                 <p>Вчіться українською, англійською чи російською — обирайте зручну мову інтерфейсу.</p>
             </div>
@@ -249,6 +333,12 @@
         <div class="toggle-link"><span id="authToggle">Ще немає акаунта? Зареєструватися</span></div>
     </div>
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    <footer class="appfoot" style="width:100%;">© 2026 Fjordlp. Production by Nazar Maksymenko. All rights reserved.</footer>
+=======
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
     <nav aria-label="Інші мови" style="width:100%;max-width:720px;margin:28px auto 0;text-align:center;">
         <p style="color:rgba(251,252,250,.6);font-size:.78rem;margin-bottom:8px;">Вчиш не норвезьку? →</p>
         <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;">
@@ -267,6 +357,10 @@
     </nav>
 
     <footer class="appfoot" style="width:100%;">© 2026 Fjord. Production by Nazar Maksymenko. All rights reserved.</footer>
+<<<<<<< HEAD
+=======
+>>>>>>> f32e6e280b4b9a4bd3c3cc459f3713ec6b980d8a
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
 </div>
 
     <!-- ===== APP ===== -->
@@ -286,7 +380,15 @@
             </div>
         </div>
         <main id="mainContent"></main>
+<<<<<<< HEAD
         <footer class="appfoot">© 2026 Fjord. Production by Nazar Maksymenko. All rights reserved.</footer>
+=======
+<<<<<<< HEAD
+        <footer class="appfoot">© 2026 Fjordlp. Production by Nazar Maksymenko. All rights reserved.</footer>
+=======
+        <footer class="appfoot">© 2026 Fjord. Production by Nazar Maksymenko. All rights reserved.</footer>
+>>>>>>> f32e6e280b4b9a4bd3c3cc459f3713ec6b980d8a
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
 
         <!-- =====================================================================
              AI-ПОМІЧНИК: ПЛАВАЮЧА КНОПКА + БІЧНА ПАНЕЛЬ
@@ -327,6 +429,12 @@
         </aside>
     </div>
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    <!-- Скрипти (порядок той самий) -->
+=======
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
     <!--
         =====================================================================
         JS-МОДУЛІ (порядок збережено таким самим, яким він був у первинному
@@ -347,6 +455,10 @@
        11. auth.js             – логіка входу/реєстрації/гостя + запуск застосунку
         =====================================================================
     -->
+<<<<<<< HEAD
+=======
+>>>>>>> f32e6e280b4b9a4bd3c3cc459f3713ec6b980d8a
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
     <script defer src="js/firebase-config.js"></script>
     <script defer src="js/firebase-auth.js"></script>
     <script defer src="js/state.js"></script>
@@ -354,20 +466,43 @@
     <script defer src="js/languages.js"></script>
     <script defer src="js/assistant.js"></script>
     <script defer src="js/data.js"></script>
+<<<<<<< HEAD
     <!-- Файли окремих мов (кожен реєструє себе в window.LANG_DATA) —
          додавай нові мови тим самим способом: js/data-de.js, js/data-es.js
          тощо, скопіювавши js/data-en.js як шаблон. -->
+=======
+<<<<<<< HEAD
+=======
+    <!-- Файли окремих мов (кожен реєструє себе в window.LANG_DATA) —
+         додавай нові мови тим самим способом: js/data-de.js, js/data-es.js
+         тощо, скопіювавши js/data-en.js як шаблон. -->
+>>>>>>> f32e6e280b4b9a4bd3c3cc459f3713ec6b980d8a
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
     <script defer src="js/data-en.js"></script>
     <script defer src="js/data-de.js"></script>
     <script defer src="js/data-es.js"></script>
     <script defer src="js/data-fr.js"></script>
     <script defer src="js/data-it.js"></script>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    <script defer src="js/data-pl.js"></script>
+    <script defer src="js/data-uk.js"></script>
+    <script defer src="js/data-nl.js"></script>
+    <script defer src="js/data-pt.js"></script>
+    <script defer src="js/data-sv.js"></script>
+=======
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
     <script defer src="js/data-ja.js"></script>
     <script defer src="js/data-nl.js"></script>
     <script defer src="js/data-pl.js"></script>
     <script defer src="js/data-pt.js"></script>
     <script defer src="js/data-sv.js"></script>
     <script defer src="js/data-uk.js"></script>
+<<<<<<< HEAD
+=======
+>>>>>>> f32e6e280b4b9a4bd3c3cc459f3713ec6b980d8a
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
     <script defer src="js/helpers.js"></script>
     <script defer src="js/gear-i18n.js"></script>
     <script defer src="js/bust-accessories.js"></script>
@@ -382,6 +517,15 @@
     <script defer src="js/views-lessons.js"></script>
     <script defer src="js/views-alphabet.js"></script>
     <script defer src="js/views-story.js"></script>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    <script defer src="js/views-admin.js"></script>
+    <script defer src="js/auth.js"></script>
+
+    <script>
+=======
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
 <script defer src="js/views-admin.js"></script>
     <script defer src="js/auth.js"></script>
     <!-- Раніше тут був @edge-tts/universal — прибрано: ця бібліотека
@@ -397,6 +541,10 @@
         // самої оболонки застосунку. Якщо реєстрація не вдалась (наприклад,
         // сайт відкрито не по https), застосунок просто працює як звичайний
         // сайт — нічого критичного не ламається.
+<<<<<<< HEAD
+=======
+>>>>>>> f32e6e280b4b9a4bd3c3cc459f3713ec6b980d8a
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').catch((err) => {

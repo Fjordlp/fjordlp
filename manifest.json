@@ -1,7 +1,19 @@
 {
+<<<<<<< HEAD
   "name": "Fjord — вивчай норвезьку",
   "short_name": "Fjord",
   "description": "Вивчай норвезьку з AI-тролем: словник, картки, тести, Norskprøve Academy",
+=======
+<<<<<<< HEAD
+  "name": "FjordLP — Платформа для вивчення мов",
+  "short_name": "FjordLP",
+  "description": "Картки, тести, граматика та AI-помічник. Створено для людей. Безкоштовно.",
+=======
+  "name": "Fjord — вивчай норвезьку",
+  "short_name": "Fjord",
+  "description": "Вивчай норвезьку з AI-тролем: словник, картки, тести, Norskprøve Academy",
+>>>>>>> f32e6e280b4b9a4bd3c3cc459f3713ec6b980d8a
+>>>>>>> 969c30b2def33a10c36e9ff2e304d817488622df
   "start_url": "/?source=pwa",
   "id": "/",
   "scope": "/",
