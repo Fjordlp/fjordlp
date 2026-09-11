@@ -270,7 +270,7 @@ function viewSentenceBuilder() {
             };
             actions.appendChild(checkBtn);
         } else {
-            const nextBtn = el(`<button class="btn btn-primary">${t('next_btn') || 'Далі'}</button>`);
+            const nextBtn = el(`<button class="btn btn-primary">${t('next_btn')}</button>`);
             nextBtn.onclick = () => {
                 SUBSTATE.i++;
                 SUBSTATE.shuffled = null;

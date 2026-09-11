@@ -240,7 +240,7 @@ async function generateVocabWordsAI(level, existingWords) {
         `Рівень: ${level}. Наявні теми у словнику: ${topics.join(', ') || 'немає даних'}. ` +
         (avoidList ? `Ці слова вже є у словнику користувача, НЕ повторюй їх і не пропонуй їхні прямі синоніми: ${avoidList}. ` : '') +
         `Згенеруй 8 нових корисних слів мовою "${targetLangName}" для цього рівня, яких ще нема у списку вище (уникай базових слів з рівня A1, якщо рівень вищий). ` +
-        `Формат масиву: [{"t": "тема українською (наприклад Їжа, Транспорт)", "no": "слово мовою вивчення", ` +
+        `Формат масиву: [{"t": "тема українською (наприклад Їжа, Транспорт)", "t_en": "та сама тема англійською", "t_ru": "та сама тема російською", "no": "слово мовою вивчення", ` +
         `"uk": "переклад українською", "en": "переклад англійською", "ru": "переклад російською", ` +
         `"ex_no": "приклад речення мовою вивчення (мінімум 4 слова, містить це слово)", ` +
         `"ex_uk": "переклад прикладу українською", "en_ex": "переклад прикладу англійською", "ru_ex": "переклад прикладу російською"}, ...]`;
@@ -368,7 +368,8 @@ function initAssistantWidget() {
         ensureStateDefaults(STATE);
         log.innerHTML = '';
         if (!STATE.assistantChat.length) {
-            renderMessage({ role: 'model', text: trollSay('greeting') + ' Я твій тролль-помічник — питай про норвезьку!' });
+            const langName = typeof targetLangName === 'function' ? targetLangName(STATE.targetLang) : '';
+            renderMessage({ role: 'model', text: trollSay('greeting') + ' ' + tf('assistant_greeting_suffix', { lang: langName }) });
         } else {
             STATE.assistantChat.forEach(renderMessage);
         }
@@ -414,24 +415,23 @@ function initAssistantWidget() {
             console.error('[AI Assistant] Помилка чату:', e);
             let msg;
             if (e && e.code === 'NOT_CONFIGURED') {
-                msg = 'Тролль ще спить 💤 — власник сайту ще не підключив AI-проксі (AI_PROXY_URL порожній у коді сторінки).';
+                msg = t('assistant_err_not_configured');
             } else if (e && e.code === 'NETWORK_ERROR') {
-                msg = 'Не вдалося достукатись до проксі-сервера (CORS, невірний URL або Worker не працює). ' +
-                      'Деталі — у консолі браузера (F12 → Console).';
+                msg = t('assistant_err_network');
             } else if (e && e.code === 'PROXY_ERROR') {
                 if (e.status === 500) {
-                    msg = 'Проксі відповів помилкою 500 — схоже, на Worker\'і не задано секрет GEMINI_API_KEY.';
+                    msg = t('assistant_err_proxy_500');
                 } else if (e.status === 401 || e.status === 403) {
-                    msg = 'Проксі відповів помилкою ' + e.status + ' — Google API-ключ, схоже, недійсний або обмежений.';
+                    msg = tf('assistant_err_proxy_auth', { status: e.status });
                 } else if (e.status === 429) {
-                    msg = 'Досягнуто безкоштовного ліміту запитів Gemini (429). Спробуй трохи пізніше.';
+                    msg = t('assistant_err_proxy_429');
                 } else if (e.status === 502) {
-                    msg = 'Google Gemini зараз недоступний або сталася несподівана помилка на сервері. Деталі — у консолі браузера (F12).';
+                    msg = t('assistant_err_proxy_502');
                 } else {
-                    msg = 'Проксі відповів помилкою ' + e.status + '. Деталі — у консолі браузера (F12 → Console).';
+                    msg = tf('assistant_err_proxy_generic', { status: e.status });
                 }
             } else {
-                msg = 'Ой, тролль спіткнувся об камінь і не зміг відповісти. Деталі — у консолі браузера (F12 → Console).';
+                msg = t('assistant_err_unknown');
             }
             const errMsg = { role: 'model', text: msg, error: true, ts: Date.now() };
             renderMessage(errMsg);

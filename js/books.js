@@ -20,27 +20,33 @@
 //  ТЕМИ/ЖАНРИ КНИГ
 // =====================================================================
 // Фіксований список — так усі книги категоризовані однаково, і бібліотеку
-// можна фільтрувати по темі. code зберігається в Firestore, label — те,
-// що бачить адмін і читач (українською, оскільки UI-переклад тем на 3
-// мови для одного select-списку — явне перевантаження на цьому етапі;
-// сама книга й опис лишаються мовою вивчення/адміна).
+// можна фільтрувати по темі. code зберігається в Firestore, label_uk/
+// label_en/label_ru — те, що бачить адмін і читач залежно від мови
+// інтерфейсу (сама книга й опис лишаються мовою вивчення/адміна).
 const BOOK_GENRES = [
-    { code: 'fairytale', label: '🧚 Казка', emoji: '🧚' },
-    { code: 'adventure', label: '🗺️ Пригоди', emoji: '🗺️' },
-    { code: 'novel', label: '📗 Повість/роман', emoji: '📗' },
-    { code: 'shortstory', label: '📄 Оповідання', emoji: '📄' },
-    { code: 'mystery', label: '🔍 Детектив', emoji: '🔍' },
-    { code: 'fantasy', label: '🐉 Фентезі', emoji: '🐉' },
-    { code: 'scifi', label: '🚀 Фантастика', emoji: '🚀' },
-    { code: 'poetry', label: '🎭 Поезія', emoji: '🎭' },
-    { code: 'biography', label: '👤 Біографія', emoji: '👤' },
-    { code: 'history', label: '🏛️ Історія', emoji: '🏛️' },
-    { code: 'children', label: '🧸 Дитяча', emoji: '🧸' },
-    { code: 'other', label: '📚 Інше', emoji: '📚' },
+    { code: 'fairytale', label_uk: '🧚 Казка', label_en: '🧚 Fairy tale', label_ru: '🧚 Сказка', emoji: '🧚' },
+    { code: 'adventure', label_uk: '🗺️ Пригоди', label_en: '🗺️ Adventure', label_ru: '🗺️ Приключения', emoji: '🗺️' },
+    { code: 'novel', label_uk: '📗 Повість/роман', label_en: '📗 Novel', label_ru: '📗 Повесть/роман', emoji: '📗' },
+    { code: 'shortstory', label_uk: '📄 Оповідання', label_en: '📄 Short story', label_ru: '📄 Рассказ', emoji: '📄' },
+    { code: 'mystery', label_uk: '🔍 Детектив', label_en: '🔍 Mystery', label_ru: '🔍 Детектив', emoji: '🔍' },
+    { code: 'fantasy', label_uk: '🐉 Фентезі', label_en: '🐉 Fantasy', label_ru: '🐉 Фэнтези', emoji: '🐉' },
+    { code: 'scifi', label_uk: '🚀 Фантастика', label_en: '🚀 Sci-fi', label_ru: '🚀 Фантастика', emoji: '🚀' },
+    { code: 'poetry', label_uk: '🎭 Поезія', label_en: '🎭 Poetry', label_ru: '🎭 Поэзия', emoji: '🎭' },
+    { code: 'biography', label_uk: '👤 Біографія', label_en: '👤 Biography', label_ru: '👤 Биография', emoji: '👤' },
+    { code: 'history', label_uk: '🏛️ Історія', label_en: '🏛️ History', label_ru: '🏛️ История', emoji: '🏛️' },
+    { code: 'children', label_uk: '🧸 Дитяча', label_en: '🧸 Children', label_ru: '🧸 Детская', emoji: '🧸' },
+    { code: 'other', label_uk: '📚 Інше', label_en: '📚 Other', label_ru: '📚 Other', emoji: '📚' },
 ];
 
 function getBookGenre(code) {
     return BOOK_GENRES.find(g => g.code === code) || BOOK_GENRES[BOOK_GENRES.length - 1];
+}
+
+// Повертає підпис жанру поточною мовою інтерфейсу (з відкатом на укр.).
+function bookGenreLabel(code) {
+    const g = getBookGenre(code);
+    const uiLang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+    return g['label_' + uiLang] || g.label_uk;
 }
 
 let _booksCache = {}; // { [lang]: [book, ...] } — кеш на сесію, щоб не смикати Firestore на кожен рендер

@@ -1288,7 +1288,7 @@ function viewAdminBooks() {
                     <div class="field">
                         <label>Тема/жанр</label>
                         <select id="abGenre">
-                            ${BOOK_GENRES.map(g => `<option value="${g.code}">${g.label}</option>`).join('')}
+                            ${BOOK_GENRES.map(g => `<option value="${g.code}">${g.label_uk}</option>`).join('')}
                         </select>
                     </div>
                     <div class="field">
@@ -1466,7 +1466,7 @@ function initAdminBooks() {
                 const genre = getBookGenre(d.genre);
                 const row = el(`
                     <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line-soft);">
-                        <span>${lang.flag} ${escHtml(d.title)} — <span class="tag level-${d.level}">${d.level}</span> · ${genre.label} · ${(d.chapters||[]).length} розд.</span>
+                        <span>${lang.flag} ${escHtml(d.title)} — <span class="tag level-${d.level}">${d.level}</span> · ${genre.label_uk} · ${(d.chapters||[]).length} розд.</span>
                         <span>
                             <button class="btn btn-ghost btn-sm ab-edit-book" data-id="${doc.id}">✏️</button>
                             <button class="btn btn-ghost btn-sm ab-delete-book" data-id="${doc.id}">🗑️</button>

@@ -16,7 +16,7 @@
                 </div>
                 <div class="card">
                   <h3>${t('settings_title')}</h3>
-                  <div class="field"><label>${t('field_name')}</label><input id="setName" value="${escHtml(displayName(''))}"></div>
+                  <div class="field"><label>${t('field_name')}</label><input id="setName" value="${escHtml(STATE.name && !isDefaultGuestName(STATE.name) ? STATE.name : '')}"></div>
                   <div class="field"><label>${t('field_learn_lang')}</label>
                     <select id="setTargetLang">
                       ${LANGUAGES.map(l => `<option value="${l.code}" ${STATE.targetLang===l.code?'selected':''}>${l.flag} ${l.name[STATE.uiLang]||l.name.uk}</option>`).join('')}
@@ -62,10 +62,10 @@
                 ["Lars", 640]
             ];
             const rows = bots.concat([
-                [STATE.name || currentUser, LD().leaderboardScore || 0]
+                [displayName(STATE.name) || currentUser, LD().leaderboardScore || 0]
             ]).sort((a, b) => b[1] - a[1]);
             rows.forEach((r, i) => {
-                const isYou = r[0] === (STATE.name || currentUser);
+                const isYou = r[0] === (displayName(STATE.name) || currentUser);
                 lb.appendChild(el(
                     `<div class="leaderboard-row ${isYou?'you':''}"><span class="rank">${i+1}</span><span class="name">${escHtml(r[0])}${isYou?t('you_label'):''}</span><span class="pts">${r[1]}</span></div>`
                     ));
@@ -81,7 +81,7 @@
                 STATE.targetLang = newTargetLang;
                 updateState();
                 toast(t('settings_saved'));
-                document.getElementById('userNameDisplay').textContent = displayName(currentUser);
+                document.getElementById('userNameDisplay').textContent = displayName(STATE.name);
                 if (targetLangChanged) navigate('home'); // словник/картки/тести залежать від мови — оновлюємо вкладку
             };
             return wrap;
@@ -989,7 +989,7 @@ function viewTournamentPlay() {
             if (uid) {
                 try {
                     await firebaseDb.collection('tournaments').doc(tr.id).collection('participants').doc(uid).set({
-                        name: displayName(t('player_name')),
+                        name: STATE.name || t('default_player_name'),
                         score: correct, // для сортування таблиці (Firestore не вміє сортувати за "correct/total" напряму)
                         correct,
                         total,

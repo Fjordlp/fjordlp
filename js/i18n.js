@@ -20,23 +20,32 @@ const UI_STRINGS = {
         toggle_to_register: 'Ще немає акаунта? Зареєструватися',
         toggle_to_login: 'Вже є акаунт? Увійти',
         guest_btn: 'Продовжити як гість', or_divider: 'або',
+        auth_err_fill_both: 'Заповніть обидва поля', auth_btn_waiting: '⏳ Зачекайте...',
+        auth_err_firebase_slow: '⏳ Firebase ще не готовий, зачекайте кілька секунд і спробуйте знову.',
+        auth_err_auth_generic: '⏳ Помилка авторизації, перезавантажте сторінку.',
+        auth_err_invalid_credentials: 'Невірний логін або пароль', auth_err_registration_generic: 'Помилка реєстрації',
+        auth_toast_registration_success: 'Реєстрація успішна! Тепер увійдіть.',
+        auth_toast_welcome: 'Ласкаво просимо, {name}!',
+        auth_toast_guest_welcome: '🎮 Ласкаво просимо! Ви в режимі гостя. Дані зберігаються локально.',
+        auth_prompt_reset_email: 'Введіть вашу електронну пошту, щоб отримати посилання для скидання пароля:',
+        auth_toast_firebase_not_ready: '⏳ Firebase ще не готовий, спробуйте пізніше.',
+        auth_toast_reset_sent: '✅ Посилання для скидання пароля надіслано на вашу пошту!',
+        auth_err_prefix: '❌ Помилка: ', auth_err_user_not_found: 'Користувача з такою поштою не знайдено.',
+        auth_err_invalid_email: 'Невірний формат електронної пошти.', auth_toast_logged_out: 'Ви вийшли з акаунта',
+        default_guest_name: 'Гість', page_not_found: 'Сторінку не знайдено.', toast_daily_goal_done: '🎉 Щоденну ціль виконано! +25 XP', tts_not_supported: 'Озвучення не підтримується',
         footer_note: 'Fjord · ваш прогрес зберігається локально під вашим логіном',
-        fill_both_fields: 'Заповніть обидва поля', please_wait: '⏳ Зачекайте...',
-        firebase_not_ready_retry: '⏳ Firebase ще не готовий, зачекайте кілька секунд і спробуйте знову.',
-        firebase_not_ready_toast: '⏳ Firebase ще не готовий, спробуйте пізніше.',
-        auth_generic_error: '⏳ Помилка авторизації, перезавантажте сторінку.',
-        invalid_login_password: 'Невірний логін або пароль', register_error_generic: 'Помилка реєстрації',
-        welcome_guest_toast: 'Ласкаво просимо! Ви в режимі гостя. Дані зберігаються локально.',
-        welcome_user_toast: 'Ласкаво просимо, {name}!', register_success_toast: 'Реєстрація успішна! Тепер увійдіть.',
-        logged_out_toast: 'Ви вийшли з акаунта',
-        reset_email_prompt: 'Введіть вашу електронну пошту, щоб отримати посилання для скидання пароля:',
-        reset_email_sent: '✅ Посилання для скидання пароля надіслано на вашу пошту!',
-        reset_error_prefix: '❌ Помилка: ', reset_user_not_found: 'Користувача з такою поштою не знайдено.',
-        reset_invalid_email: 'Невірний формат електронної пошти.',
-        guest_name: 'Гість', player_name: 'Гравець',
         save_btn: 'Зберегти', cancel_btn: 'Скасувати', clear_chat: 'Очистити чат',
         assistant_title: 'Тролль-помічник', assistant_placeholder: 'Напиши повідомлення тролю…',
         assistant_sub: 'Онлайн-тролль, одягнений так само, як у вкладці «Тролль». Запитай про граматику, слова, переклад чи просто попроси підказку — і продовжуй те, чим займався.',
+        assistant_greeting_suffix: 'Я твій тролль-помічник — питай про {lang}!',
+        assistant_err_not_configured: 'Тролль ще спить 💤 — власник сайту ще не підключив AI-проксі (AI_PROXY_URL порожній у коді сторінки).',
+        assistant_err_network: "Не вдалося достукатись до проксі-сервера (CORS, невірний URL або Worker не працює). Деталі — у консолі браузера (F12 → Console).",
+        assistant_err_proxy_500: "Проксі відповів помилкою 500 — схоже, на Worker'і не задано секрет GEMINI_API_KEY.",
+        assistant_err_proxy_auth: 'Проксі відповів помилкою {status} — Google API-ключ, схоже, недійсний або обмежений.',
+        assistant_err_proxy_429: 'Досягнуто безкоштовного ліміту запитів Gemini (429). Спробуй трохи пізніше.',
+        assistant_err_proxy_502: 'Google Gemini зараз недоступний або сталася несподівана помилка на сервері. Деталі — у консолі браузера (F12).',
+        assistant_err_proxy_generic: 'Проксі відповів помилкою {status}. Деталі — у консолі браузера (F12 → Console).',
+        assistant_err_unknown: 'Ой, тролль спіткнувся об камінь і не зміг відповісти. Деталі — у консолі браузера (F12 → Console).',
         h_home: 'Головна', h_vocabulary: 'Словник', h_tests: 'Тести', h_grammar: 'Граматика',
         h_troll: 'Твій тролль', h_profile: 'Кабінет', h_norskprove: 'Norskprøve Academy',
         h_flashcards: 'Картки', h_pick_level: 'Оберіть рівень', h_your_level: 'Ваш рівень:',
@@ -100,7 +109,7 @@ const UI_STRINGS = {
         nav_alphabet: '🔤 Основи', h_alphabet: 'Абетка та вимова', alphabet_intro: 'Перш ніж вчити слова — познайомся з літерами мови «{lang}» і тим, як вони звучать. Натисни 🔊, щоб почути.', alphabet_called: 'Називається', alphabet_none_title: 'Абетка ще не додана', alphabet_none_desc: 'Для мови «{lang}» ще немає готової абетки — адмін може опублікувати її в адмін-панелі. Поки що переходь одразу до слів і карток.', h_numbers: 'Цифри', reading_tap_hint: 'Натисни, щоб послухати вимову',
         home_story_new_title: 'Хроніки Тролля чекають', home_story_new_desc: 'Особиста пригода зі словами, які ти вже знаєш.',
         home_story_continue_title: 'Пригода триває', home_story_continue_desc: 'Розділів пройдено: {n}. Тролль чекає на продовження.',
-        story_error_network: "не вдалось з'єднатися з AI-проксі", story_error_not_configured: 'AI-проксі не налаштований на сайті',
+        story_error_network: "не вдалось з'єднатися з AI-проксі", story_error_not_configured: 'AI-проксі не налаштований на сайті', story_error_code: 'код {status}', story_error_unknown: 'невідома помилка',
         grammar_generating_notice_all: 'Готуємо граматику {lang} для всіх рівнів… Розділи з'+"'"+'являться тут, щойно будуть готові.',
         grammar_ai_generated_notice_all: 'Показані правила граматики {lang} для всіх рівнів — від A1 до C2.',
         grammar_all_levels: 'Усі рівні', grammar_empty: 'Правил граматики поки що немає.',
@@ -147,7 +156,7 @@ const UI_STRINGS = {
         achievements_title: 'Досягнення ({unlocked}/{total})',
         nav_tournaments: '🏆 Турніри', h_tournaments: 'Турніри', tourn_no_tournaments: 'Наразі немає турнірів. Зазирни пізніше!', tourn_status_upcoming: '⏳ Скоро', tourn_status_active: '🔄 Активний', tourn_status_ended: '✅ Завершено', tourn_questions_count: '{n} завдань', tourn_join_btn: 'Приєднатись', tourn_view_results_btn: 'Результати', tourn_your_score: 'Твій результат: {score}/{total}', tourn_starts_at: 'Початок: {date}', tourn_ends_at: 'До: {date}',
         tourn_not_started: 'Турнір ще не почався.', tourn_already_ended: 'Турнір уже завершився.', tourn_already_played: 'Ти вже брав(-ла) участь у цьому турнірі.', tourn_back_to_list: '← До турнірів',
-        tourn_finish_title: '🏆 Турнір завершено!', tourn_finish_desc: 'Твій результат: {correct} із {total} · +50 XP за участь', tourn_leaderboard_title: '📋 Таблиця результатів', tourn_no_participants: 'Ти перший(-а) учасник(-ця)! Результати з\'являться тут, коли приєднаються інші.', tourn_you_marker: ' (ти)', tourn_submit_error: '⚠️ Не вдалося зберегти результат. Спробуй ще раз.', tourn_guest_not_saved: '👤 Твій результат не збережеться в таблиці — грай під акаунтом, щоб результати рахувались.',
+        tourn_finish_title: '🏆 Турнір завершено!', tourn_finish_desc: 'Твій результат: {correct} із {total} · +50 XP за участь', tourn_leaderboard_title: '📋 Таблиця результатів', tourn_no_participants: 'Ти перший(-а) учасник(-ця)! Результати з\'являться тут, коли приєднаються інші.', tourn_you_marker: ' (ти)', tourn_submit_error: '⚠️ Не вдалося зберегти результат. Спробуй ще раз.', tourn_guest_not_saved: '👤 Твій результат не збережеться в таблиці — грай під акаунтом, щоб результати рахувались.', default_player_name: 'Гравець',
         home_learn_words_btn: '📇 Вчити слова', home_vocab_btn: '📚 Словник', home_grammar_btn: '📖 Граматика', home_tests_btn: '📝 Тести', home_listen_btn: '🎧 Аудіювання', home_troll_btn: '🧌 Тролль ({lvl} рів.)', more_langs_btn: '🌐 Ще мови…', change_lang_link: 'Змінити мову', viewed_mastered_label: '{seen}/{total} переглянуто · {mastered} засвоєно', you_label: ' (ви)',
         cl_welcome_title: '🌍 Яку мову хочете вивчати?', cl_welcome_desc: 'Оберіть мову — і зможемо скласти для вас план навчання саме під неї.',
         cl_switch_title: '🌍 Змінити мову навчання', cl_switch_desc: 'Прогрес по кожній мові зберігається окремо — можна вільно перемикатись.',
@@ -174,23 +183,32 @@ const UI_STRINGS = {
         toggle_to_register: "Don't have an account? Sign up",
         toggle_to_login: 'Already have an account? Log in',
         guest_btn: 'Continue as guest', or_divider: 'or',
+        auth_err_fill_both: 'Please fill in both fields', auth_btn_waiting: '⏳ Please wait...',
+        auth_err_firebase_slow: "⏳ Firebase isn't ready yet, wait a few seconds and try again.",
+        auth_err_auth_generic: '⏳ Authorization error, please reload the page.',
+        auth_err_invalid_credentials: 'Incorrect login or password', auth_err_registration_generic: 'Registration error',
+        auth_toast_registration_success: 'Registration successful! Now log in.',
+        auth_toast_welcome: 'Welcome, {name}!',
+        auth_toast_guest_welcome: "🎮 Welcome! You're in guest mode. Your data is stored locally.",
+        auth_prompt_reset_email: 'Enter your email to receive a password reset link:',
+        auth_toast_firebase_not_ready: '⏳ Firebase is not ready yet, try again later.',
+        auth_toast_reset_sent: '✅ A password reset link has been sent to your email!',
+        auth_err_prefix: '❌ Error: ', auth_err_user_not_found: 'No user found with that email.',
+        auth_err_invalid_email: 'Invalid email format.', auth_toast_logged_out: 'You have been logged out',
+        default_guest_name: 'Guest', page_not_found: 'Page not found.', toast_daily_goal_done: '🎉 Daily goal completed! +25 XP', tts_not_supported: 'Voice playback is not supported',
         footer_note: 'Fjord · your progress is stored locally under your login',
-        fill_both_fields: 'Fill in both fields', please_wait: '⏳ Please wait...',
-        firebase_not_ready_retry: '⏳ Firebase is not ready yet, wait a few seconds and try again.',
-        firebase_not_ready_toast: '⏳ Firebase is not ready yet, try again later.',
-        auth_generic_error: '⏳ Authorization error, please reload the page.',
-        invalid_login_password: 'Incorrect username or password', register_error_generic: 'Registration error',
-        welcome_guest_toast: "Welcome! You're in guest mode. Your data is stored locally.",
-        welcome_user_toast: 'Welcome, {name}!', register_success_toast: 'Registration successful! Now log in.',
-        logged_out_toast: 'You have been logged out',
-        reset_email_prompt: 'Enter your email to receive a password reset link:',
-        reset_email_sent: '✅ Password reset link sent to your email!',
-        reset_error_prefix: '❌ Error: ', reset_user_not_found: 'No user found with that email.',
-        reset_invalid_email: 'Invalid email format.',
-        guest_name: 'Guest', player_name: 'Player',
         save_btn: 'Save', cancel_btn: 'Cancel', clear_chat: 'Clear chat',
         assistant_title: 'Troll assistant', assistant_placeholder: 'Write a message to the troll…',
         assistant_sub: "An online troll, dressed the same way as in the \"Troll\" tab. Ask about grammar, words, translation, or just ask for a hint — and get back to what you were doing.",
+        assistant_greeting_suffix: "I'm your troll assistant — ask me about {lang}!",
+        assistant_err_not_configured: "The troll is still asleep 💤 — the site owner hasn't connected the AI proxy yet (AI_PROXY_URL is empty in the page code).",
+        assistant_err_network: "Couldn't reach the proxy server (CORS, wrong URL, or the Worker isn't running). Details — in the browser console (F12 → Console).",
+        assistant_err_proxy_500: "The proxy returned error 500 — looks like the GEMINI_API_KEY secret isn't set on the Worker.",
+        assistant_err_proxy_auth: 'The proxy returned error {status} — the Google API key seems invalid or restricted.',
+        assistant_err_proxy_429: "You've hit the free Gemini request limit (429). Try again in a bit.",
+        assistant_err_proxy_502: "Google Gemini is currently unavailable, or an unexpected server error occurred. Details — in the browser console (F12).",
+        assistant_err_proxy_generic: 'The proxy returned error {status}. Details — in the browser console (F12 → Console).',
+        assistant_err_unknown: "Oops, the troll tripped over a rock and couldn't answer. Details — in the browser console (F12 → Console).",
         h_home: 'Home', h_vocabulary: 'Vocabulary', h_tests: 'Tests', h_grammar: 'Grammar',
         h_troll: 'Your troll', h_profile: 'Profile', h_norskprove: 'Norskprøve Academy',
         h_flashcards: 'Flashcards', h_pick_level: 'Choose your level', h_your_level: 'Your level:',
@@ -254,7 +272,7 @@ const UI_STRINGS = {
         nav_alphabet: '🔤 Basics', h_alphabet: 'Alphabet & pronunciation', alphabet_intro: 'Before learning words — get to know the letters of "{lang}" and how they sound. Tap 🔊 to hear them.', alphabet_called: 'Called', alphabet_none_title: 'Alphabet not added yet', alphabet_none_desc: 'There is no alphabet yet for "{lang}" — an admin can publish one in the admin panel. For now, go straight to words and flashcards.', h_numbers: 'Numbers', reading_tap_hint: 'Tap to hear the pronunciation',
         home_story_new_title: "Troll's Chronicles await", home_story_new_desc: 'A personal adventure using words you already know.',
         home_story_continue_title: 'Your adventure continues', home_story_continue_desc: 'Chapters so far: {n}. The Troll is waiting to continue.',
-        story_error_network: 'could not connect to the AI proxy', story_error_not_configured: 'AI proxy is not configured on this site',
+        story_error_network: 'could not connect to the AI proxy', story_error_not_configured: 'AI proxy is not configured on this site', story_error_code: 'error code {status}', story_error_unknown: 'unknown error',
         grammar_generating_notice_all: 'Preparing {lang} grammar for all levels… Sections will appear here as they become ready.',
         grammar_ai_generated_notice_all: 'Showing {lang} grammar rules for all levels — from A1 to C2.',
         grammar_all_levels: 'All levels', grammar_empty: 'No grammar rules yet.',
@@ -301,7 +319,7 @@ const UI_STRINGS = {
         achievements_title: 'Achievements ({unlocked}/{total})',
         nav_tournaments: '🏆 Tournaments', h_tournaments: 'Tournaments', tourn_no_tournaments: 'No tournaments right now. Check back later!', tourn_status_upcoming: '⏳ Upcoming', tourn_status_active: '🔄 Active', tourn_status_ended: '✅ Ended', tourn_questions_count: '{n} questions', tourn_join_btn: 'Join', tourn_view_results_btn: 'Results', tourn_your_score: 'Your score: {score}/{total}', tourn_starts_at: 'Starts: {date}', tourn_ends_at: 'Ends: {date}',
         tourn_not_started: "This tournament hasn't started yet.", tourn_already_ended: 'This tournament has already ended.', tourn_already_played: "You've already taken part in this tournament.", tourn_back_to_list: '← Back to tournaments',
-        tourn_finish_title: '🏆 Tournament complete!', tourn_finish_desc: 'Your score: {correct} of {total} · +50 XP for participating', tourn_leaderboard_title: '📋 Leaderboard', tourn_no_participants: "You're the first participant! Results will show up here as others join.", tourn_you_marker: ' (you)', tourn_submit_error: '⚠️ Failed to save your result. Please try again.', tourn_guest_not_saved: "👤 Your result won't be saved to the leaderboard — sign in with an account for your results to count.",
+        tourn_finish_title: '🏆 Tournament complete!', tourn_finish_desc: 'Your score: {correct} of {total} · +50 XP for participating', tourn_leaderboard_title: '📋 Leaderboard', tourn_no_participants: "You're the first participant! Results will show up here as others join.", tourn_you_marker: ' (you)', tourn_submit_error: '⚠️ Failed to save your result. Please try again.', tourn_guest_not_saved: "👤 Your result won't be saved to the leaderboard — sign in with an account for your results to count.", default_player_name: 'Player',
         home_learn_words_btn: '📇 Learn words', home_vocab_btn: '📚 Vocabulary', home_grammar_btn: '📖 Grammar', home_tests_btn: '📝 Tests', home_listen_btn: '🎧 Listening', home_troll_btn: '🧌 Troll (lvl {lvl})', more_langs_btn: '🌐 More languages…', change_lang_link: 'Change language', viewed_mastered_label: '{seen}/{total} viewed · {mastered} mastered', you_label: ' (you)',
         cl_welcome_title: '🌍 Which language do you want to learn?', cl_welcome_desc: "Pick a language and we'll build a study plan just for it.",
         cl_switch_title: '🌍 Change study language', cl_switch_desc: 'Progress for each language is saved separately — switch freely anytime.',
@@ -328,23 +346,32 @@ const UI_STRINGS = {
         toggle_to_register: 'Ещё нет аккаунта? Зарегистрироваться',
         toggle_to_login: 'Уже есть аккаунт? Войти',
         guest_btn: 'Продолжить как гость', or_divider: 'или',
+        auth_err_fill_both: 'Заполните оба поля', auth_btn_waiting: '⏳ Подождите...',
+        auth_err_firebase_slow: '⏳ Firebase ещё не готов, подождите несколько секунд и попробуйте снова.',
+        auth_err_auth_generic: '⏳ Ошибка авторизации, перезагрузите страницу.',
+        auth_err_invalid_credentials: 'Неверный логин или пароль', auth_err_registration_generic: 'Ошибка регистрации',
+        auth_toast_registration_success: 'Регистрация успешна! Теперь войдите.',
+        auth_toast_welcome: 'Добро пожаловать, {name}!',
+        auth_toast_guest_welcome: '🎮 Добро пожаловать! Вы в режиме гостя. Данные сохраняются локально.',
+        auth_prompt_reset_email: 'Введите вашу электронную почту, чтобы получить ссылку для сброса пароля:',
+        auth_toast_firebase_not_ready: '⏳ Firebase ещё не готов, попробуйте позже.',
+        auth_toast_reset_sent: '✅ Ссылка для сброса пароля отправлена на вашу почту!',
+        auth_err_prefix: '❌ Ошибка: ', auth_err_user_not_found: 'Пользователь с такой почтой не найден.',
+        auth_err_invalid_email: 'Неверный формат электронной почты.', auth_toast_logged_out: 'Вы вышли из аккаунта',
+        default_guest_name: 'Гость', page_not_found: 'Страница не найдена.', toast_daily_goal_done: '🎉 Дневная цель выполнена! +25 XP', tts_not_supported: 'Озвучивание не поддерживается',
         footer_note: 'Fjord · ваш прогресс сохраняется локально под вашим логином',
-        fill_both_fields: 'Заполните оба поля', please_wait: '⏳ Подождите...',
-        firebase_not_ready_retry: '⏳ Firebase ещё не готов, подождите несколько секунд и попробуйте снова.',
-        firebase_not_ready_toast: '⏳ Firebase ещё не готов, попробуйте позже.',
-        auth_generic_error: '⏳ Ошибка авторизации, перезагрузите страницу.',
-        invalid_login_password: 'Неверный логин или пароль', register_error_generic: 'Ошибка регистрации',
-        welcome_guest_toast: 'Добро пожаловать! Вы в режиме гостя. Данные сохраняются локально.',
-        welcome_user_toast: 'Добро пожаловать, {name}!', register_success_toast: 'Регистрация успешна! Теперь войдите.',
-        logged_out_toast: 'Вы вышли из аккаунта',
-        reset_email_prompt: 'Введите вашу электронную почту, чтобы получить ссылку для сброса пароля:',
-        reset_email_sent: '✅ Ссылка для сброса пароля отправлена на вашу почту!',
-        reset_error_prefix: '❌ Ошибка: ', reset_user_not_found: 'Пользователь с такой почтой не найден.',
-        reset_invalid_email: 'Неверный формат электронной почты.',
-        guest_name: 'Гость', player_name: 'Игрок',
         save_btn: 'Сохранить', cancel_btn: 'Отмена', clear_chat: 'Очистить чат',
         assistant_title: 'Тролль-помощник', assistant_placeholder: 'Напиши сообщение тролю…',
         assistant_sub: 'Онлайн-тролль, одетый так же, как во вкладке «Тролль». Спроси о грамматике, словах, переводе или просто попроси подсказку — и продолжай то, чем занимался.',
+        assistant_greeting_suffix: 'Я твой тролль-помощник — спрашивай про {lang}!',
+        assistant_err_not_configured: 'Тролль ещё спит 💤 — владелец сайта ещё не подключил AI-прокси (AI_PROXY_URL пуст в коде страницы).',
+        assistant_err_network: 'Не удалось достучаться до прокси-сервера (CORS, неверный URL или Worker не работает). Детали — в консоли браузера (F12 → Console).',
+        assistant_err_proxy_500: "Прокси ответил ошибкой 500 — похоже, на Worker'е не задан секрет GEMINI_API_KEY.",
+        assistant_err_proxy_auth: 'Прокси ответил ошибкой {status} — похоже, Google API-ключ недействителен или ограничен.',
+        assistant_err_proxy_429: 'Достигнут бесплатный лимит запросов Gemini (429). Попробуй немного позже.',
+        assistant_err_proxy_502: 'Google Gemini сейчас недоступен, либо произошла неожиданная ошибка на сервере. Детали — в консоли браузера (F12).',
+        assistant_err_proxy_generic: 'Прокси ответил ошибкой {status}. Детали — в консоли браузера (F12 → Console).',
+        assistant_err_unknown: 'Ой, тролль споткнулся о камень и не смог ответить. Детали — в консоли браузера (F12 → Console).',
         h_home: 'Главная', h_vocabulary: 'Словарь', h_tests: 'Тесты', h_grammar: 'Грамматика',
         h_troll: 'Твой тролль', h_profile: 'Кабинет', h_norskprove: 'Norskprøve Academy',
         h_flashcards: 'Карточки', h_pick_level: 'Выберите уровень', h_your_level: 'Ваш уровень:',
@@ -408,7 +435,7 @@ const UI_STRINGS = {
         nav_alphabet: '🔤 Основы', h_alphabet: 'Алфавит и произношение', alphabet_intro: 'Прежде чем учить слова — познакомься с буквами языка «{lang}» и тем, как они звучат. Нажми 🔊, чтобы услышать.', alphabet_called: 'Называется', alphabet_none_title: 'Алфавит ещё не добавлен', alphabet_none_desc: 'Для языка «{lang}» пока нет готового алфавита — админ может опубликовать его в админ-панели. Пока переходи сразу к словам и карточкам.', h_numbers: 'Числа', reading_tap_hint: 'Нажми, чтобы услышать произношение',
         home_story_new_title: 'Хроники Тролля ждут', home_story_new_desc: 'Личное приключение со словами, которые ты уже знаешь.',
         home_story_continue_title: 'Приключение продолжается', home_story_continue_desc: 'Глав пройдено: {n}. Тролль ждёт продолжения.',
-        story_error_network: 'не удалось соединиться с AI-прокси', story_error_not_configured: 'AI-прокси не настроен на сайте',
+        story_error_network: 'не удалось соединиться с AI-прокси', story_error_not_configured: 'AI-прокси не настроен на сайте', story_error_code: 'код {status}', story_error_unknown: 'неизвестная ошибка',
         grammar_generating_notice_all: 'Готовим грамматику {lang} для всех уровней… Разделы появятся здесь по готовности.',
         grammar_ai_generated_notice_all: 'Показаны правила грамматики {lang} для всех уровней — от A1 до C2.',
         grammar_all_levels: 'Все уровни', grammar_empty: 'Правил грамматики пока нет.',
@@ -455,7 +482,7 @@ const UI_STRINGS = {
         achievements_title: 'Достижения ({unlocked}/{total})',
         nav_tournaments: '🏆 Турниры', h_tournaments: 'Турниры', tourn_no_tournaments: 'Сейчас нет турниров. Загляни позже!', tourn_status_upcoming: '⏳ Скоро', tourn_status_active: '🔄 Активный', tourn_status_ended: '✅ Завершён', tourn_questions_count: '{n} заданий', tourn_join_btn: 'Присоединиться', tourn_view_results_btn: 'Результаты', tourn_your_score: 'Твой результат: {score}/{total}', tourn_starts_at: 'Начало: {date}', tourn_ends_at: 'До: {date}',
         tourn_not_started: 'Турнир ещё не начался.', tourn_already_ended: 'Турнир уже завершился.', tourn_already_played: 'Ты уже участвовал(-а) в этом турнире.', tourn_back_to_list: '← К турнирам',
-        tourn_finish_title: '🏆 Турнир завершён!', tourn_finish_desc: 'Твой результат: {correct} из {total} · +50 XP за участие', tourn_leaderboard_title: '📋 Таблица результатов', tourn_no_participants: 'Ты первый(-ая) участник(-ца)! Результаты появятся здесь, когда присоединятся другие.', tourn_you_marker: ' (ты)', tourn_submit_error: '⚠️ Не удалось сохранить результат. Попробуй ещё раз.', tourn_guest_not_saved: '👤 Твой результат не сохранится в таблице — играй под аккаунтом, чтобы результаты засчитывались.',
+        tourn_finish_title: '🏆 Турнир завершён!', tourn_finish_desc: 'Твой результат: {correct} из {total} · +50 XP за участие', tourn_leaderboard_title: '📋 Таблица результатов', tourn_no_participants: 'Ты первый(-ая) участник(-ца)! Результаты появятся здесь, когда присоединятся другие.', tourn_you_marker: ' (ты)', tourn_submit_error: '⚠️ Не удалось сохранить результат. Попробуй ещё раз.', tourn_guest_not_saved: '👤 Твой результат не сохранится в таблице — играй под аккаунтом, чтобы результаты засчитывались.', default_player_name: 'Игрок',
         home_learn_words_btn: '📇 Учить слова', home_vocab_btn: '📚 Словарь', home_grammar_btn: '📖 Грамматика', home_tests_btn: '📝 Тесты', home_listen_btn: '🎧 Аудирование', home_troll_btn: '🧌 Тролль ({lvl} ур.)', more_langs_btn: '🌐 Ещё языки…', change_lang_link: 'Сменить язык', viewed_mastered_label: '{seen}/{total} просмотрено · {mastered} освоено', you_label: ' (вы)',
         cl_welcome_title: '🌍 Какой язык хотите изучать?', cl_welcome_desc: 'Выберите язык — и мы составим для вас план обучения именно под него.',
         cl_switch_title: '🌍 Сменить изучаемый язык', cl_switch_desc: 'Прогресс по каждому языку сохраняется отдельно — можно свободно переключаться.',
@@ -494,18 +521,6 @@ function tf(key, vars) {
 // Для uk завжди є w.uk (вбудований). Для en/ru спершу шукаємо кеш
 // STATE.wordTranslations (заповнюється кнопкою "Перекласти" через AI),
 // і лише якщо нічого нема — відкат на українську, щоб інтерфейс не ламався.
-// Ім'я користувача для показу в інтерфейсі. 'Гість' — внутрішнє
-// службове значення за замовчуванням для гостьових акаунтів (НЕ чіпати
-// в порівняннях типу STATE.name !== 'Гість' — це б зламало визначення
-// "чи це новий гість" в auth.js/helpers.js). Тут воно лише перекладається
-// для показу, щоб гість з англійським чи російським інтерфейсом не бачив
-// українське слово "Гість" серед свого тексту.
-function displayName(fallback) {
-    if (typeof STATE === 'undefined' || !STATE || !STATE.name) return fallback !== undefined ? fallback : t('guest_name');
-    if (STATE.name === 'Гість') return t('guest_name');
-    return STATE.name;
-}
-
 function wordTranslation(word, level, lang) {
     lang = lang || (typeof STATE !== 'undefined' && STATE && STATE.vocabLang) || 'uk';
     if (lang === 'uk') return word.uk;
@@ -529,20 +544,6 @@ function applyStaticTranslations() {
         authTitle: 'login_title', authSubmit: 'submit_login', guestBtn: 'guest_btn',
         forgotPasswordLink: 'forgot_password', logoutBtn: 'logout',
     };
-    // authTitle/authSubmit вище виставляють текст РЕЖИМУ "Вхід" за замовчуванням.
-    // Якщо зараз відкрито режим "Реєстрація" (isLogin === false), одразу
-    // перевизначаємо трьома нижче — інакше після зміни мови текст форми
-    // "стрибне" назад на "Вхід", хоча користувач лишається в реєстрації.
-    const authToggleEl = document.getElementById('authToggle');
-    if (typeof isLogin !== 'undefined' && !isLogin) {
-        const titleEl = document.getElementById('authTitle');
-        const submitEl = document.getElementById('authSubmit');
-        if (titleEl) titleEl.textContent = t('register_title');
-        if (submitEl) submitEl.textContent = t('submit_register');
-        if (authToggleEl) authToggleEl.textContent = t('toggle_to_login');
-    } else if (authToggleEl) {
-        authToggleEl.textContent = t('toggle_to_register');
-    }
     Object.keys(map).forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -626,6 +627,7 @@ function initLangSwitchers() {
 //  списком (AI генерує теми українською за задумом), а якщо не збігаються
 //  — просто показуються як є (без помилки).
 const TOPIC_TRANSLATIONS = {
+    'Додано AI': { en: 'Added by AI', ru: 'Добавлено AI' },
     'Ідіоми': { en: 'Idioms', ru: 'Идиомы' },
     'Їжа': { en: 'Food', ru: 'Еда' },
     'Абстрактне': { en: 'Abstract', ru: 'Абстрактное' },
@@ -691,10 +693,67 @@ const TOPIC_TRANSLATIONS = {
     'Числа': { en: 'Numbers', ru: 'Числа' },
     'Школа': { en: 'School', ru: 'Школа' },
 };
-function translateTopic(topic, lang) {
+// Індекс тем для швидкого пошуку без урахування регістру — раніше
+// TOPIC_TRANSLATIONS[topic] шукав ТОЧНИЙ збіг рядка, тож слова, згенеровані
+// AI з іншим регістром або трохи іншим формулюванням теми (наприклад,
+// "дні тижня" замість "Дні тижня", або "Базова їжа" замість "Їжа"), не
+// знаходили перекладу взагалі і показувались українською навіть коли
+// STATE.uiLang = 'en'/'ru'. Це саме та причина, чому на скріншотах
+// частина чипів тем лишалась українською при англійському інтерфейсі.
+let _topicLookupCache = null;
+function _topicLookup() {
+    if (_topicLookupCache) return _topicLookupCache;
+    _topicLookupCache = Object.keys(TOPIC_TRANSLATIONS).map(key => ({
+        key, norm: key.toLowerCase().trim(), entry: TOPIC_TRANSLATIONS[key],
+    }));
+    return _topicLookupCache;
+}
+function findTopicTranslation(topic) {
+    if (!topic) return null;
+    const norm = topic.toLowerCase().trim();
+    const list = _topicLookup();
+    // 1) точний збіг без урахування регістру.
+    const exact = list.find(e => e.norm === norm);
+    if (exact) return exact.entry;
+    // 2) тема містить відомий ключ як частину фрази (напр. "Базова їжа" ⊃
+    //    "їжа", "дієслова руху та дії" ⊃ "дієслова") — беремо найдовший
+    //    збіг, щоб не сплутати короткі підрядки.
+    let best = null;
+    list.forEach(e => {
+        if (norm.includes(e.norm) || e.norm.includes(norm)) {
+            if (!best || e.norm.length > best.norm.length) best = e;
+        }
+    });
+    return best ? best.entry : null;
+}
+
+// wordSample (опційно) — конкретне слово словника з полями t_en/t_ru, якщо
+// вони є (AI тепер генерує їх напряму разом зі словом, це найточніше
+// джерело). Якщо їх нема — відкат на еврестичний словник тем вище, і лише
+// в найгіршому разі показуємо тему як є.
+// Гостьовий акаунт раніше отримував ім'я 'Гість' ЛІТЕРАЛОМ незалежно від
+// мови інтерфейсу — і це значення потім показувалось як є (шапка,
+// привітання на Головній, таблиця турніру) навіть якщо STATE.uiLang вже
+// 'en'/'ru'. isDefaultGuestName() перевіряє належність до БУДЬ-ЯКОГО з
+// трьох локалізованих варіантів імені за замовчуванням — так дисплей-код
+// може завжди показати t('default_guest_name') поточною мовою, а не тим,
+// що збереглось у STATE.name на момент створення гостьової сесії.
+function isDefaultGuestName(name) {
+    return name === 'Гість' || name === 'Guest' || name === 'Гость';
+}
+function displayName(name, fallbackKey) {
+    if (!name || isDefaultGuestName(name)) return t(fallbackKey || 'default_guest_name');
+    return name;
+}
+
+function translateTopic(topic, lang, wordSample) {
     lang = lang || (typeof STATE !== 'undefined' && STATE && STATE.vocabLang) || 'uk';
     if (lang === 'uk' || !topic) return topic;
-    const entry = TOPIC_TRANSLATIONS[topic];
+    if (wordSample) {
+        if (lang === 'en' && wordSample.t_en) return wordSample.t_en;
+        if (lang === 'ru' && wordSample.t_ru) return wordSample.t_ru;
+    }
+    const entry = findTopicTranslation(topic);
     return (entry && entry[lang]) || topic; // немає перекладу — показуємо як є, а не порожньо
 }
 

@@ -32,7 +32,7 @@ function shouldShowOnboarding() {
         if (STATE.stats && STATE.stats.wordsSeen && Object.keys(STATE.stats.wordsSeen).length > 0) return true;
         if (STATE.stats && STATE.stats.testsCompleted > 0) return true;
         if (STATE.customWords && STATE.customWords.length > 0) return true;
-        if (STATE.name && STATE.name !== 'Гість') return true;
+        if (STATE.name && !isDefaultGuestName(STATE.name)) return true;
         return false;
     })();
 
@@ -50,10 +50,6 @@ function shouldShowOnboarding() {
 // 6 мов, змішаного з кроками "мета навчання"/"вхідний тест" в онбордингу.
 // Тепер це окремий обов'язковий перший екран (усі 30 мов), який
 // гарантовано проходить кожен НОВИЙ користувач ще ДО онбордингу.
-function shouldShowLanguageChoice() {
-    return !STATE._targetLangChosen;
-}
-
 function getStudyPlan(level, goalId) {
     const lang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
     const noGoalMsg = { uk: 'Оберіть мету, щоб отримати план навчання.', en: 'Choose a goal to get a study plan.', ru: 'Выберите цель, чтобы получить план обучения.' }[lang];
@@ -353,7 +349,7 @@ function getLevelRecommendation() {
             STATE.dailyGoal.count += (n || 1);
             if (STATE.dailyGoal.count >= DAILY_GOAL_TARGET && !STATE.dailyGoal.rewardGiven) {
                 STATE.dailyGoal.rewardGiven = true;
-                toast('🎉 Щоденну ціль виконано! +25 XP');
+                toast(t('toast_daily_goal_done'));
                 addXP(25, 'daily_goal');
             }
         }

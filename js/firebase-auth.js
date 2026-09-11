@@ -284,11 +284,11 @@ async function signUpWithFirebase(email, password) {
   try {
     await waitForFirebase(5000);
   } catch (e) {
-    toast('⏳ Firebase ще не готовий, зачекайте кілька секунд і спробуйте знову.');
+    toast(t('auth_err_firebase_slow'));
     return { success: false, error: 'Firebase not ready' };
   }
   if (!firebaseAuth) {
-    toast('⏳ Помилка авторизації, спробуйте перезавантажити сторінку.');
+    toast(t('auth_err_auth_generic'));
     return { success: false, error: 'Auth not available' };
   }
   try {
@@ -321,11 +321,11 @@ async function signInWithFirebase(email, password) {
   try {
     await waitForFirebase(5000);
   } catch (e) {
-    toast('⏳ Firebase ще не готовий, зачекайте кілька секунд і спробуйте знову.');
+    toast(t('auth_err_firebase_slow'));
     return { success: false, error: 'Firebase not ready' };
   }
   if (!firebaseAuth) {
-    toast('⏳ Помилка авторизації, спробуйте перезавантажити сторінку.');
+    toast(t('auth_err_auth_generic'));
     return { success: false, error: 'Auth not available' };
   }
   try {

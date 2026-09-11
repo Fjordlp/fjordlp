@@ -421,17 +421,43 @@
 // pickVoiceFor(bcp47) шукає системний голос браузера на льоту (а не один
 // раз кешує норвезький, як робив старий pickVoice()) — так фолбек теж
 // коректно підбирає голос для будь-якої з 30 мов.
+// ТИМЧАСОВО (поки не всюди є голос потрібної мови): якщо системного
+// голосу саме для bcp47 нема — раніше u.voice лишався unset, і на
+// частині пристроїв (особливо Android/Chrome з відсутнім мовним
+// пакетом) це означало ПОВНУ ТИШУ замість озвучення. Тепер, якщо
+// точного збігу нема, беремо БУДЬ-ЯКИЙ доступний голос — краще почути
+// текст неідеальною вимовою, ніж не почути нічого.
 function pickVoiceFor(bcp47) {
     if (!('speechSynthesis' in window)) return null;
     const voices = speechSynthesis.getVoices();
+    if (!voices.length) return null;
     const lower = bcp47.toLowerCase();
-    return voices.find(v => v.lang && v.lang.toLowerCase().startsWith(lower)) || null;
+    const exact = voices.find(v => v.lang && v.lang.toLowerCase().startsWith(lower));
+    if (exact) return exact;
+    // Наступна спроба — голос мовою інтерфейсу користувача (uk/en/ru),
+    // це хоча б звучатиме на знайомому алфавіті. Якщо й такого нема —
+    // перший-ліпший доступний голос, аби не мовчати.
+    const uiLang = (typeof STATE !== 'undefined' && STATE && STATE.uiLang) || 'uk';
+    const byUi = voices.find(v => v.lang && v.lang.toLowerCase().startsWith(uiLang));
+    return byUi || voices.find(v => v.default) || voices[0];
 }
-if ('speechSynthesis' in window) {
-    // Прогріваємо список голосів заздалегідь (у деяких браузерах він
-    // з'являється асинхронно лише після цієї події) — самого вибору голосу
-    // тут більше не робимо, це тепер відповідальність pickVoiceFor().
-    speechSynthesis.onvoiceschanged = () => {};
+
+// getVoices() у частині браузерів (Chrome) повертає порожній масив, поки
+// голоси не довантажаться асинхронно — без цього очікування pickVoiceFor()
+// може отримати [] навіть тоді, коли голоси насправді є, і озвучка мовчки
+// не спрацює з першого разу.
+function waitForVoices() {
+    return new Promise(resolve => {
+        if (!('speechSynthesis' in window)) return resolve([]);
+        const existing = speechSynthesis.getVoices();
+        if (existing.length) return resolve(existing);
+        let done = false;
+        const finish = (voices) => { if (!done) { done = true; resolve(voices); } };
+        speechSynthesis.onvoiceschanged = () => finish(speechSynthesis.getVoices());
+        // Резервний таймаут — деякі браузери не викликають onvoiceschanged
+        // взагалі; за 500 мс просто пробуємо ще раз і працюємо з тим, що є.
+        setTimeout(() => finish(speechSynthesis.getVoices()), 500);
+    });
 }
 
 // text — що озвучити; lang — код мови ЦЬОГО тексту (не обов'язково
@@ -492,14 +518,32 @@ async function speak(text, lang) {
     // звучить помітно роботизованіше, зате працює завжди й скрізь без
     // жодного налаштування на сервері.
     if (!('speechSynthesis' in window)) {
-        toast("Озвучення не підтримується");
+        toast(t('tts_not_supported'));
         return;
     }
+    await waitForVoices();
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = voiceCfg.bcp47;
     const sysVoice = pickVoiceFor(voiceCfg.bcp47);
-    if (sysVoice) u.voice = sysVoice;
+    if (sysVoice) {
+        u.voice = sysVoice;
+        // Якщо голос знайдено САМЕ для потрібної мови — явно виставляємо
+        // lang, щоб рушій використав правильну вимову. Якщо це лише
+        // запасний голос іншої мови (див. pickVoiceFor), НЕ підмінюємо
+        // йому lang: у частині браузерів невідповідність voice.lang і
+        // u.lang призводить до тиші замість звуку запасним голосом.
+        if (sysVoice.lang && sysVoice.lang.toLowerCase().startsWith(voiceCfg.bcp47.toLowerCase())) {
+            u.lang = voiceCfg.bcp47;
+        } else {
+            u.lang = sysVoice.lang;
+        }
+    } else {
+        // Жодного голосу не знайдено взагалі (список порожній навіть після
+        // очікування) — все одно пробуємо озвучити з потрібним lang, це
+        // спрацює там, де голоси є, але getVoices() з якоїсь причини їх
+        // не повернув.
+        u.lang = voiceCfg.bcp47;
+    }
     u.rate = 0.9;
     u.pitch = 1.0;
     speechSynthesis.speak(u);

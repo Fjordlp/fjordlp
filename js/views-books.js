@@ -39,7 +39,7 @@ function viewBooksLibrary() {
                             </div>
                             <span class="tag level-${book.level}">${book.level}</span>
                         </div>
-                        <p style="margin:6px 0 0;font-size:.78rem;color:var(--ink-soft);">${genre.label}</p>
+                        <p style="margin:6px 0 0;font-size:.78rem;color:var(--ink-soft);">${bookGenreLabel(book.genre)}</p>
                         ${book.description ? `<p style="margin:6px 0 0;font-size:.85rem;color:var(--ink-soft);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escHtml(book.description)}</p>` : ''}
                         <p style="margin:8px 0 0;font-size:.82rem;color:var(--ink-soft);">
                             ${done > 0 ? tf('books_progress', {done, total}) : tf('books_chapters_count', {total})}
@@ -62,7 +62,7 @@ function viewBooksLibrary() {
         // пригоди, немає сенсу показувати порожні фільтри на 10 інших тем).
         const presentGenres = Array.from(new Set(books.map(b => b.genre || 'other')));
         const chips = [{ code: 'all', label: t('books_genre_all') }].concat(
-            presentGenres.map(code => ({ code, label: getBookGenre(code).label }))
+            presentGenres.map(code => ({ code, label: bookGenreLabel(code) }))
         );
         filterBar.innerHTML = '';
         chips.forEach(({ code, label }) => {
