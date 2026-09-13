@@ -5,9 +5,6 @@
   <url><loc>https://fjordlp.com/vocabulary</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://fjordlp.com/tests</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://fjordlp.com/grammar</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://fjordlp.com/alphabet</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://fjordlp.com/lessons</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://fjordlp.com/story</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://fjordlp.com/troll</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://fjordlp.com/books</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://fjordlp.com/profile</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>

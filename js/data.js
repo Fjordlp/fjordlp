@@ -1867,95 +1867,223 @@ const STUDY_PLANS = {
         //  LEVEL TEST (ПОКРАЩЕНИЙ – 30 питань)
         // =====================================================================
         const LEVEL_TEST = [
-            { lvl: "A1", q: "«Привіт» норвезькою", opts: ["Hei", "Ha det", "Takk"], a: 0, q_en: "\"Hi\" in Norwegian", opts_en: ["Hei", "Ha det", "Takk"], q_ru: "«Привет» по-норвежски", opts_ru: ["Hei", "Ha det", "Takk"] },
-            { lvl: "A1", q: "«Дякую» — це", opts: ["Takk", "Unnskyld", "Vær så snill"], a: 0, q_en: "\"Thanks\" is", opts_en: ["Takk", "Unnskyld", "Vær så snill"], q_ru: "«Спасибо» — это", opts_ru: ["Takk", "Unnskyld", "Vær så snill"] },
-            { lvl: "A1", q: "«En» означає", opts: ["один", "два", "три"], a: 0, q_en: "\"En\" means", opts_en: ["one", "two", "three"], q_ru: "«En» означает", opts_ru: ["один", "два", "три"] },
-            { lvl: "A1", q: "«Mor» — це", opts: ["мати", "батько", "сестра"], a: 0, q_en: "\"Mor\" is", opts_en: ["mother", "father", "sister"], q_ru: "«Mor» — это", opts_ru: ["мать", "отец", "сестра"] },
-            { lvl: "A1", q: "«Rød» — це колір", opts: ["червоний", "синій", "жовтий"], a: 0, q_en: "\"Rød\" is the color", opts_en: ["red", "blue", "yellow"], q_ru: "«Rød» — это цвет", opts_ru: ["красный", "синий", "жёлтый"] },
-            { lvl: "A2", q: "«Butikk» означає", opts: ["магазин", "школа", "лікарня"], a: 0, q_en: "\"Butikk\" means", opts_en: ["shop", "school", "hospital"], q_ru: "«Butikk» означает", opts_ru: ["магазин", "школа", "больница"] },
-            { lvl: "A2", q: "«Jobb» — це", opts: ["робота", "хобі", "відпустка"], a: 0, q_en: "\"Jobb\" is", opts_en: ["job", "hobby", "vacation"], q_ru: "«Jobb» — это", opts_ru: ["работа", "хобби", "отпуск"] },
-            { lvl: "A2", q: "Минулий час від «å gå»", opts: ["går", "gikk", "gått"], a: 1, q_en: "Past tense of \"å gå\"", opts_en: ["går", "gikk", "gått"], q_ru: "Прошедшее время от «å gå»", opts_ru: ["går", "gikk", "gått"] },
-            { lvl: "A2", q: "Оберіть правильний порядок слів", opts: ["I dag jeg går.", "I dag går jeg."], a: 1, q_en: "Choose the correct word order", opts_en: ["I dag jeg går.", "I dag går jeg."], q_ru: "Выберите правильный порядок слов", opts_ru: ["I dag jeg går.", "I dag går jeg."] },
-            { lvl: "A2", q: "Як сказати «я хочу»?", opts: ["Jeg vil", "Jeg må", "Jeg kan"], a: 0, q_en: "How do you say \"I want\"?", opts_en: ["Jeg vil", "Jeg må", "Jeg kan"], q_ru: "Как сказать «я хочу»?", opts_ru: ["Jeg vil", "Jeg må", "Jeg kan"] },
-            { lvl: "A2", q: "Оберіть правильний артикль для 'hus'", opts: ["en", "ei", "et"], a: 2, q_en: "Choose the correct article for 'hus'", opts_en: ["en", "ei", "et"], q_ru: "Выберите правильный артикль для 'hus'", opts_ru: ["en", "ei", "et"] },
-            { lvl: "B1", q: "«Flyplass» — це", opts: ["аеропорт", "вокзал", "порт"], a: 0, q_en: "\"Flyplass\" is", opts_en: ["airport", "train station", "port"], q_ru: "«Flyplass» — это", opts_ru: ["аэропорт", "вокзал", "порт"] },
-            { lvl: "B1", q: "«Sykehus» — це", opts: ["лікарня", "аптека", "поліклініка"], a: 0, q_en: "\"Sykehus\" is", opts_en: ["hospital", "pharmacy", "clinic"], q_ru: "«Sykehus» — это", opts_ru: ["больница", "аптека", "поликлиника"] },
-            { lvl: "B1", q: "Перфект від «å spise»", opts: ["har spist", "har spise", "spiste"], a: 0, q_en: "Perfect tense of \"å spise\"", opts_en: ["har spist", "har spise", "spiste"], q_ru: "Перфект от «å spise»", opts_ru: ["har spist", "har spise", "spiste"] },
-            { lvl: "B1", q: "Найвищий ступінь від «god»", opts: ["best", "bedre", "godest"], a: 0, q_en: "Superlative of \"god\"", opts_en: ["best", "bedre", "godest"], q_ru: "Превосходная степень от «god»", opts_ru: ["best", "bedre", "godest"] },
-            { lvl: "B1", q: "«Å forstå» означає", opts: ["розуміти", "говорити", "писати"], a: 0, q_en: "\"Å forstå\" means", opts_en: ["to understand", "to speak", "to write"], q_ru: "«Å forstå» означает", opts_ru: ["понимать", "говорить", "писать"] },
-            { lvl: "B1", q: "«Miljø» — це", opts: ["довкілля", "економіка", "політика"], a: 0, q_en: "\"Miljø\" is", opts_en: ["environment", "economy", "politics"], q_ru: "«Miljø» — это", opts_ru: ["окружающая среда", "экономика", "политика"] },
-            { lvl: "B2", q: "«Regjering» означає", opts: ["уряд", "парламент", "міністр"], a: 0, q_en: "\"Regjering\" means", opts_en: ["government", "parliament", "minister"], q_ru: "«Regjering» означает", opts_ru: ["правительство", "парламент", "министр"] },
-            { lvl: "B2", q: "«Økonomi» — це", opts: ["економіка", "політика", "культура"], a: 0, q_en: "\"Økonomi\" is", opts_en: ["economy", "politics", "culture"], q_ru: "«Økonomi» — это", opts_ru: ["экономика", "политика", "культура"] },
-            { lvl: "B2", q: "Пасив від «Han skriver brevet.»", opts: ["Brevet blir skrevet.", "Brevet skrives."], a: 0, q_en: "Passive of \"Han skriver brevet.\"", opts_en: ["Brevet blir skrevet.", "Brevet skrives."], q_ru: "Пассив от «Han skriver brevet.»", opts_ru: ["Brevet blir skrevet.", "Brevet skrives."] },
-            { lvl: "B2", q: "Умовний спосіб: Hvis jeg ___ tid...", opts: ["har", "hadde", "hadde hatt"], a: 1, q_en: "Conditional: Hvis jeg ___ tid...", opts_en: ["har", "hadde", "hadde hatt"], q_ru: "Условное наклонение: Hvis jeg ___ tid...", opts_ru: ["har", "hadde", "hadde hatt"] },
-            { lvl: "B2", q: "«Forskning» означає", opts: ["дослідження", "освіта", "культура"], a: 0, q_en: "\"Forskning\" means", opts_en: ["research", "education", "culture"], q_ru: "«Forskning» означает", opts_ru: ["исследование", "образование", "культура"] },
-            { lvl: "C1", q: "«Imidlertid» означає", opts: ["однак", "крім того", "отже"], a: 0, q_en: "\"Imidlertid\" means", opts_en: ["however", "besides", "therefore"], q_ru: "«Imidlertid» означает", opts_ru: ["однако", "кроме того", "следовательно"] },
-            { lvl: "C1", q: "«Å antyde» — це", opts: ["натякати", "стверджувати", "заперечувати"], a: 0, q_en: "\"Å antyde\" is", opts_en: ["to imply", "to assert", "to deny"], q_ru: "«Å antyde» — это", opts_ru: ["намекать", "утверждать", "отрицать"] },
-            { lvl: "C1", q: "Іменник від «å analysere»", opts: ["analyse", "analysering", "analysjon"], a: 0, q_en: "Noun form of \"å analysere\"", opts_en: ["analyse", "analysering", "analysjon"], q_ru: "Существительное от «å analysere»", opts_ru: ["analyse", "analysering", "analysjon"] },
-            { lvl: "C1", q: "Як буде «я» у nynorsk?", opts: ["jeg", "eg", "meg"], a: 1, q_en: "How is \"I\" said in Nynorsk?", opts_en: ["jeg", "eg", "meg"], q_ru: "Как будет «я» в nynorsk?", opts_ru: ["jeg", "eg", "meg"] },
-            { lvl: "C1", q: "«Eksistens» — це", opts: ["існування", "свідомість", "етика"], a: 0, q_en: "\"Eksistens\" is", opts_en: ["existence", "consciousness", "ethics"], q_ru: "«Eksistens» — это", opts_ru: ["существование", "сознание", "этика"] },
-            { lvl: "C2", q: "«Å ta beina på nakken» означає", opts: ["втекти", "бігти", "впасти"], a: 0, q_en: "\"Å ta beina på nakken\" means", opts_en: ["to flee", "to run", "to fall"], q_ru: "«Å ta beina på nakken» означает", opts_ru: ["сбежать", "бежать", "упасть"] },
-            { lvl: "C2", q: "«Nok» — це частинка зі значенням", opts: ["напевно", "адже", "мабуть"], a: 0, q_en: "\"Nok\" is a particle meaning", opts_en: ["probably", "after all", "I suppose"], q_ru: "«Nok» — это частица со значением", opts_ru: ["наверное", "ведь", "пожалуй"] },
-            { lvl: "C2", q: "Формальне слово для «купити»", opts: ["kjøpe", "anskaffe", "handle"], a: 1, q_en: "The formal word for \"to buy\"", opts_en: ["kjøpe", "anskaffe", "handle"], q_ru: "Формальное слово для «купить»", opts_ru: ["kjøpe", "anskaffe", "handle"] }
-        
+            // Кожне питання має вагу `w` (за замовчуванням 1, якщо не вказано):
+            // просте впізнавання слова важить менше, ніж граматика (дієвідмінювання,
+            // порядок слів, пасив, умовний спосіб) чи розрізнення нюансів —
+            // тобто правильна відповідь на граматичне питання "важча" і сильніше
+            // тягне результат тесту в бік вищого рівня, а помилка в ній сильніше
+            // тягне вниз, ніж помилка в простому перекладі слова.
+            { lvl: "A1", w: 1, q: "«Привіт» норвезькою", opts: ["Hei", "Ha det", "Takk"], a: 0, q_en: "\"Hi\" in Norwegian", opts_en: ["Hei", "Ha det", "Takk"], q_ru: "«Привет» по-норвежски", opts_ru: ["Hei", "Ha det", "Takk"] },
+            { lvl: "A1", w: 1, q: "«Дякую» — це", opts: ["Takk", "Unnskyld", "Vær så snill"], a: 0, q_en: "\"Thanks\" is", opts_en: ["Takk", "Unnskyld", "Vær så snill"], q_ru: "«Спасибо» — это", opts_ru: ["Takk", "Unnskyld", "Vær så snill"] },
+            { lvl: "A1", w: 1, q: "«En» означає", opts: ["один", "два", "три"], a: 0, q_en: "\"En\" means", opts_en: ["one", "two", "three"], q_ru: "«En» означает", opts_ru: ["один", "два", "три"] },
+            { lvl: "A1", w: 1, q: "«Mor» — це", opts: ["мати", "батько", "сестра"], a: 0, q_en: "\"Mor\" is", opts_en: ["mother", "father", "sister"], q_ru: "«Mor» — это", opts_ru: ["мать", "отец", "сестра"] },
+            { lvl: "A1", w: 1, q: "«Rød» — це колір", opts: ["червоний", "синій", "жовтий"], a: 0, q_en: "\"Rød\" is the color", opts_en: ["red", "blue", "yellow"], q_ru: "«Rød» — это цвет", opts_ru: ["красный", "синий", "жёлтый"] },
+            { lvl: "A2", w: 1, q: "«Butikk» означає", opts: ["магазин", "школа", "лікарня"], a: 0, q_en: "\"Butikk\" means", opts_en: ["shop", "school", "hospital"], q_ru: "«Butikk» означает", opts_ru: ["магазин", "школа", "больница"] },
+            { lvl: "A2", w: 1, q: "«Jobb» — це", opts: ["робота", "хобі", "відпустка"], a: 0, q_en: "\"Jobb\" is", opts_en: ["job", "hobby", "vacation"], q_ru: "«Jobb» — это", opts_ru: ["работа", "хобби", "отпуск"] },
+            { lvl: "A2", w: 1.5, q: "Минулий час від «å gå»", opts: ["går", "gikk", "gått"], a: 1, q_en: "Past tense of \"å gå\"", opts_en: ["går", "gikk", "gått"], q_ru: "Прошедшее время от «å gå»", opts_ru: ["går", "gikk", "gått"] },
+            { lvl: "A2", w: 1.5, q: "Оберіть правильний порядок слів", opts: ["I dag jeg går.", "I dag går jeg."], a: 1, q_en: "Choose the correct word order", opts_en: ["I dag jeg går.", "I dag går jeg."], q_ru: "Выберите правильный порядок слов", opts_ru: ["I dag jeg går.", "I dag går jeg."] },
+            { lvl: "A2", w: 1, q: "Як сказати «я хочу»?", opts: ["Jeg vil", "Jeg må", "Jeg kan"], a: 0, q_en: "How do you say \"I want\"?", opts_en: ["Jeg vil", "Jeg må", "Jeg kan"], q_ru: "Как сказать «я хочу»?", opts_ru: ["Jeg vil", "Jeg må", "Jeg kan"] },
+            { lvl: "A2", w: 1.5, q: "Оберіть правильний артикль для 'hus'", opts: ["en", "ei", "et"], a: 2, q_en: "Choose the correct article for 'hus'", opts_en: ["en", "ei", "et"], q_ru: "Выберите правильный артикль для 'hus'", opts_ru: ["en", "ei", "et"] },
+            { lvl: "B1", w: 1, q: "«Flyplass» — це", opts: ["аеропорт", "вокзал", "порт"], a: 0, q_en: "\"Flyplass\" is", opts_en: ["airport", "train station", "port"], q_ru: "«Flyplass» — это", opts_ru: ["аэропорт", "вокзал", "порт"] },
+            { lvl: "B1", w: 1, q: "«Sykehus» — це", opts: ["лікарня", "аптека", "поліклініка"], a: 0, q_en: "\"Sykehus\" is", opts_en: ["hospital", "pharmacy", "clinic"], q_ru: "«Sykehus» — это", opts_ru: ["больница", "аптека", "поликлиника"] },
+            { lvl: "B1", w: 1.5, q: "Перфект від «å spise»", opts: ["har spist", "har spise", "spiste"], a: 0, q_en: "Perfect tense of \"å spise\"", opts_en: ["har spist", "har spise", "spiste"], q_ru: "Перфект от «å spise»", opts_ru: ["har spist", "har spise", "spiste"] },
+            { lvl: "B1", w: 1.5, q: "Найвищий ступінь від «god»", opts: ["best", "bedre", "godest"], a: 0, q_en: "Superlative of \"god\"", opts_en: ["best", "bedre", "godest"], q_ru: "Превосходная степень от «god»", opts_ru: ["best", "bedre", "godest"] },
+            { lvl: "B1", w: 1, q: "«Å forstå» означає", opts: ["розуміти", "говорити", "писати"], a: 0, q_en: "\"Å forstå\" means", opts_en: ["to understand", "to speak", "to write"], q_ru: "«Å forstå» означает", opts_ru: ["понимать", "говорить", "писать"] },
+            { lvl: "B1", w: 1, q: "«Miljø» — це", opts: ["довкілля", "економіка", "політика"], a: 0, q_en: "\"Miljø\" is", opts_en: ["environment", "economy", "politics"], q_ru: "«Miljø» — это", opts_ru: ["окружающая среда", "экономика", "политика"] },
+            { lvl: "B2", w: 1, q: "«Regjering» означає", opts: ["уряд", "парламент", "міністр"], a: 0, q_en: "\"Regjering\" means", opts_en: ["government", "parliament", "minister"], q_ru: "«Regjering» означает", opts_ru: ["правительство", "парламент", "министр"] },
+            { lvl: "B2", w: 1, q: "«Økonomi» — це", opts: ["економіка", "політика", "культура"], a: 0, q_en: "\"Økonomi\" is", opts_en: ["economy", "politics", "culture"], q_ru: "«Økonomi» — это", opts_ru: ["экономика", "политика", "культура"] },
+            { lvl: "B2", w: 2, q: "Пасив від «Han skriver brevet.»", opts: ["Brevet blir skrevet.", "Brevet skrives."], a: 0, q_en: "Passive of \"Han skriver brevet.\"", opts_en: ["Brevet blir skrevet.", "Brevet skrives."], q_ru: "Пассив от «Han skriver brevet.»", opts_ru: ["Brevet blir skrevet.", "Brevet skrives."] },
+            { lvl: "B2", w: 2, q: "Умовний спосіб: Hvis jeg ___ tid...", opts: ["har", "hadde", "hadde hatt"], a: 1, q_en: "Conditional: Hvis jeg ___ tid...", opts_en: ["har", "hadde", "hadde hatt"], q_ru: "Условное наклонение: Hvis jeg ___ tid...", opts_ru: ["har", "hadde", "hadde hatt"] },
+            { lvl: "B2", w: 1, q: "«Forskning» означає", opts: ["дослідження", "освіта", "культура"], a: 0, q_en: "\"Forskning\" means", opts_en: ["research", "education", "culture"], q_ru: "«Forskning» означает", opts_ru: ["исследование", "образование", "культура"] },
+            { lvl: "C1", w: 1.5, q: "«Imidlertid» означає", opts: ["однак", "крім того", "отже"], a: 0, q_en: "\"Imidlertid\" means", opts_en: ["however", "besides", "therefore"], q_ru: "«Imidlertid» означает", opts_ru: ["однако", "кроме того", "следовательно"] },
+            { lvl: "C1", w: 1.5, q: "«Å antyde» — це", opts: ["натякати", "стверджувати", "заперечувати"], a: 0, q_en: "\"Å antyde\" is", opts_en: ["to imply", "to assert", "to deny"], q_ru: "«Å antyde» — это", opts_ru: ["намекать", "утверждать", "отрицать"] },
+            { lvl: "C1", w: 2, q: "Іменник від «å analysere»", opts: ["analyse", "analysering", "analysjon"], a: 0, q_en: "Noun form of \"å analysere\"", opts_en: ["analyse", "analysering", "analysjon"], q_ru: "Существительное от «å analysere»", opts_ru: ["analyse", "analysering", "analysjon"] },
+            { lvl: "C1", w: 2, q: "Як буде «я» у nynorsk?", opts: ["jeg", "eg", "meg"], a: 1, q_en: "How is \"I\" said in Nynorsk?", opts_en: ["jeg", "eg", "meg"], q_ru: "Как будет «я» в nynorsk?", opts_ru: ["jeg", "eg", "meg"] },
+            { lvl: "C1", w: 1.5, q: "«Eksistens» — це", opts: ["існування", "свідомість", "етика"], a: 0, q_en: "\"Eksistens\" is", opts_en: ["existence", "consciousness", "ethics"], q_ru: "«Eksistens» — это", opts_ru: ["существование", "сознание", "этика"] },
+            { lvl: "C2", w: 2, q: "«Å ta beina på nakken» означає", opts: ["втекти", "бігти", "впасти"], a: 0, q_en: "\"Å ta beina på nakken\" means", opts_en: ["to flee", "to run", "to fall"], q_ru: "«Å ta beina på nakken» означает", opts_ru: ["сбежать", "бежать", "упасть"] },
+            { lvl: "C2", w: 2, q: "«Nok» — це частинка зі значенням", opts: ["напевно", "адже", "мабуть"], a: 0, q_en: "\"Nok\" is a particle meaning", opts_en: ["probably", "after all", "I suppose"], q_ru: "«Nok» — это частица со значением", opts_ru: ["наверное", "ведь", "пожалуй"] },
+            { lvl: "C2", w: 1.5, q: "Формальне слово для «купити»", opts: ["kjøpe", "anskaffe", "handle"], a: 1, q_en: "The formal word for \"to buy\"", opts_en: ["kjøpe", "anskaffe", "handle"], q_ru: "Формальное слово для «купить»", opts_ru: ["kjøpe", "anskaffe", "handle"] }
+
         ];
 
         const TEST_TIERS = ["A1", "A2", "B1", "B2", "C1", "C2"];
         const TIER_PASS_THRESHOLD = { A1: 0.4, A2: 0.5, B1: 0.55, B2: 0.6, C1: 0.65, C2: 0.7 };
+
+        // Вага питання: якщо в об'єкті питання явно вказано `w` (додатне
+        // число) — використовуємо її, інакше вага за замовчуванням 1.
+        // Динамічно згенеровані тести (buildDynamicLevelTest/
+        // buildLevelTestForLang) ваги не проставляють — там усі питання
+        // рівнозначні (w=1), бо це суто словникові переклади без градації
+        // складності.
+        function questionWeight(q) {
+            return (q && typeof q.w === 'number' && q.w > 0) ? q.w : 1;
+        }
 
         // questions: набір питань тесту (необов'язковий). За замовчуванням —
         // вбудований норвезький LEVEL_TEST, але приймає й інший масив (той
         // самий формат {lvl, ...}), що будується динамічно для мов, відмінних
         // від норвезької — див. buildDynamicLevelTest() у views-core.js та
         // buildLevelTestForLang() у languages.js.
+        //
+        // Раніше результат рівня в межах "тіра" рахувався як проста частка
+        // правильних відповідей (correct/total), тобто просте питання на
+        // впізнавання слова важило стільки ж, скільки граматичне питання на
+        // пасив чи умовний спосіб. Тепер рахуємо ЗВАЖЕНУ частку: кожне
+        // питання має вагу `w` (див. questionWeight) — граматика й нюанси
+        // важать більше за прості слова, тож правильна відповідь на складне
+        // питання сильніше "тягне" рівень вгору, а помилка в ньому — сильніше
+        // вниз, ніж помилка в простому перекладі.
         function computeTestLevel(answers, questions) {
             questions = questions || LEVEL_TEST;
             let achieved = "A1";
             for (const tier of TEST_TIERS) {
                 const idxs = questions.map((q, i) => q.lvl === tier ? i : -1).filter(i => i >= 0);
-                const correct = idxs.filter(i => answers[i]).length;
-                const ratio = idxs.length ? correct / idxs.length : 0;
+                const totalWeight = idxs.reduce((sum, i) => sum + questionWeight(questions[i]), 0);
+                const correctWeight = idxs.reduce((sum, i) => sum + (answers[i] ? questionWeight(questions[i]) : 0), 0);
+                const ratio = totalWeight ? correctWeight / totalWeight : 0;
                 if (ratio >= TIER_PASS_THRESHOLD[tier]) { achieved = tier; } else break;
             }
             return achieved;
+        }
+
+        // Розбивка результату тесту по рівнях — скільки з питань КОЖНОГО
+        // фактично протестованого рівня (тих, куди тест взагалі дістався —
+        // адже тепер він може зупинитись достроково) людина здала, у
+        // відсотках із урахуванням ваги питань. Рівні, яких тест не
+        // торкнувся (бо зупинився раніше), у розбивку не потрапляють —
+        // показувати "0%" для питань, які ніколи не ставили, було б
+        // оманливо.
+        function computeTierBreakdown(questions, answers) {
+            const breakdown = [];
+            for (const tier of TEST_TIERS) {
+                const idxs = [];
+                questions.forEach((q, i) => { if (q.lvl === tier) idxs.push(i); });
+                if (!idxs.length) continue;
+                const answered = idxs.filter(i => i < answers.length);
+                if (!answered.length) continue;
+                const totalWeight = answered.reduce((s, i) => s + questionWeight(questions[i]), 0);
+                const correctWeight = answered.reduce((s, i) => s + (answers[i] ? questionWeight(questions[i]) : 0), 0);
+                const ratio = totalWeight ? correctWeight / totalWeight : 0;
+                breakdown.push({
+                    tier,
+                    answeredCount: answered.length,
+                    totalCount: idxs.length,
+                    pct: Math.round(ratio * 100),
+                    passed: ratio >= TIER_PASS_THRESHOLD[tier] - 1e-9,
+                });
+            }
+            return breakdown;
+        }
+
+        // Перемішування вбудованого тесту: раніше порядок питань і порядок
+        // варіантів відповіді в LEVEL_TEST був завжди однаковим — тобто
+        // тест, по суті, можна було просто запам'ятати ("перша відповідь
+        // завжди правильна"). Ця функція перемішує питання ВСЕРЕДИНІ
+        // кожного рівня (порядок самих рівнів — A1→A2→...→C2 — не чіпаємо,
+        // бо на ньому тримається вся адаптивна зупинка: isLevelTestDecided
+        // очікує, що питання одного рівня йдуть суцільним блоком раніше за
+        // питання наступного) і незалежно перемішує варіанти відповіді
+        // кожного питання (синхронно opts/opts_en/opts_ru, з коректним
+        // перерахунком індексу правильної відповіді `a`). Викликати варто
+        // РІВНО ОДИН РАЗ на початку тесту і кешувати результат — якщо
+        // перемішувати щоразу заново під час рендеру, вже дані відповіді
+        // "з'їдуть" на інші питання.
+        function shuffleQuestionOptions(q) {
+            if (!q.opts || q.opts.length < 2) return q;
+            const order = shuffle(q.opts.map((_, idx) => idx));
+            const remap = (arr) => (Array.isArray(arr) && arr.length === q.opts.length) ? order.map(idx => arr[idx]) : arr;
+            return {
+                ...q,
+                opts: remap(q.opts),
+                opts_en: remap(q.opts_en),
+                opts_ru: remap(q.opts_ru),
+                a: order.indexOf(q.a),
+            };
+        }
+
+        function shuffleLevelTestQuestions(questions) {
+            const byTier = {};
+            questions.forEach(q => {
+                if (!byTier[q.lvl]) byTier[q.lvl] = [];
+                byTier[q.lvl].push(q);
+            });
+            const orderedTiers = TEST_TIERS.filter(t => byTier[t]);
+            const result = [];
+            orderedTiers.forEach(tier => {
+                shuffle(byTier[tier]).forEach(q => result.push(shuffleQuestionOptions(q)));
+            });
+            return result;
+        }
+        // Адаптивна зупинка тесту: раніше тест завжди показував УСІ питання
+        // від A1 до C2 незалежно від того, як людина відповідає — тобто
+        // навіть той, хто провалював усі питання рівня A1, все одно мусив
+        // пройти ще ~25 питань про B1/B2/C1/C2, перш ніж побачити
+        // результат "A1". Ця функція перевіряє, чи фінальний результат
+        // тесту вже однозначно визначений (з тими відповідями, що вже є),
+        // і якщо так — тест можна зупинити одразу, не мучаючи людину
+        // рештою запитань. Логіка навмисно дзеркалить computeTestLevel(),
+        // включно з ваговими коефіцієнтами: "максимально можливий" відсоток
+        // рахується так, ніби на всі питання, що лишились у цьому тірі,
+        // відповіли правильно (з їхніми вагами) — і якщо навіть тоді
+        // прохідний поріг не досягається, рівень вже гарантовано провалено.
+        function isLevelTestDecided(questions, answers) {
+            for (const tier of TEST_TIERS) {
+                const idxs = [];
+                questions.forEach((q, i) => { if (q.lvl === tier) idxs.push(i); });
+                if (!idxs.length) return true; // рівня в тесті немає — як break у computeTestLevel
+                const totalWeight = idxs.reduce((sum, i) => sum + questionWeight(questions[i]), 0);
+                const answered = idxs.filter(i => i < answers.length);
+                const remainingIdxs = idxs.filter(i => i >= answers.length);
+                const correctWeight = answered.reduce((sum, i) => sum + (answers[i] ? questionWeight(questions[i]) : 0), 0);
+                if (remainingIdxs.length > 0) {
+                    const remainingWeight = remainingIdxs.reduce((sum, i) => sum + questionWeight(questions[i]), 0);
+                    const maxPossibleRatio = totalWeight ? (correctWeight + remainingWeight) / totalWeight : 0;
+                    if (maxPossibleRatio < TIER_PASS_THRESHOLD[tier] - 1e-9) return true; // рівень вже неможливо здати
+                    return false; // рівень ще триває і його досі можна як здати, так і провалити
+                }
+                const ratio = totalWeight ? correctWeight / totalWeight : 0;
+                if (ratio < TIER_PASS_THRESHOLD[tier]) return true; // рівень остаточно провалено
+                // рівень здано повністю — перевіряємо наступний
+            }
+            return true; // усі рівні тесту здано й питання скінчились
         }
 
         // =====================================================================
         //  АБЕТКА (норвезька)
         // =====================================================================
         const ALPHABET = [
-            { letter: "A a", name: "а", sound: "як українське «а»", sound_en: "like the 'a' in \"father\"", sound_ru: "как русское «а»", example: "app", example_uk: "аплодисменти", example_en: "applause", example_ru: "аплодисменты" },
-            { letter: "B b", name: "бе", sound: "як українське «б»", sound_en: "like the English 'b'", sound_ru: "как русское «б»", example: "bok", example_uk: "книга", example_en: "book", example_ru: "книга" },
-            { letter: "C c", name: "се", sound: "як «с» (рідко «к»)", sound_en: "like 's' (rarely 'k')", sound_ru: "как «с» (редко «к»)", example: "cirka", example_uk: "приблизно", example_en: "approximately", example_ru: "приблизительно" },
-            { letter: "D d", name: "де", sound: "як українське «д»", sound_en: "like the English 'd'", sound_ru: "как русское «д»", example: "dag", example_uk: "день", example_en: "day", example_ru: "день" },
-            { letter: "E e", name: "е", sound: "як українське «е»", sound_en: "like the 'e' in \"bed\"", sound_ru: "как русское «э»", example: "eple", example_uk: "яблуко", example_en: "apple", example_ru: "яблоко" },
-            { letter: "F f", name: "еф", sound: "як українське «ф»", sound_en: "like the English 'f'", sound_ru: "как русское «ф»", example: "fisk", example_uk: "риба", example_en: "fish", example_ru: "рыба" },
-            { letter: "G g", name: "ге", sound: "як «ґ»; перед i/y/øy — як «й»", sound_en: "like 'g' in \"go\"; before i/y/øy — like 'y' in \"yes\"", sound_ru: "как твёрдое «г»; перед i/y/øy — как «й»", example: "gate", example_uk: "вулиця", example_en: "street", example_ru: "улица" },
-            { letter: "H h", name: "хо", sound: "як українське «г» (легке, як в англ. house)", sound_en: "like the English 'h' in \"house\"", sound_ru: "как лёгкое английское h (не как русское «х»)", example: "hus", example_uk: "будинок", example_en: "house", example_ru: "дом" },
-            { letter: "I i", name: "і", sound: "як українське «і»", sound_en: "like the 'ee' in \"see\"", sound_ru: "как русское «и»", example: "is", example_uk: "морозиво/лід", example_en: "ice cream/ice", example_ru: "мороженое/лёд" },
-            { letter: "J j", name: "є", sound: "як українське «й»", sound_en: "like the 'y' in \"yes\"", sound_ru: "как русское «й»", example: "ja", example_uk: "так", example_en: "yes", example_ru: "да" },
-            { letter: "K k", name: "ко", sound: "як українське «к»; перед i/y/øy — м'якше, як «хь»", sound_en: "like the English 'k'; before i/y/øy — softer, like \"ch\" in German \"ich\"", sound_ru: "как русское «к»; перед i/y/øy — мягче, как «хь»", example: "katt", example_uk: "кіт", example_en: "cat", example_ru: "кот" },
-            { letter: "L l", name: "ель", sound: "як українське «л»", sound_en: "like the English 'l'", sound_ru: "как русское «л»", example: "lys", example_uk: "світло", example_en: "light", example_ru: "свет" },
-            { letter: "M m", name: "ем", sound: "як українське «м»", sound_en: "like the English 'm'", sound_ru: "как русское «м»", example: "mat", example_uk: "їжа", example_en: "food", example_ru: "еда" },
-            { letter: "N n", name: "ен", sound: "як українське «н»", sound_en: "like the English 'n'", sound_ru: "как русское «н»", example: "natt", example_uk: "ніч", example_en: "night", example_ru: "ночь" },
-            { letter: "O o", name: "у", sound: "часто звучить як українське «у»", sound_en: "often sounds like the 'oo' in \"food\"", sound_ru: "часто звучит как русское «у»", example: "ost", example_uk: "сир", example_en: "cheese", example_ru: "сыр" },
-            { letter: "P p", name: "пе", sound: "як українське «п»", sound_en: "like the English 'p'", sound_ru: "как русское «п»", example: "penn", example_uk: "ручка", example_en: "pen", example_ru: "ручка" },
-            { letter: "Q q", name: "ку", sound: "як «к» (дуже рідко вживається)", sound_en: "like 'k' (very rarely used)", sound_ru: "как «к» (очень редко используется)", example: "quiz", example_uk: "вікторина", example_en: "quiz", example_ru: "викторина" },
-            { letter: "R r", name: "ер", sound: "гортанне «р», інакше ніж українське", sound_en: "a guttural 'r', unlike the English 'r'", sound_ru: "гортанное «р», не как русское", example: "rød", example_uk: "червоний", example_en: "red", example_ru: "красный" },
-            { letter: "S s", name: "ес", sound: "як українське «с»", sound_en: "like the English 's'", sound_ru: "как русское «с»", example: "sol", example_uk: "сонце", example_en: "sun", example_ru: "солнце" },
-            { letter: "T t", name: "те", sound: "як українське «т»", sound_en: "like the English 't'", sound_ru: "как русское «т»", example: "tid", example_uk: "час", example_en: "time", example_ru: "время" },
-            { letter: "U u", name: "у", sound: "заокруглене, ближче до «ю» без «й»", sound_en: "rounded, similar to the German 'ü'", sound_ru: "округлённое, близко к «ю» без «й»", example: "ute", example_uk: "надворі", example_en: "outside", example_ru: "на улице (снаружи)" },
-            { letter: "V v", name: "ве", sound: "як українське «в»", sound_en: "like the English 'v'", sound_ru: "как русское «в»", example: "vann", example_uk: "вода", example_en: "water", example_ru: "вода" },
-            { letter: "W w", name: "дубль-ве", sound: "як «в» (рідко вживається)", sound_en: "like 'v' (rarely used)", sound_ru: "как «в» (редко используется)", example: "web", example_uk: "мережа", example_en: "web (network)", example_ru: "сеть" },
-            { letter: "X x", name: "екс", sound: "як «кс» (рідко вживається)", sound_en: "like 'ks' (rarely used)", sound_ru: "как «кс» (редко используется)", example: "xylofon", example_uk: "ксилофон", example_en: "xylophone", example_ru: "ксилофон" },
-            { letter: "Y y", name: "и", sound: "заокруглене «і», немає аналога в українській", sound_en: "rounded 'ee', similar to the German 'ü' — no English equivalent", sound_ru: "округлённое «и», аналога в русском нет", example: "by", example_uk: "місто", example_en: "city", example_ru: "город" },
-            { letter: "Z z", name: "сетт", sound: "як «с» (рідко вживається)", sound_en: "like 's' (rarely used)", sound_ru: "как «с» (редко используется)", example: "zoom", example_uk: "збільшення", example_en: "zoom (magnification)", example_ru: "увеличение" },
+            { letter: "A a", name: "а", sound: "як українське «а»", example: "app", example_uk: "аплодисменти" },
+            { letter: "B b", name: "бе", sound: "як українське «б»", example: "bok", example_uk: "книга" },
+            { letter: "C c", name: "се", sound: "як «с» (рідко «к»)", example: "cirka", example_uk: "приблизно" },
+            { letter: "D d", name: "де", sound: "як українське «д»", example: "dag", example_uk: "день" },
+            { letter: "E e", name: "е", sound: "як українське «е»", example: "eple", example_uk: "яблуко" },
+            { letter: "F f", name: "еф", sound: "як українське «ф»", example: "fisk", example_uk: "риба" },
+            { letter: "G g", name: "ге", sound: "як «ґ»; перед i/y/øy — як «й»", example: "gate", example_uk: "вулиця" },
+            { letter: "H h", name: "хо", sound: "як українське «г» (легке, як в англ. house)", example: "hus", example_uk: "будинок" },
+            { letter: "I i", name: "і", sound: "як українське «і»", example: "is", example_uk: "морозиво/лід" },
+            { letter: "J j", name: "є", sound: "як українське «й»", example: "ja", example_uk: "так" },
+            { letter: "K k", name: "ко", sound: "як українське «к»; перед i/y/øy — м'якше, як «хь»", example: "katt", example_uk: "кіт" },
+            { letter: "L l", name: "ель", sound: "як українське «л»", example: "lys", example_uk: "світло" },
+            { letter: "M m", name: "ем", sound: "як українське «м»", example: "mat", example_uk: "їжа" },
+            { letter: "N n", name: "ен", sound: "як українське «н»", example: "natt", example_uk: "ніч" },
+            { letter: "O o", name: "у", sound: "часто звучить як українське «у»", example: "ost", example_uk: "сир" },
+            { letter: "P p", name: "пе", sound: "як українське «п»", example: "penn", example_uk: "ручка" },
+            { letter: "Q q", name: "ку", sound: "як «к» (дуже рідко вживається)", example: "quiz", example_uk: "вікторина" },
+            { letter: "R r", name: "ер", sound: "гортанне «р», інакше ніж українське", example: "rød", example_uk: "червоний" },
+            { letter: "S s", name: "ес", sound: "як українське «с»", example: "sol", example_uk: "сонце" },
+            { letter: "T t", name: "те", sound: "як українське «т»", example: "tid", example_uk: "час" },
+            { letter: "U u", name: "у", sound: "заокруглене, ближче до «ю» без «й»", example: "ute", example_uk: "надворі" },
+            { letter: "V v", name: "ве", sound: "як українське «в»", example: "vann", example_uk: "вода" },
+            { letter: "W w", name: "дубль-ве", sound: "як «в» (рідко вживається)", example: "web", example_uk: "мережа" },
+            { letter: "X x", name: "екс", sound: "як «кс» (рідко вживається)", example: "xylofon", example_uk: "ксилофон" },
+            { letter: "Y y", name: "и", sound: "заокруглене «і», немає аналога в українській", example: "by", example_uk: "місто" },
+            { letter: "Z z", name: "сетт", sound: "як «с» (рідко вживається)", example: "zoom", example_uk: "збільшення" },
             // Раніше приклад для æ був данським словом (æble) з приміткою
             // "рідко починає слова в норвезькій" — по суті визнання, що приклад
             // не підходить. Замінено на реальне норвезьке слово з æ.
-            { letter: "Æ æ", name: "е", sound: "відкрите «е», трохи ширше за звичайне", sound_en: "an open 'e', as in \"cat\" but a bit wider", sound_ru: "открытое «э», немного шире обычного", example: "være", example_uk: "бути", example_en: "to be", example_ru: "быть" },
-            { letter: "Ø ø", name: "ьо", sound: "заокруглене, як нім. ö — немає аналога в українській", sound_en: "rounded, like the German 'ö' or French 'eu' — no English equivalent", sound_ru: "округлённое, как нем. ö — аналога в русском нет", example: "øy", example_uk: "острів", example_en: "island", example_ru: "остров" },
-            { letter: "Å å", name: "о", sound: "закрите заокруглене «о»", sound_en: "a closed, rounded 'o', as in \"more\"", sound_ru: "закрытое округлённое «о»", example: "å gå", example_uk: "йти (частка + дієслово)", example_en: "to go (particle + verb)", example_ru: "идти (частица + глагол)" },
+            { letter: "Æ æ", name: "е", sound: "відкрите «е», трохи ширше за звичайне", example: "være", example_uk: "бути" },
+            { letter: "Ø ø", name: "ьо", sound: "заокруглене, як нім. ö — немає аналога в українській", example: "øy", example_uk: "острів" },
+            { letter: "Å å", name: "о", sound: "закрите заокруглене «о»", example: "å gå", example_uk: "йти (частка + дієслово)" },
         ];
 
         // =====================================================================

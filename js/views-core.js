@@ -574,9 +574,11 @@ function viewLevelTest() {
         }
     }
 
-    const questions = hasBuiltinTest ? langFile.LEVEL_TEST : SUBSTATE.testQuestions;
+    const questions = hasBuiltinTest
+        ? (SUBSTATE.shuffledQuestions || (SUBSTATE.shuffledQuestions = shuffleLevelTestQuestions(langFile.LEVEL_TEST)))
+        : SUBSTATE.testQuestions;
 
-    if (!SUBSTATE.i) { SUBSTATE.i = 0; SUBSTATE.answers = []; }
+    if (!SUBSTATE.i) { SUBSTATE.i = 0; SUBSTATE.answers = []; SUBSTATE.selections = []; }
     const i = SUBSTATE.i;
     if (i >= questions.length) {
         const level = computeTestLevel(SUBSTATE.answers, questions);
@@ -585,11 +587,55 @@ function viewLevelTest() {
         markActivityToday();
         checkAchievements();
         updateState();
+        // Записуємо результат вхідного тесту в загальну історію тестів
+        // (той самий LD().testHistory/getTestHistory(), що й для
+        // test-mc/test-order/test-translate — видно на сторінці
+        // "Історія тестів" у Кабінеті). Раніше цей тест туди взагалі не
+        // потрапляв. Прапорець _historyRecorded — щоб не задублювати
+        // запис, якщо ця гілка рендериться повторно (той самий патерн,
+        // що й recordTestHistoryIfNeeded() у helpers.js).
+        if (!SUBSTATE._historyRecorded) {
+            SUBSTATE._historyRecorded = true;
+            const total = SUBSTATE.answers.length;
+            const correctCount = SUBSTATE.answers.filter(Boolean).length;
+            let totalWeight = 0, correctWeight = 0;
+            const details = SUBSTATE.answers.map((isCorrect, idx2) => {
+                const qq = questions[idx2];
+                const w = questionWeight(qq);
+                totalWeight += w;
+                if (isCorrect) correctWeight += w;
+                const selIdx = SUBSTATE.selections ? SUBSTATE.selections[idx2] : undefined;
+                return {
+                    question: (qq && qq.q) || '',
+                    userAnswer: (qq && qq.opts && selIdx !== undefined) ? (qq.opts[selIdx] || '') : '',
+                    correctAnswer: (qq && qq.opts && qq.a !== undefined) ? (qq.opts[qq.a] || '') : '',
+                    isCorrect: !!isCorrect,
+                };
+            });
+            const score = totalWeight ? Math.round((correctWeight / totalWeight) * 100) : 0;
+            addTestResult({ type: 'leveltest', level, total, correct: correctCount, score, details });
+        }
+        const breakdown = computeTierBreakdown(questions, SUBSTATE.answers);
         const resultView = el(`
             <div class="view onb-wrap" style="max-width:500px;margin:30px auto;text-align:center;">
                 <h1>${t('h_your_level')}</h1>
                 <div class="tag level-${level}" style="font-size:1rem;padding:6px 18px;margin:12px 0;">${level}</div>
                 <p style="color:var(--ink-soft)">${LEVEL_META[level].desc}</p>
+                ${SUBSTATE.stoppedEarly ? `<p style="color:var(--ink-soft);font-size:.85rem;margin-top:4px;">${t('leveltest_early_stop')}</p>` : ''}
+                ${breakdown.length ? `
+                <div style="text-align:left;margin-top:20px;">
+                    <div style="font-size:.85rem;color:var(--ink-soft);margin-bottom:8px;">${t('leveltest_breakdown_title')}</div>
+                    ${breakdown.map(b => `
+                        <div style="margin-bottom:8px;">
+                            <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:3px;">
+                                <span class="tag level-${b.tier}" style="padding:1px 8px;">${b.tier}</span>
+                                <span style="color:${b.passed ? 'var(--teal, #0d9488)' : 'var(--rose, #e11d48)'};">${b.pct}%</span>
+                            </div>
+                            <div class="progress-track"><div class="progress-fill" style="width:${b.pct}%;background:${b.passed ? 'var(--teal, #0d9488)' : 'var(--rose, #e11d48)'};"></div></div>
+                        </div>
+                    `).join('')}
+                </div>
+                ` : ''}
                 <div style="display:flex;justify-content:center;margin:16px 0;"></div>
                 <button class="btn btn-primary" id="goHome">${t('start_learning_btn')}</button>
             </div>
@@ -623,7 +669,20 @@ function viewLevelTest() {
         const b = el(`<button class="mc-opt">${escHtml(opt)}</button>`);
         b.onclick = () => {
             SUBSTATE.answers.push(idx === q.a);
-            SUBSTATE.i++;
+            if (!SUBSTATE.selections) SUBSTATE.selections = [];
+            SUBSTATE.selections.push(idx);
+            // Адаптивна зупинка: щойно результат тесту вже однозначно
+            // визначений (наприклад, людина провалила легкі питання й
+            // рівень A1/A2 їй уже не "здати" — або, навпаки, вона
+            // відповіла на все, що можна було), відразу переходимо до
+            // результату замість того, щоб і далі питати про рівні,
+            // які вже нічого не змінять.
+            if (isLevelTestDecided(questions, SUBSTATE.answers)) {
+                SUBSTATE.stoppedEarly = SUBSTATE.answers.length < questions.length;
+                SUBSTATE.i = questions.length;
+            } else {
+                SUBSTATE.i++;
+            }
             navigate('leveltest', SUBSTATE);
         };
         opts.appendChild(b);

@@ -37,11 +37,8 @@ function viewAlphabet() {
     const content = wrap.querySelector('#alphaContent');
 
     function renderLetterGrid(letters) {
-        const uiLang = STATE.uiLang || 'uk';
         const grid = el(`<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:24px;"></div>`);
         letters.forEach(item => {
-            const sound = item['sound_' + uiLang] || item.sound;
-            const exampleTranslation = item['example_' + uiLang] || item.example_uk;
             const card = el(`
                 <div class="card" style="padding:12px 14px;">
                     <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -49,8 +46,8 @@ function viewAlphabet() {
                         <button class="btn btn-ghost btn-sm alpha-listen" data-letter="${escHtml(item.letter.split(' ')[0])}" title="${t('reading_tap_hint') || ''}">🔊</button>
                     </div>
                     <p style="color:var(--ink-soft);font-size:.8rem;margin:6px 0 2px;">${t('alphabet_called')}: <b>${escHtml(item.name)}</b></p>
-                    <p style="color:var(--ink-soft);font-size:.8rem;margin:2px 0;">${escHtml(sound)}</p>
-                    <p style="font-size:.85rem;margin-top:8px;"><i>${escHtml(item.example)}</i> — ${escHtml(exampleTranslation)}</p>
+                    <p style="color:var(--ink-soft);font-size:.8rem;margin:2px 0;">${escHtml(item.sound)}</p>
+                    <p style="font-size:.85rem;margin-top:8px;"><i>${escHtml(item.example)}</i> — ${escHtml(item.example_uk)}</p>
                 </div>
             `);
             card.querySelector('.alpha-listen').onclick = () => speak(item.example, lang);

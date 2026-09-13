@@ -1056,7 +1056,7 @@ function viewTestHistory() {
 
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
                 <button class="chip active" data-filter="all">${t('th_filter_all')}</button>
-                ${['mc','cloze','order','listen','translate'].map(type => `
+                ${['mc','cloze','order','listen','translate','leveltest'].map(type => `
                     <button class="chip" data-filter="${type}">${t('test_' + type + '_title') || type}</button>
                 `).join('')}
                 <button class="chip btn-danger" id="clearHistoryBtn">🗑️ ${t('th_clear')}</button>
