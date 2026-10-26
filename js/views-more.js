@@ -78,11 +78,11 @@
                 STATE.settings.pace = wrap.querySelector('#setPace').value;
                 const newTargetLang = wrap.querySelector('#setTargetLang').value;
                 const targetLangChanged = newTargetLang !== STATE.targetLang;
-                STATE.targetLang = newTargetLang;
                 updateState();
                 toast(t('settings_saved'));
                 document.getElementById('userNameDisplay').textContent = displayName(STATE.name);
-                if (targetLangChanged) navigate('home'); // словник/картки/тести залежать від мови — оновлюємо вкладку
+                // Словник/картки/тести залежать від мови: міняємо мову й URL (/<мова>/profile), вкладка перемальовується.
+                if (targetLangChanged) switchTargetLanguage(newTargetLang, { route: ROUTE });
             };
             return wrap;
         }
@@ -524,21 +524,21 @@ function viewChooseLanguage() {
             </button>
         `);
         card.onclick = () => {
-            STATE.targetLang = l.code;
-            STATE._targetLangChosen = true;
-            updateState();
             if (switchMode) {
-                navigate('home');
+                // Змінює мову й переходить на /<нова-мова>[/<та сама вкладка>]
+                // (pushState, без перезавантаження) — див. js/router.js.
+                switchTargetLanguage(l.code, { route: SUBSTATE.returnRoute });
                 toast(tf('cl_switched_toast', { lang: l.name[STATE.uiLang] || l.name.uk }));
             } else {
-                navigate('onboarding');
+                setTargetLanguage(l.code);
+                navigate('onboarding'); // після онбордингу — /<мова>
             }
         };
         grid.appendChild(card);
     });
 
     const cancelBtn = wrap.querySelector('#clCancelBtn');
-    if (cancelBtn) cancelBtn.onclick = () => navigate('home');
+    if (cancelBtn) cancelBtn.onclick = () => navigate(routeAfterLanguageSwitch(SUBSTATE.returnRoute));
 
     return wrap;
 }

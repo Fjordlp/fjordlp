@@ -28,6 +28,9 @@ function initAuth() {
     const titleEl = document.getElementById('authTitle');
 
     function getInitialRoute() {
+        // Мова з URL (/fr, /fr/vocabulary) застосовується до STATE до будь-яких
+        // рішень нижче — див. applyUrlLanguageToState у js/router.js.
+        if (typeof applyUrlLanguageToState === 'function') applyUrlLanguageToState();
         if (STATE) {
             const hasData = (function checkData() {
                 if (STATE.langData && typeof STATE.langData === 'object') {
@@ -282,6 +285,7 @@ function resetRouterForLogout() {
     ROUTE = 'home';
     SUBSTATE = {};
     _historyInitialized = false;
-    try { history.replaceState(null, '', '/'); } catch (e) { /* ignore */ }
+    // Після виходу — чистий /<збережена-мова> (а не /fr/vocabulary поверх екрана входу).
+    try { history.replaceState(null, '', (typeof buildLangPath === 'function') ? buildLangPath(fallbackLang(), 'home') : '/'); } catch (e) { /* ignore */ }
 }
 window.resetRouterForLogout = resetRouterForLogout;

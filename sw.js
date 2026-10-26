@@ -100,6 +100,12 @@ self.addEventListener('fetch', (event) => {
         caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
       }
       return res;
-    }).catch(() => caches.match(req)) // мережі немає — віддаємо те, що встигли закешувати раніше
+    }).catch(() => caches.match(req).then((cached) => {
+      // Мережі немає: віддаємо закешоване. Для переходів на /<мова>/<вкладка>
+      // (їх немає як окремих файлів) віддаємо оболонку застосунку, а не помилку.
+      if (cached) return cached;
+      if (req.mode === 'navigate') return caches.match('./index.html').then((shell) => shell || Response.error());
+      return Response.error();
+    })) // мережі немає — віддаємо те, що встигли закешувати раніше
   );
 });

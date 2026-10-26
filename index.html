@@ -7,15 +7,15 @@
     <meta name="copyright" content="© 2026 Nazar Maksymenko. All rights reserved.">
 
     <!-- ============ PWA ============ -->
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0A1D2B">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Fjord">
-    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
 
     <!-- ============ SEO ============ -->
     <title>FjordLP — підготовка до Norskprøve для українців у Норвегії</title>
@@ -38,7 +38,7 @@
     <meta name="twitter:image" content="https://fjordlp.com/og-image.jpg">
 
     <!-- ============ Favicon ============ -->
-    <link rel="icon" type="image/png" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" href="/icons/icon-192.png">
 
     <!-- ============ Шрифти ============ -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -46,7 +46,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
     <!-- ============ Стилі ============ -->
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
 
     <!-- ============ Firebase SDK ============ -->
     <script defer src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
@@ -153,6 +153,8 @@
            btn.onclick = function () {
                safeSet('fjord_target_lang', l.code);
                safeSet('fjord_entry_done', '1');
+               // URL → /<код-мови> (pushState; функцію задає js/router.js)
+               if (window.fjordSetUrlLanguage) window.fjordSetUrlLanguage(l.code);
                document.getElementById('entryPicker').style.display = 'none';
                document.getElementById('authPage').style.display = 'flex';
            };
@@ -275,6 +277,8 @@
             <div class="brand"><span class="mark"><svg viewBox="0 0 30 30" width="26" height="26"><circle cx="15" cy="20" r="6" fill="#2FA89B"/><path d="M2 20 A13 13 0 0 1 28 20" stroke="#E8A33D" stroke-width="2" fill="none"/></svg></span> Fjord</div>
             <nav class="nav" id="mainnav"></nav>
             <div class="user-area">
+                <!-- Поточна мова навчання (прапор + код). Текст і обробник — updateTargetLangBadge() у js/router.js -->
+                <button type="button" class="chip" id="targetLangBtn" style="padding:4px 10px;font-size:.78rem;font-weight:700;"></button>
                 <div class="lang-switch" id="appLangSwitch" style="display:flex;gap:4px;">
                     <button class="chip lang-chip" data-lang="uk">UK</button>
                     <button class="chip lang-chip" data-lang="en">EN</button>
@@ -347,43 +351,43 @@
        11. auth.js             – логіка входу/реєстрації/гостя + запуск застосунку
         =====================================================================
     -->
-    <script defer src="js/firebase-config.js"></script>
-    <script defer src="js/firebase-auth.js"></script>
-    <script defer src="js/state.js"></script>
-    <script defer src="js/i18n.js"></script>
-    <script defer src="js/languages.js"></script>
-    <script defer src="js/assistant.js"></script>
-    <script defer src="js/data.js"></script>
+    <script defer src="/js/firebase-config.js"></script>
+    <script defer src="/js/firebase-auth.js"></script>
+    <script defer src="/js/state.js"></script>
+    <script defer src="/js/i18n.js"></script>
+    <script defer src="/js/languages.js"></script>
+    <script defer src="/js/assistant.js"></script>
+    <script defer src="/js/data.js"></script>
     <!-- Файли окремих мов (кожен реєструє себе в window.LANG_DATA) —
          додавай нові мови тим самим способом: js/data-de.js, js/data-es.js
          тощо, скопіювавши js/data-en.js як шаблон. -->
-    <script defer src="js/data-en.js"></script>
-    <script defer src="js/data-de.js"></script>
-    <script defer src="js/data-es.js"></script>
-    <script defer src="js/data-fr.js"></script>
-    <script defer src="js/data-it.js"></script>
-    <script defer src="js/data-ja.js"></script>
-    <script defer src="js/data-nl.js"></script>
-    <script defer src="js/data-pl.js"></script>
-    <script defer src="js/data-pt.js"></script>
-    <script defer src="js/data-sv.js"></script>
-    <script defer src="js/data-uk.js"></script>
-    <script defer src="js/helpers.js"></script>
-    <script defer src="js/gear-i18n.js"></script>
-    <script defer src="js/bust-accessories.js"></script>
-    <script defer src="js/troll.js"></script>
-    <script defer src="js/books.js"></script>
-    <script defer src="js/lessons.js"></script>
-    <script defer src="js/story.js"></script>
-    <script defer src="js/router.js"></script>
-    <script defer src="js/views-core.js"></script>
-    <script defer src="js/views-more.js"></script>
-    <script defer src="js/views-books.js"></script>
-    <script defer src="js/views-lessons.js"></script>
-    <script defer src="js/views-alphabet.js"></script>
-    <script defer src="js/views-story.js"></script>
-<script defer src="js/views-admin.js"></script>
-    <script defer src="js/auth.js"></script>
+    <script defer src="/js/data-en.js"></script>
+    <script defer src="/js/data-de.js"></script>
+    <script defer src="/js/data-es.js"></script>
+    <script defer src="/js/data-fr.js"></script>
+    <script defer src="/js/data-it.js"></script>
+    <script defer src="/js/data-ja.js"></script>
+    <script defer src="/js/data-nl.js"></script>
+    <script defer src="/js/data-pl.js"></script>
+    <script defer src="/js/data-pt.js"></script>
+    <script defer src="/js/data-sv.js"></script>
+    <script defer src="/js/data-uk.js"></script>
+    <script defer src="/js/helpers.js"></script>
+    <script defer src="/js/gear-i18n.js"></script>
+    <script defer src="/js/bust-accessories.js"></script>
+    <script defer src="/js/troll.js"></script>
+    <script defer src="/js/books.js"></script>
+    <script defer src="/js/lessons.js"></script>
+    <script defer src="/js/story.js"></script>
+    <script defer src="/js/router.js"></script>
+    <script defer src="/js/views-core.js"></script>
+    <script defer src="/js/views-more.js"></script>
+    <script defer src="/js/views-books.js"></script>
+    <script defer src="/js/views-lessons.js"></script>
+    <script defer src="/js/views-alphabet.js"></script>
+    <script defer src="/js/views-story.js"></script>
+<script defer src="/js/views-admin.js"></script>
+    <script defer src="/js/auth.js"></script>
     <!-- Раніше тут був @edge-tts/universal — прибрано: ця бібліотека
          офіційно працює лише в самому браузері Microsoft Edge (протокол
          вимагає WebSocket-заголовок, який жоден інший браузер не дозволяє
