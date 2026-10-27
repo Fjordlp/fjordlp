@@ -290,3 +290,41 @@ window.LANG_DATA['pt'] = {
         C2: [],
     }
 };
+
+// =====================================================================
+//  LEVEL_TEST – вхідний тест на рівень (по 5 питань на кожен рівень A1–C2).
+//  Формат як у data.js: opts — відповіді ЦІЛЬОВОЮ мовою, q_en/q_ru — для
+//  інтерфейсу en/ru. Порядок варіантів перемішується в shuffleLevelTestQuestions().
+// =====================================================================
+window.LANG_DATA['pt'].LEVEL_TEST = [
+        { lvl: "A1", q: "«Дякую» португальською", opts: ["Obrigado", "Por favor", "Desculpe"], a: 0, q_en: "\"thank you\" in Portuguese", q_ru: "«спасибо» по-португальски" },
+        { lvl: "A1", q: "«Добрий ранок» португальською", opts: ["Bom dia", "Boa tarde", "Boa noite"], a: 0, q_en: "\"good morning\" in Portuguese", q_ru: "«доброе утро» по-португальски" },
+        { lvl: "A1", q: "«Вода» португальською", opts: ["água", "pão", "leite"], a: 0, q_en: "\"water\" in Portuguese", q_ru: "«вода» по-португальски" },
+        { lvl: "A1", q: "Eu ___ português.", opts: ["falo", "fala", "falas"], a: 0 },
+        { lvl: "A1", q: "Ela ___ professora.", opts: ["é", "sou", "és"], a: 0 },
+        { lvl: "A2", q: "Ontem eu ___ ao cinema.", opts: ["fui", "vou", "vai"], a: 0 },
+        { lvl: "A2", q: "Tenho dois ___.", opts: ["gatos", "gato", "gata"], a: 0 },
+        { lvl: "A2", q: "Quero ___ água.", opts: ["beber", "bebo", "bebes"], a: 0 },
+        { lvl: "A2", q: "«Скільки це коштує?» португальською", opts: ["Quanto custa?", "Onde fica?", "Que horas são?"], a: 0, q_en: "\"How much does it cost?\" in Portuguese", q_ru: "«Сколько это стоит?» по-португальски" },
+        { lvl: "A2", q: "O livro está ___ mesa.", opts: ["na", "no", "ao"], a: 0 },
+        { lvl: "B1", q: "Se eu tivesse mais tempo, ___ mais.", opts: ["viajaria", "viajo", "viajei"], a: 0 },
+        { lvl: "B1", q: "Este livro foi ___ por muitas pessoas.", opts: ["lido", "ler", "leu"], a: 0 },
+        { lvl: "B1", q: "Gosto ___ viajar.", opts: ["de", "a", "em"], a: 0 },
+        { lvl: "B1", q: "O homem ___ mora ao lado é médico.", opts: ["que", "quem", "onde"], a: 0 },
+        { lvl: "B1", q: "Quando eu era criança, ___ muito.", opts: ["brincava", "brinco", "brincarei"], a: 0 },
+        { lvl: "B2", q: "Apesar ___ chuva, saímos.", opts: ["da", "a", "na"], a: 0 },
+        { lvl: "B2", q: "Oxalá ele ___ a tempo!", opts: ["chegue", "chega", "chegou"], a: 0 },
+        { lvl: "B2", q: "Ele fingiu que não ___ nada.", opts: ["sabia", "sabe", "saberá"], a: 0 },
+        { lvl: "B2", q: "É importante que todos ___ presentes.", opts: ["estejam", "estão", "estarão"], a: 0 },
+        { lvl: "B2", q: "Penso ___ ti todos os dias.", opts: ["em", "de", "a"], a: 0 },
+        { lvl: "C1", q: "Se eu ___ isso antes, teria agido de outra forma.", opts: ["soubesse", "sei", "saberia"], a: 0 },
+        { lvl: "C1", q: "Quer ___ quer não, tens de ir.", opts: ["queiras", "queres", "quiseste"], a: 0 },
+        { lvl: "C1", q: "O facto de ele ___ atrasado não é desculpa.", opts: ["estar", "está", "esteve"], a: 0 },
+        { lvl: "C1", q: "Os resultados estão ___ com as expectativas.", opts: ["de acordo", "em acordo", "ao acordo"], a: 0 },
+        { lvl: "C1", q: "«Дощ лиє як з відра (злива)» португальською", opts: ["Chove a cântaros", "Está um dia soalheiro", "Faz um frio de rachar"], a: 0, q_en: "\"it is pouring with rain\" in Portuguese", q_ru: "«льёт как из ведра» по-португальски" },
+        { lvl: "C2", q: "«Бути на сьомому небі» португальською", opts: ["Estar no sétimo céu", "Estar com a cabeça no ar", "Estar de pé atrás"], a: 0, q_en: "\"to be on cloud nine\" in Portuguese", q_ru: "«быть на седьмом небе» по-португальски" },
+        { lvl: "C2", q: "Gato escaldado de água fria tem ___.", opts: ["medo", "pena", "sede"], a: 0 },
+        { lvl: "C2", q: "Mais vale um pássaro na mão do que dois a ___.", opts: ["voar", "cantar", "correr"], a: 0 },
+        { lvl: "C2", q: "Quem tudo quer, tudo ___.", opts: ["perde", "ganha", "tem"], a: 0 },
+        { lvl: "C2", q: "Não há fome que não dê em ___.", opts: ["fartura", "doença", "guerra"], a: 0 },
+];

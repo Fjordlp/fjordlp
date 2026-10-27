@@ -290,3 +290,41 @@ window.LANG_DATA['sv'] = {
         C2: [],
     }
 };
+
+// =====================================================================
+//  LEVEL_TEST – вхідний тест на рівень (по 5 питань на кожен рівень A1–C2).
+//  Формат як у data.js: opts — відповіді ЦІЛЬОВОЮ мовою, q_en/q_ru — для
+//  інтерфейсу en/ru. Порядок варіантів перемішується в shuffleLevelTestQuestions().
+// =====================================================================
+window.LANG_DATA['sv'].LEVEL_TEST = [
+        { lvl: "A1", q: "«Дякую» шведською", opts: ["Tack", "Hej", "Snälla"], a: 0, q_en: "\"thank you\" in Swedish", q_ru: "«спасибо» по-шведски" },
+        { lvl: "A1", q: "«Добрий ранок» шведською", opts: ["God morgon", "God natt", "God kväll"], a: 0, q_en: "\"good morning\" in Swedish", q_ru: "«доброе утро» по-шведски" },
+        { lvl: "A1", q: "«Хліб» шведською", opts: ["bröd", "bord", "bok"], a: 0, q_en: "\"bread\" in Swedish", q_ru: "«хлеб» по-шведски" },
+        { lvl: "A1", q: "Jag ___ kaffe.", opts: ["dricker", "dricka", "drack"], a: 0 },
+        { lvl: "A1", q: "Hon ___ i Stockholm.", opts: ["bor", "bo", "bott"], a: 0 },
+        { lvl: "A2", q: "Igår ___ jag till affären.", opts: ["gick", "går", "gå"], a: 0 },
+        { lvl: "A2", q: "Jag har två ___.", opts: ["katter", "kattar", "kattor"], a: 0 },
+        { lvl: "A2", q: "Boken ligger ___ bordet.", opts: ["på", "i", "till"], a: 0 },
+        { lvl: "A2", q: "«Скільки це коштує?» шведською", opts: ["Hur mycket kostar det?", "Var är det?", "Vad är klockan?"], a: 0, q_en: "\"How much does it cost?\" in Swedish", q_ru: "«Сколько это стоит?» по-шведски" },
+        { lvl: "A2", q: "Hon är äldre ___ jag.", opts: ["än", "som", "att"], a: 0 },
+        { lvl: "B1", q: "Om jag hade mer tid, ___ jag träna oftare.", opts: ["skulle", "ska", "skall"], a: 0 },
+        { lvl: "B1", q: "Boken ___ av många.", opts: ["läses", "läser", "läst"], a: 0 },
+        { lvl: "B1", q: "Jag väntar ___ bussen.", opts: ["på", "för", "till"], a: 0 },
+        { lvl: "B1", q: "Mannen ___ bor bredvid är läkare.", opts: ["som", "vad", "att"], a: 0 },
+        { lvl: "B1", q: "Han sa att han ___ imorgon.", opts: ["kommer", "komma", "kom"], a: 0 },
+        { lvl: "B2", q: "Vi gick ut ___ det regnade.", opts: ["trots att", "därför att", "eftersom"], a: 0 },
+        { lvl: "B2", q: "Jag önskar att jag ___ mer pengar.", opts: ["hade", "har", "haft"], a: 0 },
+        { lvl: "B2", q: "Han låtsades som om han inte ___ något.", opts: ["visste", "vet", "vetat"], a: 0 },
+        { lvl: "B2", q: "Så fort han ___ hem ringer han dig.", opts: ["kommer", "kom", "kommit"], a: 0 },
+        { lvl: "B2", q: "Jag ser fram ___ semestern.", opts: ["emot", "mot", "till"], a: 0 },
+        { lvl: "C1", q: "Hade jag bara ___ det tidigare!", opts: ["vetat", "vet", "visste"], a: 0 },
+        { lvl: "C1", q: "Han håller sig ___ reglerna.", opts: ["till", "med", "vid"], a: 0 },
+        { lvl: "C1", q: "___ han än försökte, lyckades han inte.", opts: ["Hur", "Vad", "Om"], a: 0 },
+        { lvl: "C1", q: "Hon tog saken i egna ___.", opts: ["händer", "hand", "händerna"], a: 0 },
+        { lvl: "C1", q: "Det råder ingen ___ om att han har rätt.", opts: ["tvekan", "tvivla", "tveksam"], a: 0 },
+        { lvl: "C2", q: "«Бути на сьомому небі» шведською", opts: ["Vara i sjunde himlen", "Vara på tredje våningen", "Ha huvudet i molnen"], a: 0, q_en: "\"to be on cloud nine\" in Swedish", q_ru: "«быть на седьмом небе» по-шведски" },
+        { lvl: "C2", q: "Bättre en fågel i handen än ___ i skogen.", opts: ["tio", "två", "fem"], a: 0 },
+        { lvl: "C2", q: "Man ska inte döma hunden efter ___.", opts: ["håren", "svansen", "skallet"], a: 0 },
+        { lvl: "C2", q: "Den som gräver en grop åt andra ___ själv däri.", opts: ["faller", "hoppar", "går"], a: 0 },
+        { lvl: "C2", q: "Pengar växer inte på ___.", opts: ["träd", "gräs", "fält"], a: 0 },
+];

@@ -566,10 +566,19 @@ function viewLevelTest() {
                 <div class="view onb-wrap" style="max-width:500px;margin:30px auto;text-align:center;">
                     <h1>${t('onb_test_title')}</h1>
                     <p style="color:var(--ink-soft);">${t('level_test_no_words')}</p>
-                    <button class="btn btn-primary" id="goLevels" style="margin-top:12px;">${t('pick_level_manually_btn')}</button>
+                    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px;">
+                        <button class="btn btn-primary" id="goLevels">${t('pick_level_manually_btn')}</button>
+                        <button class="btn btn-ghost" id="startA1">${t('start_at_a1_btn')}</button>
+                    </div>
                 </div>
             `);
             wrap.querySelector('#goLevels').onclick = () => navigate('levels');
+            wrap.querySelector('#startA1').onclick = () => {
+                LD().level = 'A1';
+                LD().levelTestDone = true;
+                updateState();
+                navigate('home');
+            };
             return wrap;
         }
     }
@@ -1207,7 +1216,50 @@ function currentLevelWords() {
     return lang === 'no' ? VOCAB.A1 : [];
 }
 
+// Спільний захист для тестів на словах. Повертає готовий екран (або null,
+// якщо слів достатньо). Раніше при 1–3 словах на рівні тест MC/Listen
+// будував питання з 1–3 варіантами відповіді (або з єдиним варіантом).
+// Тепер: якщо слів замало — чесне повідомлення + вихід (на A1 чи додому);
+// якщо слова саме зараз підвантажуються/генеруються (ensureVocabAvailable
+// уже виставив прапорець) — показуємо "готуємо", а не "замало слів".
+function testPoolGuard(minWords) {
+    minWords = minWords || 4;
+    const lang = STATE.targetLang || 'no';
+    const level = LD().level || 'A1';
+    const pool = currentLevelWords(); // заодно запускає ensureVocabAvailable()
+    if (pool && pool.length >= minWords) return null;
+    const loading = typeof _vocabAutoGenLoading !== 'undefined' && _vocabAutoGenLoading[lang + '|' + level];
+    if (loading) {
+        const v = el(
+            `<div class="view"><div class="empty-state"><h3>${t('quiz_preparing_title')}</h3>` +
+            `<p>${t('quiz_preparing_desc')}</p>` +
+            `<button class="btn btn-ghost" id="poolBackTests">${t('to_tests_btn')}</button></div></div>`
+        );
+        v.querySelector('#poolBackTests').onclick = () => navigate('tests');
+        return v;
+    }
+    const langName = (typeof targetLangName === 'function') ? targetLangName(lang) : lang;
+    const v = el(
+        `<div class="view"><div class="empty-state"><h3>${t('test_not_enough_words')}</h3>` +
+        `<p>${tf('test_not_enough_words_desc', { lang: langName })}</p>` +
+        `<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">` +
+        (level !== 'A1' ? `<button class="btn btn-primary" id="poolToA1">${t('test_use_a1_btn')}</button>` : '') +
+        `<button class="btn btn-ghost" id="poolHome">${t('to_home_btn')}</button>` +
+        `</div></div></div>`
+    );
+    const a1 = v.querySelector('#poolToA1');
+    if (a1) a1.onclick = () => { LD().level = 'A1'; updateState(); SUBSTATE.qs = null; navigate('tests'); };
+    v.querySelector('#poolHome').onclick = () => navigate('home');
+    return v;
+}
+
 function runQuiz(sub, route, title) {
+    // Страховка: питання з <2 варіантами неможливо пройти — відкидаємо їх
+    // (лише поки відповідей ще немає, щоб не зсунути вже дані відповіді).
+    if (sub.qs && !sub.userAnswers) {
+        const playable = sub.qs.filter(q => !q || !q.opts || q.opts.length >= 2);
+        if (playable.length !== sub.qs.length) sub.qs = playable;
+    }
     if (!sub.qs || sub.qs.length === 0) {
         // Порожньо буває, коли для щойно обраної мови ще нема слів на
         // цьому рівні — ensureVocabAvailable() (викликається зі
@@ -1395,6 +1447,7 @@ function runQuiz(sub, route, title) {
 
 function viewTestMC() {
     if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
+        const poolGuard = testPoolGuard(); if (poolGuard) return poolGuard;
         const level = LD().level || "A1";
         const lang = STATE.targetLang || 'no';
         if (lang !== 'no') ensureGrammarAvailable(lang, level); // тихо; якщо не встигне — цього разу просто без граматичних питань
@@ -1436,6 +1489,7 @@ function clozeBlank(word, exampleNo) {
 
 function viewTestCloze() {
     if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
+        const poolGuard = testPoolGuard(); if (poolGuard) return poolGuard;
         const eligible = currentLevelWords().filter(w => clozeBlank(w.no, w.ex_no) !== null);
         const words = shuffle(eligible).slice(0, 6);
         SUBSTATE.qs = words.map(w => {
@@ -1581,6 +1635,7 @@ function viewTestCloze() {
 
 function viewTestOrder() {
     if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
+        const poolGuard = testPoolGuard(); if (poolGuard) return poolGuard;
         const words = shuffle(currentLevelWords().filter(w => w.ex_no.split(' ').length >= 3 && w.ex_no.split(' ')
             .length <= 7)).slice(0, 5);
         SUBSTATE.qs = words.map(w => {
@@ -1748,6 +1803,7 @@ function viewTestOrder() {
 
 function viewTestListen() {
     if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
+        const poolGuard = testPoolGuard(); if (poolGuard) return poolGuard;
         const words = shuffle(currentLevelWords()).slice(0, 6);
         // Раніше варіанти відповіді завжди були українською (w.uk) —
         // тепер локалізуються через wordTranslation(), як і решта тестів.
@@ -1774,6 +1830,7 @@ function viewTestListen() {
 
 function viewTestTranslate() {
     if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
+        const poolGuard = testPoolGuard(); if (poolGuard) return poolGuard;
         const words = shuffle(currentLevelWords()).slice(0, 6);
         SUBSTATE.qs = words.map(w => {
             return { word: w, dirToNo: Math.random() < 0.5 };
@@ -1932,7 +1989,7 @@ function viewGrammar() {
     // Тепер вкладка одразу показує правила ВСІХ рівнів (A1–C2), а фільтр
     // рівнів зверху — це лише зручність навігації по довгому списку, не
     // обмеження: за замовчуванням обрано "Усі".
-    const hasBuiltinGrammar = !!(window.LANG_DATA && window.LANG_DATA[lang] && window.LANG_DATA[lang].GRAMMAR);
+    const hasBuiltinGrammar = !!(window.LANG_DATA && window.LANG_DATA[lang] && Array.isArray(window.LANG_DATA[lang].GRAMMAR) && window.LANG_DATA[lang].GRAMMAR.length);
     if (!hasBuiltinGrammar) LEVELS.forEach(lvl => ensureGrammarAvailable(lang, lvl));
 
     const rulesByLevel = {};

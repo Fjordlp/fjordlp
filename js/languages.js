@@ -329,7 +329,7 @@ let _alphabetLoading = {};
 
 async function ensureAlphabetAvailable(lang) {
     if (!lang) return;
-    if (window.LANG_DATA && window.LANG_DATA[lang] && window.LANG_DATA[lang].ALPHABET) return; // вбудований файл цієї мови вже покриває абетку
+    if (window.LANG_DATA && window.LANG_DATA[lang] && Array.isArray(window.LANG_DATA[lang].ALPHABET) && window.LANG_DATA[lang].ALPHABET.length) return; // вбудований файл цієї мови вже покриває абетку (порожній [] = ще не покриває)
     if (_alphabetCache[lang]) return;
     if (_alphabetLoading[lang]) return;
     _alphabetLoading[lang] = true;
@@ -352,7 +352,7 @@ async function ensureAlphabetAvailable(lang) {
 
 function getAlphabetForLang(lang) {
     const langFile = window.LANG_DATA && window.LANG_DATA[lang];
-    if (langFile && langFile.ALPHABET) return langFile.ALPHABET;
+    if (langFile && Array.isArray(langFile.ALPHABET) && langFile.ALPHABET.length) return langFile.ALPHABET;
     return _alphabetCache[lang] || null;
 }
 
@@ -413,7 +413,7 @@ async function saveSharedGrammar(lang, level, rules) {
 let _grammarAutoGenLoading = {};
 async function ensureGrammarAvailable(lang, level) {
     if (!lang) return;
-    if (window.LANG_DATA && window.LANG_DATA[lang] && window.LANG_DATA[lang].GRAMMAR) return; // вбудований файл цієї мови вже покриває граматику
+    if (window.LANG_DATA && window.LANG_DATA[lang] && Array.isArray(window.LANG_DATA[lang].GRAMMAR) && window.LANG_DATA[lang].GRAMMAR.length) return; // вбудований файл цієї мови вже покриває граматику (порожній [] = ще не покриває → дозволяємо спільну/AI-граматику)
     if (!STATE.generatedGrammar) STATE.generatedGrammar = {};
     if (!STATE.generatedGrammar[lang]) STATE.generatedGrammar[lang] = {};
     const already = STATE.generatedGrammar[lang][level];
@@ -616,8 +616,14 @@ async function ensureSharedVocabLoaded(lang, level) {
 // — перший рендер може показати порожній стан, другий (після render())
 // вже покаже слова.
 let _vocabAutoGenLoading = {};
+// Одноразовий прапорець: після невдалої підготовки ми перемальовуємо екран
+// (щоб замість вічного "готуємо…" показати чесний порожній стан), але ця
+// перемальовка НЕ має знову запускати той самий запит — інакше вийшов би
+// нескінченний цикл render → ensureVocabAvailable → render.
+let _vocabAutoGenSkipOnce = {};
 async function ensureVocabAvailable(lang, level) {
     if (!lang) return;
+    if (_vocabAutoGenSkipOnce[lang + '|' + level]) { delete _vocabAutoGenSkipOnce[lang + '|' + level]; return; }
     ensureGeneratedVocabStore(lang);
     // Для норвезької лише перевіряємо, чи адмін щось додатково опублікував —
     // AI-самогенерацію нижче пропускаємо, вона тут не потрібна.
@@ -654,6 +660,17 @@ async function ensureVocabAvailable(lang, level) {
         console.error('[Словник] Не вдалося підготувати слова для', lang, level, e);
     } finally {
         _vocabAutoGenLoading[key] = false;
+        // Слів так і не з'явилось — перемальовуємо поточний екран слів/тестів,
+        // щоб він перейшов зі стану "готуємо" у порожній стан (без нового запиту).
+        try {
+            const got = STATE.generatedVocab[lang] && STATE.generatedVocab[lang][level];
+            const onWordScreen = typeof ROUTE !== 'undefined' && /^(test-|flashcards|flashsession|vocabulary)/.test(ROUTE);
+            if (lang !== 'no' && !(got && got.length) && !vocabForLevel(level, lang).length &&
+                STATE.targetLang === lang && (LD().level || 'A1') === level && onWordScreen && typeof render === 'function') {
+                _vocabAutoGenSkipOnce[key] = true;
+                render();
+            }
+        } catch (e) { /* перемальовка — лише косметика */ }
     }
 }
 

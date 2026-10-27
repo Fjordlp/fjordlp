@@ -421,7 +421,7 @@ function vocabForLevel(level, lang) {
 function grammarForLevel(level, lang) {
     lang = lang || (STATE && STATE.targetLang) || 'no';
     const langFile = window.LANG_DATA && window.LANG_DATA[lang];
-    if (langFile && langFile.GRAMMAR) {
+    if (langFile && Array.isArray(langFile.GRAMMAR) && langFile.GRAMMAR.length) {
         return langFile.GRAMMAR.filter(g => g.level === level);
     }
     if (!STATE.generatedGrammar) STATE.generatedGrammar = {};

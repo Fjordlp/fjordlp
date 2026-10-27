@@ -7,6 +7,8 @@
 //
 //  СТАТУС: рівень A1 заповнено (270 слів, паритет з норвезьким A1).
 //  Рівні A2–C2 — заготовки (порожні масиви), наповнити наступними.
+//  LEVEL_TEST заповнено (30 питань). GRAMMAR/ALPHABET порожні → екрани
+//  граматики/абетки беруть спільний (адмін) або AI-варіант.
 // =====================================================================
 (function () {
 // =====================================================================
@@ -28,8 +30,8 @@
             { t: "Привітання", no: "pardon", uk: "вибачте", ex_no: "Pardon, waar is het station?", ex_uk: "Вибачте, де вокзал?", en: "excuse me", en_ex: "Excuse me, where is the station?", ru: "извините", ru_ex: "Извините, где вокзал?" },
             { t: "Привітання", no: "ja", uk: "так", ex_no: "Ja, dat klopt.", ex_uk: "Так, це правда.", en: "yes", en_ex: "Yes, that's right.", ru: "да", ru_ex: "Да, это правда." },
             { t: "Привітання", no: "nee", uk: "ні", ex_no: "Nee, ik weet het niet.", ex_uk: "Ні, я не знаю.", en: "no", en_ex: "No, I don't know.", ru: "нет", ru_ex: "Нет, я не знаю." },
-            { t: "Привітання", no: "welkom", uk: "ласкаво просимо", ex_nl: "Welkom in Nederland!", ex_uk: "Ласкаво просимо до Норвегії!", en: "welcome", en_ex: "Welcome to Norway!", ru: "добро пожаловать", ru_ex: "Добро пожаловать в Норвегию!" },
-            { t: "Привітання", no: "hoi (ochtend)", uk: "привіт (ранок)", ex_nl: "Hoi, hoe gaat het met je?", ex_uk: "Привіт, як ся маєш?", en: "morning (greeting)", en_ex: "Morning, how are you?", ru: "доброе утро (привет)", ru_ex: "Доброе утро, как ты?" },
+            { t: "Привітання", no: "welkom", uk: "ласкаво просимо", ex_no: "Welkom in Nederland!", ex_uk: "Ласкаво просимо до Нідерландів!", en: "welcome", en_ex: "Welcome to the Netherlands!", ru: "добро пожаловать", ru_ex: "Добро пожаловать в Нидерланды!" },
+            { t: "Привітання", no: "doei", uk: "па-па", ex_no: "Doei, tot morgen!", ex_uk: "Па-па, до завтра!", en: "bye", en_ex: "Bye, see you tomorrow!", ru: "пока", ru_ex: "Пока, до завтра!" },
             { t: "Числа", no: "nul", uk: "нуль", ex_no: "We beginnen bij nul.", ex_uk: "Ми починаємо з нуля.", en: "zero", en_ex: "We start from zero.", ru: "ноль", ru_ex: "Мы начинаем с нуля." },
             { t: "Числа", no: "een", uk: "один", ex_no: "Ik heb een kat.", ex_uk: "У мене є один кіт.", en: "one", en_ex: "I have one cat.", ru: "один", ru_ex: "У меня есть один кот." },
             { t: "Числа", no: "twee", uk: "два", ex_no: "Het is twee uur.", ex_uk: "Зараз друга година.", en: "two", en_ex: "It's two o'clock.", ru: "два", ru_ex: "Сейчас два часа." },
@@ -313,9 +315,41 @@
     };
 
     // =====================================================================
-    //  LEVEL_TEST – ТЕСТ НА РІВЕНЬ (поки порожній)
+    //  LEVEL_TEST – ТЕСТ НА РІВЕНЬ (по 5 питань на кожен рівень A1–C2)
+    //  opts — відповіді ЦІЛЬОВОЮ мовою; q_en/q_ru — для інтерфейсу en/ru.
     // =====================================================================
-    const LEVEL_TEST = [];
+    const LEVEL_TEST = [
+        { lvl: "A1", q: "«Дякую» нідерландською", opts: ["Dank je", "Alsjeblieft", "Goedemorgen"], a: 0, q_en: "\"thank you\" in Dutch", q_ru: "«спасибо» по-нидерландски" },
+        { lvl: "A1", q: "«Хліб» нідерландською", opts: ["brood", "boek", "bord"], a: 0, q_en: "\"bread\" in Dutch", q_ru: "«хлеб» по-нидерландски" },
+        { lvl: "A1", q: "«Добрий ранок» нідерландською", opts: ["Goedemorgen", "Goedenavond", "Goedenacht"], a: 0, q_en: "\"good morning\" in Dutch", q_ru: "«доброе утро» по-нидерландски" },
+        { lvl: "A1", q: "Ik ___ in Amsterdam.", opts: ["woon", "woont", "wonen"], a: 0 },
+        { lvl: "A1", q: "Hij ___ koffie.", opts: ["drinkt", "drink", "drinken"], a: 0 },
+        { lvl: "A2", q: "Gisteren ___ ik naar de markt.", opts: ["ging", "ga", "gaat"], a: 0 },
+        { lvl: "A2", q: "Ik heb een ___ huis.", opts: ["groot", "grote", "groten"], a: 0 },
+        { lvl: "A2", q: "Ik heb gisteren een brief ___.", opts: ["geschreven", "schrijven", "schreef"], a: 0 },
+        { lvl: "A2", q: "«Скільки це коштує?» нідерландською", opts: ["Hoeveel kost het?", "Waar is het?", "Hoe laat is het?"], a: 0, q_en: "\"How much does it cost?\" in Dutch", q_ru: "«Сколько это стоит?» по-нидерландски" },
+        { lvl: "A2", q: "Hij is groter ___ ik.", opts: ["dan", "dat", "door"], a: 0 },
+        { lvl: "B1", q: "Als ik meer tijd ___, zou ik vaker sporten.", opts: ["had", "heb", "heeft"], a: 0 },
+        { lvl: "B1", q: "Het boek ___ door veel mensen gelezen.", opts: ["wordt", "is", "heeft"], a: 0 },
+        { lvl: "B1", q: "Ik wacht ___ de bus.", opts: ["op", "voor", "aan"], a: 0 },
+        { lvl: "B1", q: "De man ___ naast mij woont, is dokter.", opts: ["die", "dat", "wat"], a: 0 },
+        { lvl: "B1", q: "Hij zei dat hij morgen ___.", opts: ["komt", "kom", "gekomen"], a: 0 },
+        { lvl: "B2", q: "Ondanks ___ regen gingen we wandelen.", opts: ["de", "het", "dat"], a: 0 },
+        { lvl: "B2", q: "Ik wou dat ik meer geld ___.", opts: ["had", "heb", "hebt"], a: 0 },
+        { lvl: "B2", q: "Hij deed alsof hij niets ___.", opts: ["wist", "weet", "geweten"], a: 0 },
+        { lvl: "B2", q: "Zodra hij thuis ___, belt hij je.", opts: ["is", "was", "heeft"], a: 0 },
+        { lvl: "B2", q: "Zij kijkt uit ___ de vakantie.", opts: ["naar", "op", "voor"], a: 0 },
+        { lvl: "C1", q: "Had ik dat maar eerder ___!", opts: ["geweten", "weten", "wist"], a: 0 },
+        { lvl: "C1", q: "«Дощ лиє як з відра (злива)» нідерландською", opts: ["Het regent pijpenstelen", "Het regent honden en katten", "Het regent vandaag"], a: 0, q_en: "\"it is pouring with rain\" in Dutch", q_ru: "«льёт как из ведра» по-нидерландски" },
+        { lvl: "C1", q: "Hij ___ zich niet aan de regels.", opts: ["houdt", "bindt", "zet"], a: 0 },
+        { lvl: "C1", q: "___ hij ook zijn best deed, hij haalde de prijs niet.", opts: ["Hoe", "Wat", "Als"], a: 0 },
+        { lvl: "C1", q: "De problemen ___ zich op.", opts: ["stapelen", "stapelt", "stapelde"], a: 0 },
+        { lvl: "C2", q: "«Нічого не зрозуміти (ні кінця ні краю)» нідерландською", opts: ["Daar is geen touw aan vast te knopen", "Dat is koren op mijn molen", "Dat is een open deur"], a: 0, q_en: "\"you cannot make head or tail of it\" in Dutch", q_ru: "«ничего не понять (ни начала ни конца)» по-нидерландски" },
+        { lvl: "C2", q: "«Бути на сьомому небі» нідерландською", opts: ["In de zevende hemel zijn", "Met beide benen op de grond staan", "Een kat in de zak kopen"], a: 0, q_en: "\"to be on cloud nine\" in Dutch", q_ru: "«быть на седьмом небе» по-нидерландски" },
+        { lvl: "C2", q: "Hij ___ er een handje van om te laat te komen.", opts: ["heeft", "is", "doet"], a: 0 },
+        { lvl: "C2", q: "Hij heeft de plank volledig ___ geslagen.", opts: ["mis", "fout", "weg"], a: 0 },
+        { lvl: "C2", q: "Eind goed, ___ goed.", opts: ["al", "alles", "nog"], a: 0 },
+    ];
 
     // =====================================================================
     //  ALPHABET – АБЕТКА (поки порожня)
