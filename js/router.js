@@ -222,7 +222,7 @@ window.fjordSetUrlLanguage = function (code) {
         } catch (e) { /* ignore */ }
         const picker = document.getElementById('entryPicker');
         const authPage = document.getElementById('authPage');
-        if (picker && authPage && picker.style.display !== 'none') {
+        if (!window.__fjordPickUi && picker && authPage && picker.style.display !== 'none') {
             picker.style.display = 'none';
             authPage.style.display = 'flex';
         }
@@ -336,9 +336,10 @@ function render() {
     const main = document.getElementById('mainContent');
     main.innerHTML = '';
     main.appendChild(renderView());
+    // Ім'я потрібне ДО updateNav(): з нього береться літера аватара.
+    document.getElementById('userNameDisplay').textContent = STATE.name && !isDefaultGuestName(STATE.name) ? STATE.name : (currentUser === 'guest' ? t('default_guest_name') : currentUser);
     updateNav();
     updateTargetLangBadge();
-    document.getElementById('userNameDisplay').textContent = STATE.name && !isDefaultGuestName(STATE.name) ? STATE.name : (currentUser === 'guest' ? t('default_guest_name') : currentUser);
     
     // Деякі адмін-сторінки потребують ініціалізації після рендерингу
     // (їхні view-функції повертають рядок HTML, а не DOM-елемент із вже
@@ -393,60 +394,161 @@ const NAV_ROUTE_GROUPS = {
     admin: ['admin', 'admin-words', 'admin-tournaments', 'admin-daily', 'admin-users', 'admin-vocab-gen', 'admin-grammar-gen', 'admin-alphabet-gen', 'admin-sentence-gen', 'admin-books', 'admin-daily-word'],
 };
 
-function updateNav() {
-    const nav = document.getElementById('mainnav');
-    const items = [
-        ["home", t('nav_home')],
-        ["alphabet", t('nav_alphabet')],
-        ["flashcards", t('nav_flashcards')],
-        ["vocabulary", t('nav_vocabulary')],
-        ["tests", t('nav_tests')],
-        ["grammar", t('nav_grammar')],
-        ["books", t('nav_books')],
-        ["lessons", t('nav_lessons')],
-        ["story", t('nav_story')],
-        ["troll", t('nav_troll')],
-        ["profile", t('nav_profile')],
-        ["onboarding", t('nav_onboarding')],
-        ["tournaments", t('nav_tournaments')],
-    ];
-    // Вкладку "Norskprøve" в шапці показуємо лише для тих, хто вчить
-    // норвезьку — це підготовка до конкретного норвезького іспиту, для
-    // решти мов вона нерелевантна (раніше замінювалась на узагальнений
-    // пункт "Завдання", але й це не мало сенсу — прибираємо повністю).
-    const targetLang = (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
-    if (targetLang === 'no') {
-        // Вставляємо перед "Турнірами" за назвою пункту, а не за фіксованим
-        // індексом — індекс "поплив" після того, як з'явився пункт "Книги",
-        // і Norskprøve вискакував не на своєму місці в меню.
-        const tournamentsIdx = items.findIndex(([r]) => r === 'tournaments');
-        items.splice(tournamentsIdx === -1 ? items.length : tournamentsIdx, 0, ["norskprove", examSectionNavLabel()]);
-    }
+// ---------------------------------------------------------------------
+//  ГОЛОВНЕ МЕНЮ: 5 пунктів замість ~15 кнопок
+// ---------------------------------------------------------------------
+// Пункти, що мають спільну тему, згруповані у випадні меню:
+//   Home | Learn ▾ | Practice ▾ | Read ▾ | Play ▾          + меню профілю (аватар)
+// На десктопі це рядок у шапці з випадними списками вниз; на телефоні (≤760px)
+// той самий DOM стає нижньою панеллю вкладок, а списки відкриваються вгору
+// (див. CSS "NAV" в кінці css/style.css). Підсвітка активного пункту
+// спирається на NAV_ROUTE_GROUPS (дочірні екрани підсвічують свою групу).
+// Меню профілю (#profileMenu) — статична розмітка в index.html, тут лише
+// оновлюється вміст (updateProfileMenu).
+const NAV_MENU = [
+    { id: 'home', icon: '🏠', labelKey: 'nav_home', route: 'home' },
+    { id: 'learn', icon: '📚', labelKey: 'nav_group_learn', items: ['alphabet', 'vocabulary', 'grammar', 'lessons'] },
+    { id: 'practice', icon: '🎯', labelKey: 'nav_group_practice', items: ['flashcards', 'tests', 'norskprove'] },
+    { id: 'read', icon: '📖', labelKey: 'nav_group_read', items: ['books', 'story'] },
+    { id: 'play', icon: '🎮', labelKey: 'nav_group_play', items: ['troll', 'tournaments'] },
+];
+// Екрани, які підсвічують кнопку профілю (а не якусь із груп).
+const PROFILE_MENU_ROUTES = ['profile', 'levels', 'leveltest', 'test-history', 'onboarding',
+    ...NAV_ROUTE_GROUPS.admin];
 
-    // Якщо користувач адмін – додаємо адмін-панель
-    if (STATE && STATE.admin) {
-        items.push(["admin", "⚙️ Адмін"]);
-    }
-
-    nav.innerHTML = '';
-    items.forEach(([r, label]) => {
-        const b = el(`<button>${label}</button>`);
-        const group = NAV_ROUTE_GROUPS[r] || [r];
-        if (group.includes(ROUTE)) b.classList.add('active');
-        b.onclick = () => { navigate(r);
-            nav.classList.remove('open'); };
-        nav.appendChild(b);
-    });
-    
-    const hamburger = document.getElementById('hamburger');
-    hamburger.onclick = () => nav.classList.toggle('open');
+function routeInNavItem(item, route) {
+    return (NAV_ROUTE_GROUPS[item] || [item]).includes(route);
 }
 
-document.addEventListener('click', (e) => {
-    if (!e.target.closest('.topbar')) {
-        const nav = document.getElementById('mainnav');
-        if (nav) nav.classList.remove('open');
+// Підписи в списках без провідного емодзі (частина старих підписів його має,
+// частина ні — так список виглядає рівно). Групи мають власну іконку.
+function navItemLabel(route) {
+    const label = route === 'norskprove' ? examSectionNavLabel() : t('nav_' + route);
+    return String(label).replace(/^[\p{Extended_Pictographic}\uFE0F\u200D\s]+/u, '');
+}
+
+// Норвезький іспит має сенс лише для тих, хто вчить норвезьку.
+function navItemVisible(route) {
+    if (route === 'norskprove') {
+        const targetLang = (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
+        return targetLang === 'no';
     }
+    return true;
+}
+
+// Яке меню відкрите і на якому екрані воно було побудоване. render() викликається
+// не лише при навігації, а й коли довантажились дані або змінилась мова
+// інтерфейсу — тоді відкрите меню НЕ можна закривати під пальцем користувача.
+// Воно лишається відкритим, поки ROUTE той самий (див. updateNav).
+let _navOpenId = null;
+let _navLastRoute = null;
+
+function closeNavMenus() {
+    _navOpenId = null;
+    document.querySelectorAll('.nav-menu.open').forEach(m => m.classList.remove('open'));
+    document.querySelectorAll('.topbar [aria-expanded="true"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+    const app = document.getElementById('app');
+    if (app) app.classList.remove('nav-menu-open');
+}
+
+// Відкриває/закриває одне меню; відкрите попереднє закривається.
+function toggleNavMenu(btn, menu) {
+    const wasOpen = menu.classList.contains('open');
+    closeNavMenus();
+    if (wasOpen) return;
+    menu.classList.add('open');
+    btn.setAttribute('aria-expanded', 'true');
+    _navOpenId = btn.dataset.menuId || null;
+    const app = document.getElementById('app');
+    if (app) app.classList.add('nav-menu-open');
+}
+
+// Відновлює відкрите меню після перебудови шапки (той самий екран).
+function reopenNavMenu(id) {
+    const btn = document.querySelector('.topbar [data-menu-id="' + id + '"]');
+    const menu = btn && btn.parentElement.querySelector('.nav-menu');
+    if (btn && menu) toggleNavMenu(btn, menu);
+}
+
+function updateNav() {
+    const nav = document.getElementById('mainnav');
+    // Навігація на інший екран закриває меню; перемальовка того самого екрана — ні.
+    const keepOpen = (_navLastRoute === ROUTE) ? _navOpenId : null;
+    closeNavMenus();
+    _navLastRoute = ROUTE;
+    nav.innerHTML = '';
+
+    NAV_MENU.forEach(g => {
+        const items = (g.items || []).filter(navItemVisible);
+        if (g.items && !items.length) return;
+        const active = g.route ? routeInNavItem(g.route, ROUTE) : items.some(i => routeInNavItem(i, ROUTE));
+        const label = `<span class="nav-ico" aria-hidden="true">${g.icon}</span><span class="nav-lbl">${t(g.labelKey)}</span>`;
+
+        if (g.route) { // одиночний пункт (Home)
+            const b = el(`<button type="button" class="nav-top${active ? ' active' : ''}">${label}</button>`);
+            b.onclick = () => { closeNavMenus(); navigate(g.route); };
+            nav.appendChild(b);
+            return;
+        }
+
+        const wrap = el(`<div class="nav-group"></div>`);
+        const btn = el(`<button type="button" class="nav-top${active ? ' active' : ''}" data-menu-id="${g.id}" aria-haspopup="menu" aria-expanded="false">${label}<span class="nav-caret" aria-hidden="true">▾</span></button>`);
+        const menu = el(`<div class="nav-menu" role="menu"></div>`);
+        items.forEach(route => {
+            const it = el(`<button type="button" class="nav-item${routeInNavItem(route, ROUTE) ? ' active' : ''}" role="menuitem">${navItemLabel(route)}</button>`);
+            it.onclick = () => { closeNavMenus(); navigate(route); };
+            menu.appendChild(it);
+        });
+        btn.onclick = () => toggleNavMenu(btn, menu);
+        wrap.appendChild(btn);
+        wrap.appendChild(menu);
+        nav.appendChild(wrap);
+    });
+
+    updateProfileMenu();
+    if (keepOpen) reopenNavMenu(keepOpen);
+}
+
+// Аватар + випадне меню профілю (статична розмітка з index.html).
+function updateProfileMenu() {
+    const btn = document.getElementById('profileBtn');
+    const menu = document.getElementById('profileMenu');
+    if (!btn || !menu) return;
+
+    const shown = document.getElementById('userNameDisplay');
+    const initialEl = document.getElementById('profileInitial');
+    const name = shown ? shown.textContent.trim() : '';
+    if (initialEl) initialEl.textContent = name ? Array.from(name)[0].toUpperCase() : '👤';
+    btn.title = name || t('nav_profile');
+    btn.setAttribute('aria-label', name ? `${t('nav_profile')}: ${name}` : t('nav_profile'));
+    btn.classList.toggle('active', PROFILE_MENU_ROUTES.includes(ROUTE));
+    btn.onclick = () => toggleNavMenu(btn, menu);
+
+    const labels = { pmProfile: '👤 ' + t('nav_profile'), pmOnboarding: '🎯 ' + t('nav_onboarding'), pmAdmin: '⚙️ ' + ({ uk: 'Адмін', en: 'Admin', ru: 'Админ' }[STATE.uiLang] || 'Адмін') };
+    Object.keys(labels).forEach(id => {
+        const it = document.getElementById(id);
+        if (!it) return;
+        it.textContent = labels[id];
+        const route = it.dataset.route;
+        it.classList.toggle('active', routeInNavItem(route, ROUTE));
+        it.onclick = () => { closeNavMenus(); navigate(route); };
+    });
+    // Адмін-панель бачить лише адмін.
+    const adminItem = document.getElementById('pmAdmin');
+    if (adminItem) adminItem.style.display = (STATE && STATE.admin) ? '' : 'none';
+}
+
+// Клік поза меню та Escape закривають відкриті списки.
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.nav-group')) closeNavMenus();
+});
+document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const open = document.querySelector('.nav-menu.open');
+    if (!open) return;
+    const trigger = open.parentElement.querySelector('[aria-haspopup]');
+    closeNavMenus();
+    if (trigger) trigger.focus();
 });
 
 function renderView() {

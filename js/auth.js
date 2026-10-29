@@ -88,6 +88,7 @@ function initAuth() {
         titleEl.textContent = isLogin ? t('login_title') : t('register_title');
         submitBtn.textContent = isLogin ? t('submit_login') : t('submit_register');
         toggleLink.textContent = isLogin ? t('toggle_to_register') : t('toggle_to_login');
+        toggleLink.dataset.mode = isLogin ? 'login' : 'register';
         errorEl.textContent = '';
         loginInput.value = '';
         passwordInput.value = '';

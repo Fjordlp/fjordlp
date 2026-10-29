@@ -92,16 +92,23 @@
                <span class="mark"><svg viewBox="0 0 30 30" width="34" height="34"><circle cx="15" cy="20" r="6" fill="#2FA89B"/><path d="M2 20 A13 13 0 0 1 28 20" stroke="#E8A33D" stroke-width="2" fill="none"/></svg></span>
                Fjord
            </div>
-           <div style="display:flex;justify-content:center;gap:6px;margin-bottom:26px;">
-               <button class="chip lang-chip" data-lang="uk">UK</button>
-               <button class="chip lang-chip" data-lang="en">EN</button>
-               <button class="chip lang-chip" data-lang="ru">RU</button>
-           </div>
-           <h1 class="hero-title" style="text-align:center;font-size:clamp(1.6rem,4vw,2.2rem);">Яку мову хочеш вивчати?</h1>
-           <p class="hero-subtitle" style="text-align:center;margin-bottom:26px;">
-               Оберіть мову — далі завжди можна змінити в налаштуваннях.
-           </p>
-           <div id="entryLangGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;"></div>
+            <!-- КРОК 1: мова-міст (інтерфейс + переклади слів) -->
+            <div id="entryStep1">
+                <h1 class="hero-title" id="entryT1" style="text-align:center;font-size:clamp(1.6rem,4vw,2.2rem);">Якою мовою хочеш користуватися?</h1>
+                <p class="hero-subtitle" id="entryS1" style="text-align:center;margin-bottom:26px;">
+                    Це мова інтерфейсу та перекладів слів. Її можна змінити будь-коли.
+                </p>
+                <div id="entryUiGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;max-width:520px;margin:0 auto;"></div>
+            </div>
+            <!-- КРОК 2: мова, яку вчимо -->
+            <div id="entryStep2" style="display:none;">
+                <div style="margin-bottom:10px;"><button type="button" class="btn btn-ghost btn-sm" id="entryBack">← Назад</button></div>
+                <h1 class="hero-title" id="entryT2" style="text-align:center;font-size:clamp(1.6rem,4vw,2.2rem);">Яку мову хочеш вивчати?</h1>
+                <p class="hero-subtitle" id="entryS2" style="text-align:center;margin-bottom:26px;">
+                    Оберіть мову — далі завжди можна змінити в налаштуваннях.
+                </p>
+                <div id="entryLangGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;"></div>
+            </div>
        </div>
    </div>
 
@@ -111,18 +118,18 @@
        // решта мов у js/languages.js поки що лише в списку інтерфейсу без
        // контенту, тож на першому екрані їх навмисно не пропонуємо.
        var ENTRY_LANGS = [
-           { code: 'no', flag: '🇳🇴', native: 'Norsk', uk: 'Норвезька' },
-           { code: 'en', flag: '🇬🇧', native: 'English', uk: 'Англійська' },
-           { code: 'de', flag: '🇩🇪', native: 'Deutsch', uk: 'Німецька' },
-           { code: 'es', flag: '🇪🇸', native: 'Español', uk: 'Іспанська' },
-           { code: 'fr', flag: '🇫🇷', native: 'Français', uk: 'Французька' },
-           { code: 'it', flag: '🇮🇹', native: 'Italiano', uk: 'Італійська' },
-           { code: 'ja', flag: '🇯🇵', native: '日本語', uk: 'Японська' },
-           { code: 'nl', flag: '🇳🇱', native: 'Nederlands', uk: 'Нідерландська' },
-           { code: 'pl', flag: '🇵🇱', native: 'Polski', uk: 'Польська' },
-           { code: 'pt', flag: '🇵🇹', native: 'Português', uk: 'Португальська' },
-           { code: 'sv', flag: '🇸🇪', native: 'Svenska', uk: 'Шведська' },
-           { code: 'uk', flag: '🇺🇦', native: 'Українська', uk: 'Українська' }
+           { code: 'no', flag: '🇳🇴', native: 'Norsk', uk: 'Норвезька', en: 'Norwegian', ru: 'Норвежский' },
+           { code: 'en', flag: '🇬🇧', native: 'English', uk: 'Англійська', en: 'English', ru: 'Английский' },
+           { code: 'de', flag: '🇩🇪', native: 'Deutsch', uk: 'Німецька', en: 'German', ru: 'Немецкий' },
+           { code: 'es', flag: '🇪🇸', native: 'Español', uk: 'Іспанська', en: 'Spanish', ru: 'Испанский' },
+           { code: 'fr', flag: '🇫🇷', native: 'Français', uk: 'Французька', en: 'French', ru: 'Французский' },
+           { code: 'it', flag: '🇮🇹', native: 'Italiano', uk: 'Італійська', en: 'Italian', ru: 'Итальянский' },
+           { code: 'ja', flag: '🇯🇵', native: '日本語', uk: 'Японська', en: 'Japanese', ru: 'Японский' },
+           { code: 'nl', flag: '🇳🇱', native: 'Nederlands', uk: 'Нідерландська', en: 'Dutch', ru: 'Нидерландский' },
+           { code: 'pl', flag: '🇵🇱', native: 'Polski', uk: 'Польська', en: 'Polish', ru: 'Польский' },
+           { code: 'pt', flag: '🇵🇹', native: 'Português', uk: 'Португальська', en: 'Portuguese', ru: 'Португальский' },
+           { code: 'sv', flag: '🇸🇪', native: 'Svenska', uk: 'Шведська', en: 'Swedish', ru: 'Шведский' },
+           { code: 'uk', flag: '🇺🇦', native: 'Українська', uk: 'Українська', en: 'Ukrainian', ru: 'Украинский' }
        ];
        var VALID_CODES = ENTRY_LANGS.map(function (l) { return l.code; });
 
@@ -141,35 +148,112 @@
            safeSet('fjord_ui_lang', qUi);
        }
 
-       // ---- 2. Малюємо сітку мов (клік одразу зберігає вибір і відкриває вхід) ----
-       var grid = document.getElementById('entryLangGrid');
-       ENTRY_LANGS.forEach(function (l) {
-           var btn = document.createElement('button');
-           btn.type = 'button';
-           btn.className = 'cl-lang-card';
-           btn.innerHTML = '<span class="cl-lang-flag">' + l.flag + '</span>' +
-               '<span class="cl-lang-native">' + l.native + '</span>' +
-               '<span class="cl-lang-name">' + l.uk + '</span>';
-           btn.onclick = function () {
-               safeSet('fjord_target_lang', l.code);
-               safeSet('fjord_entry_done', '1');
-               // URL → /<код-мови> (pushState; функцію задає js/router.js)
-               if (window.fjordSetUrlLanguage) window.fjordSetUrlLanguage(l.code);
-               document.getElementById('entryPicker').style.display = 'none';
-               document.getElementById('authPage').style.display = 'flex';
-           };
-           grid.appendChild(btn);
-       });
+        // ---- 2. Двокроковий вибір: 1) мова-міст (uk/en/ru), 2) мова навчання ----
+        var STR = {
+            uk: { t1: 'Якою мовою хочеш користуватися?', s1: 'Це мова інтерфейсу та перекладів слів. Її можна змінити будь-коли.',
+                  t2: 'Яку мову хочеш вивчати?', s2: 'Оберіть мову — далі завжди можна змінити в налаштуваннях.', back: '← Назад' },
+            en: { t1: 'Which language do you want to use?', s1: 'This is the language of the interface and word translations. You can change it any time.',
+                  t2: 'Which language do you want to learn?', s2: 'Pick a language — you can always change it later in settings.', back: '← Back' },
+            ru: { t1: 'На каком языке хочешь пользоваться?', s1: 'Это язык интерфейса и переводов слов. Его можно изменить в любой момент.',
+                  t2: 'Какой язык хочешь изучать?', s2: 'Выберите язык — потом его всегда можно сменить в настройках.', back: '← Назад' }
+        };
+        var BRIDGES = [
+            { code: 'uk', flag: '🇺🇦', native: 'Українська' },
+            { code: 'en', flag: '🇬🇧', native: 'English' },
+            { code: 'ru', flag: '🌐', native: 'Русский' }
+        ];
+        var uiNow = (['uk', 'en', 'ru'].indexOf(safeGet('fjord_ui_lang')) !== -1) ? safeGet('fjord_ui_lang') : 'uk';
+
+        function byId(id) { return document.getElementById(id); }
+        function applyEntryStrings() {
+            var S = STR[uiNow];
+            byId('entryT1').textContent = S.t1; byId('entryS1').textContent = S.s1;
+            byId('entryT2').textContent = S.t2; byId('entryS2').textContent = S.s2;
+            byId('entryBack').textContent = S.back;
+            document.documentElement.lang = uiNow;
+            // Підписи мов у сітці кроку 2 — мовою інтерфейсу
+            var labels = byId('entryLangGrid').querySelectorAll('.cl-lang-name');
+            ENTRY_LANGS.forEach(function (l, i) { if (labels[i]) labels[i].textContent = l[uiNow] || l.uk; });
+            byId('entryUiGrid').querySelectorAll('.cl-lang-card').forEach(function (c) {
+                c.classList.toggle('active', c.getAttribute('data-ui') === uiNow);
+            });
+        }
+        function showStep(n) {
+            byId('entryStep1').style.display = n === 1 ? 'block' : 'none';
+            byId('entryStep2').style.display = n === 2 ? 'block' : 'none';
+        }
+
+        var uiGrid = byId('entryUiGrid');
+        BRIDGES.forEach(function (b) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'cl-lang-card';
+            btn.setAttribute('data-ui', b.code);
+            btn.innerHTML = '<span class="cl-lang-flag">' + b.flag + '</span>' +
+                '<span class="cl-lang-native">' + b.native + '</span>';
+            btn.onclick = function () {
+                uiNow = b.code;
+                safeSet('fjord_ui_lang', b.code);
+                // Якщо застосунок уже ініціалізований — синхронізуємо й його стан
+                if (typeof setUiLang === 'function' && typeof STATE !== 'undefined' && STATE) setUiLang(b.code);
+                // До входу в акаунт STATE ще немає — t() бере мову з localStorage, тож достатньо
+                // перемалювати статичні тексти (лендинг, форма входу) вже обраною мовою.
+                else if (typeof applyStaticTranslations === 'function') applyStaticTranslations();
+                applyEntryStrings();
+                if (safeGet('fjord_entry_done') === '1') { // мова навчання вже відома (посилання /fr, ?lang=)
+                    // мова навчання вже відома з посилання — одразу на сторінку входу
+                    byId('entryPicker').style.display = 'none';
+                    var ap = byId('authPage'); if (ap) ap.style.display = 'flex';
+                } else {
+                    showStep(2);
+                }
+            };
+            uiGrid.appendChild(btn);
+        });
+
+        var grid = byId('entryLangGrid');
+        ENTRY_LANGS.forEach(function (l) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'cl-lang-card';
+            btn.innerHTML = '<span class="cl-lang-flag">' + l.flag + '</span>' +
+                '<span class="cl-lang-native">' + l.native + '</span>' +
+                '<span class="cl-lang-name">' + (l[uiNow] || l.uk) + '</span>';
+            btn.onclick = function () {
+                safeSet('fjord_target_lang', l.code);
+                safeSet('fjord_entry_done', '1');
+                // URL → /<код-мови> (pushState; функцію задає js/router.js)
+                if (window.fjordSetUrlLanguage) window.fjordSetUrlLanguage(l.code);
+                byId('entryPicker').style.display = 'none';
+                byId('authPage').style.display = 'flex';
+            };
+            grid.appendChild(btn);
+        });
+        byId('entryBack').onclick = function () { showStep(1); };
+        applyEntryStrings();
+        showStep(1);
 
        // ---- 3. Хто вже щось обирав/має акаунт чи гостьову сесію — пікер не бачить ----
        var entryDone = safeGet('fjord_entry_done') === '1';
        var hasGuest = !!safeGet('fjord_guest');
        var usersRaw = safeGet('fjord_users');
        var hasUsers = !!(usersRaw && usersRaw !== '{}' && usersRaw !== 'null');
-       var skipPicker = entryDone || hasGuest || hasUsers;
+       // Мова сайту (міст) ще не обиралась і користувач новий → завжди питаємо її ПЕРШОЮ,
+       // навіть якщо він прийшов за прямим посиланням (/fr, ?lang=fr), яке вже визначило
+       // мову навчання. Тоді показуємо лише крок 1 (uiOnly), а крок 2 пропускаємо.
+       var hasUiChoice = !!safeGet('fjord_ui_lang');
+       var needUi = !hasUiChoice && !hasGuest && !hasUsers;
+       window.__fjordPickUi = needUi; // router.js не має ховати пікер, поки мову сайту не обрано
+       var skipPicker = (entryDone || hasGuest || hasUsers) && !needUi;
 
        document.getElementById('entryPicker').style.display = skipPicker ? 'none' : 'flex';
-       document.getElementById('authPage').style.display = skipPicker ? 'flex' : 'none';
+       // #authPage розташований НИЖЧЕ цього скрипта в DOM — на момент виконання його ще немає
+       // (раніше тут був getElementById(...) === null → TypeError при кожному завантаженні).
+       function syncAuthPage() {
+           var ap = document.getElementById('authPage');
+           if (ap) ap.style.display = skipPicker ? 'flex' : 'none';
+       }
+       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', syncAuthPage); else syncAuthPage();
    })();
    </script>
 
@@ -184,35 +268,35 @@
                 Fjord
             </div>
             <div class="hero-troll" id="heroTroll" aria-hidden="true"></div>
-            <h1 class="hero-title">Норвезька, яка нарешті<br>триматиметься в голові</h1>
-            <p class="hero-subtitle">AI-тролль-наставник, гейміфікація і реальна підготовка до Norskprøve —<br class="hero-br">щоб ви вчились із задоволенням, а не через силу.</p>
+            <h1 class="hero-title" data-i18n-html="land_title">Норвезька, яка нарешті<br>триматиметься в голові</h1>
+            <p class="hero-subtitle" data-i18n-html="land_sub">AI-тролль-наставник, гейміфікація і реальна підготовка до Norskprøve —<br class="hero-br">щоб ви вчились із задоволенням, а не через силу.</p>
             <div class="hero-cta-row">
-                <button class="btn btn-hero-primary" id="heroTryBtn">Спробувати безкоштовно →</button>
-                <button class="btn btn-hero-ghost" id="heroLoginBtn">Увійти в акаунт</button>
+                <button class="btn btn-hero-primary" id="heroTryBtn" data-i18n="land_try">Спробувати безкоштовно →</button>
+                <button class="btn btn-hero-ghost" id="heroLoginBtn" data-i18n="land_login">Увійти в акаунт</button>
             </div>
-            <p class="hero-microcopy">Без карток. Без обов'язкової реєстрації — просто заходьте і вчіться.</p>
+            <p class="hero-microcopy" data-i18n="land_micro">Без карток. Без обов'язкової реєстрації — просто заходьте і вчіться.</p>
         </div>
 
         <div class="hero-features">
             <div class="hero-feature-card">
                 <div class="hero-feature-icon">🧌</div>
-                <h3>AI-тролль поруч</h3>
-                <p>Пояснить граматику, перевірить речення, підкаже приклад — просто напиши йому, як другу.</p>
+                <h3 data-i18n="land_f1_t">AI-тролль поруч</h3>
+                <p data-i18n="land_f1_b">Пояснить граматику, перевірить речення, підкаже приклад — просто напиши йому, як другу.</p>
             </div>
             <div class="hero-feature-card">
                 <div class="hero-feature-icon">🎮</div>
-                <h3>XP, рівні, спорядження</h3>
-                <p>Кожне вивчене слово наближає тролля до нового рівня — і нових капелюхів, окулярів, фонів.</p>
+                <h3 data-i18n="land_f2_t">XP, рівні, спорядження</h3>
+                <p data-i18n="land_f2_b">Кожне вивчене слово наближає тролля до нового рівня — і нових капелюхів, окулярів, фонів.</p>
             </div>
             <div class="hero-feature-card">
                 <div class="hero-feature-icon">📝</div>
                 <h3>Norskprøve Academy</h3>
-                <p>Реальні завдання з читання, аудіювання, письма й говоріння — саме як на справжньому іспиті.</p>
+                <p data-i18n="land_f3_b">Реальні завдання з читання, аудіювання, письма й говоріння — саме як на справжньому іспиті.</p>
             </div>
             <div class="hero-feature-card">
                 <div class="hero-feature-icon">🌍</div>
-                <h3>1500+ слів на 3 мовах</h3>
-                <p>Вчіться українською, англійською чи російською — обирайте зручну мову інтерфейсу.</p>
+                <h3 data-i18n="land_f4_t">1500+ слів на 3 мовах</h3>
+                <p data-i18n="land_f4_b">Вчіться українською, англійською чи російською — обирайте зручну мову інтерфейсу.</p>
             </div>
         </div>
     </section>
@@ -229,7 +313,7 @@
         </div>
         <h2 id="authTitle">Вхід</h2>
         <div class="field"><label>Email</label><input type="email" id="authLogin" placeholder="you@example.com" autocomplete="email"></div>
-        <div class="field"><label>Пароль</label><input type="password" id="authPassword" placeholder="Пароль"></div>
+        <div class="field"><label data-i18n="password_placeholder">Пароль</label><input type="password" id="authPassword" placeholder="Пароль"></div>
  <div style="text-align:right;margin-top:-4px;margin-bottom:12px;">
             <span id="forgotPasswordLink" style="color:var(--teal);cursor:pointer;font-size:.8rem;text-decoration:underline;">Забули пароль?</span>
         </div>
@@ -252,7 +336,7 @@
     </div>
 
     <nav aria-label="Інші мови" style="width:100%;max-width:720px;margin:28px auto 0;text-align:center;">
-        <p style="color:rgba(251,252,250,.6);font-size:.78rem;margin-bottom:8px;">Вчиш не норвезьку? →</p>
+        <p style="color:rgba(251,252,250,.6);font-size:.78rem;margin-bottom:8px;" data-i18n="land_other">Вчиш не норвезьку? →</p>
         <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;">
             <a href="/learn/english/" style="color:var(--frost);opacity:.75;font-size:.8rem;">🇬🇧 English</a>
             <a href="/learn/german/" style="color:var(--frost);opacity:.75;font-size:.8rem;">🇩🇪 Deutsch</a>
@@ -278,15 +362,24 @@
             <nav class="nav" id="mainnav"></nav>
             <div class="user-area">
                 <!-- Поточна мова навчання (прапор + код). Текст і обробник — updateTargetLangBadge() у js/router.js -->
-                <button type="button" class="chip" id="targetLangBtn" style="padding:4px 10px;font-size:.78rem;font-weight:700;"></button>
-                <div class="lang-switch" id="appLangSwitch" style="display:flex;gap:4px;">
-                    <button class="chip lang-chip" data-lang="uk">UK</button>
-                    <button class="chip lang-chip" data-lang="en">EN</button>
-                    <button class="chip lang-chip" data-lang="ru">RU</button>
+                <button type="button" class="chip target-lang-btn" id="targetLangBtn"></button>
+                <!-- Меню профілю: ім'я, кабінет, мета, адмінка (лише адміну), мова інтерфейсу, вихід.
+                     Заповнюється/оновлюється в updateProfileMenu() (js/router.js). -->
+                <div class="nav-group profile-group">
+                    <button type="button" class="avatar-btn" id="profileBtn" data-menu-id="profile" aria-haspopup="menu" aria-expanded="false" aria-controls="profileMenu"><span id="profileInitial">👤</span></button>
+                    <div class="nav-menu profile-menu" id="profileMenu" role="menu">
+                        <div class="pm-head"><span class="pm-name" id="userNameDisplay"></span></div>
+                        <button type="button" class="nav-item" role="menuitem" id="pmProfile" data-route="profile"></button>
+                        <button type="button" class="nav-item" role="menuitem" id="pmOnboarding" data-route="onboarding"></button>
+                        <button type="button" class="nav-item" role="menuitem" id="pmAdmin" data-route="admin" style="display:none;"></button>
+                        <div class="pm-row lang-switch" id="appLangSwitch">
+                            <button class="chip lang-chip" data-lang="uk">UK</button>
+                            <button class="chip lang-chip" data-lang="en">EN</button>
+                            <button class="chip lang-chip" data-lang="ru">RU</button>
+                        </div>
+                        <button type="button" class="nav-item logout-btn" role="menuitem" id="logoutBtn">Вийти</button>
+                    </div>
                 </div>
-                <span class="username" id="userNameDisplay"></span>
-                <button class="logout-btn" id="logoutBtn">Вийти</button>
-                <button class="hamburger" id="hamburger">☰</button>
             </div>
         </div>
         <main id="mainContent"></main>

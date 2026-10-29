@@ -184,27 +184,8 @@
             color: var(--frost);
         }
         .topbar .brand .mark { width: 26px; height: 26px; }
-        .topbar .nav { display: flex; gap: 2px; flex-wrap: wrap; }
-        .topbar .nav button {
-            background: transparent; border: none;
-            color: rgba(251,252,250,.7);
-            padding: 6px 10px; border-radius: 999px;
-            font-size: .75rem; font-weight: 500;
-            transition: background .15s, color .15s;
-            white-space: nowrap;
-        }
-        .topbar .nav button:hover { background: rgba(255,255,255,.08); color: var(--frost); }
-        .topbar .nav button.active { background: var(--teal); color: var(--navy); font-weight: 700; }
         .topbar .user-area { display: flex; align-items: center; gap: 10px; }
         .lang-chip { padding: 4px 8px !important; font-size: .68rem !important; min-width: auto; }
-        .topbar .user-area .username { font-size: .8rem; font-weight: 500; color: rgba(251,252,250,.8); }
-        .topbar .user-area .logout-btn {
-            background: transparent; border: 1px solid rgba(251,252,250,.2);
-            color: var(--frost); padding: 4px 12px; border-radius: 999px;
-            font-size: .7rem; font-weight: 600; transition: background .15s;
-        }
-        .topbar .user-area .logout-btn:hover { background: rgba(255,255,255,.1); }
-        .hamburger { display: none; background: transparent; border: none; color: var(--frost); font-size: 1.4rem; padding: 4px 8px; }
 
         main { flex: 1; max-width: 1120px; width: 100%; margin: 0 auto; padding: 24px 16px 60px; }
         .view { animation: fadein .35s ease; }
@@ -606,10 +587,6 @@
 
         /* ===== MOBILE ===== */
         @media(max-width:760px) {
-            .topbar .nav { position: fixed; top: 60px; left: 0; right: 0; background: var(--navy); flex-direction: column; padding: 8px 16px; display: none; box-shadow: var(--shadow-lg); z-index: 50; gap: 2px; }
-            .topbar .nav.open { display: flex; }
-            .topbar .nav button { text-align: left; padding: 8px 14px; font-size: .85rem; }
-            .hamburger { display: block; }
             .hero h1 { font-size: 1.4rem; }
             .hero { padding: 24px 18px; }
             .homepick .btn { font-size: .78rem; padding: 7px 12px; }
@@ -626,9 +603,7 @@
         }
         @media(max-width:480px) {
             .auth-box { padding: 30px 20px; }
-            .topbar .username { display: none; }
             .topbar .user-area { gap: 6px; }
-            .topbar .logout-btn { padding: 4px 8px; font-size: .7rem; }
             .flip-card { height: 260px; }
             .flip-face .no-word { font-size: 1.8rem; }
             .flip-face .uk-word { font-size: 1.4rem; }
@@ -800,4 +775,116 @@
 }
 .admin-card:active {
     transform: scale(0.98);
+}
+
+/* =====================================================================
+   NAV — згруповане меню (js/router.js: NAV_MENU / updateNav / updateProfileMenu)
+   Десктоп: рядок у шапці + випадні списки вниз.
+   ≤760px:  той самий DOM = нижня панель вкладок, списки відкриваються вгору.
+   ===================================================================== */
+:root { --tabbar-h: 58px; }
+
+.topbar .nav { display: flex; align-items: center; gap: 4px; }
+.nav-group { position: relative; display: flex; }
+
+/* кнопка верхнього рівня (Home / Learn ▾ / ...) */
+.topbar .nav-top {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: transparent; border: none; cursor: pointer; font-family: inherit;
+    color: rgba(251,252,250,.78);
+    padding: 8px 14px; border-radius: 999px;
+    font-size: .85rem; font-weight: 600; white-space: nowrap;
+    transition: background .15s, color .15s;
+}
+.topbar .nav-top:hover { background: rgba(255,255,255,.09); color: var(--frost); }
+.topbar .nav-top.active { background: var(--teal); color: var(--navy); }
+.topbar .nav-top:focus-visible, .avatar-btn:focus-visible, .nav-item:focus-visible {
+    outline: 2px solid var(--amber); outline-offset: 2px;
+}
+.nav-caret { font-size: .65rem; opacity: .7; }
+
+/* випадний список */
+.nav-menu {
+    display: none; flex-direction: column; gap: 2px;
+    position: absolute; top: calc(100% + 8px); left: 0; z-index: 60;
+    min-width: 200px; padding: 6px;
+    background: var(--frost); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow-lg);
+}
+.nav-menu.open { display: flex; animation: fadein .12s ease; }
+.nav-item {
+    display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
+    background: transparent; border: none; cursor: pointer; font-family: inherit;
+    color: var(--ink); padding: 9px 12px; border-radius: 10px;
+    font-size: .88rem; font-weight: 500; white-space: nowrap;
+}
+.nav-item:hover { background: var(--line-soft); }
+.nav-item.active { background: rgba(47,168,155,.14); color: var(--teal-dim); font-weight: 700; }
+
+/* права частина шапки */
+.topbar .user-area { gap: 8px; }
+.target-lang-btn {
+    display: inline-flex; align-items: center; white-space: nowrap;
+    padding: 5px 11px !important; font-size: .78rem !important; font-weight: 700; line-height: 1;
+}
+.avatar-btn {
+    width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-family: inherit;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,.1); color: var(--frost);
+    border: 1.5px solid rgba(255,255,255,.28); font-size: .95rem; font-weight: 700;
+    transition: background .15s;
+}
+.avatar-btn:hover { background: rgba(255,255,255,.18); }
+.avatar-btn.active { background: var(--teal); color: var(--navy); border-color: var(--teal); }
+
+/* меню профілю притискається до правого краю */
+.profile-menu { left: auto; right: 0; min-width: 220px; }
+.pm-head { padding: 8px 12px 6px; border-bottom: 1px solid var(--line-soft); margin-bottom: 4px; }
+.pm-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 1rem; color: var(--navy); }
+.pm-row { display: flex; gap: 6px; padding: 8px 12px; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); margin: 4px 0; }
+.profile-menu .logout-btn { color: var(--rose, #B5485D); font-weight: 600; }
+
+/* ---------- ТЕЛЕФОН: нижня панель вкладок ---------- */
+@media (max-width: 760px) {
+    #app { padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px)); }
+    .topbar { padding: 0 12px; }
+    .topbar .nav {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+        height: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+        padding: 0 4px env(safe-area-inset-bottom, 0px);
+        background: var(--navy); box-shadow: 0 -2px 14px rgba(0,0,0,.22);
+        justify-content: space-around; gap: 0;
+    }
+    .topbar .nav > .nav-top, .topbar .nav > .nav-group { flex: 1 1 0; min-width: 0; }
+    .nav-group > .nav-top { width: 100%; }
+    .topbar .nav-top {
+        flex-direction: column; justify-content: center; gap: 2px;
+        height: 100%; padding: 4px 2px; border-radius: 12px;
+        font-size: .64rem; font-weight: 600;
+    }
+    .topbar .nav-top.active { background: transparent; color: var(--teal); }
+    .topbar .nav-top.active .nav-ico { transform: translateY(-1px) scale(1.12); }
+    .nav-ico { font-size: 1.25rem; line-height: 1; transition: transform .15s; }
+    .nav-caret { display: none; }
+
+    /* списки вкладок відкриваються ВГОРУ над панеллю */
+    .topbar .nav .nav-menu {
+        position: fixed; top: auto; left: 12px; right: 12px;
+        bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 8px);
+        min-width: 0; padding: 8px;
+    }
+    .topbar .nav .nav-item { padding: 12px 14px; font-size: .95rem; }
+
+    /* меню профілю лишається під шапкою, справа */
+    .topbar .profile-group .nav-menu { position: absolute; top: calc(100% + 8px); bottom: auto; left: auto; right: 0; min-width: 220px; }
+
+    /* плаваючі елементи над панеллю вкладок */
+    .assistant-fab { bottom: calc(var(--tabbar-h) + 14px + env(safe-area-inset-bottom, 0px)); }
+    .toast { bottom: calc(var(--tabbar-h) + 14px + env(safe-area-inset-bottom, 0px)); }
+    #app.nav-menu-open .assistant-fab { opacity: 0; pointer-events: none; }
+    body:has(#app.nav-menu-open) .toast { opacity: 0; pointer-events: none; }
+}
+@media (max-width: 480px) {
+    .topbar .brand { font-size: 1rem; }
+    .target-lang-btn { padding: 4px 9px !important; }
 }

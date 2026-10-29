@@ -470,7 +470,7 @@ function viewLevels() {
                 <span class="tag level-${lv}">${lv}</span>
                 <h3 style="margin-top:8px;">${meta.name}</h3>
                 <div class="lname">${meta.desc}</div>
-                <div class="level-topics">${LEVEL_META[lv].topics.map(top=>`<span>${top}</span>`).join('')}</div>
+                <div class="level-topics">${LEVEL_META[lv].topics.map(top=>`<span>${translateTopic(top)}</span>`).join('')}</div>
             </div>
         `);
         card.onclick = () => {
@@ -1497,7 +1497,7 @@ function viewTestCloze() {
             const distractors = shuffle(currentLevelWords().filter(x => x.no !== w.no)).slice(0, 3).map(x => x
                 .no);
             const opts = shuffle([w.no, ...distractors]);
-            return { sentence, translation: w.ex_uk, opts, a: opts.indexOf(w.no) };
+            return { sentence, translation: wordExampleTranslation(w), opts, a: opts.indexOf(w.no) };
         });
         SUBSTATE.i = 0;
         SUBSTATE.correct = 0;
@@ -1641,7 +1641,7 @@ function viewTestOrder() {
         SUBSTATE.qs = words.map(w => {
             const clean = w.ex_no.replace(/[.,!?]/g, '');
             const tokens = clean.split(' ');
-            return { original: tokens, translation: w.ex_uk };
+            return { original: tokens, translation: wordExampleTranslation(w) };
         });
         SUBSTATE.i = 0;
         SUBSTATE.correct = 0;

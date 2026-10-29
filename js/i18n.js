@@ -8,7 +8,21 @@
 // Решта текстів (глибші описи, підказки) поки лишаються українською.
 const UI_STRINGS = {
     uk: {
-        nav_home: 'Головна', nav_flashcards: 'Картки', nav_vocabulary: 'Словник',
+        // --- лендинг (сторінка входу): тексти, що раніше були зашиті в index.html ---
+        land_title: "Норвезька, яка нарешті<br>триматиметься в голові",
+        land_sub: "AI-тролль-наставник, гейміфікація і реальна підготовка до Norskprøve —<br class=\"hero-br\">щоб ви вчились із задоволенням, а не через силу.",
+        land_try: "Спробувати безкоштовно →",
+        land_login: "Увійти в акаунт",
+        land_micro: "Без карток. Без обов'язкової реєстрації — просто заходьте і вчіться.",
+        land_f1_t: "AI-тролль поруч",
+        land_f1_b: "Пояснить граматику, перевірить речення, підкаже приклад — просто напиши йому, як другу.",
+        land_f2_t: "XP, рівні, спорядження",
+        land_f2_b: "Кожне вивчене слово наближає тролля до нового рівня — і нових капелюхів, окулярів, фонів.",
+        land_f3_b: "Реальні завдання з читання, аудіювання, письма й говоріння — саме як на справжньому іспиті.",
+        land_f4_t: "1500+ слів на 3 мовах",
+        land_f4_b: "Вчіться українською, англійською чи російською — обирайте зручну мову інтерфейсу.",
+        land_other: "Вчиш не норвезьку? →",
+        nav_home: 'Головна', nav_group_learn: 'Вчити', nav_group_practice: 'Практика', nav_group_read: 'Читати', nav_group_play: 'Ігри', nav_flashcards: 'Картки', nav_vocabulary: 'Словник',
         nav_tests: 'Тести', nav_grammar: 'Граматика', nav_books: '📚 Книги', nav_lessons: '📖 Уроки', nav_story: '🧌 Пригода', nav_troll: 'Тролль',
         h_lessons: 'Уроки', lessons_intro: 'Проходь уроки по черзі — кожен наступний відкривається після того, як пройдеш попередній.', lessons_empty: 'Для цієї мови ще немає уроків. Загляньте пізніше!', lesson_n_label: 'Урок {n}', lessons_not_found: 'Урок не знайдено', lessons_locked_title: 'Урок ще закритий', lessons_locked_desc: 'Спочатку пройдіть попередній урок, щоб відкрити цей.', lesson_complete_btn: 'Позначити урок пройденим', lesson_complete_toast: 'Урок пройдено! +15 XP', lesson_already_done: 'Цей урок уже пройдено.',
         test_history_title: 'Історія тестів', back_to_profile: 'До профілю', th_total: 'Тестів пройдено', th_avg: 'Середній бал', th_best: 'Найкращий', th_worst: 'Найгірший', th_filter_all: 'Усі', th_clear: 'Очистити історію', th_empty_title: 'Історія порожня', th_empty_desc: 'Пройдіть перший тест, щоб побачити тут результати.', th_your_answer: 'Ваша відповідь', th_correct_answer: 'Правильна', th_clear_confirm: 'Видалити всю історію тестів? Це незворотно.', th_cleared_toast: 'Історію очищено',
@@ -175,7 +189,21 @@ const UI_STRINGS = {
         onb_plan_title: '🎓 Ваш план навчання', onb_level_tag: 'Рівень: {level}', onb_goal_chosen: 'Мета обрана', onb_start_learning_btn: '🚀 Почати навчання!', onb_change_goal_btn: '🔄 Змінити мету', onb_change_level_btn: '📊 Змінити рівень', onb_can_change_later: 'Ви завжди зможете змінити мету та рівень у налаштуваннях.', onb_step3_indicator: 'Крок 3 з 3: План готовий!', onb_welcome_toast: '🎉 Ласкаво просимо! Починаємо навчання!',
     },
     en: {
-        nav_home: 'Home', nav_flashcards: 'Flashcards', nav_vocabulary: 'Vocabulary',
+        // --- лендинг (сторінка входу): тексти, що раніше були зашиті в index.html ---
+        land_title: "Norwegian that finally<br>sticks in your head",
+        land_sub: "An AI troll mentor, gamification and real Norskprøve prep —<br class=\"hero-br\">so you learn with pleasure, not through gritted teeth.",
+        land_try: "Try it for free →",
+        land_login: "Log in to your account",
+        land_micro: "No credit card. No required sign-up — just jump in and learn.",
+        land_f1_t: "An AI troll by your side",
+        land_f1_b: "It explains grammar, checks your sentences and suggests examples — just message it like a friend.",
+        land_f2_t: "XP, levels, gear",
+        land_f2_b: "Every word you learn moves your troll closer to the next level — and to new hats, glasses and backgrounds.",
+        land_f3_b: "Real reading, listening, writing and speaking tasks — just like the actual exam.",
+        land_f4_t: "1500+ words in 3 languages",
+        land_f4_b: "Learn in Ukrainian, English or Russian — pick the interface language that suits you.",
+        land_other: "Learning something other than Norwegian? →",
+        nav_home: 'Home', nav_group_learn: 'Learn', nav_group_practice: 'Practice', nav_group_read: 'Read', nav_group_play: 'Play', nav_flashcards: 'Flashcards', nav_vocabulary: 'Vocabulary',
         nav_tests: 'Tests', nav_grammar: 'Grammar', nav_books: '📚 Books', nav_lessons: '📖 Lessons', nav_story: '🧌 Adventure', nav_troll: 'Troll',
         h_lessons: 'Lessons', lessons_intro: 'Go through the lessons in order — each next one unlocks once you finish the previous.', lessons_empty: "There aren't any lessons for this language yet. Check back later!", lesson_n_label: 'Lesson {n}', lessons_not_found: 'Lesson not found', lessons_locked_title: 'This lesson is still locked', lessons_locked_desc: 'Finish the previous lesson first to unlock this one.', lesson_complete_btn: 'Mark lesson as done', lesson_complete_toast: 'Lesson complete! +15 XP', lesson_already_done: "You've already completed this lesson.",
         test_history_title: 'Test History', back_to_profile: 'Back to profile', th_total: 'Tests taken', th_avg: 'Average score', th_best: 'Best', th_worst: 'Worst', th_filter_all: 'All', th_clear: 'Clear history', th_empty_title: 'No history yet', th_empty_desc: 'Take your first test to see results here.', th_your_answer: 'Your answer', th_correct_answer: 'Correct', th_clear_confirm: 'Delete all test history? This cannot be undone.', th_cleared_toast: 'History cleared',
@@ -342,7 +370,21 @@ const UI_STRINGS = {
         onb_plan_title: '🎓 Your study plan', onb_level_tag: 'Level: {level}', onb_goal_chosen: 'Goal selected', onb_start_learning_btn: '🚀 Start learning!', onb_change_goal_btn: '🔄 Change goal', onb_change_level_btn: '📊 Change level', onb_can_change_later: 'You can always change your goal and level in Settings.', onb_step3_indicator: 'Step 3 of 3: Plan ready!', onb_welcome_toast: '🎉 Welcome! Let\'s start learning!',
     },
     ru: {
-        nav_home: 'Главная', nav_flashcards: 'Карточки', nav_vocabulary: 'Словарь',
+        // --- лендинг (сторінка входу): тексти, що раніше були зашиті в index.html ---
+        land_title: "Норвежский, который наконец<br>останется в голове",
+        land_sub: "AI-тролль-наставник, геймификация и реальная подготовка к Norskprøve —<br class=\"hero-br\">чтобы вы учились с удовольствием, а не через силу.",
+        land_try: "Попробовать бесплатно →",
+        land_login: "Войти в аккаунт",
+        land_micro: "Без банковских карт. Без обязательной регистрации — просто заходите и учитесь.",
+        land_f1_t: "AI-тролль рядом",
+        land_f1_b: "Объяснит грамматику, проверит предложение, подскажет пример — просто напиши ему, как другу.",
+        land_f2_t: "XP, уровни, снаряжение",
+        land_f2_b: "Каждое выученное слово приближает тролля к новому уровню — и к новым шляпам, очкам, фонам.",
+        land_f3_b: "Реальные задания по чтению, аудированию, письму и говорению — как на настоящем экзамене.",
+        land_f4_t: "1500+ слов на 3 языках",
+        land_f4_b: "Учитесь на украинском, английском или русском — выбирайте удобный язык интерфейса.",
+        land_other: "Учишь не норвежский? →",
+        nav_home: 'Главная', nav_group_learn: 'Учить', nav_group_practice: 'Практика', nav_group_read: 'Читать', nav_group_play: 'Игры', nav_flashcards: 'Карточки', nav_vocabulary: 'Словарь',
         nav_tests: 'Тесты', nav_grammar: 'Грамматика', nav_books: '📚 Книги', nav_lessons: '📖 Уроки', nav_story: '🧌 Приключение', nav_troll: 'Тролль',
         h_lessons: 'Уроки', lessons_intro: 'Проходи уроки по очереди — каждый следующий открывается после того, как пройдёшь предыдущий.', lessons_empty: 'Для этого языка пока нет уроков. Загляните позже!', lesson_n_label: 'Урок {n}', lessons_not_found: 'Урок не найден', lessons_locked_title: 'Урок ещё закрыт', lessons_locked_desc: 'Сначала пройдите предыдущий урок, чтобы открыть этот.', lesson_complete_btn: 'Отметить урок пройденным', lesson_complete_toast: 'Урок пройден! +15 XP', lesson_already_done: 'Этот урок уже пройден.',
         test_history_title: 'История тестов', back_to_profile: 'К профилю', th_total: 'Тестов пройдено', th_avg: 'Средний балл', th_best: 'Лучший', th_worst: 'Худший', th_filter_all: 'Все', th_clear: 'Очистить историю', th_empty_title: 'История пуста', th_empty_desc: 'Пройдите первый тест, чтобы увидеть здесь результаты.', th_your_answer: 'Ваш ответ', th_correct_answer: 'Правильный', th_clear_confirm: 'Удалить всю историю тестов? Это необратимо.', th_cleared_toast: 'История очищена',
@@ -552,6 +594,9 @@ function wordExampleTranslation(word, level, lang) {
 // Застосовує переклад до статичних елементів сторінки входу/шапки, які
 // живуть поза #mainContent і тому не перемальовуються через navigate().
 function applyStaticTranslations() {
+    // Тексти лендингу: елементи з data-i18n / data-i18n-html (останнє — коли в рядку є <br>).
+    document.querySelectorAll('[data-i18n]').forEach(e => { e.textContent = t(e.getAttribute('data-i18n')); });
+    document.querySelectorAll('[data-i18n-html]').forEach(e => { e.innerHTML = t(e.getAttribute('data-i18n-html')); });
     const map = {
         authTitle: 'login_title', authSubmit: 'submit_login', guestBtn: 'guest_btn',
         forgotPasswordLink: 'forgot_password', logoutBtn: 'logout',
@@ -562,13 +607,21 @@ function applyStaticTranslations() {
             // guestBtn містить вкладений <span> з логотипом — не чіпаємо його,
             // замінюємо лише текстовий вузол після нього.
             if (id === 'guestBtn') {
-                const textNode = Array.from(el.childNodes).find(n => n.nodeType === 3);
+                const textNode = Array.from(el.childNodes).find(n => n.nodeType === 3 && n.textContent.trim() !== '');  // перший ТЕКСТОВИЙ вузол із вмістом (а не пробіли перед <span>)
                 if (textNode) textNode.textContent = ' ' + t(map[id]);
             } else {
                 el.textContent = t(map[id]);
             }
         }
     });
+    // Режим форми (вхід/реєстрація) зберігає auth.js у data-mode — не скидаємо його при зміні мови.
+    const authToggleEl = document.getElementById('authToggle');
+    if (authToggleEl) {
+        const reg = authToggleEl.dataset.mode === 'register';
+        authToggleEl.textContent = t(reg ? 'toggle_to_login' : 'toggle_to_register');
+        const ttl = document.getElementById('authTitle'); if (ttl) ttl.textContent = t(reg ? 'register_title' : 'login_title');
+        const sbm = document.getElementById('authSubmit'); if (sbm) sbm.textContent = t(reg ? 'submit_register' : 'submit_login');
+    }
     const loginInput = document.getElementById('authLogin');
     if (loginInput) loginInput.placeholder = t('login_placeholder');
     const passInput = document.getElementById('authPassword');
@@ -641,6 +694,7 @@ function initLangSwitchers() {
 const TOPIC_TRANSLATIONS = {
     'Додано AI': { en: 'Added by AI', ru: 'Добавлено AI' },
     'Ідіоми': { en: 'Idioms', ru: 'Идиомы' },
+    'Питання': { en: 'Questions', ru: 'Вопросы' },
     'Ввічливість': { en: 'Politeness', ru: 'Вежливость' },
     'Базові слова': { en: 'Basic words', ru: 'Базовые слова' },
     'Знайомство': { en: 'Getting acquainted', ru: 'Знакомство' },
