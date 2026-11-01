@@ -591,6 +591,44 @@ function wordExampleTranslation(word, level, lang) {
     return word.ex_uk;
 }
 
+// Чи має слово СПРАВЖНІЙ переклад мовою lang. wordTranslation() мовчки підставляє
+// українську, коли en/ru немає — для показу слова це ок, але для варіантів
+// відповіді в тестах це дає суміш мов (3 варіанти англійською + 1 українською).
+// Тому тести добирають і питання, і неправильні варіанти лише зі слів, у яких
+// переклад цією мовою є насправді.
+function hasWordTranslation(word, lang) {
+    lang = lang || (typeof STATE !== 'undefined' && STATE && STATE.vocabLang) || 'uk';
+    if (!word) return false;
+    const v = lang === 'en' ? word.en : lang === 'ru' ? word.ru : word.uk;
+    if (typeof v !== 'string' || !v.trim()) return false;
+    // «англійський» переклад кирилицею — це не переклад (помилка даних/генерації)
+    if (lang === 'en' && /[\u0400-\u04FF]/.test(v)) return false;
+    return true;
+}
+
+function translatableWords(words, lang) {
+    return (words || []).filter(w => hasWordTranslation(w, lang));
+}
+
+// Неправильні варіанти-переклади для слова `word`: лише зі слів пулу, що мають
+// переклад мовою lang, без самого слова і без дублікатів тексту (два однакові
+// варіанти зробили б питання двозначним).
+function translationDistractors(pool, word, count, level, lang) {
+    lang = lang || (typeof STATE !== 'undefined' && STATE && STATE.vocabLang) || 'uk';
+    const norm = s => String(s).trim().toLowerCase();
+    const seen = new Set([norm(wordTranslation(word, level, lang))]);
+    const out = [];
+    for (const x of shuffle(pool || [])) {
+        if (!x || x.no === word.no || !hasWordTranslation(x, lang)) continue;
+        const tr = wordTranslation(x, level, lang);
+        if (seen.has(norm(tr))) continue;
+        seen.add(norm(tr));
+        out.push(tr);
+        if (out.length >= count) break;
+    }
+    return out;
+}
+
 // Застосовує переклад до статичних елементів сторінки входу/шапки, які
 // живуть поза #mainContent і тому не перемальовуються через navigate().
 function applyStaticTranslations() {

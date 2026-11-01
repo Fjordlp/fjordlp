@@ -19,6 +19,24 @@
 // "Числа" (уже перекладені, з прикладами), тому просто фільтруються
 // звідти.
 
+// Поля картки абетки залежать від мови інтерфейсу. Базові (українські) поля —
+// name / sound / example_uk — лишаються обов'язковими й служать запасним
+// варіантом; для інших мов інтерфейсу дані МОЖУТЬ мати необов'язкові поля:
+//     name_en / name_ru        — як літера називається (латиницею / російською)
+//     sound_en / sound_ru      — пояснення вимови для носія цієї мови
+//     example_en / example_ru  — переклад слова-прикладу
+// field: 'name' | 'sound' | 'translation' (переклад слова-прикладу).
+// Є локалізоване поле — беремо його; нема — тихо повертаємось до базового.
+function localizedAlphabetField(item, field) {
+    const ui = (STATE && (STATE.uiLang || STATE.vocabLang)) || 'uk';
+    const base = field === 'translation' ? 'example' : field;
+    if (ui !== 'uk') {
+        const v = item[base + '_' + ui];
+        if (typeof v === 'string' && v.trim()) return v;
+    }
+    return (field === 'translation' ? item.example_uk : item[field]) || '';
+}
+
 function viewAlphabet() {
     const lang = STATE.targetLang || 'no';
     const langName = targetLangName(lang);
@@ -45,9 +63,9 @@ function viewAlphabet() {
                         <span style="font-size:1.6rem;font-weight:700;font-family:'Fraunces',serif;">${escHtml(item.letter)}</span>
                         <button class="btn btn-ghost btn-sm alpha-listen" data-letter="${escHtml(item.letter.split(' ')[0])}" title="${t('reading_tap_hint') || ''}">🔊</button>
                     </div>
-                    <p style="color:var(--ink-soft);font-size:.8rem;margin:6px 0 2px;">${t('alphabet_called')}: <b>${escHtml(item.name)}</b></p>
-                    <p style="color:var(--ink-soft);font-size:.8rem;margin:2px 0;">${escHtml(item.sound)}</p>
-                    <p style="font-size:.85rem;margin-top:8px;"><i>${escHtml(item.example)}</i> — ${escHtml(item.example_uk)}</p>
+                    <p style="color:var(--ink-soft);font-size:.8rem;margin:6px 0 2px;">${t('alphabet_called')}: <b>${escHtml(localizedAlphabetField(item, 'name'))}</b></p>
+                    <p style="color:var(--ink-soft);font-size:.8rem;margin:2px 0;">${escHtml(localizedAlphabetField(item, 'sound'))}</p>
+                    <p style="font-size:.85rem;margin-top:8px;"><i>${escHtml(item.example)}</i> — ${escHtml(localizedAlphabetField(item, 'translation'))}</p>
                 </div>
             `);
             card.querySelector('.alpha-listen').onclick = () => speak(item.example, lang);

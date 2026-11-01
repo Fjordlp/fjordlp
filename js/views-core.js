@@ -518,12 +518,13 @@ async function buildDynamicLevelTest(lang) {
     }
     const groups = [];
     for (const level of LEVELS) {
-        const words = vocabForLevel(level, lang);
+        // лише слова з реальним перекладом мовою інтерфейсу — інакше варіанти змішують мови
+        const words = translatableWords(vocabForLevel(level, lang), STATE.vocabLang);
         if (!words || words.length < 4) continue; // замало слів для рівня — пропускаємо, а не показуємо порожні/непарні питання
         const pool = shuffle(words).slice(0, 5);
         pool.forEach(w => {
             const correct = wordTranslation(w, level, STATE.vocabLang);
-            const distractors = shuffle(words.filter(x => x.no !== w.no)).slice(0, 2).map(x => wordTranslation(x, level, STATE.vocabLang));
+            const distractors = translationDistractors(words, w, 2, level, STATE.vocabLang);
             if (distractors.length < 2 || !correct) return;
             const opts = shuffle([correct, ...distractors]);
             groups.push({ lvl: level, q: `${t('how_translate')} «${w.no}»?`, opts, a: opts.indexOf(correct) });
@@ -1009,7 +1010,7 @@ function renderMCCard(item, deckWords, level) {
     // аргумент — рівень, той самий патерн, що й у renderFlipCard вище).
     const lvl = item.key.split('|')[0];
     const correctTranslation = wordTranslation(item.w, lvl);
-    const distractors = shuffle(deckWords.filter(w => w.no !== item.w.no)).slice(0, 3).map(w => wordTranslation(w, lvl));
+    const distractors = translationDistractors(deckWords, item.w, 3, lvl);
     const options = shuffle([correctTranslation, ...distractors]);
     const opts = el(`<div class="mc-options"></div>`);
     options.forEach(opt => {
@@ -1222,11 +1223,13 @@ function currentLevelWords() {
 // Тепер: якщо слів замало — чесне повідомлення + вихід (на A1 чи додому);
 // якщо слова саме зараз підвантажуються/генеруються (ensureVocabAvailable
 // уже виставив прапорець) — показуємо "готуємо", а не "замало слів".
-function testPoolGuard(minWords) {
+function testPoolGuard(minWords, needTranslation) {
     minWords = minWords || 4;
     const lang = STATE.targetLang || 'no';
     const level = LD().level || 'A1';
-    const pool = currentLevelWords(); // заодно запускає ensureVocabAvailable()
+    let pool = currentLevelWords(); // заодно запускає ensureVocabAvailable()
+    // Тести з варіантами-перекладами рахують лише слова, що мають переклад мовою інтерфейсу
+    if (needTranslation && pool) pool = translatableWords(pool, STATE.vocabLang);
     if (pool && pool.length >= minWords) return null;
     const loading = typeof _vocabAutoGenLoading !== 'undefined' && _vocabAutoGenLoading[lang + '|' + level];
     if (loading) {
@@ -1447,19 +1450,19 @@ function runQuiz(sub, route, title) {
 
 function viewTestMC() {
     if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
-        const poolGuard = testPoolGuard(); if (poolGuard) return poolGuard;
+        const poolGuard = testPoolGuard(4, true); if (poolGuard) return poolGuard;
         const level = LD().level || "A1";
         const lang = STATE.targetLang || 'no';
         if (lang !== 'no') ensureGrammarAvailable(lang, level); // тихо; якщо не встигне — цього разу просто без граматичних питань
-        const words = shuffle(currentLevelWords()).slice(0, 6);
+        const words = shuffle(translatableWords(currentLevelWords(), STATE.vocabLang)).slice(0, 6);
         const gramQs = grammarForLevel(level, lang).map(g => ({ q: grammarLocalizedQ(g), opts: g.ex
                 .opts, a: g.ex.a }));
         const wordQs = words.map(w => {
             const correctTranslation = wordTranslation(w, level, STATE.vocabLang);
-            const distractors = shuffle(currentLevelWords().filter(x => x.no !== w.no)).slice(0, 3).map(x => wordTranslation(x, level, STATE.vocabLang));
+            const distractors = translationDistractors(currentLevelWords(), w, 3, level, STATE.vocabLang);
             const opts = shuffle([correctTranslation, ...distractors]);
             return { q: `${t('how_translate')} «${w.no}»?`, opts, a: opts.indexOf(correctTranslation) };
-        });
+        }).filter(q => q.opts.length >= 2); // питання з єдиним варіантом пройти неможливо
         SUBSTATE.qs = shuffle(wordQs.concat(gramQs)).slice(0, 8);
         SUBSTATE.i = 0;
         SUBSTATE.correct = 0;
@@ -1809,8 +1812,8 @@ function viewTestOrder() {
 
 function viewTestListen() {
     if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
-        const poolGuard = testPoolGuard(); if (poolGuard) return poolGuard;
-        const words = shuffle(currentLevelWords()).slice(0, 6);
+        const poolGuard = testPoolGuard(4, true); if (poolGuard) return poolGuard;
+        const words = shuffle(translatableWords(currentLevelWords(), STATE.vocabLang)).slice(0, 6);
         // Раніше варіанти відповіді завжди були українською (w.uk) —
         // тепер локалізуються через wordTranslation(), як і решта тестів.
         // КРИТИЧНО: об'єкт питання раніше не мав поля "q" (текст питання),
@@ -1823,10 +1826,10 @@ function viewTestListen() {
         // замість тексту питання.
         SUBSTATE.qs = words.map(w => {
             const correctTranslation = wordTranslation(w, LD().level);
-            const distractors = shuffle(currentLevelWords().filter(x => x.no !== w.no)).slice(0, 3).map(x => wordTranslation(x, LD().level));
+            const distractors = translationDistractors(currentLevelWords(), w, 3, LD().level, STATE.vocabLang);
             const opts = shuffle([correctTranslation, ...distractors]);
             return { no: w.no, audio: w.no, opts, a: opts.indexOf(correctTranslation) };
-        });
+        }).filter(q => q.opts.length >= 2);
         SUBSTATE.i = 0;
         SUBSTATE.correct = 0;
         SUBSTATE.userAnswers = null;
@@ -1836,8 +1839,8 @@ function viewTestListen() {
 
 function viewTestTranslate() {
     if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
-        const poolGuard = testPoolGuard(); if (poolGuard) return poolGuard;
-        const words = shuffle(currentLevelWords()).slice(0, 6);
+        const poolGuard = testPoolGuard(4, true); if (poolGuard) return poolGuard;
+        const words = shuffle(translatableWords(currentLevelWords(), STATE.vocabLang)).slice(0, 6);
         SUBSTATE.qs = words.map(w => {
             return { word: w, dirToNo: Math.random() < 0.5 };
         });
