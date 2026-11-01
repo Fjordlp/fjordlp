@@ -407,12 +407,8 @@
             </p>
             <div class="chat-shell assistant-chat-shell">
                 <div class="chat-log" id="chatLog"></div>
-                <div class="chat-suggest-row" id="chatSuggest">
-                    <button class="chat-suggest-chip" data-q="Поясни різницю між en, et і ei">en / et / ei?</button>
-                    <button class="chat-suggest-chip" data-q="Перевір це речення норвезькою: ">Перевір речення</button>
-                    <button class="chat-suggest-chip" data-q="Дай 3 приклади речень зі словом ">Приклади речень</button>
-                    <button class="chat-suggest-chip" data-q="Порадь, що вчити далі на моєму рівні">Що вчити далі?</button>
-                </div>
+                <!-- Швидкі підказки: будуються в assistant.js (renderSuggestions) під мову інтерфейсу ТА мову навчання -->
+                <div class="chat-suggest-row" id="chatSuggest"></div>
                 <div class="chat-input-bar">
                     <textarea id="chatInput" placeholder="Напиши повідомлення тролю…" rows="1" maxlength="2000"></textarea>
                     <button class="chat-send-btn" id="chatSendBtn" title="Надіслати">➤</button>

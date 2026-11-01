@@ -477,11 +477,11 @@ async function speak(text, lang) {
     if (typeof AI_PROXY_URL !== 'undefined' && AI_PROXY_URL) {
         try {
             const ttsUrl = AI_PROXY_URL.replace(/\/?$/, '') + '/tts-api';
-            const res = await fetch(ttsUrl, {
+            const res = await proxyFetch(ttsUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: await proxyHeaders(),
                 body: JSON.stringify({ text, voice: voiceCfg.edge }),
-            });
+            }, 15000);
             if (res.ok) {
                 const arrayBuffer = await res.arrayBuffer();
                 // Спроба 1: Web Audio API (краще для якості й для деяких

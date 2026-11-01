@@ -16,7 +16,7 @@
                 </div>
                 <div class="card">
                   <h3>${t('settings_title')}</h3>
-                  <div class="field"><label>${t('field_name')}</label><input id="setName" value="${escHtml(STATE.name && !isDefaultGuestName(STATE.name) ? STATE.name : '')}"></div>
+                  <div class="field"><label>${t('field_name')}</label><input id="setName" maxlength="60" value="${escHtml(STATE.name && !isDefaultGuestName(STATE.name) ? STATE.name : '')}"></div>
                   <div class="field"><label>${t('field_learn_lang')}</label>
                     <select id="setTargetLang">
                       ${LANGUAGES.map(l => `<option value="${l.code}" ${STATE.targetLang===l.code?'selected':''}>${l.flag} ${l.name[STATE.uiLang]||l.name.uk}</option>`).join('')}
@@ -71,7 +71,8 @@
                     ));
             });
             wrap.querySelector('#saveSettings').onclick = () => {
-                STATE.name = wrap.querySelector('#setName').value.trim() || STATE.name || currentUser;
+                // Ім'я бачать інші користувачі (турніри) і адмін; обмежуємо довжину так само, як правила Firestore (validProfile).
+                STATE.name = wrap.querySelector('#setName').value.trim().slice(0, 60) || STATE.name || currentUser;
                 if (!STATE.settings) STATE.settings = {};
                 STATE.settings.goal = wrap.querySelector('#setGoal').value.trim();
                 STATE.settings.reminderTime = wrap.querySelector('#setTime').value;
@@ -275,6 +276,9 @@ function viewNorskprove() {
   return wrap;
 }
 function renderNorskproveTask(task, mode, index, total) {
+  // Рівень обраний у viewNorskprove() і лежить у SUBSTATE.norskLevel. Раніше змінна `level` тут не була
+  // оголошена взагалі — збереження письма, AI-перевірка і лічильник усної частини падали з ReferenceError.
+  const level = SUBSTATE.norskLevel || LD().level || 'A1';
   const wrap = el(`<div class="card" style="margin-top:8px;"></div>`);
 
   // Заголовок і прогрес

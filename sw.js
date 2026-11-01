@@ -19,10 +19,15 @@
 // (і кеш оновлюється разом з тим). Кеш використовується тільки якщо
 // fetch провалився (людина офлайн) — тоді хоч стара, та робоча версія.
 //
-// 🔥 CACHE_NAME лишається динамічним (Date.now()), щоб при кожному
-// новому встановленні SW старі кеші гарантовано підчищались в activate.
+// 🔥 CACHE_NAME тепер стабільний (CACHE_VERSION); старі кеші підчищаються в activate.
 // =====================================================================
-const CACHE_NAME = 'fjord-shell-' + Date.now();
+// ⚠️ Раніше тут було 'fjord-shell-' + Date.now(). Але цей рядок виконується при КОЖНОМУ запуску воркера
+// (браузер зупиняє й знову запускає SW постійно), тож install, fetch і activate бачили РІЗНІ імена:
+// на кожне пробудження створювався новий порожній кеш, а старі не прибирались до наступного activate.
+// Тепер ім'я стабільне; при зміні файлів застосунку просто підніміть CACHE_VERSION (разом із зміною sw.js
+// браузер перевстановить воркер, а activate видалить кеші з іншою версією).
+const CACHE_VERSION = '2026-11-01-1';
+const CACHE_NAME = 'fjord-shell-' + CACHE_VERSION;
 
 const APP_SHELL = [
   './',
@@ -54,6 +59,15 @@ const APP_SHELL = [
   './js/views-story.js',
   './js/views-admin.js',
   './js/auth.js',
+  './js/data-ja.js',
+  './js/data-nl.js',
+  './js/data-pl.js',
+  './js/data-pt.js',
+  './js/data-sv.js',
+  './js/data-uk.js',
+  './js/lessons.js',
+  './js/views-lessons.js',
+  './js/views-alphabet.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-512-maskable.png',

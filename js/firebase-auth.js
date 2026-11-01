@@ -27,15 +27,18 @@ function initFirebase() {
   if (firebaseInitPromise) return firebaseInitPromise;
 
   firebaseInitPromise = new Promise((resolve, reject) => {
+    // Не більше ~15 с очікування SDK (75 × 200 мс): раніше повтор був безкінечним, а якщо
+    // initializeApp() кидав помилку (напр. "app already exists") — крутився вічно.
+    let attempts = 0;
     const tryInit = () => {
       try {
         if (typeof firebase === 'undefined') {
-          console.warn('⏳ Firebase SDK ще не завантажився, повторна спроба через 200ms...');
+          if (++attempts > 75) { reject(new Error('Firebase SDK не завантажився')); return; }
           setTimeout(tryInit, 200);
           return;
         }
 
-        const app = firebase.initializeApp(firebaseConfig);
+        const app = firebase.apps && firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
         firebaseAuth = firebase.auth(app);
         firebaseDb = firebase.firestore(app);
         firebaseReady = true;
@@ -234,6 +237,38 @@ function prepareDataForFirestore(data, aggressive = false) {
 }
 
 // ------------------------------------------------------------
+//  Запис документа користувача
+// ------------------------------------------------------------
+// ЧОМУ update(), а не set(..., {merge:true}): merge ГЛИБОКО зливає вкладені мапи, тож ключі, які
+// prepareDataForFirestore() обрізав (srs, wordsSeen, customWords...), лишались у Firestore — документ
+// продовжував рости до ліміту 1 МБ, а обрізання було косметичним. update() ЗАМІНЮЄ кожне передане
+// поле верхнього рівня цілком (інші поля документа не чіпає).
+// Також:
+//  • `admin` з клієнта НІКОЛИ не надсилаємо: його міняє лише адмін через панель, а правила
+//    відхиляють будь-який запис, де admin відрізняється від збереженого (застаріле значення в STATE
+//    блокувало б кожне збереження);
+//  • застарілі AI-кеші, що вже лежать у документі, видаляємо явно (FieldValue.delete()).
+const FIRESTORE_CACHE_FIELDS = ['generatedVocab', 'generatedTasks', 'generatedGrammar', 'wordTranslations'];
+async function writeUserDoc(docRef, data) {
+  const payload = Object.assign({}, data);
+  delete payload.admin;
+  const FV = firebase.firestore.FieldValue;
+  FIRESTORE_CACHE_FIELDS.forEach(k => { payload[k] = FV.delete(); });
+  try {
+    await docRef.update(payload);
+  } catch (e) {
+    if (e && e.code === 'not-found') {
+      // Документа ще немає (перше збереження) — створюємо; без admin (правила це дозволяють лише як false).
+      const fresh = Object.assign({}, data);
+      delete fresh.admin;
+      await docRef.set(fresh);
+    } else {
+      throw e;
+    }
+  }
+}
+
+// ------------------------------------------------------------
 //  Дебаунс збереження
 // ------------------------------------------------------------
 const FIRESTORE_SAVE_DEBOUNCE_MS = 300;
@@ -258,7 +293,7 @@ async function saveToFirestore(uid, data) {
     const preparedData = prepareDataForFirestore(pendingData, false);
     try {
       const docRef = firebaseDb.collection('users').doc(pendingUid);
-      await docRef.set(preparedData, { merge: true });
+      await writeUserDoc(docRef, preparedData);
       console.log('💾 Дані збережено у Firestore');
     } catch (e) {
       console.error('❌ Помилка збереження у Firestore:', e);
@@ -269,7 +304,7 @@ async function saveToFirestore(uid, data) {
         const emergencyData = prepareDataForFirestore(pendingData, true);
         try {
           const docRef = firebaseDb.collection('users').doc(pendingUid);
-          await docRef.set(emergencyData, { merge: true });
+          await writeUserDoc(docRef, emergencyData);
           console.log('💾 Дані збережено після агресивного обрізання');
         } catch (e2) {
           console.error('❌ Навіть після обрізання не вдалося зберегти:', e2);
@@ -280,6 +315,19 @@ async function saveToFirestore(uid, data) {
 }
 
 // ---- Функції входу/реєстрації (без змін) ----
+// Переклад кодів помилок Firebase Auth у локалізовані повідомлення. Раніше користувачу показувався сирий
+// e.message ("Firebase: Error (auth/...)") англійською. Для входу "невірний пароль" і "користувача немає"
+// навмисно дають ОДНАКОВЕ повідомлення — інакше за відповіддю можна дізнатись, чи зареєстрована пошта.
+function authErrorMessage(e, mode) {
+  const code = (e && e.code) || '';
+  if (code === 'auth/invalid-email') return t('auth_err_invalid_email');
+  if (code === 'auth/weak-password') return t('auth_err_password_short');
+  if (code === 'auth/too-many-requests') return t('auth_err_too_many');
+  if (code === 'auth/network-request-failed') return t('auth_err_firebase_slow');
+  if (mode === 'login') return t('auth_err_invalid_credentials');
+  return t('auth_err_registration_generic');
+}
+
 async function signUpWithFirebase(email, password) {
   try {
     await waitForFirebase(5000);
@@ -313,7 +361,7 @@ async function signUpWithFirebase(email, password) {
     return { success: true, user };
   } catch (e) {
     console.error('❌ Помилка реєстрації:', e);
-    return { success: false, error: e.message };
+    return { success: false, error: authErrorMessage(e, 'register') };
   }
 }
 
@@ -335,7 +383,7 @@ async function signInWithFirebase(email, password) {
     return { success: true, user };
   } catch (e) {
     console.error('❌ Помилка входу:', e);
-    return { success: false, error: e.message };
+    return { success: false, error: authErrorMessage(e, 'login') };
   }
 }
 

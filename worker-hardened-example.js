@@ -45,11 +45,27 @@ const SYSTEM_PROMPTS = {
 
 const MAX_MESSAGE_LEN = 4000;
 const MAX_HISTORY_ITEMS = 12;
+// Верхня межа розміру тіла запиту (12 реплік історії × 4000 символів + повідомлення ≈ 55 КБ).
+const MAX_BODY_BYTES = 100000;
+
+// ---- Автентифікація й ліміти ------------------------------------------------
+// ВАЖЛИВО: перевірка Origin/CORS НЕ є захистом від зловмисника: це лише інструкція для браузера.
+// curl/скрипт просто не шле Origin (або підробляє його) — і потрапляє до платного AI-ключа.
+// Справжні межі довіри тут — (1) Firebase ID-токен (підтверджує, хто викликає) і (2) ліміти запитів
+// по акаунту/IP. Клієнт (js/assistant.js) додає "Authorization: Bearer <ID-токен>", коли людина
+// увійшла в акаунт. Гості (без токена) отримують суворіші ліміти.
+//   env.AUTH_MODE = "required"  → без дійсного токена AI/TTS недоступні (рекомендовано, якщо гості не потрібні)
+//   env.AUTH_MODE = "optional"  → (за замовчуванням) гості пускаються, але з гостьовими лімітами
+//   env.FIREBASE_PROJECT_ID     → id проєкту Firebase (за замовчуванням нижче)
+const FIREBASE_PROJECT_ID_DEFAULT = "fjord-f0e0b";
+const LIMITS = {
+  user:  { perMin: 30, perDay: 400 },  // увійшов у акаунт (ключ — Firebase uid)
+  guest: { perMin: 8,  perDay: 60  },  // без токена (ключ — IP)
+};
 // Було 12/хв — це майже гарантовано впиралось у ліміт, якщо адмін генерував
 // словник у кілька пакетів (5-8 запитів) для однієї мови, а тим паче для
 // кількох мов підряд в одній сесії. Піднято до 30/хв; клієнт (generateBulkVocab)
 // також тепер сам витримує паузу ~600мс між пакетами.
-const RATE_LIMIT_PER_MIN = 30;
 
 // Список моделей для fallback (перша робоча буде використана)
 // Було: gemini-3.1-flash-lite, gemini-1.5-pro, gemini-1.5-flash,
@@ -73,6 +89,9 @@ const MODEL_CANDIDATES = [
 // ============================================================
 
 async function handleOrdApi(request, corsHeaders) {
+  if (request.method !== 'GET') {
+    return json({ error: 'Method not allowed' }, 405, corsHeaders);
+  }
   const url = new URL(request.url);
   const path = url.pathname;
 
@@ -82,30 +101,29 @@ async function handleOrdApi(request, corsHeaders) {
   } else if (path === '/ord-api/articles') {
     targetPath = '/api/articles';
   } else if (path.startsWith('/ord-api/article/')) {
+    // id статті — лише літери/цифри/крапка/дефіс: без "../" та інших шляхів на тому ж хості.
     const id = path.replace('/ord-api/article/', '');
+    if (!/^[A-Za-z0-9._-]{1,40}$/.test(id) || id.includes('..')) return json({ error: 'Bad article id' }, 400, corsHeaders);
     targetPath = `/bm/article/${id}`;
   } else {
-    return new Response('Not found', { status: 404, headers: corsHeaders });
+    return json({ error: 'Not found' }, 404, corsHeaders);
   }
 
   const params = url.searchParams;
+  if (params.toString().length > 300) return json({ error: 'Query too long' }, 400, corsHeaders);
   const targetUrl = `https://ord.uib.no${targetPath}?${params.toString()}`;
 
-  const resp = await fetch(targetUrl, {
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (compatible; FjordBot/1.0)',
-      'Accept': 'application/json',
-    }
-  });
-  const data = await resp.json();
-  return new Response(JSON.stringify(data), {
-    headers: {
-      'Content-Type': 'application/json',
-      // Раніше тут був "*" (дозволено з будь-якого сайту) — звужено до
-      // того самого списку дозволених джерел, що й для решти Worker'а.
-      ...corsHeaders,
-    }
-  });
+  try {
+    const resp = await fetch(targetUrl, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; FjordBot/1.0)', 'Accept': 'application/json' },
+    });
+    // Раніше resp.json() не був обгорнутий у try: якщо ord.uib.no віддавав HTML-помилку — Worker падав з 500.
+    const data = await resp.json();
+    return json(data, resp.ok ? 200 : 502, corsHeaders);
+  } catch (e) {
+    console.warn('ord.uib.no недоступний:', e && e.message);
+    return json({ error: 'Upstream dictionary unavailable' }, 502, corsHeaders);
+  }
 }
 
 // ============================================================
@@ -243,102 +261,189 @@ async function handleTtsApi(request, corsHeaders, env, ctx) {
 }
 
 // ============================================================
+//  ДОПОМІЖНЕ: відповіді, CORS, токен, ліміти
+// ============================================================
+
+function json(obj, status, corsHeaders) {
+  return new Response(JSON.stringify(obj), {
+    status: status || 200,
+    headers: { "Content-Type": "application/json", ...(corsHeaders || {}) },
+  });
+}
+
+// CORS: заголовки Access-Control-Allow-* видаємо ЛИШЕ дозволеному Origin. Раніше для чужого джерела
+// віддавалось літеральне "null" — а браузер надсилає саме Origin: null із sandbox-iframe та file://,
+// тобто таке значення збігалося б і ДОЗВОЛЯЛО доступ. Тепер для чужого/відсутнього Origin заголовка немає.
+function buildCorsHeaders(origin) {
+  const h = { "Vary": "Origin" };
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    h["Access-Control-Allow-Origin"] = origin;
+    h["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS";
+    h["Access-Control-Allow-Headers"] = "Content-Type, Authorization";
+    h["Access-Control-Max-Age"] = "86400";
+  }
+  return h;
+}
+
+// ---- Firebase ID-токен: перевірка підпису RS256 за публічними ключами Google (JWKS) ----
+let _jwksCache = { keys: null, exp: 0 };
+async function getFirebaseJwks() {
+  if (_jwksCache.keys && Date.now() < _jwksCache.exp) return _jwksCache.keys;
+  const res = await fetch("https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com");
+  if (!res.ok) throw new Error("JWKS fetch failed: " + res.status);
+  const m = (res.headers.get("cache-control") || "").match(/max-age=(\d+)/);
+  const ttl = m ? Math.min(parseInt(m[1], 10), 3600) : 600;
+  _jwksCache = { keys: (await res.json()).keys || [], exp: Date.now() + ttl * 1000 };
+  return _jwksCache.keys;
+}
+function b64urlToBytes(str) {
+  const pad = "=".repeat((4 - (str.length % 4)) % 4);
+  const bin = atob(str.replace(/-/g, "+").replace(/_/g, "/") + pad);
+  return Uint8Array.from(bin, c => c.charCodeAt(0));
+}
+const _dec = new TextDecoder();
+// Повертає { uid } для дійсного токена або null. Перевіряє: підпис (alg=RS256, kid зі списку Google),
+// aud === id проєкту, iss === https://securetoken.google.com/<проєкт>, exp/iat/auth_time, непорожній sub.
+async function verifyFirebaseIdToken(token, projectId) {
+  try {
+    const parts = String(token || "").split(".");
+    if (parts.length !== 3) return null;
+    const header = JSON.parse(_dec.decode(b64urlToBytes(parts[0])));
+    const p = JSON.parse(_dec.decode(b64urlToBytes(parts[1])));
+    if (header.alg !== "RS256" || !header.kid) return null;
+    const now = Math.floor(Date.now() / 1000);
+    if (p.aud !== projectId || p.iss !== "https://securetoken.google.com/" + projectId) return null;
+    if (typeof p.sub !== "string" || !p.sub || p.sub.length > 128) return null;
+    if (typeof p.exp !== "number" || p.exp <= now) return null;
+    if (typeof p.iat !== "number" || p.iat > now + 300) return null;
+    if (typeof p.auth_time === "number" && p.auth_time > now + 300) return null;
+    const jwk = (await getFirebaseJwks()).find(k => k.kid === header.kid);
+    if (!jwk) return null;
+    const key = await crypto.subtle.importKey("jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
+    const ok = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, b64urlToBytes(parts[2]),
+      new TextEncoder().encode(parts[0] + "." + parts[1]));
+    return ok ? { uid: p.sub } : null;
+  } catch (e) {
+    return null; // будь-яка помилка розбору = недійсний токен (нічого не розкриваємо)
+  }
+}
+
+// Лічильники "за хвилину" і "за добу". KV не атомарний (два паралельні запити можуть прослизнути), тому це
+// м'який запобіжник від зловживань, а не точна бухгалтерія; для жорсткої квоти — Rate Limiting binding
+// або Durable Object. Якщо RATE_KV не підключений — ліміту НЕМАЄ (попереджаємо в логах): прив'яжіть KV!
+async function underLimit(env, ctx, scope, id, lim) {
+  if (!env.RATE_KV) { console.warn("RATE_KV не підключений — ліміти запитів не діють"); return true; }
+  const minKey = `rl:${scope}:${id}:m${Math.floor(Date.now() / 60000)}`;
+  const dayKey = `rl:${scope}:${id}:d${new Date().toISOString().slice(0, 10)}`;
+  const [m, d] = await Promise.all([env.RATE_KV.get(minKey), env.RATE_KV.get(dayKey)]);
+  const mi = parseInt(m || "0", 10), di = parseInt(d || "0", 10);
+  if (mi >= lim.perMin || di >= lim.perDay) return false;
+  ctx.waitUntil(Promise.all([
+    env.RATE_KV.put(minKey, String(mi + 1), { expirationTtl: 120 }),
+    env.RATE_KV.put(dayKey, String(di + 1), { expirationTtl: 172800 }),
+  ]));
+  return true;
+}
+
+// Хто викликає: { kind: "user", id: uid } | { kind: "guest", id: ip } | { error: Response }
+async function identify(request, env, corsHeaders) {
+  const authz = request.headers.get("Authorization") || "";
+  const m = authz.match(/^Bearer\s+(\S+)$/i);
+  if (m) {
+    const user = await verifyFirebaseIdToken(m[1], env.FIREBASE_PROJECT_ID || FIREBASE_PROJECT_ID_DEFAULT);
+    if (user) return { kind: "user", id: user.uid };
+    return { error: json({ error: "Недійсний або прострочений токен — увійдіть знову" }, 401, corsHeaders) };
+  }
+  if (env.AUTH_MODE === "required") {
+    return { error: json({ error: "Потрібен вхід в акаунт" }, 401, corsHeaders) };
+  }
+  return { kind: "guest", id: request.headers.get("CF-Connecting-IP") || "unknown" };
+}
+
+// ============================================================
 //  ОСНОВНА ФУНКЦІЯ FETCH
 // ============================================================
 
 export default {
   async fetch(request, env, ctx) {
     const origin = request.headers.get("Origin") || "";
-    const corsHeaders = {
-      "Access-Control-Allow-Origin": ALLOWED_ORIGINS.includes(origin) ? origin : "null",
-      "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-      "Vary": "Origin",
-    };
+    const corsHeaders = buildCorsHeaders(origin);
 
     // CORS preflight
     if (request.method === "OPTIONS") {
-      return new Response(null, { headers: corsHeaders });
+      return new Response(null, { status: 204, headers: corsHeaders });
     }
 
-    // Перевірка походження (безпека)
+    // Браузер із чужого сайту → 403. (Запити БЕЗ Origin — curl/скрипти — тут не відсікаються: це не
+    // захист, їх обмежують токен і ліміти нижче.)
     if (origin && !ALLOWED_ORIGINS.includes(origin)) {
-      return new Response(JSON.stringify({ error: "Forbidden origin" }), {
-        status: 403,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
+      return json({ error: "Forbidden origin" }, 403, corsHeaders);
     }
 
     const url = new URL(request.url);
 
+    // Хто викликає і які в нього ліміти (для /ord-api теж: це відкритий проксі до стороннього сервісу).
+    const who = await identify(request, env, corsHeaders);
+    if (who.error) return who.error;
+    const lim = LIMITS[who.kind];
+
     // --- Маршрут для ord.uib.no ---
-    if (url.pathname.startsWith('/ord-api')) {
+    if (url.pathname.startsWith("/ord-api")) {
+      if (!(await underLimit(env, ctx, "ord:" + who.kind, who.id, { perMin: lim.perMin * 2, perDay: lim.perDay * 5 }))) {
+        return json({ error: "Забагато запитів, спробуйте за хвилину" }, 429, corsHeaders);
+      }
       return handleOrdApi(request, corsHeaders);
     }
 
-    // --- Маршрут для озвучення (Azure Speech) ---
-    if (url.pathname.startsWith('/tts-api')) {
+    // --- Маршрут для озвучення (VoiceRSS) ---
+    if (url.pathname.startsWith("/tts-api")) {
       return handleTtsApi(request, corsHeaders, env, ctx);
     }
 
     // --- Маршрут для AI (Gemini) ---
     if (request.method !== "POST") {
-      return new Response(JSON.stringify({ error: "Method not allowed" }), {
-        status: 405,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
+      return json({ error: "Method not allowed" }, 405, corsHeaders);
     }
 
-    // Rate limiting (опціонально)
-    const ip = request.headers.get("CF-Connecting-IP") || "unknown";
-    const rateKey = `rl:${ip}:${Math.floor(Date.now() / 60000)}`;
-    if (env.RATE_KV) {
-      const current = parseInt((await env.RATE_KV.get(rateKey)) || "0", 10);
-      if (current >= RATE_LIMIT_PER_MIN) {
-        return new Response(JSON.stringify({ error: "Забагато запитів, спробуйте за хвилину" }), {
-          status: 429,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        });
-      }
-      ctx.waitUntil(env.RATE_KV.put(rateKey, String(current + 1), { expirationTtl: 60 }));
+    if (!(await underLimit(env, ctx, "ai:" + who.kind, who.id, lim))) {
+      return json({ error: "Забагато запитів, спробуйте пізніше" }, 429, corsHeaders);
     }
 
-    // Валідація вхідних даних
+    // Валідація вхідних даних: спершу розмір, потім JSON.
+    if (parseInt(request.headers.get("Content-Length") || "0", 10) > MAX_BODY_BYTES) {
+      return json({ error: "Payload too large" }, 413, corsHeaders);
+    }
     let body;
     try {
-      body = await request.json();
+      const raw = await request.text();
+      if (raw.length > MAX_BODY_BYTES) return json({ error: "Payload too large" }, 413, corsHeaders);
+      body = JSON.parse(raw);
     } catch {
-      return new Response(JSON.stringify({ error: "Invalid JSON" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
+      return json({ error: "Invalid JSON" }, 400, corsHeaders);
     }
+    if (!body || typeof body !== "object") return json({ error: "Invalid JSON" }, 400, corsHeaders);
 
-    const mode = typeof body.mode === "string" && SYSTEM_PROMPTS[body.mode] ? body.mode : "chat";
+    const mode = typeof body.mode === "string" && Object.prototype.hasOwnProperty.call(SYSTEM_PROMPTS, body.mode) ? body.mode : "chat";
     const systemPrompt = SYSTEM_PROMPTS[mode];
     const message = typeof body.message === "string" ? body.message.slice(0, MAX_MESSAGE_LEN) : "";
-    if (!message) {
-      return new Response(JSON.stringify({ error: "Empty message" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
-    }
+    if (!message) return json({ error: "Empty message" }, 400, corsHeaders);
     const history = Array.isArray(body.history)
-      ? body.history.slice(-MAX_HISTORY_ITEMS).map(h => ({
+      ? body.history.slice(-MAX_HISTORY_ITEMS).filter(h => h && typeof h === "object").map(h => ({
           role: h.role === "assistant" ? "model" : "user",
           parts: [{ text: String(h.text || "").slice(0, MAX_MESSAGE_LEN) }],
         }))
       : [];
 
     // ---- Виклик Gemini з автоматичним вибором моделі (fallback) ----
-    let lastError = null;
+    // Ключ — у заголовку x-goog-api-key, а не в URL (URL потрапляє в логи/трасування).
+    let lastStatus = 0;
     for (const modelName of MODEL_CANDIDATES) {
       try {
         const apiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${env.GEMINI_API_KEY}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent`,
           {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
             body: JSON.stringify({
               systemInstruction: { parts: [{ text: systemPrompt }] },
               contents: [...history, { role: "user", parts: [{ text: message }] }],
@@ -349,27 +454,18 @@ export default {
         if (apiRes.ok) {
           const data = await apiRes.json();
           const reply = data?.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("\n") || "";
-          return new Response(JSON.stringify({ reply }), {
-            headers: { "Content-Type": "application/json", ...corsHeaders },
-          });
+          return json({ reply }, 200, corsHeaders);
         }
 
-        const errText = await apiRes.text();
-        lastError = errText;
-        console.warn(`Модель ${modelName} не вдалася:`, errText);
+        lastStatus = apiRes.status;
+        // Сире тіло помилки Google лишається лише в логах Worker — клієнту його не віддаємо.
+        console.warn(`Модель ${modelName} не вдалася:`, apiRes.status, (await apiRes.text()).slice(0, 500));
       } catch (e) {
-        lastError = e.message;
         console.warn(`Помилка при спробі моделі ${modelName}:`, e.message);
       }
     }
 
     // Якщо жодна модель не спрацювала
-    return new Response(JSON.stringify({
-      error: "All Gemini models failed",
-      detail: lastError || "Unknown error"
-    }), {
-      status: 502,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    });
+    return json({ error: "All Gemini models failed", detail: lastStatus ? "upstream status " + lastStatus : "upstream unreachable" }, 502, corsHeaders);
   }
 };

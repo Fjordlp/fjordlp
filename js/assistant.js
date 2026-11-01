@@ -57,6 +57,33 @@ function renderLiteMarkdownGlobal(text) {
     return html;
 }
 
+// ---------------------------------------------------------------------
+//  Виклики Worker-проксі: автентифікація і таймаут (використовує й troll.js для озвучення)
+// ---------------------------------------------------------------------
+// Worker не довіряє заголовку Origin (його підробляє будь-який скрипт) — він довіряє Firebase ID-токену.
+// Якщо людина увійшла в акаунт, додаємо "Authorization: Bearer <токен>": тоді Worker рахує ліміти по
+// акаунту (а не по IP) і дає їх більше. Гості (без акаунта) працюють без токена, але з суворішими
+// лімітами. getIdToken() сам оновлює токен, коли той майже прострочений.
+async function proxyHeaders() {
+    const h = { 'Content-Type': 'application/json' };
+    try {
+        const u = (typeof firebaseAuth !== 'undefined' && firebaseAuth && firebaseAuth.currentUser) || null;
+        if (u) h['Authorization'] = 'Bearer ' + await u.getIdToken();
+    } catch (e) { /* без токена — Worker застосує гостьові ліміти */ }
+    return h;
+}
+
+// fetch із таймаутом: без нього завислий запит до проксі залишав інтерфейс у вічному "завантаження".
+async function proxyFetch(url, init, timeoutMs) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs || 60000);
+    try {
+        return await fetch(url, Object.assign({}, init, { signal: ctrl.signal }));
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
 async function callAiRaw(mode, systemPromptText, userText, history, lang) {
     if (!AI_PROXY_URL) {
         const err = new Error('NOT_CONFIGURED');
@@ -72,14 +99,15 @@ async function callAiRaw(mode, systemPromptText, userText, history, lang) {
     };
     let res;
     try {
-        res = await fetch(AI_PROXY_URL, {
+        res = await proxyFetch(AI_PROXY_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: await proxyHeaders(),
             body: JSON.stringify(payload),
-        });
+        }, 60000);
     } catch (networkErr) {
         const err = new Error('NETWORK_ERROR');
-        err.code = 'NETWORK_ERROR';
+        err.code = 'NETWORK_ERROR'; // існуючі обробники (assistant/story/admin) знають саме цей код
+        err.timeout = !!(networkErr && networkErr.name === 'AbortError');
         err.cause = networkErr;
         console.error('[AI Assistant] Мережева помилка при зверненні до проксі:', networkErr);
         throw err;
@@ -94,7 +122,8 @@ async function callAiRaw(mode, systemPromptText, userText, history, lang) {
         err.detail = detail;
         throw err;
     }
-    const data = await res.json();
+    let data = null;
+    try { data = await res.json(); } catch (parseErr) { /* не JSON — обробляємо нижче як BAD_RESPONSE */ }
     if (!data || typeof data.reply !== 'string') {
         console.error('[AI Assistant] Неочікувана відповідь проксі:', data);
         const err = new Error('BAD_RESPONSE');
@@ -309,6 +338,39 @@ setTimeout(tryAutoLogin, 500);
 let _assistantWidgetReady = false;
 let _assistantRenderAll = null;
 
+// ---------------------------------------------------------------------
+//  Швидкі підказки в чаті: залежать від мови інтерфейсу (тексти — i18n) і від мови НАВЧАННЯ
+// ---------------------------------------------------------------------
+// Раніше це були 4 статичні кнопки в index.html: українські підписи при будь-якому інтерфейсі і перша
+// "en / et / ei?" — про норвезькі артиклі — навіть коли людина вчить італійську.
+// Перша підказка тепер "мовна": що найчастіше плутають саме в цій мові.
+const CHAT_ARTICLE_CHIPS = {   // артиклі / роди / частки — пишуться самою мовою, не перекладаються
+    no: ['en', 'et', 'ei'], da: ['en', 'et'], sv: ['en', 'ett'], nl: ['de', 'het'], de: ['der', 'die', 'das'],
+    fr: ['le', 'la', 'les'], es: ['el', 'la'], it: ['il', 'lo', 'la'], pt: ['o', 'a'], en: ['a', 'an', 'the'],
+    el: ['ο', 'η', 'το'], hu: ['a', 'az'], ja: ['は', 'が'], ko: ['은/는', '이/가'], zh: ['的', '了'],
+};
+const CHAT_CASE_LANGS = ['pl', 'uk', 'ru', 'cs', 'sk', 'hr', 'fi', 'is', 'bg'];   // мови з відмінками
+
+// Повертає [{ label, q, send }]: send=true — запит повний (шлемо одразу); false — користувач дописує
+// своє (речення/слово), тож лише підставляємо текст у поле.
+function chatSuggestions() {
+    const lang = (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
+    const name = targetLangName(lang);
+    const list = [];
+    if (CHAT_ARTICLE_CHIPS[lang]) {
+        const topic = CHAT_ARTICLE_CHIPS[lang].join(', ');
+        list.push({ label: CHAT_ARTICLE_CHIPS[lang].join(' / ') + '?', q: tf('chat_q_diff', { topic, lang: name }), send: true });
+    } else if (CHAT_CASE_LANGS.includes(lang)) {
+        list.push({ label: t('chat_chip_cases'), q: tf('chat_q_cases', { lang: name }), send: true });
+    } else {
+        list.push({ label: t('chat_chip_rule'), q: tf('chat_q_rule', { lang: name }), send: true });
+    }
+    list.push({ label: t('chat_chip_check'), q: tf('chat_q_check', { lang: name }), send: false });
+    list.push({ label: t('chat_chip_examples'), q: tf('chat_q_examples', { lang: name }), send: false });
+    list.push({ label: t('chat_chip_next'), q: tf('chat_q_next', { lang: name }), send: true });
+    return list;
+}
+
 function initAssistantWidget() {
     if (_assistantWidgetReady) {
         if (_assistantRenderAll) _assistantRenderAll();
@@ -364,8 +426,30 @@ function initAssistantWidget() {
         log.appendChild(row);
     }
 
+    // Підказки перебудовуються при кожному відкритті чату — тож завжди відповідають поточній мові
+    // інтерфейсу й мові навчання (їх можна змінити між відкриттями). Текст вставляємо через
+    // textContent/dataset, не через innerHTML.
+    function renderSuggestions() {
+        const row = document.getElementById('chatSuggest');
+        if (!row) return;
+        row.innerHTML = '';
+        chatSuggestions().forEach(sg => {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className = 'chat-suggest-chip';
+            chip.textContent = sg.label;
+            chip.onclick = () => {
+                input.value = sg.q;
+                input.dispatchEvent(new Event('input'));   // підганяє висоту поля
+                if (sg.send) send(); else input.focus();
+            };
+            row.appendChild(chip);
+        });
+    }
+
     function renderAll() {
         ensureStateDefaults(STATE);
+        renderSuggestions();
         log.innerHTML = '';
         if (!STATE.assistantChat.length) {
             const langName = typeof targetLangName === 'function' ? targetLangName(STATE.targetLang) : '';
@@ -451,13 +535,6 @@ function initAssistantWidget() {
     input.addEventListener('input', () => {
         input.style.height = 'auto';
         input.style.height = Math.min(input.scrollHeight, 100) + 'px';
-    });
-
-    document.querySelectorAll('#chatSuggest .chat-suggest-chip').forEach(chip => {
-        chip.onclick = () => {
-            input.value = chip.dataset.q;
-            input.focus();
-        };
     });
 
     if (clearBtn) {

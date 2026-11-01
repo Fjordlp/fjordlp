@@ -382,7 +382,7 @@ async function loadWordsForLang(lang) {
     }
     
     const words = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    sessionStorage.setItem(`words_${lang}`, JSON.stringify(words));
+    try { sessionStorage.setItem(`words_${lang}`, JSON.stringify(words)); } catch (e) { /* кеш сесії не критичний */ }
     return words;
 }
 
@@ -421,7 +421,7 @@ function vocabForLevel(level, lang) {
 function grammarForLevel(level, lang) {
     lang = lang || (STATE && STATE.targetLang) || 'no';
     const langFile = window.LANG_DATA && window.LANG_DATA[lang];
-    if (langFile && Array.isArray(langFile.GRAMMAR) && langFile.GRAMMAR.length) {
+    if (langFile && langFile.GRAMMAR) {
         return langFile.GRAMMAR.filter(g => g.level === level);
     }
     if (!STATE.generatedGrammar) STATE.generatedGrammar = {};

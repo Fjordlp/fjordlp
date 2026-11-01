@@ -59,8 +59,21 @@ function migrateLegacyLangFields(state) {
 const USERS_KEY = 'fjord_users';
 const GUEST_KEY = 'fjord_guest';
 
+// Безпечний запис у localStorage. setItem кидає QuotaExceededError, коли сховище переповнене (AI-кеші слів
+// швидко його "їдять"), і SecurityError у приватному режимі деяких браузерів. Раніше виняток вилітав
+// з updateState() і ламав усе, що його викликає (addXP, збереження прогресу, ...). Тепер застосунок
+// продовжує працювати в пам'яті, а збій лишається в консолі.
+let _lsWarned = false;
+function lsSet(key, value) {
+    try { localStorage.setItem(key, value); return true; }
+    catch (e) {
+        if (!_lsWarned) { _lsWarned = true; console.warn('localStorage недоступний або переповнений — прогрес не збережено локально:', e && e.name); }
+        return false;
+    }
+}
+
 function getUsers() { try { return JSON.parse(localStorage.getItem(USERS_KEY)) || {}; } catch { return {}; } }
-function saveUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+function saveUsers(u) { lsSet(USERS_KEY, JSON.stringify(u)); }
 
 function getGuestState() {
     try { const raw = localStorage.getItem(GUEST_KEY); if (raw) { const d = JSON.parse(raw); return ensureStateDefaults(d); } } catch { }
@@ -68,7 +81,7 @@ function getGuestState() {
 }
 
 function saveGuestState(state) {
-    localStorage.setItem(GUEST_KEY, JSON.stringify(state));
+    lsSet(GUEST_KEY, JSON.stringify(state));
 }
 
 // ---- Глобальна функція для перевірки наявності даних (використовується в auth.js) ----
@@ -206,7 +219,7 @@ function loadSession() {
 }
 
 function saveSession(login, guest) {
-    localStorage.setItem('fjord_session', JSON.stringify({ login, guest: !!guest }));
+    lsSet('fjord_session', JSON.stringify({ login, guest: !!guest }));
 }
 
 function clearSession() {

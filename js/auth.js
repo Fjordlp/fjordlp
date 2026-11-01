@@ -175,9 +175,15 @@ function initAuth() {
     // ---- Основний обробник входу/реєстрації ----
     submitBtn.onclick = async () => {
         const login = loginInput.value.trim();
-        const password = passwordInput.value.trim();
+        // Пароль НЕ обрізаємо: пробіли на краях — частина пароля. Раніше .trim() мовчки змінював пароль
+        // (з менеджера паролів / із пробілом на кінці) і вхід ламався або пароль виходив коротшим за задуманий.
+        const password = passwordInput.value;
         if (!login || !password) {
             errorEl.textContent = t('auth_err_fill_both');
+            return;
+        }
+        if (!isLogin && password.length < 8) {
+            errorEl.textContent = t('auth_err_password_short');
             return;
         }
 

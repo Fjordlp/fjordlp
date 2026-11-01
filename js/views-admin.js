@@ -316,12 +316,12 @@ async function loadUserList(query) {
         rows.forEach(u => {
             const lang = (typeof getLanguage === 'function') ? getLanguage(u.targetLang) : null;
             html += `<tr>
-                <td><strong>${u.name}</strong>${u.email ? `<br><span style="font-size:.72rem;color:var(--ink-soft);">${u.email}</span>` : ''}</td>
-                <td><span class="tag level-${u.level}">${u.level}</span></td>
-                <td>${lang ? lang.flag + ' ' + lang.name.uk : u.targetLang}</td>
-                <td>${u.xp}</td>
+                <td><strong>${escHtml(u.name)}</strong>${u.email ? `<br><span style="font-size:.72rem;color:var(--ink-soft);">${escHtml(u.email)}</span>` : ''}</td>
+                <td><span class="tag level-${escHtml(u.level)}">${escHtml(u.level)}</span></td>
+                <td>${lang ? lang.flag + ' ' + lang.name.uk : escHtml(u.targetLang)}</td>
+                <td>${escHtml(u.xp)}</td>
                 <td>${u.admin ? '✅' : '—'}</td>
-                <td><button class="btn btn-ghost btn-sm" onclick="adminToggleUserAdmin('${u.id}', ${!u.admin})">${u.admin ? 'Прибрати адміна' : 'Зробити адміном'}</button></td>
+                <td><button class="btn btn-ghost btn-sm" onclick="adminToggleUserAdmin(${escHtml(JSON.stringify(u.id))}, ${!u.admin})">${u.admin ? 'Прибрати адміна' : 'Зробити адміном'}</button></td>
             </tr>`;
         });
         html += '</tbody></table>';
@@ -427,7 +427,7 @@ window.adminCreateTournament = async function() {
             const options = shuffle([w.uk, ...distractors]);
             return {
                 type: 'translation',
-                question: `Як перекладається "${w.no}"?`,
+                question: `Як перекладається "${escHtml(w.no)}"?`,
                 options: options,
                 correct: options.indexOf(w.uk)
             };
@@ -553,9 +553,9 @@ async function loadWordList(query) {
         html += '<table class="vocab-table"><thead><tr><th>Слово</th><th>Переклад</th><th>Рівень</th><th>Джерело</th><th>Дія</th></tr></thead><tbody>';
         all.forEach(data => {
             html += `<tr>
-                <td><strong>${data.no}</strong></td>
-                <td>${data.uk}</td>
-                <td><span class="tag level-${data.level}">${data.level}</span></td>
+                <td><strong>${escHtml(data.no)}</strong></td>
+                <td>${escHtml(data.uk)}</td>
+                <td><span class="tag level-${escHtml(data.level)}">${escHtml(data.level)}</span></td>
                 <td style="font-size:.75rem;color:var(--ink-soft);">${data._builtin ? 'Вбудоване' : 'Додано вручну'}</td>
                 <td>${data._builtin ? '<span style="color:var(--ink-soft);font-size:.75rem;">—</span>' : `<button class="btn btn-danger btn-sm" onclick="adminDeleteWord('${data._docId}')">🗑️</button>`}</td>
             </tr>`;
@@ -610,7 +610,7 @@ async function loadTournamentList() {
                         .map(p => ({ id: p.id, ...p.data() }))
                         .sort((a, b) => (b.correct || 0) - (a.correct || 0));
                     participantsHtml = '<table class="vocab-table"><thead><tr><th>Ім\'я</th><th>Результат</th></tr></thead><tbody>' +
-                        rows.map(p => `<tr><td>${escHtml(p.name || p.id)}</td><td>${(p.correct ?? '—')}/${(p.total ?? '—')}</td></tr>`).join('') +
+                        rows.map(p => `<tr><td>${escHtml(p.name || p.id)}</td><td>${escHtml((p.correct ?? '—'))}/${escHtml((p.total ?? '—'))}</td></tr>`).join('') +
                         '</tbody></table>';
                 }
             } catch (e) {
@@ -622,16 +622,16 @@ async function loadTournamentList() {
                 <div class="card" style="margin-bottom:8px;">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
                         <div>
-                            <strong>${escHtml(data.name || '')}</strong> ${statusMap[data.status] || data.status}
-                            <span style="font-size:.8rem;color:var(--ink-soft);margin-left:12px;">${data.level || 'A1'}</span>
+                            <strong>${escHtml(data.name || '')}</strong> ${escHtml(statusMap[data.status] || data.status)}
+                            <span style="font-size:.8rem;color:var(--ink-soft);margin-left:12px;">${escHtml(data.level || 'A1')}</span>
                             <span class="tag" style="margin-left:8px;" title="Кількість учасників">👥 ${participantsCount}</span>
                         </div>
                         <div style="display:flex;gap:8px;">
-                            <button class="btn btn-ghost btn-sm" onclick="toggleTournamentParticipants('${doc.id}')">👥 Учасники</button>
-                            <button class="btn btn-danger btn-sm" onclick="adminDeleteTournament('${doc.id}')">🗑️</button>
+                            <button class="btn btn-ghost btn-sm" onclick="toggleTournamentParticipants(${escHtml(JSON.stringify(doc.id))})">👥 Учасники</button>
+                            <button class="btn btn-danger btn-sm" onclick="adminDeleteTournament(${escHtml(JSON.stringify(doc.id))})">🗑️</button>
                         </div>
                     </div>
-                    <div id="tournParticipants-${doc.id}" style="display:none;margin-top:10px;max-height:300px;overflow-y:auto;">${participantsHtml}</div>
+                    <div id="tournParticipants-${escHtml(doc.id)}" style="display:none;margin-top:10px;max-height:300px;overflow-y:auto;">${participantsHtml}</div>
                 </div>
             `;
         }
@@ -681,10 +681,10 @@ async function loadDailyList() {
                 <div class="card" style="margin-bottom:8px;">
                     <div style="display:flex;justify-content:space-between;align-items:center;">
                         <div>
-                            <strong>${data.question?.slice(0, 60)}...</strong>
-                            <span style="font-size:.8rem;color:var(--ink-soft);margin-left:12px;">${langLabel} · ${doc.id}</span>
+                            <strong>${escHtml(data.question?.slice(0, 60))}...</strong>
+                            <span style="font-size:.8rem;color:var(--ink-soft);margin-left:12px;">${langLabel} · ${escHtml(doc.id)}</span>
                         </div>
-                        <button class="btn btn-danger btn-sm" onclick="adminDeleteDaily('${doc.id}')">🗑️</button>
+                        <button class="btn btn-danger btn-sm" onclick="adminDeleteDaily(${escHtml(JSON.stringify(doc.id))})">🗑️</button>
                     </div>
                 </div>
             `;
@@ -833,8 +833,8 @@ function initAdminSharedVocab() {
                 const d = doc.data();
                 const lang = getLanguage(d.lang);
                 rows.push(`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line-soft);">
-                    <span>${lang.flag} ${lang.name.uk} — <span class="tag level-${d.level}">${d.level}</span></span>
-                    <span>${d.count || (d.words||[]).length} слів</span>
+                    <span>${lang.flag} ${lang.name.uk} — <span class="tag level-${escHtml(d.level)}">${escHtml(d.level)}</span></span>
+                    <span>${escHtml(d.count || (d.words||[]).length)} слів</span>
                 </div>`);
             });
             existingList.innerHTML = rows.join('');
@@ -861,7 +861,7 @@ function initAdminSharedVocab() {
             previewCount.textContent = words.length;
             previewList.innerHTML = words.map(w => `
                 <div style="padding:6px 0;border-bottom:1px solid var(--line-soft);font-size:.85rem;">
-                    <strong>${w.no}</strong> — ${w.uk}${w.en ? ` · en: ${w.en}` : ''}${w.ru ? ` · ru: ${w.ru}` : ''} <span style="color:var(--ink-soft);">(${w.t || ''})</span>
+                    <strong>${escHtml(w.no)}</strong> — ${escHtml(w.uk)}${w.en ? ` · en: ${w.en}` : ''}${w.ru ? ` · ru: ${w.ru}` : ''} <span style="color:var(--ink-soft);">(${escHtml(w.t || '')})</span>
                 </div>
             `).join('');
             previewCard.style.display = 'block';
@@ -1007,8 +1007,8 @@ function initAdminSharedGrammar() {
                 const d = doc.data();
                 const lang = getLanguage(d.lang);
                 rows.push(`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line-soft);">
-                    <span>${lang.flag} ${lang.name.uk} — <span class="tag level-${d.level}">${d.level}</span></span>
-                    <span>${d.count || (d.rules||[]).length} правил</span>
+                    <span>${lang.flag} ${lang.name.uk} — <span class="tag level-${escHtml(d.level)}">${escHtml(d.level)}</span></span>
+                    <span>${escHtml(d.count || (d.rules||[]).length)} правил</span>
                 </div>`);
             });
             existingList.innerHTML = rows.join('');
@@ -1035,8 +1035,8 @@ function initAdminSharedGrammar() {
             previewCount.textContent = rules.length;
             previewList.innerHTML = rules.map(g => `
                 <div style="padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:.85rem;">
-                    <strong>${g.title}</strong>
-                    <div style="color:var(--ink-soft);">${g.exp}</div>
+                    <strong>${escHtml(g.title)}</strong>
+                    <div style="color:var(--ink-soft);">${escHtml(g.exp)}</div>
                 </div>
             `).join('');
             previewCard.style.display = 'block';
@@ -1169,7 +1169,7 @@ function initAdminSharedAlphabet() {
                 const lang = getLanguage(d.lang);
                 rows.push(`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line-soft);">
                     <span>${lang.flag} ${lang.name.uk}</span>
-                    <span>${d.count || (d.letters||[]).length} літер</span>
+                    <span>${escHtml(d.count || (d.letters||[]).length)} літер</span>
                 </div>`);
             });
             existingList.innerHTML = rows.join('');
@@ -1466,16 +1466,16 @@ function initAdminBooks() {
                 const genre = getBookGenre(d.genre);
                 const row = el(`
                     <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line-soft);">
-                        <span>${lang.flag} ${escHtml(d.title)} — <span class="tag level-${d.level}">${d.level}</span> · ${genre.label} · ${(d.chapters||[]).length} розд.</span>
+                        <span>${lang.flag} ${escHtml(d.title)} — <span class="tag level-${escHtml(d.level)}">${escHtml(d.level)}</span> · ${genre.label} · ${(d.chapters||[]).length} розд.</span>
                         <span>
-                            <button class="btn btn-ghost btn-sm ab-edit-book" data-id="${doc.id}">✏️</button>
-                            <button class="btn btn-ghost btn-sm ab-delete-book" data-id="${doc.id}">🗑️</button>
+                            <button class="btn btn-ghost btn-sm ab-edit-book" data-id="${escHtml(doc.id)}">✏️</button>
+                            <button class="btn btn-ghost btn-sm ab-delete-book" data-id="${escHtml(doc.id)}">🗑️</button>
                         </span>
                     </div>
                 `);
                 row.querySelector('.ab-edit-book').onclick = () => loadBookIntoForm(doc.id, d);
                 row.querySelector('.ab-delete-book').onclick = async () => {
-                    if (!confirm(`Видалити книгу "${d.title}"? Це незворотно.`)) return;
+                    if (!confirm(`Видалити книгу "${escHtml(d.title)}"? Це незворотно.`)) return;
                     try {
                         await deleteSharedBook(doc.id, d.lang);
                         toast('🗑️ Книгу видалено');
@@ -1658,9 +1658,9 @@ function initAdminDailyWord() {
                         <div style="display:flex;justify-content:space-between;align-items:center;">
                             <div>
                                 <strong>${escHtml(d.no)}</strong> — ${escHtml(d.uk)}
-                                <span style="font-size:.8rem;color:var(--ink-soft);margin-left:12px;">${lang.flag} ${lang.name.uk} · ${d.level}</span>
+                                <span style="font-size:.8rem;color:var(--ink-soft);margin-left:12px;">${lang.flag} ${lang.name.uk} · ${escHtml(d.level)}</span>
                             </div>
-                            <button class="btn btn-danger btn-sm" onclick="adminDeleteDailyWord('${doc.id}')">🗑️</button>
+                            <button class="btn btn-danger btn-sm" onclick="adminDeleteDailyWord(${escHtml(JSON.stringify(doc.id))})">🗑️</button>
                         </div>
                     </div>
                 `);
@@ -1795,8 +1795,8 @@ function initAdminSharedSentenceBuilder() {
                 const d = doc.data();
                 const lang = getLanguage(d.lang);
                 rows.push(`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line-soft);">
-                    <span>${lang.flag} ${lang.name.uk} — <span class="tag level-${d.level}">${d.level}</span></span>
-                    <span>${d.count || (d.sentences||[]).length} речень</span>
+                    <span>${lang.flag} ${lang.name.uk} — <span class="tag level-${escHtml(d.level)}">${escHtml(d.level)}</span></span>
+                    <span>${escHtml(d.count || (d.sentences||[]).length)} речень</span>
                 </div>`);
             });
             existingList.innerHTML = rows.join('');

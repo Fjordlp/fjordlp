@@ -1,0 +1,1530 @@
+diff -ruN '--exclude=notes' '--exclude=__pycache__' site6/SECURITY-REVIEW.md site7/SECURITY-REVIEW.md
+--- a/SECURITY-REVIEW.md	1970-01-01 00:00:00.000000000 +0000
++++ a/SECURITY-REVIEW.md	2026-11-01 14:59:47.415940464 +0000
+@@ -0,0 +1,36 @@
++# Fjord – security review & hardening
++
++**Scope:** static + dynamic review of the client (`js/*`, `index.html`, `sw.js`, `_headers`), `firestore.rules` and the AI Worker (`worker-hardened-example.js`).
++
++**What this is NOT:** the Claude Security plugin's verified-panel scan. That pipeline needs a `Workflow` tool and plugin scripts that do not exist in this environment, so it was not run and no "verified" report is claimed. Everything below is a direct review, backed by the tests in `security-tests/`.
++The Supabase Postgres skill does not apply (the project uses Firestore, not Postgres); only its principles (least privilege, validate writes server-side, never trust user-editable fields for authorization) were used as a checklist for `firestore.rules`.
++
++## Findings and status
++
++| # | Severity | Finding | Evidence | Status |
++|---|---|---|---|---|
++| 1 | **High** | **Stored XSS → admin takeover chain.** Admin "Users" list rendered `name`, `email`, `level` of other users unescaped. A user can write those fields into their own `users/{uid}` doc; the script then runs in the admin's session (admin can publish shared content to every user). | `security-tests/xss-taint.py`: 15 distinct fields executed script (3 user-written, 12 admin/AI-authored) | **Fixed** (`views-admin.js`: 41 template sites escaped, inline-handler ids JSON-encoded). Re-run: 0 of 39 routes execute payloads |
++| 2 | **High** | **AI proxy is effectively open.** CORS/`Origin` is not authentication (curl sends none, or forges it). No token, rate limit optional → anyone can spend the Gemini key. `Access-Control-Allow-Origin: "null"` matched `Origin: null` (sandboxed iframes, `file://`). | `worker.test.mjs` (37 checks) | **Fixed in code, needs deploy** (Firebase ID-token verification, per-uid / per-IP limits, daily caps, strict CORS) |
++| 3 | **High** | **Firestore rules trusted the client's data.** No type/size validation of profile fields (the XSS vector above); tournament results could be overwritten (replay / "improve" a score) and had no range checks. | review of `firestore.rules` | **Fixed in code, needs publish + emulator run** |
++| 4 | Medium | Quiz feedback inserted answer text via `tf()` into `innerHTML` unescaped (AI-generated / shared words). | taint test: `test-translate` fired | **Fixed** (4 sites) |
++| 5 | Medium | Gemini API key sent in the URL query string; upstream error body returned to clients. | code review + test | **Fixed** (header `x-goog-api-key`, generic error) |
++| 6 | Medium | `/ord-api` open proxy: no rate limit, unvalidated article id, unhandled upstream non-JSON → 500. | test | **Fixed** |
++| 7 | Medium | Account enumeration + raw English Firebase errors on login. | `client-unit.py` | **Fixed** (same message for wrong password / unknown user, localized) |
++| 8 | Medium | Passwords were silently `.trim()`-ed; no minimum length at sign-up. | code | **Fixed** (no trim; ≥ 8 characters on registration) |
++| 9 | Medium | `set(..., {merge:true})` never removed trimmed keys, so the 1 MB document limit was not actually avoided; stale AI caches stayed in the doc; the client sent a possibly stale `admin` field. | code + `client-unit.py` | **Fixed** (`writeUserDoc`: `update()`, explicit `FieldValue.delete()`, never sends `admin`) |
++| 10 | Low | `level` undefined in `renderNorskproveTask` (ReferenceError on save/AI check). | code | **Fixed** |
++| 11 | Low | Cloze/Order tests crashed on empty question sets (e.g. Dutch `welkom`); Order also on words without example. | audit | **Fixed** |
++| 12 | Low | Service worker: cache name from `Date.now()` re-evaluated on every SW start (cache leak), no offline fallback for deep links, 9 scripts missing from the shell. | code | **Fixed** |
++| 13 | Low | Unguarded `localStorage.setItem` (quota / private mode) threw out of `updateState()`. | `client-unit.py` | **Fixed** |
++| 14 | Low | `initFirebase` retried forever. | code | **Fixed** (≈15 s cap) |
++| 15 | Low | `_headers`: stale second Worker host in CSP `connect-src` (and an account name); no `no-cache` for `sw.js`/`index.html`. | file | **Fixed** (+ `upgrade-insecure-requests`, COOP) |
++
++## Not changed – needs a decision or action outside the code
++
++1. **Deploy order.** The client works with the old *and* the new Worker. Publish `firestore.rules` only after running `security-tests/firestore.rules.test.mjs` in the emulator (it was **not** run here). Bind `RATE_KV` on the Worker: without it there is still **no** rate limit (the Worker logs a warning). Decide `AUTH_MODE=required` if guests should not use AI.
++2. **Firebase console:** enable App Check, email-enumeration protection and a password policy; restrict the browser API key to `fjordlp.com` referrers and the needed APIs; set budget alerts/quotas on the Gemini key.
++3. **CSP still allows `'unsafe-inline'`** (inline `onclick=` handlers and inline scripts). It is the main remaining reason an XSS would not be contained. Removing it means moving handlers to `addEventListener` – a larger refactor.
++4. **No Subresource Integrity** on the Firebase SDK scripts from `gstatic.com` (hashes cannot be computed offline). Pin versions and add `integrity=`, or self-host.
++5. **Tournament / leaderboard scores are computed in the browser.** Rules now validate type and range and allow one attempt, but a determined player can still submit any score from 0 to total.
++6. **Sign-up race** (Firebase auto-login vs. the "registered, please log in" flow) and the first-login `onAuthStateChanged` double navigation were not changed.
++7. No account-deletion / data-export feature yet (GDPR).
+diff -ruN '--exclude=notes' '--exclude=__pycache__' site6/_headers site7/_headers
+--- a/_headers	2026-10-31 13:31:33.030746879 +0000
++++ a/_headers	2026-11-01 10:02:30.113279824 +0000
+@@ -3,5 +3,12 @@
+   X-Content-Type-Options: nosniff
+   Referrer-Policy: strict-origin-when-cross-origin
+   Permissions-Policy: geolocation=(), camera=(), microphone=(self), payment=(), usb=()
++  Cross-Origin-Opener-Policy: same-origin
+   Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob: data:; connect-src 'self' https://fjord-ai-proxy.maksimenkonazar013.workers.dev https://fjord.fjordlearningplatform.workers.dev https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://firebasestorage.googleapis.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'
++  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob: data:; connect-src 'self' https://fjord.fjordlearningplatform.workers.dev https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://firebasestorage.googleapis.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
++
++/sw.js
++  Cache-Control: no-cache
++
++/index.html
++  Cache-Control: no-cache
+diff -ruN '--exclude=notes' '--exclude=__pycache__' site6/firestore.rules site7/firestore.rules
+--- a/firestore.rules	2026-10-31 13:31:33.027847069 +0000
++++ a/firestore.rules	2026-11-01 09:58:48.149028783 +0000
+@@ -22,6 +22,34 @@
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('admin', false) == true;
+     }
+ 
++    // ----- Допоміжні перевірки (принцип найменших привілеїв + валідація запису) -----
++    function isOwner(uid) {
++      return request.auth != null && request.auth.uid == uid;
++    }
++
++    // Правила — єдина ПО-СПРАВЖНЬОМУ надійна межа довіри: клієнтському коду (STATE у браузері) вірити не можна,
++    // бо користувач сам пише власний документ users/{uid}, а його поля (name, email, level...) потім
++    // показуються АДМІНУ в панелі "Користувачі". Тому типи й розміри цих полів перевіряються тут, а не лише в JS.
++    // (Перевірки навмисно м'які — лише тип і довжина — щоб не відхиляти вже збережені документи.)
++    function validProfile(d) {
++      return (!('name' in d) || (d.name is string && d.name.size() <= 100))
++          && (!('email' in d) || (d.email is string && d.email.size() <= 254))
++          && (!('level' in d) || (d.level is string && d.level.size() <= 3))
++          && (!('targetLang' in d) || (d.targetLang is string && d.targetLang.size() <= 8));
++    }
++
++    // Результат гравця в турнірі: рівно ті поля, які пише клієнт (js/views-more.js), цілі числа в
++    // розумних межах, correct <= total, score == correct, completedAt — серверний час.
++    function validParticipant(d) {
++      return d.keys().hasOnly(['name', 'score', 'correct', 'total', 'completedAt'])
++          && d.name is string && d.name.size() > 0 && d.name.size() <= 100
++          && d.correct is int && d.total is int && d.score is int
++          && d.total >= 1 && d.total <= 200
++          && d.correct >= 0 && d.correct <= d.total
++          && d.score == d.correct
++          && d.completedAt == request.time;
++    }
++
+     match /users/{uid} {
+       // Читати свій документ може кожен; адмін додатково може читати
+       // документи інших користувачів (потрібно для розділу
+@@ -30,8 +58,9 @@
+         (request.auth.uid == uid || isAdmin());
+       // Дозволяємо створення власного документа, але НЕ дозволяємо одразу
+       // виставити собі admin: true.
+-      allow create: if request.auth != null && request.auth.uid == uid &&
+-        (!('admin' in request.resource.data) || request.resource.data.admin == false);
++      allow create: if isOwner(uid) &&
++        (!('admin' in request.resource.data) || request.resource.data.admin == false) &&
++        validProfile(request.resource.data);
+       // Оновлення: звичайний користувач може оновлювати СВІЙ документ, але
+       // не може сам собі змінити admin. Адміністратор (isAdmin()) може
+       // оновлювати БУДЬ-чий документ, включно з зміною поля admin —
+@@ -47,9 +76,10 @@
+       // причина "результати й користувачі не зберігаються": не лише
+       // прогрес користувача, а й усе, що з ним пов'язано, просто ніколи
+       // не записувалось у Firestore.
+-      allow update: if request.auth != null && (
+-        (request.auth.uid == uid &&
+-          request.resource.data.get('admin', false) == resource.data.get('admin', false)) ||
++      allow update: if (
++        (isOwner(uid) &&
++          request.resource.data.get('admin', false) == resource.data.get('admin', false) &&
++          validProfile(request.resource.data)) ||
+         isAdmin()
+       );
+     }
+@@ -113,9 +143,17 @@
+       // грошових призів, але якщо колись зробите реальні призи чи
+       // офіційний рейтинг — рахунок треба буде переносити на бекенд
+       // (Cloud Function, яка сама перевіряє відповіді).
++      //
++      // Одна спроба на людину: результат можна лише СТВОРИТИ (не перезаписати й не видалити) —
++      // так не можна ні "покращити" рахунок повторним записом, ні підмінити чужий. Видалити
++      // запис (напр. при скиданні турніру) може лише адмін. Документ турніру мусить існувати.
+       match /participants/{uid} {
+         allow read: if true;
+-        allow write: if request.auth != null && request.auth.uid == uid;
++        allow create: if isOwner(uid) &&
++          exists(/databases/$(database)/documents/tournaments/$(docId)) &&
++          validParticipant(request.resource.data);
++        allow update: if false;
++        allow delete: if isAdmin();
+       }
+     }
+     // Завдання дня — так само: всі бачать сьогоднішнє завдання, редагує
+diff -ruN '--exclude=notes' '--exclude=__pycache__' site6/js/assistant.js site7/js/assistant.js
+--- a/js/assistant.js	2026-10-31 13:31:33.028035713 +0000
++++ a/js/assistant.js	2026-11-01 10:01:17.794586700 +0000
+@@ -57,6 +57,33 @@
+     return html;
+ }
+ 
++// ---------------------------------------------------------------------
++//  Виклики Worker-проксі: автентифікація і таймаут (використовує й troll.js для озвучення)
++// ---------------------------------------------------------------------
++// Worker не довіряє заголовку Origin (його підробляє будь-який скрипт) — він довіряє Firebase ID-токену.
++// Якщо людина увійшла в акаунт, додаємо "Authorization: Bearer <токен>": тоді Worker рахує ліміти по
++// акаунту (а не по IP) і дає їх більше. Гості (без акаунта) працюють без токена, але з суворішими
++// лімітами. getIdToken() сам оновлює токен, коли той майже прострочений.
++async function proxyHeaders() {
++    const h = { 'Content-Type': 'application/json' };
++    try {
++        const u = (typeof firebaseAuth !== 'undefined' && firebaseAuth && firebaseAuth.currentUser) || null;
++        if (u) h['Authorization'] = 'Bearer ' + await u.getIdToken();
++    } catch (e) { /* без токена — Worker застосує гостьові ліміти */ }
++    return h;
++}
++
++// fetch із таймаутом: без нього завислий запит до проксі залишав інтерфейс у вічному "завантаження".
++async function proxyFetch(url, init, timeoutMs) {
++    const ctrl = new AbortController();
++    const timer = setTimeout(() => ctrl.abort(), timeoutMs || 60000);
++    try {
++        return await fetch(url, Object.assign({}, init, { signal: ctrl.signal }));
++    } finally {
++        clearTimeout(timer);
++    }
++}
++
+ async function callAiRaw(mode, systemPromptText, userText, history, lang) {
+     if (!AI_PROXY_URL) {
+         const err = new Error('NOT_CONFIGURED');
+@@ -72,14 +99,15 @@
+     };
+     let res;
+     try {
+-        res = await fetch(AI_PROXY_URL, {
++        res = await proxyFetch(AI_PROXY_URL, {
+             method: 'POST',
+-            headers: { 'Content-Type': 'application/json' },
++            headers: await proxyHeaders(),
+             body: JSON.stringify(payload),
+-        });
++        }, 60000);
+     } catch (networkErr) {
+         const err = new Error('NETWORK_ERROR');
+-        err.code = 'NETWORK_ERROR';
++        err.code = 'NETWORK_ERROR'; // існуючі обробники (assistant/story/admin) знають саме цей код
++        err.timeout = !!(networkErr && networkErr.name === 'AbortError');
+         err.cause = networkErr;
+         console.error('[AI Assistant] Мережева помилка при зверненні до проксі:', networkErr);
+         throw err;
+@@ -94,7 +122,8 @@
+         err.detail = detail;
+         throw err;
+     }
+-    const data = await res.json();
++    let data = null;
++    try { data = await res.json(); } catch (parseErr) { /* не JSON — обробляємо нижче як BAD_RESPONSE */ }
+     if (!data || typeof data.reply !== 'string') {
+         console.error('[AI Assistant] Неочікувана відповідь проксі:', data);
+         const err = new Error('BAD_RESPONSE');
+diff -ruN '--exclude=notes' '--exclude=__pycache__' site6/js/auth.js site7/js/auth.js
+--- a/js/auth.js	2026-10-31 13:31:33.032226571 +0000
++++ a/js/auth.js	2026-11-01 10:01:41.584015705 +0000
+@@ -175,11 +175,17 @@
+     // ---- Основний обробник входу/реєстрації ----
+     submitBtn.onclick = async () => {
+         const login = loginInput.value.trim();
+-        const password = passwordInput.value.trim();
++        // Пароль НЕ обрізаємо: пробіли на краях — частина пароля. Раніше .trim() мовчки змінював пароль
++        // (з менеджера паролів / із пробілом на кінці) і вхід ламався або пароль виходив коротшим за задуманий.
++        const password = passwordInput.value;
+         if (!login || !password) {
+             errorEl.textContent = t('auth_err_fill_both');
+             return;
+         }
++        if (!isLogin && password.length < 8) {
++            errorEl.textContent = t('auth_err_password_short');
++            return;
++        }
+ 
+         submitBtn.disabled = true;
+         submitBtn.textContent = t('auth_btn_waiting');
+diff -ruN '--exclude=notes' '--exclude=__pycache__' site6/js/firebase-auth.js site7/js/firebase-auth.js
+--- a/js/firebase-auth.js	2026-10-31 13:31:33.028686618 +0000
++++ a/js/firebase-auth.js	2026-11-01 10:01:41.583413753 +0000
+@@ -27,15 +27,18 @@
+   if (firebaseInitPromise) return firebaseInitPromise;
+ 
+   firebaseInitPromise = new Promise((resolve, reject) => {
++    // Не більше ~15 с очікування SDK (75 × 200 мс): раніше повтор був безкінечним, а якщо
++    // initializeApp() кидав помилку (напр. "app already exists") — крутився вічно.
++    let attempts = 0;
+     const tryInit = () => {
+       try {
+         if (typeof firebase === 'undefined') {
+-          console.warn('⏳ Firebase SDK ще не завантажився, повторна спроба через 200ms...');
++          if (++attempts > 75) { reject(new Error('Firebase SDK не завантажився')); return; }
+           setTimeout(tryInit, 200);
+           return;
+         }
+ 
+-        const app = firebase.initializeApp(firebaseConfig);
++        const app = firebase.apps && firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
+         firebaseAuth = firebase.auth(app);
+         firebaseDb = firebase.firestore(app);
+         firebaseReady = true;
+@@ -234,6 +237,38 @@
+ }
+ 
+ // ------------------------------------------------------------
++//  Запис документа користувача
++// ------------------------------------------------------------
++// ЧОМУ update(), а не set(..., {merge:true}): merge ГЛИБОКО зливає вкладені мапи, тож ключі, які
++// prepareDataForFirestore() обрізав (srs, wordsSeen, customWords...), лишались у Firestore — документ
++// продовжував рости до ліміту 1 МБ, а обрізання було косметичним. update() ЗАМІНЮЄ кожне передане
++// поле верхнього рівня цілком (інші поля документа не чіпає).
++// Також:
++//  • `admin` з клієнта НІКОЛИ не надсилаємо: його міняє лише адмін через панель, а правила
++//    відхиляють будь-який запис, де admin відрізняється від збереженого (застаріле значення в STATE
++//    блокувало б кожне збереження);
++//  • застарілі AI-кеші, що вже лежать у документі, видаляємо явно (FieldValue.delete()).
++const FIRESTORE_CACHE_FIELDS = ['generatedVocab', 'generatedTasks', 'generatedGrammar', 'wordTranslations'];
++async function writeUserDoc(docRef, data) {
++  const payload = Object.assign({}, data);
++  delete payload.admin;
++  const FV = firebase.firestore.FieldValue;
++  FIRESTORE_CACHE_FIELDS.forEach(k => { payload[k] = FV.delete(); });
++  try {
++    await docRef.update(payload);
++  } catch (e) {
++    if (e && e.code === 'not-found') {
++      // Документа ще немає (перше збереження) — створюємо; без admin (правила це дозволяють лише як false).
++      const fresh = Object.assign({}, data);
++      delete fresh.admin;
++      await docRef.set(fresh);
++    } else {
++      throw e;
++    }
++  }
++}
++
++// ------------------------------------------------------------
+ //  Дебаунс збереження
+ // ------------------------------------------------------------
+ const FIRESTORE_SAVE_DEBOUNCE_MS = 300;
+@@ -258,7 +293,7 @@
+     const preparedData = prepareDataForFirestore(pendingData, false);
+     try {
+       const docRef = firebaseDb.collection('users').doc(pendingUid);
+-      await docRef.set(preparedData, { merge: true });
++      await writeUserDoc(docRef, preparedData);
+       console.log('💾 Дані збережено у Firestore');
+     } catch (e) {
+       console.error('❌ Помилка збереження у Firestore:', e);
+@@ -269,7 +304,7 @@
+         const emergencyData = prepareDataForFirestore(pendingData, true);
+         try {
+           const docRef = firebaseDb.collection('users').doc(pendingUid);
+-          await docRef.set(emergencyData, { merge: true });
++          await writeUserDoc(docRef, emergencyData);
+           console.log('💾 Дані збережено після агресивного обрізання');
+         } catch (e2) {
+           console.error('❌ Навіть після обрізання не вдалося зберегти:', e2);
+@@ -280,6 +315,19 @@
+ }
+ 
+ // ---- Функції входу/реєстрації (без змін) ----
++// Переклад кодів помилок Firebase Auth у локалізовані повідомлення. Раніше користувачу показувався сирий
++// e.message ("Firebase: Error (auth/...)") англійською. Для входу "невірний пароль" і "користувача немає"
++// навмисно дають ОДНАКОВЕ повідомлення — інакше за відповіддю можна дізнатись, чи зареєстрована пошта.
++function authErrorMessage(e, mode) {
++  const code = (e && e.code) || '';
++  if (code === 'auth/invalid-email') return t('auth_err_invalid_email');
++  if (code === 'auth/weak-password') return t('auth_err_password_short');
++  if (code === 'auth/too-many-requests') return t('auth_err_too_many');
++  if (code === 'auth/network-request-failed') return t('auth_err_firebase_slow');
++  if (mode === 'login') return t('auth_err_invalid_credentials');
++  return t('auth_err_registration_generic');
++}
++
+ async function signUpWithFirebase(email, password) {
+   try {
+     await waitForFirebase(5000);
+@@ -313,7 +361,7 @@
+     return { success: true, user };
+   } catch (e) {
+     console.error('❌ Помилка реєстрації:', e);
+-    return { success: false, error: e.message };
++    return { success: false, error: authErrorMessage(e, 'register') };
+   }
+ }
+ 
+@@ -335,7 +383,7 @@
+     return { success: true, user };
+   } catch (e) {
+     console.error('❌ Помилка входу:', e);
+-    return { success: false, error: e.message };
++    return { success: false, error: authErrorMessage(e, 'login') };
+   }
+ }
+ 
+diff -ruN '--exclude=notes' '--exclude=__pycache__' site6/js/helpers.js site7/js/helpers.js
+--- a/js/helpers.js	2026-10-31 13:31:33.028731231 +0000
++++ a/js/helpers.js	2026-11-01 10:01:54.971849246 +0000
+@@ -382,7 +382,7 @@
+     }
+     
+     const words = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+-    sessionStorage.setItem(`words_${lang}`, JSON.stringify(words));
++    try { sessionStorage.setItem(`words_${lang}`, JSON.stringify(words)); } catch (e) { /* кеш сесії не критичний */ }
+     return words;
+ }
+ 
+diff -ruN '--exclude=notes' '--exclude=__pycache__' site6/js/i18n.js site7/js/i18n.js
+--- a/js/i18n.js	2026-10-31 13:31:33.032081486 +0000
++++ a/js/i18n.js	2026-11-01 10:01:41.582852808 +0000
+@@ -34,7 +34,7 @@
+         toggle_to_register: 'Ще немає акаунта? Зареєструватися',
+         toggle_to_login: 'Вже є акаунт? Увійти',
+         guest_btn: 'Продовжити як гість', or_divider: 'або',
+-        auth_err_fill_both: 'Заповніть обидва поля', auth_btn_waiting: '⏳ Зачекайте...',
++        auth_err_fill_both: 'Заповніть обидва поля', auth_err_password_short: 'Пароль має містити щонайменше 8 символів.', auth_err_too_many: 'Забагато спроб. Зачекайте кілька хвилин і спробуйте знову.', auth_btn_waiting: '⏳ Зачекайте...',
+         auth_err_firebase_slow: '⏳ Firebase ще не готовий, зачекайте кілька секунд і спробуйте знову.',
+         auth_err_auth_generic: '⏳ Помилка авторизації, перезавантажте сторінку.',
+         auth_err_invalid_credentials: 'Невірний логін або пароль', auth_err_registration_generic: 'Помилка реєстрації',
+@@ -215,7 +215,7 @@
+         toggle_to_register: "Don't have an account? Sign up",
+         toggle_to_login: 'Already have an account? Log in',
+         guest_btn: 'Continue as guest', or_divider: 'or',
+-        auth_err_fill_both: 'Please fill in both fields', auth_btn_waiting: '⏳ Please wait...',
++        auth_err_fill_both: 'Please fill in both fields', auth_err_password_short: 'Password must be at least 8 characters long.', auth_err_too_many: 'Too many attempts. Please wait a few minutes and try again.', auth_btn_waiting: '⏳ Please wait...',
+         auth_err_firebase_slow: "⏳ Firebase isn't ready yet, wait a few seconds and try again.",
+         auth_err_auth_generic: '⏳ Authorization error, please reload the page.',
+         auth_err_invalid_credentials: 'Incorrect login or password', auth_err_registration_generic: 'Registration error',
+@@ -396,7 +396,7 @@
+         toggle_to_register: 'Ещё нет аккаунта? Зарегистрироваться',
+         toggle_to_login: 'Уже есть аккаунт? Войти',
+         guest_btn: 'Продолжить как гость', or_divider: 'или',
+-        auth_err_fill_both: 'Заполните оба поля', auth_btn_waiting: '⏳ Подождите...',
++        auth_err_fill_both: 'Заполните оба поля', auth_err_password_short: 'Пароль должен содержать не менее 8 символов.', auth_err_too_many: 'Слишком много попыток. Подождите несколько минут и попробуйте снова.', auth_btn_waiting: '⏳ Подождите...',
+         auth_err_firebase_slow: '⏳ Firebase ещё не готов, подождите несколько секунд и попробуйте снова.',
+         auth_err_auth_generic: '⏳ Ошибка авторизации, перезагрузите страницу.',
+         auth_err_invalid_credentials: 'Неверный логин или пароль', auth_err_registration_generic: 'Ошибка регистрации',
+diff -ruN '--exclude=notes' '--exclude=__pycache__' site6/js/state.js site7/js/state.js
+--- a/js/state.js	2026-10-31 13:31:33.028871127 +0000
++++ a/js/state.js	2026-11-01 10:01:54.971108952 +0000
+@@ -59,8 +59,21 @@
+ const USERS_KEY = 'fjord_users';
+ const GUEST_KEY = 'fjord_guest';
+ 
++// Безпечний запис у localStorage. setItem кидає QuotaExceededError, коли сховище переповнене (AI-кеші слів
++// швидко його "їдять"), і SecurityError у приватному режимі деяких браузерів. Раніше виняток вилітав
++// з updateState() і ламав усе, що його викликає (addXP, збереження прогресу, ...). Тепер застосунок
++// продовжує працювати в пам'яті, а збій лишається в консолі.
++let _lsWarned = false;
++function lsSet(key, value) {
++    try { localStorage.setItem(key, value); return true; }
++    catch (e) {
++        if (!_lsWarned) { _lsWarned = true; console.warn('localStorage недоступний або переповнений — прогрес не збережено локально:', e && e.name); }
++        return false;
++    }
++}
++
+ function getUsers() { try { return JSON.parse(localStorage.getItem(USERS_KEY)) || {}; } catch { return {}; } }
+-function saveUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
++function saveUsers(u) { lsSet(USERS_KEY, JSON.stringify(u)); }
+ 
+ function getGuestState() {
+     try { const raw = localStorage.getItem(GUEST_KEY); if (raw) { const d = JSON.parse(raw); return ensureStateDefaults(d); } } catch { }
+@@ -68,7 +81,7 @@
+ }
+ 
+ function saveGuestState(state) {
+-    localStorage.setItem(GUEST_KEY, JSON.stringify(state));
++    lsSet(GUEST_KEY, JSON.stringify(state));
+ }
+ 
+ // ---- Глобальна функція для перевірки наявності даних (використовується в auth.js) ----
+@@ -206,7 +219,7 @@
+ }
+ 
+ function saveSession(login, guest) {
+-    localStorage.setItem('fjord_session', JSON.stringify({ login, guest: !!guest }));
++    lsSet('fjord_session', JSON.stringify({ login, guest: !!guest }));
+ }
+ 
+ function clearSession() {
+diff -ruN '--exclude=notes' '--exclude=__pycache__' site6/js/troll.js site7/js/troll.js
+--- a/js/troll.js	2026-10-31 13:31:33.028902740 +0000
++++ a/js/troll.js	2026-11-01 10:01:12.797900181 +0000
+@@ -477,11 +477,11 @@
+     if (typeof AI_PROXY_URL !== 'undefined' && AI_PROXY_URL) {
+         try {
+             const ttsUrl = AI_PROXY_URL.replace(/\/?$/, '') + '/tts-api';
+-            const res = await fetch(ttsUrl, {
++            const res = await proxyFetch(ttsUrl, {
+                 method: 'POST',
+-                headers: { 'Content-Type': 'application/json' },
++                headers: await proxyHeaders(),
+                 body: JSON.stringify({ text, voice: voiceCfg.edge }),
+-            });
++            }, 15000);
+             if (res.ok) {
+                 const arrayBuffer = await res.arrayBuffer();
+                 // Спроба 1: Web Audio API (краще для якості й для деяких
+diff -ruN '--exclude=notes' '--exclude=__pycache__' site6/js/views-admin.js site7/js/views-admin.js
+--- a/js/views-admin.js	2026-10-31 13:31:33.028927786 +0000
++++ a/js/views-admin.js	2026-10-31 19:59:41.962351279 +0000
+@@ -316,12 +316,12 @@
+         rows.forEach(u => {
+             const lang = (typeof getLanguage === 'function') ? getLanguage(u.targetLang) : null;
+             html += `<tr>
+-                <td><strong>${u.name}</strong>${u.email ? `<br><span style="font-size:.72rem;color:var(--ink-soft);">${u.email}</span>` : ''}</td>
+-                <td><span class="tag level-${u.level}">${u.level}</span></td>
+-                <td>${lang ? lang.flag + ' ' + lang.name.uk : u.targetLang}</td>
+-                <td>${u.xp}</td>
++                <td><strong>${escHtml(u.name)}</strong>${u.email ? `<br><span style="font-size:.72rem;color:var(--ink-soft);">${escHtml(u.email)}</span>` : ''}</td>
++                <td><span class="tag level-${escHtml(u.level)}">${escHtml(u.level)}</span></td>
++                <td>${lang ? lang.flag + ' ' + lang.name.uk : escHtml(u.targetLang)}</td>
++                <td>${escHtml(u.xp)}</td>
+                 <td>${u.admin ? '✅' : '—'}</td>
+-                <td><button class="btn btn-ghost btn-sm" onclick="adminToggleUserAdmin('${u.id}', ${!u.admin})">${u.admin ? 'Прибрати адміна' : 'Зробити адміном'}</button></td>
++                <td><button class="btn btn-ghost btn-sm" onclick="adminToggleUserAdmin(${escHtml(JSON.stringify(u.id))}, ${!u.admin})">${u.admin ? 'Прибрати адміна' : 'Зробити адміном'}</button></td>
+             </tr>`;
+         });
+         html += '</tbody></table>';
+@@ -427,7 +427,7 @@
+             const options = shuffle([w.uk, ...distractors]);
+             return {
+                 type: 'translation',
+-                question: `Як перекладається "${w.no}"?`,
++                question: `Як перекладається "${escHtml(w.no)}"?`,
+                 options: options,
+                 correct: options.indexOf(w.uk)
+             };
+@@ -553,9 +553,9 @@
+         html += '<table class="vocab-table"><thead><tr><th>Слово</th><th>Переклад</th><th>Рівень</th><th>Джерело</th><th>Дія</th></tr></thead><tbody>';
+         all.forEach(data => {
+             html += `<tr>
+-                <td><strong>${data.no}</strong></td>
+-                <td>${data.uk}</td>
+-                <td><span class="tag level-${data.level}">${data.level}</span></td>
++                <td><strong>${escHtml(data.no)}</strong></td>
++                <td>${escHtml(data.uk)}</td>
++                <td><span class="tag level-${escHtml(data.level)}">${escHtml(data.level)}</span></td>
+                 <td style="font-size:.75rem;color:var(--ink-soft);">${data._builtin ? 'Вбудоване' : 'Додано вручну'}</td>
+                 <td>${data._builtin ? '<span style="color:var(--ink-soft);font-size:.75rem;">—</span>' : `<button class="btn btn-danger btn-sm" onclick="adminDeleteWord('${data._docId}')">🗑️</button>`}</td>
+             </tr>`;
+@@ -610,7 +610,7 @@
+                         .map(p => ({ id: p.id, ...p.data() }))
+                         .sort((a, b) => (b.correct || 0) - (a.correct || 0));
+                     participantsHtml = '<table class="vocab-table"><thead><tr><th>Ім\'я</th><th>Результат</th></tr></thead><tbody>' +
+-                        rows.map(p => `<tr><td>${escHtml(p.name || p.id)}</td><td>${(p.correct ?? '—')}/${(p.total ?? '—')}</td></tr>`).join('') +
++                        rows.map(p => `<tr><td>${escHtml(p.name || p.id)}</td><td>${escHtml((p.correct ?? '—'))}/${escHtml((p.total ?? '—'))}</td></tr>`).join('') +
+                         '</tbody></table>';
+                 }
+             } catch (e) {
+@@ -622,16 +622,16 @@
+                 <div class="card" style="margin-bottom:8px;">
+                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                         <div>
+-                            <strong>${escHtml(data.name || '')}</strong> ${statusMap[data.status] || data.status}
+-                            <span style="font-size:.8rem;color:var(--ink-soft);margin-left:12px;">${data.level || 'A1'}</span>
++                            <strong>${escHtml(data.name || '')}</strong> ${escHtml(statusMap[data.status] || data.status)}
++                            <span style="font-size:.8rem;color:var(--ink-soft);margin-left:12px;">${escHtml(data.level || 'A1')}</span>
+                             <span class="tag" style="margin-left:8px;" title="Кількість учасників">👥 ${participantsCount}</span>
+                         </div>
+                         <div style="display:flex;gap:8px;">
+-                            <button class="btn btn-ghost btn-sm" onclick="toggleTournamentParticipants('${doc.id}')">👥 Учасники</button>
+-                            <button class="btn btn-danger btn-sm" onclick="adminDeleteTournament('${doc.id}')">🗑️</button>
++                            <button class="btn btn-ghost btn-sm" onclick="toggleTournamentParticipants(${escHtml(JSON.stringify(doc.id))})">👥 Учасники</button>
++                            <button class="btn btn-danger btn-sm" onclick="adminDeleteTournament(${escHtml(JSON.stringify(doc.id))})">🗑️</button>
+                         </div>
+                     </div>
+-                    <div id="tournParticipants-${doc.id}" style="display:none;margin-top:10px;max-height:300px;overflow-y:auto;">${participantsHtml}</div>
++                    <div id="tournParticipants-${escHtml(doc.id)}" style="display:none;margin-top:10px;max-height:300px;overflow-y:auto;">${participantsHtml}</div>
+                 </div>
+             `;
+         }
+@@ -681,10 +681,10 @@
+                 <div class="card" style="margin-bottom:8px;">
+                     <div style="display:flex;justify-content:space-between;align-items:center;">
+                         <div>
+-                            <strong>${data.question?.slice(0, 60)}...</strong>
+-                            <span style="font-size:.8rem;color:var(--ink-soft);margin-left:12px;">${langLabel} · ${doc.id}</span>
++                            <strong>${escHtml(data.question?.slice(0, 60))}...</strong>
++                            <span style="font-size:.8rem;color:var(--ink-soft);margin-left:12px;">${langLabel} · ${escHtml(doc.id)}</span>
+                         </div>
+-                        <button class="btn btn-danger btn-sm" onclick="adminDeleteDaily('${doc.id}')">🗑️</button>
++                        <button class="btn btn-danger btn-sm" onclick="adminDeleteDaily(${escHtml(JSON.stringify(doc.id))})">🗑️</button>
+                     </div>
+                 </div>
+             `;
+@@ -833,8 +833,8 @@
+                 const d = doc.data();
+                 const lang = getLanguage(d.lang);
+                 rows.push(`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line-soft);">
+-                    <span>${lang.flag} ${lang.name.uk} — <span class="tag level-${d.level}">${d.level}</span></span>
+-                    <span>${d.count || (d.words||[]).length} слів</span>
++                    <span>${lang.flag} ${lang.name.uk} — <span class="tag level-${escHtml(d.level)}">${escHtml(d.level)}</span></span>
++                    <span>${escHtml(d.count || (d.words||[]).length)} слів</span>
+                 </div>`);
+             });
+             existingList.innerHTML = rows.join('');
+@@ -861,7 +861,7 @@
+             previewCount.textContent = words.length;
+             previewList.innerHTML = words.map(w => `
+                 <div style="padding:6px 0;border-bottom:1px solid var(--line-soft);font-size:.85rem;">
+-                    <strong>${w.no}</strong> — ${w.uk}${w.en ? ` · en: ${w.en}` : ''}${w.ru ? ` · ru: ${w.ru}` : ''} <span style="color:var(--ink-soft);">(${w.t || ''})</span>
++                    <strong>${escHtml(w.no)}</strong> — ${escHtml(w.uk)}${w.en ? ` · en: ${w.en}` : ''}${w.ru ? ` · ru: ${w.ru}` : ''} <span style="color:var(--ink-soft);">(${escHtml(w.t || '')})</span>
+                 </div>
+             `).join('');
+             previewCard.style.display = 'block';
+@@ -1007,8 +1007,8 @@
+                 const d = doc.data();
+                 const lang = getLanguage(d.lang);
+                 rows.push(`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line-soft);">
+-                    <span>${lang.flag} ${lang.name.uk} — <span class="tag level-${d.level}">${d.level}</span></span>
+-                    <span>${d.count || (d.rules||[]).length} правил</span>
++                    <span>${lang.flag} ${lang.name.uk} — <span class="tag level-${escHtml(d.level)}">${escHtml(d.level)}</span></span>
++                    <span>${escHtml(d.count || (d.rules||[]).length)} правил</span>
+                 </div>`);
+             });
+             existingList.innerHTML = rows.join('');
+@@ -1035,8 +1035,8 @@
+             previewCount.textContent = rules.length;
+             previewList.innerHTML = rules.map(g => `
+                 <div style="padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:.85rem;">
+-                    <strong>${g.title}</strong>
+-                    <div style="color:var(--ink-soft);">${g.exp}</div>
++                    <strong>${escHtml(g.title)}</strong>
++                    <div style="color:var(--ink-soft);">${escHtml(g.exp)}</div>
+                 </div>
+             `).join('');
+             previewCard.style.display = 'block';
+@@ -1169,7 +1169,7 @@
+                 const lang = getLanguage(d.lang);
+                 rows.push(`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line-soft);">
+                     <span>${lang.flag} ${lang.name.uk}</span>
+-                    <span>${d.count || (d.letters||[]).length} літер</span>
++                    <span>${escHtml(d.count || (d.letters||[]).length)} літер</span>
+                 </div>`);
+             });
+             existingList.innerHTML = rows.join('');
+@@ -1466,16 +1466,16 @@
+                 const genre = getBookGenre(d.genre);
+                 const row = el(`
+                     <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line-soft);">
+-                        <span>${lang.flag} ${escHtml(d.title)} — <span class="tag level-${d.level}">${d.level}</span> · ${genre.label} · ${(d.chapters||[]).length} розд.</span>
++                        <span>${lang.flag} ${escHtml(d.title)} — <span class="tag level-${escHtml(d.level)}">${escHtml(d.level)}</span> · ${genre.label} · ${(d.chapters||[]).length} розд.</span>
+                         <span>
+-                            <button class="btn btn-ghost btn-sm ab-edit-book" data-id="${doc.id}">✏️</button>
+-                            <button class="btn btn-ghost btn-sm ab-delete-book" data-id="${doc.id}">🗑️</button>
++                            <button class="btn btn-ghost btn-sm ab-edit-book" data-id="${escHtml(doc.id)}">✏️</button>
++                            <button class="btn btn-ghost btn-sm ab-delete-book" data-id="${escHtml(doc.id)}">🗑️</button>
+                         </span>
+                     </div>
+                 `);
+                 row.querySelector('.ab-edit-book').onclick = () => loadBookIntoForm(doc.id, d);
+                 row.querySelector('.ab-delete-book').onclick = async () => {
+-                    if (!confirm(`Видалити книгу "${d.title}"? Це незворотно.`)) return;
++                    if (!confirm(`Видалити книгу "${escHtml(d.title)}"? Це незворотно.`)) return;
+                     try {
+                         await deleteSharedBook(doc.id, d.lang);
+                         toast('🗑️ Книгу видалено');
+@@ -1658,9 +1658,9 @@
+                         <div style="display:flex;justify-content:space-between;align-items:center;">
+                             <div>
+                                 <strong>${escHtml(d.no)}</strong> — ${escHtml(d.uk)}
+-                                <span style="font-size:.8rem;color:var(--ink-soft);margin-left:12px;">${lang.flag} ${lang.name.uk} · ${d.level}</span>
++                                <span style="font-size:.8rem;color:var(--ink-soft);margin-left:12px;">${lang.flag} ${lang.name.uk} · ${escHtml(d.level)}</span>
+                             </div>
+-                            <button class="btn btn-danger btn-sm" onclick="adminDeleteDailyWord('${doc.id}')">🗑️</button>
++                            <button class="btn btn-danger btn-sm" onclick="adminDeleteDailyWord(${escHtml(JSON.stringify(doc.id))})">🗑️</button>
+                         </div>
+                     </div>
+                 `);
+@@ -1795,8 +1795,8 @@
+                 const d = doc.data();
+                 const lang = getLanguage(d.lang);
+                 rows.push(`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line-soft);">
+-                    <span>${lang.flag} ${lang.name.uk} — <span class="tag level-${d.level}">${d.level}</span></span>
+-                    <span>${d.count || (d.sentences||[]).length} речень</span>
++                    <span>${lang.flag} ${lang.name.uk} — <span class="tag level-${escHtml(d.level)}">${escHtml(d.level)}</span></span>
++                    <span>${escHtml(d.count || (d.sentences||[]).length)} речень</span>
+                 </div>`);
+             });
+             existingList.innerHTML = rows.join('');
+diff -ruN '--exclude=notes' '--exclude=__pycache__' site6/js/views-core.js site7/js/views-core.js
+--- a/js/views-core.js	2026-10-31 13:35:11.032410188 +0000
++++ a/js/views-core.js	2026-10-31 20:02:16.236552206 +0000
+@@ -1055,7 +1055,7 @@
+         const target = item.w.no;
+         const correct = isFuzzyMatch(val, target);
+         fb.innerHTML =
+-            `<div class="feedback-banner ${correct?'ok':'bad'}">${correct? t('check_correct') : tf('check_wrong_prefix', {answer: target})}</div>`;
++            `<div class="feedback-banner ${correct?'ok':'bad'}">${correct? t('check_correct') : tf('check_wrong_prefix', {answer: escHtml(target)})}</div>`;
+         input.disabled = true;
+         btn.disabled = true;
+         gradeWord(item.key, correct ? 'good' : 'again');
+@@ -1503,6 +1503,9 @@
+         SUBSTATE.correct = 0;
+         SUBSTATE.userAnswers = null;
+     }
++    // Жодне слово рівня не підійшло (напр. приклад не містить самого слова) — qs порожній:
++    // показуємо стандартне "замало слів" замість падіння на q.sentence / q.words.
++    if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) return testPoolGuard(1e9);
+     const sub = SUBSTATE;
+     if (sub.i >= sub.qs.length && sub.userAnswers && sub.userAnswers.every(a => a !== null)) {
+         LD().stats.testsCompleted = (LD().stats.testsCompleted || 0) + 1;
+@@ -1647,6 +1650,9 @@
+         SUBSTATE.correct = 0;
+         SUBSTATE.userAnswers = new Array(SUBSTATE.qs.length).fill(null);
+     }
++    // Жодне слово рівня не підійшло (напр. приклад не містить самого слова) — qs порожній:
++    // показуємо стандартне "замало слів" замість падіння на q.sentence / q.words.
++    if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) return testPoolGuard(1e9);
+     const sub = SUBSTATE;
+     if (sub.i >= sub.qs.length && sub.userAnswers.every(a => a !== null)) {
+         LD().stats.testsCompleted = (LD().stats.testsCompleted || 0) + 1;
+@@ -1750,7 +1756,7 @@
+             sub.userAnswers[sub.i] = { chosen: chosen.slice(), shuffled: shuffled, correct: correct };
+             if (correct) sub.correct = (sub.correct || 0) + 1;
+             fb.innerHTML =
+-                `<div class="feedback-banner ${correct?'ok':'bad'}" style="margin-top:12px;">${correct? t('check_correct') : tf('correct_variant_prefix', {answer: q.original.join(' ')})}</div>`;
++                `<div class="feedback-banner ${correct?'ok':'bad'}" style="margin-top:12px;">${correct? t('check_correct') : tf('correct_variant_prefix', {answer: escHtml(q.original.join(' '))})}</div>`;
+             checkBtn.disabled = true;
+             updateDotsOrder();
+             setTimeout(() => {
+@@ -1914,7 +1920,7 @@
+ 
+         if (ans !== null) {
+             fb.innerHTML =
+-                `<div class="feedback-banner ${ans.correct?'ok':'bad'}">${ans.correct? t('check_correct') : tf('check_wrong_prefix', {answer: ans.correctAnswer})}</div>`;
++                `<div class="feedback-banner ${ans.correct?'ok':'bad'}">${ans.correct? t('check_correct') : tf('check_wrong_prefix', {answer: escHtml(ans.correctAnswer)})}</div>`;
+         }
+ 
+         btn.onclick = () => {
+@@ -1924,7 +1930,7 @@
+             sub.userAnswers[sub.i] = { input: val, correct: correct, correctAnswer: target };
+             if (correct) sub.correct = (sub.correct || 0) + 1;
+             fb.innerHTML =
+-                `<div class="feedback-banner ${correct?'ok':'bad'}">${correct? t('check_correct') : tf('check_wrong_prefix', {answer: target})}</div>`;
++                `<div class="feedback-banner ${correct?'ok':'bad'}">${correct? t('check_correct') : tf('check_wrong_prefix', {answer: escHtml(target)})}</div>`;
+             btn.disabled = true;
+             input.disabled = true;
+             updateDotsTranslate();
+diff -ruN '--exclude=notes' '--exclude=__pycache__' site6/js/views-more.js site7/js/views-more.js
+--- a/js/views-more.js	2026-10-31 13:31:33.029057007 +0000
++++ a/js/views-more.js	2026-11-01 10:02:19.769787575 +0000
+@@ -16,7 +16,7 @@
+                 </div>
+                 <div class="card">
+                   <h3>${t('settings_title')}</h3>
+-                  <div class="field"><label>${t('field_name')}</label><input id="setName" value="${escHtml(STATE.name && !isDefaultGuestName(STATE.name) ? STATE.name : '')}"></div>
++                  <div class="field"><label>${t('field_name')}</label><input id="setName" maxlength="60" value="${escHtml(STATE.name && !isDefaultGuestName(STATE.name) ? STATE.name : '')}"></div>
+                   <div class="field"><label>${t('field_learn_lang')}</label>
+                     <select id="setTargetLang">
+                       ${LANGUAGES.map(l => `<option value="${l.code}" ${STATE.targetLang===l.code?'selected':''}>${l.flag} ${l.name[STATE.uiLang]||l.name.uk}</option>`).join('')}
+@@ -71,7 +71,8 @@
+                     ));
+             });
+             wrap.querySelector('#saveSettings').onclick = () => {
+-                STATE.name = wrap.querySelector('#setName').value.trim() || STATE.name || currentUser;
++                // Ім'я бачать інші користувачі (турніри) і адмін; обмежуємо довжину так само, як правила Firestore (validProfile).
++                STATE.name = wrap.querySelector('#setName').value.trim().slice(0, 60) || STATE.name || currentUser;
+                 if (!STATE.settings) STATE.settings = {};
+                 STATE.settings.goal = wrap.querySelector('#setGoal').value.trim();
+                 STATE.settings.reminderTime = wrap.querySelector('#setTime').value;
+@@ -275,6 +276,9 @@
+   return wrap;
+ }
+ function renderNorskproveTask(task, mode, index, total) {
++  // Рівень обраний у viewNorskprove() і лежить у SUBSTATE.norskLevel. Раніше змінна `level` тут не була
++  // оголошена взагалі — збереження письма, AI-перевірка і лічильник усної частини падали з ReferenceError.
++  const level = SUBSTATE.norskLevel || LD().level || 'A1';
+   const wrap = el(`<div class="card" style="margin-top:8px;"></div>`);
+ 
+   // Заголовок і прогрес
+diff -ruN '--exclude=notes' '--exclude=__pycache__' site6/security-tests/README.md site7/security-tests/README.md
+--- a/security-tests/README.md	1970-01-01 00:00:00.000000000 +0000
++++ a/security-tests/README.md	2026-11-01 14:59:47.416916964 +0000
+@@ -0,0 +1,8 @@
++# security-tests
++
++| File | Needs | What it proves | Status when written |
++|---|---|---|---|
++| `worker.test.mjs` | Node 20+ | token verification (forged/expired/tampered/`alg=none`), limits, CORS, body caps, no upstream-error leak, ord-api | 37/37 pass |
++| `xss-taint.py` + `pw.py` | `pip install playwright && playwright install chromium` | poisons every untrusted data source (state, AI caches, Firestore docs) and visits every route; reports fields that execute script. `SITE_ROOT=.. TLANG=tr SLICE=0:22 LEVEL_POISON=1 python3 security-tests/xss-taint.py` (then `SLICE=22:60`) | 0 executions on 39 routes (15 before the fixes) |
++| `client-unit.py` | same | `writeUserDoc`, localized non-enumerating auth errors, storage-quota safety | 15/15 pass |
++| `firestore.rules.test.mjs` | Firebase emulator | rules: no self-promotion, field validation, one-shot tournament results | **not run** (no emulator in the authoring environment) |
+diff -ruN '--exclude=notes' '--exclude=__pycache__' site6/security-tests/client-unit.py site7/security-tests/client-unit.py
+--- a/security-tests/client-unit.py	1970-01-01 00:00:00.000000000 +0000
++++ a/security-tests/client-unit.py	2026-11-01 14:59:22.162628456 +0000
+@@ -0,0 +1,48 @@
++import json, os
++from pw import *
++from playwright.sync_api import sync_playwright
++srv = start(); base = f"http://127.0.0.1:{srv.server_address[1]}"
++fails = 0
++def ok(c, m, x=''):
++    global fails
++    if not c: fails += 1
++    print(('PASS ' if c else 'FAIL ') + m + (f'  [{x}]' if x != '' else ''))
++with sync_playwright() as p:
++    b = p.chromium.launch(); pg = b.new_context().new_page()
++    pg.route("**/*", lambda r: r.abort() if not r.request.url.startswith(base) else r.continue_())
++    login(pg, base, '/no')
++    # --- writeUserDoc
++    r = pg.evaluate("""async () => {
++      window.firebase = { firestore: { FieldValue: { delete: () => '__DELETE__' } } };
++      const log = [];
++      const mk = (failFirst) => ({ update: async (d) => { log.push(['update', d]); if (failFirst) { const e = new Error('nf'); e.code = 'not-found'; throw e; } },
++                                   set: async (d, o) => { log.push(['set', d, o || null]); } });
++      const data = { name: 'N', admin: true, langData: { no: { xp: 1 } }, generatedVocab: { tr: 1 } };
++      await writeUserDoc(mk(false), data);
++      await writeUserDoc(mk(true), data);
++      return log;
++    }""")
++    upd, upd2, setc = r[0], r[1], r[2]
++    ok(upd[0] == 'update' and 'admin' not in upd[1], 'update payload never contains the admin field', list(upd[1].keys()))
++    ok(all(upd[1][k] == '__DELETE__' for k in ['generatedVocab', 'generatedTasks', 'generatedGrammar', 'wordTranslations']), 'stale AI caches are deleted explicitly (FieldValue.delete)')
++    ok(upd[1]['langData'] == {'no': {'xp': 1}}, 'langData replaced as a whole (no deep merge)')
++    ok(setc[0] == 'set' and setc[2] is None and 'admin' not in setc[1] and 'generatedVocab' in setc[1], 'not-found -> first save uses plain set() (no merge) without admin', str(setc[2]))
++    # --- localized, non-enumerating auth errors
++    msgs = pg.evaluate("""() => { const out = {};
++      for (const ui of ['uk', 'en', 'ru']) { setUiLang(ui);
++        out[ui] = { wrong: authErrorMessage({code:'auth/wrong-password'}, 'login'), nouser: authErrorMessage({code:'auth/user-not-found'}, 'login'),
++                    inv: authErrorMessage({code:'auth/invalid-credential'}, 'login'), weak: authErrorMessage({code:'auth/weak-password'}, 'register'),
++                    many: authErrorMessage({code:'auth/too-many-requests'}, 'login'), raw: authErrorMessage({code:'x', message:'Firebase: Error (auth/zzz)'}, 'register') }; }
++      return out; }""")
++    for ui, m in msgs.items():
++        ok(m['wrong'] == m['nouser'] == m['inv'], f'[{ui}] wrong password / unknown user / invalid credential give the SAME message (no enumeration)', m['wrong'])
++        ok('Firebase' not in m['raw'] and 'auth/' not in m['raw'], f'[{ui}] raw Firebase text is never shown', m['raw'])
++        ok(m['weak'] and m['many'] and m['weak'] != m['many'], f'[{ui}] weak-password and too-many-requests have their own messages')
++    # --- lsSet survives QuotaExceeded and does not throw out of updateState
++    r = pg.evaluate("""() => { const orig = Storage.prototype.setItem; Storage.prototype.setItem = function () { const e = new Error('quota'); e.name = 'QuotaExceededError'; throw e; };
++      let threw = false; try { updateState(); saveGuestState(STATE); saveSession('guest', true); } catch (e) { threw = true; } Storage.prototype.setItem = orig; return threw; }""")
++    ok(r is False, 'full localStorage (QuotaExceededError) no longer throws out of updateState()/saveGuestState()/saveSession()')
++    src = open('' + os.environ.get('SITE_ROOT', '..') + '/js/auth.js', encoding='utf-8').read()
++    ok('const password = passwordInput.value;' in src and 'passwordInput.value.trim()' not in src, 'auth.js no longer trims the password')
++    b.close()
++print(f'\n{fails} FAILED' if fails else '\nALL PASSED')
+diff -ruN '--exclude=notes' '--exclude=__pycache__' site6/security-tests/firestore.rules.test.mjs site7/security-tests/firestore.rules.test.mjs
+--- a/security-tests/firestore.rules.test.mjs	1970-01-01 00:00:00.000000000 +0000
++++ a/security-tests/firestore.rules.test.mjs	2026-11-01 14:59:22.185415860 +0000
+@@ -0,0 +1,56 @@
++// ⚠️ НЕ ЗАПУСКАВСЯ автором змін: для цього потрібен емулятор Firestore (Java + завантаження з серверів Google),
++// а в середовищі, де готувались зміни, мережа до них закрита. Правила перевірено лише структурно (баланс дужок,
++// синтаксис функцій) і за кодом клієнта. ЗАПУСТІТЬ цей тест, перш ніж публікувати firestore.rules:
++//
++//   npm i -D @firebase/rules-unit-testing firebase
++//   npx firebase emulators:exec --only firestore "node security-tests/firestore.rules.test.mjs"
++//
++import { initializeTestEnvironment, assertFails, assertSucceeds } from '@firebase/rules-unit-testing';
++import { readFileSync } from 'node:fs';
++import { doc, setDoc, getDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
++
++const env = await initializeTestEnvironment({ projectId: 'fjord-test', firestore: { rules: readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8') } });
++const as = (uid) => env.authenticatedContext(uid, { email: `${uid}@example.com` }).firestore();
++let pass = 0, fail = 0;
++const t = async (name, p) => { try { await p; pass++; console.log('PASS', name); } catch (e) { fail++; console.log('FAIL', name, '-', String(e.message).slice(0, 100)); } };
++
++await env.withSecurityRulesDisabled(async (ctx) => {
++  const db = ctx.firestore();
++  await setDoc(doc(db, 'users/admin1'), { name: 'Admin', admin: true });
++  await setDoc(doc(db, 'users/alice'), { name: 'Alice', admin: false });
++  await setDoc(doc(db, 'tournaments/T1'), { title: 'T' });
++});
++
++// ---- users
++await t('owner can update own profile', assertSucceeds(updateDoc(doc(as('alice'), 'users/alice'), { name: 'Alice 2', xp: 5 })));
++await t('owner CANNOT make themselves admin', assertFails(updateDoc(doc(as('alice'), 'users/alice'), { admin: true })));
++await t('cannot create own doc with admin:true', assertFails(setDoc(doc(as('bob'), 'users/bob'), { name: 'Bob', admin: true })));
++await t('can create own doc without admin', assertSucceeds(setDoc(doc(as('carol'), 'users/carol'), { name: 'Carol', email: 'carol@example.com' })));
++await t('name longer than 100 chars rejected', assertFails(updateDoc(doc(as('alice'), 'users/alice'), { name: 'x'.repeat(101) })));
++await t('name must be a string', assertFails(updateDoc(doc(as('alice'), 'users/alice'), { name: { a: 1 } })));
++await t('email must be a string (<=254)', assertFails(updateDoc(doc(as('alice'), 'users/alice'), { email: 'a'.repeat(300) })));
++await t("cannot read another user's doc", assertFails(getDoc(doc(as('alice'), 'users/carol'))));
++await t('cannot write another user\'s doc', assertFails(updateDoc(doc(as('alice'), 'users/carol'), { name: 'x' })));
++await t('admin can read any user', assertSucceeds(getDoc(doc(as('admin1'), 'users/alice'))));
++await t('admin can promote another user', assertSucceeds(updateDoc(doc(as('admin1'), 'users/alice'), { admin: true })));
++await t('anonymous cannot read users', assertFails(getDoc(doc(env.unauthenticatedContext().firestore(), 'users/alice'))));
++
++// ---- tournament results
++const good = () => ({ name: 'P', score: 3, correct: 3, total: 5, completedAt: serverTimestamp() });
++const pDoc = (db, uid) => doc(db, `tournaments/T1/participants/${uid}`);
++await t('player can submit own result once', assertSucceeds(setDoc(pDoc(as('p1'), 'p1'), good())));
++await t('result cannot be overwritten (no replay / no "improving" the score)', assertFails(setDoc(pDoc(as('p1'), 'p1'), { ...good(), score: 5, correct: 5 })));
++await t('result cannot be updated', assertFails(updateDoc(pDoc(as('p1'), 'p1'), { score: 5, correct: 5 })));
++await t("cannot write another player's result", assertFails(setDoc(pDoc(as('p2'), 'p3'), good())));
++await t('correct > total rejected', assertFails(setDoc(pDoc(as('p4'), 'p4'), { ...good(), correct: 6, score: 6 })));
++await t('score != correct rejected', assertFails(setDoc(pDoc(as('p5'), 'p5'), { ...good(), score: 99 })));
++await t('extra fields rejected', assertFails(setDoc(pDoc(as('p6'), 'p6'), { ...good(), bonus: 1 })));
++await t('fake completedAt rejected', assertFails(setDoc(pDoc(as('p7'), 'p7'), { ...good(), completedAt: new Date(0) })));
++await t('result for a non-existent tournament rejected', assertFails(setDoc(doc(as('p8'), 'tournaments/NOPE/participants/p8'), good())));
++await t('anyone can read the leaderboard', assertSucceeds(getDoc(pDoc(env.unauthenticatedContext().firestore(), 'p1'))));
++await t('only admin can delete a result', assertFails(deleteDoc(pDoc(as('p1'), 'p1'))));
++await t('admin can delete a result', assertSucceeds(deleteDoc(pDoc(as('admin1'), 'p1'))));
++
++console.log(`\n${pass} passed, ${fail} failed`);
++await env.cleanup();
++process.exit(fail ? 1 : 0);
+diff -ruN '--exclude=notes' '--exclude=__pycache__' site6/security-tests/pw.py site7/security-tests/pw.py
+--- a/security-tests/pw.py	1970-01-01 00:00:00.000000000 +0000
++++ a/security-tests/pw.py	2026-11-01 14:59:22.160100984 +0000
+@@ -0,0 +1,20 @@
++import http.server, socketserver, threading, os, json, sys
++ROOT = os.environ.get('SITE_ROOT', '/home/claude/site4')
++class H(http.server.SimpleHTTPRequestHandler):
++    def __init__(self,*a,**k): super().__init__(*a,directory=ROOT,**k)
++    def do_GET(self):
++        p = self.path.split('?')[0]
++        f = os.path.join(ROOT, p.lstrip('/'))
++        if not os.path.exists(f) or (os.path.isdir(f) and not os.path.exists(os.path.join(f,'index.html'))):
++            self.path = '/index.html'
++        return super().do_GET()
++    def log_message(self,*a): pass
++def start():
++    srv = socketserver.ThreadingTCPServer(('127.0.0.1',0),H); srv.daemon_threads=True
++    threading.Thread(target=srv.serve_forever,daemon=True).start(); return srv
++GUEST = {"name":"Nazar","targetLang":"no","uiLang":"en","admin":False,"langData":{"no":{"xp":120}}}
++def login(pg, base, path='/no', admin=False):
++    g = dict(GUEST); g["admin"]=admin
++    pg.add_init_script("localStorage.setItem('fjord_guest', %s); localStorage.setItem('fjord_entry_done','1'); localStorage.setItem('fjord_ui_lang','en');" % json.dumps(json.dumps(g)))
++    pg.goto(base+path); pg.wait_for_selector('#guestBtn', state='attached'); pg.evaluate("document.getElementById('guestBtn').click()")
++    pg.wait_for_selector('#app.active'); pg.wait_for_timeout(500)
+diff -ruN '--exclude=notes' '--exclude=__pycache__' site6/security-tests/worker.test.mjs site7/security-tests/worker.test.mjs
+--- a/security-tests/worker.test.mjs	1970-01-01 00:00:00.000000000 +0000
++++ a/security-tests/worker.test.mjs	2026-11-01 14:59:22.181321018 +0000
+@@ -0,0 +1,126 @@
++// Запуск: node security-tests/worker.test.mjs   (Node 20+; тестує Worker локально з підробленим ключем Google, KV і fetch)
++import { webcrypto as crypto } from 'node:crypto';
++import worker from '../worker-hardened-example.js';
++
++const PROJECT = 'fjord-f0e0b';
++const b64u = (buf) => Buffer.from(buf).toString('base64url');
++const enc = (o) => b64u(JSON.stringify(o));
++let pass = 0, fail = 0;
++const ok = (c, m, x = '') => { c ? pass++ : fail++; console.log((c ? 'PASS ' : 'FAIL ') + m + (x !== '' ? `  [${x}]` : '')); };
++
++// --- fake Google signing key + JWKS
++const kp = await crypto.subtle.generateKey({ name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['sign', 'verify']);
++const other = await crypto.subtle.generateKey({ name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['sign', 'verify']);
++const pubJwk = { ...(await crypto.subtle.exportKey('jwk', kp.publicKey)), kid: 'k1', alg: 'RS256', use: 'sig' };
++const now = () => Math.floor(Date.now() / 1000);
++async function token({ aud = PROJECT, iss = 'https://securetoken.google.com/' + PROJECT, sub = 'UID1', exp = now() + 3600, iat = now() - 5, kid = 'k1', alg = 'RS256', key = kp.privateKey } = {}) {
++  const h = enc({ alg, kid, typ: 'JWT' }), p = enc({ aud, iss, sub, exp, iat, auth_time: iat });
++  const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, new TextEncoder().encode(h + '.' + p));
++  return `${h}.${p}.${b64u(sig)}`;
++}
++
++// --- mocks
++const calls = [];
++globalThis.fetch = async (url, init = {}) => {
++  calls.push({ url: String(url), init });
++  const u = String(url);
++  if (u.includes('securetoken@system.gserviceaccount.com')) return new Response(JSON.stringify({ keys: [pubJwk] }), { headers: { 'cache-control': 'public, max-age=3600' } });
++  if (u.includes('generativelanguage.googleapis.com')) {
++    if (globalThis.__geminiFail) return new Response('{"error":{"message":"API key SECRET-ABC invalid for project 123"}}', { status: 429 });
++    return new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: 'hei!' }] } }] }));
++  }
++  if (u.includes('ord.uib.no')) return new Response(globalThis.__ordHtml ? '<html>oops</html>' : '{"a":1}');
++  return new Response('x', { status: 500 });
++};
++const mkKV = () => { const m = new Map(); return { get: async (k) => m.get(k) ?? null, put: async (k, v) => { m.set(k, v); }, _m: m }; };
++const mkEnv = (extra = {}) => ({ GEMINI_API_KEY: 'REAL-KEY-123', RATE_KV: mkKV(), ...extra });
++const ctx = { waitUntil: (p) => p };
++const ORIGIN = 'https://fjordlp.com';
++const post = (body, headers = {}, path = '/') => new Request('https://w.example' + path, { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: typeof body === 'string' ? body : JSON.stringify(body) });
++const msg = { mode: 'chat', message: 'hello', history: [] };
++const call = (req, env) => worker.fetch(req, env, ctx);
++
++// 1. CORS
++let r = await call(new Request('https://w.example/', { method: 'OPTIONS', headers: { Origin: ORIGIN } }), mkEnv());
++ok(r.status === 204 && r.headers.get('access-control-allow-origin') === ORIGIN, 'OPTIONS from allowed origin -> 204 + ACAO=origin');
++ok((r.headers.get('access-control-allow-headers') || '').includes('Authorization'), 'preflight allows the Authorization header');
++r = await call(new Request('https://w.example/', { method: 'OPTIONS', headers: { Origin: 'https://evil.example' } }), mkEnv());
++ok(r.headers.get('access-control-allow-origin') === null, 'OPTIONS from evil origin -> no ACAO header');
++r = await call(post(msg, { Origin: 'null' }), mkEnv());
++ok(r.status === 403 && r.headers.get('access-control-allow-origin') === null, 'Origin: null -> 403 and NO "null" ACAO (old bug allowed it)', r.status);
++r = await call(post(msg, { Origin: 'https://evil.example' }), mkEnv());
++ok(r.status === 403, 'POST from evil origin -> 403');
++
++// 2. guest happy path + key not in URL
++calls.length = 0;
++r = await call(post(msg, { Origin: ORIGIN }), mkEnv());
++const j = await r.json(); const g = calls.find(c => c.url.includes('generativelanguage'));
++ok(r.status === 200 && j.reply === 'hei!', 'guest chat works', r.status);
++ok(g && !g.url.includes('REAL-KEY') && g.init.headers['x-goog-api-key'] === 'REAL-KEY-123', 'Gemini key sent in header, not in URL');
++r = await call(post(msg), mkEnv());
++ok(r.status === 200, 'request without Origin (curl-like) still works as a GUEST (limited)');
++
++// 3. guest limit per minute (8) and per day (60)
++let env = mkEnv(); let last;
++for (let i = 0; i < 9; i++) last = await call(post(msg, { 'CF-Connecting-IP': '1.2.3.4' }), env);
++ok(last.status === 429, 'guest: 9th request within a minute -> 429', last.status);
++const r2 = await call(post(msg, { 'CF-Connecting-IP': '5.6.7.8' }), env);
++ok(r2.status === 200, 'limit is per IP: another IP unaffected');
++env = mkEnv(); const dayKey = `rl:ai:guest:9.9.9.9:d${new Date().toISOString().slice(0, 10)}`; await env.RATE_KV.put(dayKey, '60');
++r = await call(post(msg, { 'CF-Connecting-IP': '9.9.9.9' }), env);
++ok(r.status === 429, 'guest: daily cap (60) enforced', r.status);
++
++// 4. token verification
++env = mkEnv();
++r = await call(post(msg, { Authorization: 'Bearer ' + await token() }), env);
++ok(r.status === 200, 'valid Firebase token -> 200');
++const keys = [...env.RATE_KV._m.keys()].join(' ');
++ok(keys.includes('ai:user:UID1'), 'limits are keyed by uid for signed-in users', keys.slice(0, 60));
++const bad = {
++  'expired token': await token({ exp: now() - 10 }),
++  'wrong audience': await token({ aud: 'other-project' }),
++  'wrong issuer': await token({ iss: 'https://evil.example/' }),
++  'signature from a different key': await token({ key: other.privateKey }),
++  'unknown kid': await token({ kid: 'nope' }),
++  'empty sub': await token({ sub: '' }),
++  'iat in the future': await token({ iat: now() + 3600 }),
++};
++for (const [name, t] of Object.entries(bad)) { r = await call(post(msg, { Authorization: 'Bearer ' + t }), mkEnv()); ok(r.status === 401, `${name} -> 401`, r.status); }
++const noneTok = enc({ alg: 'none', typ: 'JWT', kid: 'k1' }) + '.' + enc({ aud: PROJECT, iss: 'https://securetoken.google.com/' + PROJECT, sub: 'x', exp: now() + 99, iat: now() }) + '.';
++r = await call(post(msg, { Authorization: 'Bearer ' + noneTok }), mkEnv()); ok(r.status === 401, 'alg=none token -> 401');
++r = await call(post(msg, { Authorization: 'Bearer garbage' }), mkEnv()); ok(r.status === 401, 'garbage token -> 401 (not silently treated as guest)');
++// tampered payload keeps original signature
++const t0 = await token(); const [h0, , s0] = t0.split('.'); const tam = `${h0}.${enc({ aud: PROJECT, iss: 'https://securetoken.google.com/' + PROJECT, sub: 'ADMIN', exp: now() + 999, iat: now() })}.${s0}`;
++r = await call(post(msg, { Authorization: 'Bearer ' + tam }), mkEnv()); ok(r.status === 401, 'payload tampered after signing -> 401');
++// signed-in user limit is higher than guest
++env = mkEnv(); const tk = await token(); let okCount = 0;
++for (let i = 0; i < 31; i++) { r = await call(post(msg, { Authorization: 'Bearer ' + tk }), env); if (r.status === 200) okCount++; }
++ok(okCount === 30 && r.status === 429, 'signed-in user: 30/min then 429', okCount);
++
++// 5. AUTH_MODE=required
++r = await call(post(msg), mkEnv({ AUTH_MODE: 'required' })); ok(r.status === 401, 'AUTH_MODE=required: no token -> 401');
++r = await call(post(msg, { Authorization: 'Bearer ' + await token() }), mkEnv({ AUTH_MODE: 'required' })); ok(r.status === 200, 'AUTH_MODE=required: valid token -> 200');
++
++// 6. body validation
++r = await call(post('x'.repeat(100001)), mkEnv()); ok(r.status === 413, 'oversized body -> 413', r.status);
++r = await call(post('{not json'), mkEnv()); ok(r.status === 400, 'invalid JSON -> 400');
++r = await call(post('null'), mkEnv()); ok(r.status === 400, 'JSON null -> 400');
++r = await call(post({ mode: 'chat', message: '' }), mkEnv()); ok(r.status === 400, 'empty message -> 400');
++calls.length = 0; r = await call(post({ mode: '__proto__', message: 'x', history: [null, 5, { role: 'user', text: 'ok' }] }), mkEnv());
++ok(r.status === 200, 'mode "__proto__" and junk history entries do not crash', r.status);
++
++// 7. upstream failure does not leak the Google error body
++globalThis.__geminiFail = true; r = await call(post(msg), mkEnv()); const ej = await r.json(); globalThis.__geminiFail = false;
++ok(r.status === 502 && !JSON.stringify(ej).includes('SECRET-ABC') && ej.detail === 'upstream status 429', 'Gemini failure -> generic 502, upstream body not leaked', JSON.stringify(ej));
++
++// 8. ord-api
++r = await call(new Request('https://w.example/ord-api/article/..%2F..%2Fadmin', { headers: { Origin: ORIGIN } }), mkEnv()); ok(r.status === 400 || r.status === 404, 'ord-api: path-traversal article id rejected', r.status);
++r = await call(new Request('https://w.example/ord-api/article/12345'), mkEnv()); ok(r.status === 200, 'ord-api: valid id works', r.status);
++r = await call(new Request('https://w.example/ord-api/suggest', { method: 'POST' }), mkEnv()); ok(r.status === 405, 'ord-api: POST -> 405');
++globalThis.__ordHtml = true; r = await call(new Request('https://w.example/ord-api/suggest?q=a'), mkEnv()); globalThis.__ordHtml = false;
++ok(r.status === 502, 'ord-api: non-JSON upstream -> 502 (used to throw)', r.status);
++env = mkEnv(); let lastOrd; for (let i = 0; i < 17; i++) lastOrd = await call(new Request('https://w.example/ord-api/suggest?q=a', { headers: { 'CF-Connecting-IP': '3.3.3.3' } }), env);
++ok(lastOrd.status === 429, 'ord-api is rate limited per IP (16/min for guests)', lastOrd.status);
++
++console.log(`\n${pass} passed, ${fail} failed`);
++process.exit(fail ? 1 : 0);
+diff -ruN '--exclude=notes' '--exclude=__pycache__' site6/security-tests/xss-taint.py site7/security-tests/xss-taint.py
+--- a/security-tests/xss-taint.py	1970-01-01 00:00:00.000000000 +0000
++++ a/security-tests/xss-taint.py	2026-11-01 14:59:22.158926558 +0000
+@@ -0,0 +1,125 @@
++"""Dynamic XSS taint test: poison every untrusted data source, visit every route, record which fields execute script."""
++import json, os, re, sys
++from pw import *
++from playwright.sync_api import sync_playwright
++LANG = os.environ.get('TLANG', 'tr')          # tr = no built-in data -> AI-generated (generatedVocab) path
++ROUTES_SLICE = os.environ.get('SLICE', '')     # e.g. "0:20"
++srv = start(); base = f"http://127.0.0.1:{srv.server_address[1]}"
++
++PAYLOAD_JS = r"""
++window.__hits = {};
++window.__xss = (tag) => { (window.__hits[tag] = window.__hits[tag] || []).push(window.ROUTE_NOW || ''); };
++const P = (tag) => `"'><img src=x onerror="__xss('${tag}')">`;
++window.P = P;
++const KEEP = new Set(['level', 'lang', 'id', 'login']);
++window.poisonDeep = function poisonDeep(o, tag) {
++  if (typeof o === 'string') return P(tag);
++  if (Array.isArray(o)) return o.map((x, i) => poisonDeep(x, tag + '[' + i + ']'));
++  if (o && typeof o === 'object') { const r = {}; for (const k of Object.keys(o)) r[k] = KEEP.has(k) ? o[k] : poisonDeep(o[k], tag + '.' + k); return r; }
++  return o;
++};
++"""
++
++STUB_JS = r"""
++(() => {
++  const ARR = new Set(['words','topics','items','pages','chapters','sentences','questions','options','examples','letters','tasks','blocks','rows','list','entries','lessons','participants','vocab','grammar','cards']);
++  const NUM = new Set(['xp','streak','score','count','total','correct','points','leaderboardScore','order','index','size','number','duration','max','min','limit','timeLimit','stars','level_num']);
++  const mkDoc = (coll, id, depth = 0) => new Proxy({}, {
++    get(_, p) {
++      if (typeof p !== 'string') return undefined;
++      if (p === 'then') return undefined;
++      if (p === 'level') return window.__POISON_LEVEL ? P(`FS:${coll}.level`) : 'A1'; if (p === 'lang') return window.__LANG;
++      if (p === 'admin') return false;
++      if (NUM.has(p)) return 5;
++      if (/(At|Date|Time|date|time)$/.test(p)) return { toDate: () => new Date(), seconds: 1, toMillis: () => Date.now() };
++      if (ARR.has(p) && depth < 2) return [0, 1, 2].map(i => mkDoc(coll, id + 'i' + i, depth + 1));
++      return P(`FS:${coll}.${p}`);
++    },
++    has: () => true,
++    ownKeys: () => ['name','email','title','description','word','no','uk','en','ru','text','author','topic','note','desc','question','answer','t','ex_no','ex_uk','en_ex','ru_ex'],
++    getOwnPropertyDescriptor: (t, p) => ({ enumerable: true, configurable: true, writable: true, value: undefined }),
++  });
++  const snapDoc = (coll, id) => ({ id, exists: true, data: () => mkDoc(coll, id), ref: null, get: (f) => mkDoc(coll, id)[f] });
++  const mkSnap = (coll) => { const docs = [0, 1, 2].map(i => snapDoc(coll, 'D' + i)); return { empty: false, size: 3, docs, forEach: (fn) => docs.forEach(fn), docChanges: () => [] }; };
++  const Q = (coll) => new Proxy(function () {}, {
++    get(_, p) {
++      if (p === 'get') return async () => mkSnap(coll);
++      if (p === 'doc') return (id) => D(coll, id || 'D0');
++      if (p === 'onSnapshot') return (cb) => { setTimeout(() => cb(mkSnap(coll)), 0); return () => {}; };
++      if (p === 'add') return async () => ({ id: 'NEW' });
++      if (p === 'then') return undefined;
++      return () => Q(coll);       // where / orderBy / limit / startAfter ... chain
++    },
++  });
++  const D = (coll, id) => new Proxy({}, {
++    get(_, p) {
++      if (p === 'get') return async () => snapDoc(coll, id);
++      if (p === 'collection') return (name) => Q(coll + '/' + name);
++      if (p === 'set' || p === 'update' || p === 'delete') return async () => undefined;
++      if (p === 'onSnapshot') return (cb) => { setTimeout(() => cb(snapDoc(coll, id)), 0); return () => {}; };
++      if (p === 'id') return id;
++      if (p === 'then') return undefined;
++      return undefined;
++    },
++  });
++  const db = { collection: (n) => Q(n), batch: () => ({ set() {}, update() {}, delete() {}, commit: async () => {} }), runTransaction: async (fn) => fn({ get: async () => snapDoc('t', 't'), set() {}, update() {} }) };
++  window.firebase = window.firebase || {};
++  window.firebase.firestore = Object.assign(() => db, { FieldValue: { serverTimestamp: () => 0, increment: n => n, delete: () => null, arrayUnion: (...a) => a, arrayRemove: (...a) => a }, Timestamp: { now: () => ({ toDate: () => new Date() }), fromDate: d => d } });
++  window.firebase.auth = () => ({ currentUser: { uid: 'U1', email: 'a@b.c', getIdToken: async () => 'tok' } });
++  (0, eval)('firebaseDb = window.firebase.firestore(); firebaseReady = true;');
++})();
++"""
++
++with sync_playwright() as p:
++    b = p.chromium.launch()
++    ctx = b.new_context(viewport={'width': 1200, 'height': 900}); pg = ctx.new_page()
++    errors = []
++    pg.on('pageerror', lambda e: errors.append(str(e)[:140]))
++    pg.on('dialog', lambda d: d.dismiss())
++    pg.route("**/*", lambda r: r.abort() if not r.request.url.startswith(base) else r.continue_())
++    pg.add_init_script(PAYLOAD_JS)
++    # empty guest first; the poisoned state is injected after login (so ensureStateDefaults/migrations cannot drop it)
++    g = dict(GUEST); g.update(uiLang='en', targetLang=LANG, admin=True, langData={LANG: {'xp': 120}})
++    pg.add_init_script("localStorage.setItem('fjord_guest', %s); localStorage.setItem('fjord_entry_done','1'); localStorage.setItem('fjord_ui_lang','en');" % json.dumps(json.dumps(g)))
++    pg.goto(base + '/' + LANG); pg.wait_for_selector('#guestBtn', state='attached'); pg.evaluate("document.getElementById('guestBtn').click()")
++    pg.wait_for_selector('#app.active'); pg.wait_for_timeout(500)
++    pg.evaluate("window.__LANG = %s; window.__POISON_LEVEL = %s" % (json.dumps(LANG), 'true' if os.environ.get('LEVEL_POISON') else 'false')); pg.evaluate(STUB_JS)
++
++    # ---- poison every client-side source, shaped like real data
++    pg.evaluate("""(LANG) => {
++      const word = (VOCAB.A1 && VOCAB.A1[0]) || { no: 'x', uk: 'x', en: 'x', ru: 'x', ex_no: 'x', ex_uk: 'x', t: 'x', level: 'A1' };
++      const mk = (n, tag) => Array.from({ length: n }, (_, i) => Object.assign(poisonDeep(word, tag + i), { level: 'A1', lang: LANG }));
++      STATE.name = P('STATE.name');
++      STATE.generatedVocab = { [LANG]: { A1: mk(40, 'gen.vocab.'), A2: mk(10, 'gen.vocab2.') } };
++      LD().customWords = mk(8, 'custom.word.');
++      const g0 = (typeof GRAMMAR !== 'undefined' && GRAMMAR.A1 && GRAMMAR.A1[0]) || (typeof GRAMMAR !== 'undefined' && GRAMMAR[0]) || { title: 'x', rule: 'x', examples: ['a'] };
++      STATE.generatedGrammar = { [LANG]: { A1: [0, 1, 2].map(i => Object.assign(poisonDeep(g0, 'gen.grammar.' + i), { level: 'A1' })) } };
++      STATE.wordTranslations = { en: { a: P('wordTranslations') } };
++      STATE.assistantChat = [{ role: 'user', content: P('chat.user'), text: P('chat.user.text') }, { role: 'assistant', content: P('chat.ai'), text: P('chat.ai.text') }];
++      STATE.customNorskTasks = { A1: [poisonDeep({ title: 't', text: 't', prompt: 't', question: 't', answer: 't' }, 'norskTask')] };
++      updateState();
++    }""", LANG)
++
++    routes = pg.evaluate("[...renderView.toString().matchAll(/case '([\\w-]+)'/g)].map(m => m[1])")
++    if ROUTES_SLICE:
++        a, c = ROUTES_SLICE.split(':'); routes = routes[int(a):int(c)]
++    print(f'target={LANG}  routes ({len(routes)}):', ' '.join(routes))
++    CLICKABLE = "#mainContent button:visible, #mainContent [onclick]:visible, #mainContent .card:visible, #mainContent a:visible, #mainContent summary:visible"
++    for route in routes:
++        pg.evaluate("(()=>{const id=setTimeout(()=>{},0);for(let i=0;i<=id;i++)clearTimeout(i);})()")
++        pg.evaluate("window.ROUTE_NOW = %s; try { navigate(%s) } catch (e) { }" % (json.dumps(route), json.dumps(route))); pg.wait_for_timeout(500)
++        n = min(pg.locator(CLICKABLE).count(), 7)
++        for k in range(n):
++            pg.evaluate("(()=>{const id=setTimeout(()=>{},0);for(let i=0;i<=id;i++)clearTimeout(i);})()")
++            pg.evaluate("try { navigate(%s) } catch (e) { }" % json.dumps(route)); pg.wait_for_timeout(250)
++            try:
++                el = pg.locator(CLICKABLE).nth(k)
++                if el.count(): el.click(timeout=1200, force=True)
++            except Exception: pass
++            pg.wait_for_timeout(250)
++    hits = pg.evaluate("window.__hits")
++    print('\nEXECUTED PAYLOADS (field -> routes where it fired):')
++    for tag, rts in sorted(hits.items()): print(f'  {tag:44} {sorted(set(rts))}')
++    if not hits: print('  none')
++    print('\npage errors (unique, first 6):', sorted(set(e for e in errors if "reading 'style'" not in e))[:6])
++    b.close()
+diff -ruN '--exclude=notes' '--exclude=__pycache__' site6/sw.js site7/sw.js
+--- a/sw.js	2026-10-31 13:31:33.030641277 +0000
++++ a/sw.js	2026-11-01 10:02:19.770465031 +0000
+@@ -19,10 +19,15 @@
+ // (і кеш оновлюється разом з тим). Кеш використовується тільки якщо
+ // fetch провалився (людина офлайн) — тоді хоч стара, та робоча версія.
+ //
+-// 🔥 CACHE_NAME лишається динамічним (Date.now()), щоб при кожному
+-// новому встановленні SW старі кеші гарантовано підчищались в activate.
++// 🔥 CACHE_NAME тепер стабільний (CACHE_VERSION); старі кеші підчищаються в activate.
+ // =====================================================================
+-const CACHE_NAME = 'fjord-shell-' + Date.now();
++// ⚠️ Раніше тут було 'fjord-shell-' + Date.now(). Але цей рядок виконується при КОЖНОМУ запуску воркера
++// (браузер зупиняє й знову запускає SW постійно), тож install, fetch і activate бачили РІЗНІ імена:
++// на кожне пробудження створювався новий порожній кеш, а старі не прибирались до наступного activate.
++// Тепер ім'я стабільне; при зміні файлів застосунку просто підніміть CACHE_VERSION (разом із зміною sw.js
++// браузер перевстановить воркер, а activate видалить кеші з іншою версією).
++const CACHE_VERSION = '2026-11-01-1';
++const CACHE_NAME = 'fjord-shell-' + CACHE_VERSION;
+ 
+ const APP_SHELL = [
+   './',
+@@ -54,6 +59,15 @@
+   './js/views-story.js',
+   './js/views-admin.js',
+   './js/auth.js',
++  './js/data-ja.js',
++  './js/data-nl.js',
++  './js/data-pl.js',
++  './js/data-pt.js',
++  './js/data-sv.js',
++  './js/data-uk.js',
++  './js/lessons.js',
++  './js/views-lessons.js',
++  './js/views-alphabet.js',
+   './icons/icon-192.png',
+   './icons/icon-512.png',
+   './icons/icon-512-maskable.png',
+diff -ruN '--exclude=notes' '--exclude=__pycache__' site6/worker-hardened-example.js site7/worker-hardened-example.js
+--- a/worker-hardened-example.js	2026-10-31 13:31:33.030704636 +0000
++++ a/worker-hardened-example.js	2026-11-01 10:00:22.837347458 +0000
+@@ -45,11 +45,27 @@
+ 
+ const MAX_MESSAGE_LEN = 4000;
+ const MAX_HISTORY_ITEMS = 12;
++// Верхня межа розміру тіла запиту (12 реплік історії × 4000 символів + повідомлення ≈ 55 КБ).
++const MAX_BODY_BYTES = 100000;
++
++// ---- Автентифікація й ліміти ------------------------------------------------
++// ВАЖЛИВО: перевірка Origin/CORS НЕ є захистом від зловмисника: це лише інструкція для браузера.
++// curl/скрипт просто не шле Origin (або підробляє його) — і потрапляє до платного AI-ключа.
++// Справжні межі довіри тут — (1) Firebase ID-токен (підтверджує, хто викликає) і (2) ліміти запитів
++// по акаунту/IP. Клієнт (js/assistant.js) додає "Authorization: Bearer <ID-токен>", коли людина
++// увійшла в акаунт. Гості (без токена) отримують суворіші ліміти.
++//   env.AUTH_MODE = "required"  → без дійсного токена AI/TTS недоступні (рекомендовано, якщо гості не потрібні)
++//   env.AUTH_MODE = "optional"  → (за замовчуванням) гості пускаються, але з гостьовими лімітами
++//   env.FIREBASE_PROJECT_ID     → id проєкту Firebase (за замовчуванням нижче)
++const FIREBASE_PROJECT_ID_DEFAULT = "fjord-f0e0b";
++const LIMITS = {
++  user:  { perMin: 30, perDay: 400 },  // увійшов у акаунт (ключ — Firebase uid)
++  guest: { perMin: 8,  perDay: 60  },  // без токена (ключ — IP)
++};
+ // Було 12/хв — це майже гарантовано впиралось у ліміт, якщо адмін генерував
+ // словник у кілька пакетів (5-8 запитів) для однієї мови, а тим паче для
+ // кількох мов підряд в одній сесії. Піднято до 30/хв; клієнт (generateBulkVocab)
+ // також тепер сам витримує паузу ~600мс між пакетами.
+-const RATE_LIMIT_PER_MIN = 30;
+ 
+ // Список моделей для fallback (перша робоча буде використана)
+ // Було: gemini-3.1-flash-lite, gemini-1.5-pro, gemini-1.5-flash,
+@@ -73,6 +89,9 @@
+ // ============================================================
+ 
+ async function handleOrdApi(request, corsHeaders) {
++  if (request.method !== 'GET') {
++    return json({ error: 'Method not allowed' }, 405, corsHeaders);
++  }
+   const url = new URL(request.url);
+   const path = url.pathname;
+ 
+@@ -82,30 +101,29 @@
+   } else if (path === '/ord-api/articles') {
+     targetPath = '/api/articles';
+   } else if (path.startsWith('/ord-api/article/')) {
++    // id статті — лише літери/цифри/крапка/дефіс: без "../" та інших шляхів на тому ж хості.
+     const id = path.replace('/ord-api/article/', '');
++    if (!/^[A-Za-z0-9._-]{1,40}$/.test(id) || id.includes('..')) return json({ error: 'Bad article id' }, 400, corsHeaders);
+     targetPath = `/bm/article/${id}`;
+   } else {
+-    return new Response('Not found', { status: 404, headers: corsHeaders });
++    return json({ error: 'Not found' }, 404, corsHeaders);
+   }
+ 
+   const params = url.searchParams;
++  if (params.toString().length > 300) return json({ error: 'Query too long' }, 400, corsHeaders);
+   const targetUrl = `https://ord.uib.no${targetPath}?${params.toString()}`;
+ 
+-  const resp = await fetch(targetUrl, {
+-    headers: {
+-      'User-Agent': 'Mozilla/5.0 (compatible; FjordBot/1.0)',
+-      'Accept': 'application/json',
+-    }
+-  });
+-  const data = await resp.json();
+-  return new Response(JSON.stringify(data), {
+-    headers: {
+-      'Content-Type': 'application/json',
+-      // Раніше тут був "*" (дозволено з будь-якого сайту) — звужено до
+-      // того самого списку дозволених джерел, що й для решти Worker'а.
+-      ...corsHeaders,
+-    }
+-  });
++  try {
++    const resp = await fetch(targetUrl, {
++      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; FjordBot/1.0)', 'Accept': 'application/json' },
++    });
++    // Раніше resp.json() не був обгорнутий у try: якщо ord.uib.no віддавав HTML-помилку — Worker падав з 500.
++    const data = await resp.json();
++    return json(data, resp.ok ? 200 : 502, corsHeaders);
++  } catch (e) {
++    console.warn('ord.uib.no недоступний:', e && e.message);
++    return json({ error: 'Upstream dictionary unavailable' }, 502, corsHeaders);
++  }
+ }
+ 
+ // ============================================================
+@@ -243,102 +261,189 @@
+ }
+ 
+ // ============================================================
++//  ДОПОМІЖНЕ: відповіді, CORS, токен, ліміти
++// ============================================================
++
++function json(obj, status, corsHeaders) {
++  return new Response(JSON.stringify(obj), {
++    status: status || 200,
++    headers: { "Content-Type": "application/json", ...(corsHeaders || {}) },
++  });
++}
++
++// CORS: заголовки Access-Control-Allow-* видаємо ЛИШЕ дозволеному Origin. Раніше для чужого джерела
++// віддавалось літеральне "null" — а браузер надсилає саме Origin: null із sandbox-iframe та file://,
++// тобто таке значення збігалося б і ДОЗВОЛЯЛО доступ. Тепер для чужого/відсутнього Origin заголовка немає.
++function buildCorsHeaders(origin) {
++  const h = { "Vary": "Origin" };
++  if (origin && ALLOWED_ORIGINS.includes(origin)) {
++    h["Access-Control-Allow-Origin"] = origin;
++    h["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS";
++    h["Access-Control-Allow-Headers"] = "Content-Type, Authorization";
++    h["Access-Control-Max-Age"] = "86400";
++  }
++  return h;
++}
++
++// ---- Firebase ID-токен: перевірка підпису RS256 за публічними ключами Google (JWKS) ----
++let _jwksCache = { keys: null, exp: 0 };
++async function getFirebaseJwks() {
++  if (_jwksCache.keys && Date.now() < _jwksCache.exp) return _jwksCache.keys;
++  const res = await fetch("https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com");
++  if (!res.ok) throw new Error("JWKS fetch failed: " + res.status);
++  const m = (res.headers.get("cache-control") || "").match(/max-age=(\d+)/);
++  const ttl = m ? Math.min(parseInt(m[1], 10), 3600) : 600;
++  _jwksCache = { keys: (await res.json()).keys || [], exp: Date.now() + ttl * 1000 };
++  return _jwksCache.keys;
++}
++function b64urlToBytes(str) {
++  const pad = "=".repeat((4 - (str.length % 4)) % 4);
++  const bin = atob(str.replace(/-/g, "+").replace(/_/g, "/") + pad);
++  return Uint8Array.from(bin, c => c.charCodeAt(0));
++}
++const _dec = new TextDecoder();
++// Повертає { uid } для дійсного токена або null. Перевіряє: підпис (alg=RS256, kid зі списку Google),
++// aud === id проєкту, iss === https://securetoken.google.com/<проєкт>, exp/iat/auth_time, непорожній sub.
++async function verifyFirebaseIdToken(token, projectId) {
++  try {
++    const parts = String(token || "").split(".");
++    if (parts.length !== 3) return null;
++    const header = JSON.parse(_dec.decode(b64urlToBytes(parts[0])));
++    const p = JSON.parse(_dec.decode(b64urlToBytes(parts[1])));
++    if (header.alg !== "RS256" || !header.kid) return null;
++    const now = Math.floor(Date.now() / 1000);
++    if (p.aud !== projectId || p.iss !== "https://securetoken.google.com/" + projectId) return null;
++    if (typeof p.sub !== "string" || !p.sub || p.sub.length > 128) return null;
++    if (typeof p.exp !== "number" || p.exp <= now) return null;
++    if (typeof p.iat !== "number" || p.iat > now + 300) return null;
++    if (typeof p.auth_time === "number" && p.auth_time > now + 300) return null;
++    const jwk = (await getFirebaseJwks()).find(k => k.kid === header.kid);
++    if (!jwk) return null;
++    const key = await crypto.subtle.importKey("jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
++    const ok = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, b64urlToBytes(parts[2]),
++      new TextEncoder().encode(parts[0] + "." + parts[1]));
++    return ok ? { uid: p.sub } : null;
++  } catch (e) {
++    return null; // будь-яка помилка розбору = недійсний токен (нічого не розкриваємо)
++  }
++}
++
++// Лічильники "за хвилину" і "за добу". KV не атомарний (два паралельні запити можуть прослизнути), тому це
++// м'який запобіжник від зловживань, а не точна бухгалтерія; для жорсткої квоти — Rate Limiting binding
++// або Durable Object. Якщо RATE_KV не підключений — ліміту НЕМАЄ (попереджаємо в логах): прив'яжіть KV!
++async function underLimit(env, ctx, scope, id, lim) {
++  if (!env.RATE_KV) { console.warn("RATE_KV не підключений — ліміти запитів не діють"); return true; }
++  const minKey = `rl:${scope}:${id}:m${Math.floor(Date.now() / 60000)}`;
++  const dayKey = `rl:${scope}:${id}:d${new Date().toISOString().slice(0, 10)}`;
++  const [m, d] = await Promise.all([env.RATE_KV.get(minKey), env.RATE_KV.get(dayKey)]);
++  const mi = parseInt(m || "0", 10), di = parseInt(d || "0", 10);
++  if (mi >= lim.perMin || di >= lim.perDay) return false;
++  ctx.waitUntil(Promise.all([
++    env.RATE_KV.put(minKey, String(mi + 1), { expirationTtl: 120 }),
++    env.RATE_KV.put(dayKey, String(di + 1), { expirationTtl: 172800 }),
++  ]));
++  return true;
++}
++
++// Хто викликає: { kind: "user", id: uid } | { kind: "guest", id: ip } | { error: Response }
++async function identify(request, env, corsHeaders) {
++  const authz = request.headers.get("Authorization") || "";
++  const m = authz.match(/^Bearer\s+(\S+)$/i);
++  if (m) {
++    const user = await verifyFirebaseIdToken(m[1], env.FIREBASE_PROJECT_ID || FIREBASE_PROJECT_ID_DEFAULT);
++    if (user) return { kind: "user", id: user.uid };
++    return { error: json({ error: "Недійсний або прострочений токен — увійдіть знову" }, 401, corsHeaders) };
++  }
++  if (env.AUTH_MODE === "required") {
++    return { error: json({ error: "Потрібен вхід в акаунт" }, 401, corsHeaders) };
++  }
++  return { kind: "guest", id: request.headers.get("CF-Connecting-IP") || "unknown" };
++}
++
++// ============================================================
+ //  ОСНОВНА ФУНКЦІЯ FETCH
+ // ============================================================
+ 
+ export default {
+   async fetch(request, env, ctx) {
+     const origin = request.headers.get("Origin") || "";
+-    const corsHeaders = {
+-      "Access-Control-Allow-Origin": ALLOWED_ORIGINS.includes(origin) ? origin : "null",
+-      "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+-      "Access-Control-Allow-Headers": "Content-Type",
+-      "Vary": "Origin",
+-    };
++    const corsHeaders = buildCorsHeaders(origin);
+ 
+     // CORS preflight
+     if (request.method === "OPTIONS") {
+-      return new Response(null, { headers: corsHeaders });
++      return new Response(null, { status: 204, headers: corsHeaders });
+     }
+ 
+-    // Перевірка походження (безпека)
++    // Браузер із чужого сайту → 403. (Запити БЕЗ Origin — curl/скрипти — тут не відсікаються: це не
++    // захист, їх обмежують токен і ліміти нижче.)
+     if (origin && !ALLOWED_ORIGINS.includes(origin)) {
+-      return new Response(JSON.stringify({ error: "Forbidden origin" }), {
+-        status: 403,
+-        headers: { "Content-Type": "application/json", ...corsHeaders },
+-      });
++      return json({ error: "Forbidden origin" }, 403, corsHeaders);
+     }
+ 
+     const url = new URL(request.url);
+ 
++    // Хто викликає і які в нього ліміти (для /ord-api теж: це відкритий проксі до стороннього сервісу).
++    const who = await identify(request, env, corsHeaders);
++    if (who.error) return who.error;
++    const lim = LIMITS[who.kind];
++
+     // --- Маршрут для ord.uib.no ---
+-    if (url.pathname.startsWith('/ord-api')) {
++    if (url.pathname.startsWith("/ord-api")) {
++      if (!(await underLimit(env, ctx, "ord:" + who.kind, who.id, { perMin: lim.perMin * 2, perDay: lim.perDay * 5 }))) {
++        return json({ error: "Забагато запитів, спробуйте за хвилину" }, 429, corsHeaders);
++      }
+       return handleOrdApi(request, corsHeaders);
+     }
+ 
+-    // --- Маршрут для озвучення (Azure Speech) ---
+-    if (url.pathname.startsWith('/tts-api')) {
++    // --- Маршрут для озвучення (VoiceRSS) ---
++    if (url.pathname.startsWith("/tts-api")) {
+       return handleTtsApi(request, corsHeaders, env, ctx);
+     }
+ 
+     // --- Маршрут для AI (Gemini) ---
+     if (request.method !== "POST") {
+-      return new Response(JSON.stringify({ error: "Method not allowed" }), {
+-        status: 405,
+-        headers: { "Content-Type": "application/json", ...corsHeaders },
+-      });
++      return json({ error: "Method not allowed" }, 405, corsHeaders);
+     }
+ 
+-    // Rate limiting (опціонально)
+-    const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+-    const rateKey = `rl:${ip}:${Math.floor(Date.now() / 60000)}`;
+-    if (env.RATE_KV) {
+-      const current = parseInt((await env.RATE_KV.get(rateKey)) || "0", 10);
+-      if (current >= RATE_LIMIT_PER_MIN) {
+-        return new Response(JSON.stringify({ error: "Забагато запитів, спробуйте за хвилину" }), {
+-          status: 429,
+-          headers: { "Content-Type": "application/json", ...corsHeaders },
+-        });
+-      }
+-      ctx.waitUntil(env.RATE_KV.put(rateKey, String(current + 1), { expirationTtl: 60 }));
++    if (!(await underLimit(env, ctx, "ai:" + who.kind, who.id, lim))) {
++      return json({ error: "Забагато запитів, спробуйте пізніше" }, 429, corsHeaders);
+     }
+ 
+-    // Валідація вхідних даних
++    // Валідація вхідних даних: спершу розмір, потім JSON.
++    if (parseInt(request.headers.get("Content-Length") || "0", 10) > MAX_BODY_BYTES) {
++      return json({ error: "Payload too large" }, 413, corsHeaders);
++    }
+     let body;
+     try {
+-      body = await request.json();
++      const raw = await request.text();
++      if (raw.length > MAX_BODY_BYTES) return json({ error: "Payload too large" }, 413, corsHeaders);
++      body = JSON.parse(raw);
+     } catch {
+-      return new Response(JSON.stringify({ error: "Invalid JSON" }), {
+-        status: 400,
+-        headers: { "Content-Type": "application/json", ...corsHeaders },
+-      });
++      return json({ error: "Invalid JSON" }, 400, corsHeaders);
+     }
++    if (!body || typeof body !== "object") return json({ error: "Invalid JSON" }, 400, corsHeaders);
+ 
+-    const mode = typeof body.mode === "string" && SYSTEM_PROMPTS[body.mode] ? body.mode : "chat";
++    const mode = typeof body.mode === "string" && Object.prototype.hasOwnProperty.call(SYSTEM_PROMPTS, body.mode) ? body.mode : "chat";
+     const systemPrompt = SYSTEM_PROMPTS[mode];
+     const message = typeof body.message === "string" ? body.message.slice(0, MAX_MESSAGE_LEN) : "";
+-    if (!message) {
+-      return new Response(JSON.stringify({ error: "Empty message" }), {
+-        status: 400,
+-        headers: { "Content-Type": "application/json", ...corsHeaders },
+-      });
+-    }
++    if (!message) return json({ error: "Empty message" }, 400, corsHeaders);
+     const history = Array.isArray(body.history)
+-      ? body.history.slice(-MAX_HISTORY_ITEMS).map(h => ({
++      ? body.history.slice(-MAX_HISTORY_ITEMS).filter(h => h && typeof h === "object").map(h => ({
+           role: h.role === "assistant" ? "model" : "user",
+           parts: [{ text: String(h.text || "").slice(0, MAX_MESSAGE_LEN) }],
+         }))
+       : [];
+ 
+     // ---- Виклик Gemini з автоматичним вибором моделі (fallback) ----
+-    let lastError = null;
++    // Ключ — у заголовку x-goog-api-key, а не в URL (URL потрапляє в логи/трасування).
++    let lastStatus = 0;
+     for (const modelName of MODEL_CANDIDATES) {
+       try {
+         const apiRes = await fetch(
+-          `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${env.GEMINI_API_KEY}`,
++          `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent`,
+           {
+             method: "POST",
+-            headers: { "Content-Type": "application/json" },
++            headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
+             body: JSON.stringify({
+               systemInstruction: { parts: [{ text: systemPrompt }] },
+               contents: [...history, { role: "user", parts: [{ text: message }] }],
+@@ -349,27 +454,18 @@
+         if (apiRes.ok) {
+           const data = await apiRes.json();
+           const reply = data?.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("\n") || "";
+-          return new Response(JSON.stringify({ reply }), {
+-            headers: { "Content-Type": "application/json", ...corsHeaders },
+-          });
++          return json({ reply }, 200, corsHeaders);
+         }
+ 
+-        const errText = await apiRes.text();
+-        lastError = errText;
+-        console.warn(`Модель ${modelName} не вдалася:`, errText);
++        lastStatus = apiRes.status;
++        // Сире тіло помилки Google лишається лише в логах Worker — клієнту його не віддаємо.
++        console.warn(`Модель ${modelName} не вдалася:`, apiRes.status, (await apiRes.text()).slice(0, 500));
+       } catch (e) {
+-        lastError = e.message;
+         console.warn(`Помилка при спробі моделі ${modelName}:`, e.message);
+       }
+     }
+ 
+     // Якщо жодна модель не спрацювала
+-    return new Response(JSON.stringify({
+-      error: "All Gemini models failed",
+-      detail: lastError || "Unknown error"
+-    }), {
+-      status: 502,
+-      headers: { "Content-Type": "application/json", ...corsHeaders },
+-    });
++    return json({ error: "All Gemini models failed", detail: lastStatus ? "upstream status " + lastStatus : "upstream unreachable" }, 502, corsHeaders);
+   }
+ };

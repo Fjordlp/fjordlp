@@ -1055,7 +1055,7 @@ function renderTypeCard(item) {
         const target = item.w.no;
         const correct = isFuzzyMatch(val, target);
         fb.innerHTML =
-            `<div class="feedback-banner ${correct?'ok':'bad'}">${correct? t('check_correct') : tf('check_wrong_prefix', {answer: target})}</div>`;
+            `<div class="feedback-banner ${correct?'ok':'bad'}">${correct? t('check_correct') : tf('check_wrong_prefix', {answer: escHtml(target)})}</div>`;
         input.disabled = true;
         btn.disabled = true;
         gradeWord(item.key, correct ? 'good' : 'again');
@@ -1503,6 +1503,9 @@ function viewTestCloze() {
         SUBSTATE.correct = 0;
         SUBSTATE.userAnswers = null;
     }
+    // Жодне слово рівня не підійшло (напр. приклад не містить самого слова) — qs порожній:
+    // показуємо стандартне "замало слів" замість падіння на q.sentence / q.words.
+    if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) return testPoolGuard(1e9);
     const sub = SUBSTATE;
     if (sub.i >= sub.qs.length && sub.userAnswers && sub.userAnswers.every(a => a !== null)) {
         LD().stats.testsCompleted = (LD().stats.testsCompleted || 0) + 1;
@@ -1636,7 +1639,7 @@ function viewTestCloze() {
 function viewTestOrder() {
     if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
         const poolGuard = testPoolGuard(); if (poolGuard) return poolGuard;
-        const words = shuffle(currentLevelWords().filter(w => w.ex_no.split(' ').length >= 3 && w.ex_no.split(' ')
+        const words = shuffle(currentLevelWords().filter(w => w.ex_no && w.ex_no.split(' ').length >= 3 && w.ex_no.split(' ')  // w.ex_no може бути порожнім (напр. нідерландські 'welkom')
             .length <= 7)).slice(0, 5);
         SUBSTATE.qs = words.map(w => {
             const clean = w.ex_no.replace(/[.,!?]/g, '');
@@ -1647,6 +1650,9 @@ function viewTestOrder() {
         SUBSTATE.correct = 0;
         SUBSTATE.userAnswers = new Array(SUBSTATE.qs.length).fill(null);
     }
+    // Жодне слово рівня не підійшло (напр. приклад не містить самого слова) — qs порожній:
+    // показуємо стандартне "замало слів" замість падіння на q.sentence / q.words.
+    if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) return testPoolGuard(1e9);
     const sub = SUBSTATE;
     if (sub.i >= sub.qs.length && sub.userAnswers.every(a => a !== null)) {
         LD().stats.testsCompleted = (LD().stats.testsCompleted || 0) + 1;
@@ -1750,7 +1756,7 @@ function viewTestOrder() {
             sub.userAnswers[sub.i] = { chosen: chosen.slice(), shuffled: shuffled, correct: correct };
             if (correct) sub.correct = (sub.correct || 0) + 1;
             fb.innerHTML =
-                `<div class="feedback-banner ${correct?'ok':'bad'}" style="margin-top:12px;">${correct? t('check_correct') : tf('correct_variant_prefix', {answer: q.original.join(' ')})}</div>`;
+                `<div class="feedback-banner ${correct?'ok':'bad'}" style="margin-top:12px;">${correct? t('check_correct') : tf('correct_variant_prefix', {answer: escHtml(q.original.join(' '))})}</div>`;
             checkBtn.disabled = true;
             updateDotsOrder();
             setTimeout(() => {
@@ -1914,7 +1920,7 @@ function viewTestTranslate() {
 
         if (ans !== null) {
             fb.innerHTML =
-                `<div class="feedback-banner ${ans.correct?'ok':'bad'}">${ans.correct? t('check_correct') : tf('check_wrong_prefix', {answer: ans.correctAnswer})}</div>`;
+                `<div class="feedback-banner ${ans.correct?'ok':'bad'}">${ans.correct? t('check_correct') : tf('check_wrong_prefix', {answer: escHtml(ans.correctAnswer)})}</div>`;
         }
 
         btn.onclick = () => {
@@ -1924,7 +1930,7 @@ function viewTestTranslate() {
             sub.userAnswers[sub.i] = { input: val, correct: correct, correctAnswer: target };
             if (correct) sub.correct = (sub.correct || 0) + 1;
             fb.innerHTML =
-                `<div class="feedback-banner ${correct?'ok':'bad'}">${correct? t('check_correct') : tf('check_wrong_prefix', {answer: target})}</div>`;
+                `<div class="feedback-banner ${correct?'ok':'bad'}">${correct? t('check_correct') : tf('check_wrong_prefix', {answer: escHtml(target)})}</div>`;
             btn.disabled = true;
             input.disabled = true;
             updateDotsTranslate();
