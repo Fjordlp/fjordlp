@@ -606,6 +606,25 @@ function hasWordTranslation(word, lang) {
     return true;
 }
 
+// Те саме для перекладу речення-прикладу (en_ex / ru_ex) — його показують у тестах
+// Cloze/Order як підказку.
+function hasExampleTranslation(word, lang) {
+    lang = lang || (typeof STATE !== 'undefined' && STATE && STATE.vocabLang) || 'uk';
+    if (!word) return false;
+    const v = lang === 'en' ? word.en_ex : lang === 'ru' ? word.ru_ex : word.ex_uk;
+    if (typeof v !== 'string' || !v.trim()) return false;
+    if (lang === 'en' && /[\u0400-\u04FF]/.test(v)) return false;
+    return true;
+}
+
+// Віддає перевагу словам, у яких є справжній переклад прикладу мовою інтерфейсу.
+// Якщо таких замало (< minCount) — повертає всі, щоб тест не став порожнім:
+// краще підказка запасною мовою, ніж жодного питання.
+function preferTranslatedExamples(words, minCount, lang) {
+    const good = (words || []).filter(w => hasExampleTranslation(w, lang));
+    return good.length >= (minCount || 3) ? good : (words || []);
+}
+
 function translatableWords(words, lang) {
     return (words || []).filter(w => hasWordTranslation(w, lang));
 }

@@ -1493,7 +1493,7 @@ function clozeBlank(word, exampleNo) {
 function viewTestCloze() {
     if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
         const poolGuard = testPoolGuard(); if (poolGuard) return poolGuard;
-        const eligible = currentLevelWords().filter(w => clozeBlank(w.no, w.ex_no) !== null);
+        const eligible = preferTranslatedExamples(currentLevelWords().filter(w => clozeBlank(w.no, w.ex_no) !== null), 3);
         const words = shuffle(eligible).slice(0, 6);
         SUBSTATE.qs = words.map(w => {
             const sentence = clozeBlank(w.no, w.ex_no);
@@ -1642,8 +1642,9 @@ function viewTestCloze() {
 function viewTestOrder() {
     if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
         const poolGuard = testPoolGuard(); if (poolGuard) return poolGuard;
-        const words = shuffle(currentLevelWords().filter(w => w.ex_no && w.ex_no.split(' ').length >= 3 && w.ex_no.split(' ')  // w.ex_no може бути порожнім (напр. нідерландські 'welkom')
-            .length <= 7)).slice(0, 5);
+        const orderable = currentLevelWords().filter(w => w.ex_no && w.ex_no.split(' ').length >= 3 && w.ex_no.split(' ')  // w.ex_no може бути порожнім (напр. нідерландські 'welkom')
+            .length <= 7);
+        const words = shuffle(preferTranslatedExamples(orderable, 3)).slice(0, 5);
         SUBSTATE.qs = words.map(w => {
             const clean = w.ex_no.replace(/[.,!?]/g, '');
             const tokens = clean.split(' ');

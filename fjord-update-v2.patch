@@ -1,0 +1,815 @@
+diff --git a/docs-how-to-add-language.md b/docs-how-to-add-language.md
+index 1e3df29..fb20dd6 100644
+--- a/docs-how-to-add-language.md
++++ b/docs-how-to-add-language.md
+@@ -75,3 +75,26 @@
+ помилок AI. Далі просто вставляєш знайдені слова/переклади у формат вище.
+ Я можу допомогти звести будь-який знайдений список у потрібний JS-формат,
+ якщо накидаєш його мені — не обов'язково вручну форматувати кожне слово.
++
++## Alphabet entries (`ALPHABET`) — multilingual fields
++
++Each entry in `window.LANG_DATA[code].ALPHABET`:
++
++```js
++{
++  letter: "C c",
++  // обов'язкові (українською) — також запасний варіант:
++  name: "чі", sound: "перед a/o/u — як «к»; перед e/i — як «ч»",
++  example: "casa", example_uk: "будинок",
++  // необов'язкові — для інтерфейсу English / Русский:
++  name_en: "chee",  name_ru: "чи",
++  sound_en: "before a/o/u like “k” in “cat”; before e/i like “ch” in “chair”",
++  sound_ru: "перед a/o/u — как «к»; перед e/i — как «ч»",
++  example_en: "house", example_ru: "дом"
++}
++```
++
++The Alphabet screen (`localizedAlphabetField()` in `js/views-alphabet.js`) shows the
++`*_en` / `*_ru` field matching `STATE.uiLang` and falls back to the Ukrainian field when
++it is missing. Write `sound_en` for English speakers (compare to English sounds), not as a
++literal translation of the Ukrainian text. `data-it.js` is the fully localised reference.
+diff --git a/js/data-de.js b/js/data-de.js
+index a4ccadb..b2a0e90 100644
+--- a/js/data-de.js
++++ b/js/data-de.js
+@@ -669,37 +669,41 @@
+     // =====================================================================
+     //  ALPHABET — АБЕТКА (німецька)
+     // =====================================================================
++    // Формат елемента ALPHABET:
++    //   обов'язкові (українською, запасний варіант): letter, name, sound, example, example_uk
++    //   необов'язкові для інтерфейсу en/ru: name_en, name_ru, sound_en, sound_ru, example_en, example_ru
++    //   (екран абетки бере поле мови інтерфейсу, а якщо його нема — українське; див. localizedAlphabetField)
+     const ALPHABET = [
+-        { letter: "A a", name: "а", sound: "як українське «а»", example: "Apfel", example_uk: "яблуко" },
+-        { letter: "B b", name: "бе", sound: "як українське «б»", example: "Buch", example_uk: "книга" },
+-        { letter: "C c", name: "це", sound: "здебільшого в поєднаннях: ch, sch; окремо рідко (як «ц» або «к»)", example: "Café", example_uk: "кафе" },
+-        { letter: "D d", name: "де", sound: "як українське «д»", example: "Dorf", example_uk: "село" },
+-        { letter: "E e", name: "е", sound: "як українське «е»", example: "Ende", example_uk: "кінець" },
+-        { letter: "F f", name: "еф", sound: "як українське «ф»", example: "Fisch", example_uk: "риба" },
+-        { letter: "G g", name: "ге", sound: "як українське «ґ»", example: "Garten", example_uk: "сад" },
+-        { letter: "H h", name: "га", sound: "легке «г», як в англ. house; після голосної подовжує її й не вимовляється", example: "Haus", example_uk: "будинок" },
+-        { letter: "I i", name: "і", sound: "як українське «і»", example: "Insel", example_uk: "острів" },
+-        { letter: "J j", name: "йот", sound: "як українське «й»", example: "Jahr", example_uk: "рік" },
+-        { letter: "K k", name: "ка", sound: "як українське «к»", example: "Katze", example_uk: "кіт" },
+-        { letter: "L l", name: "ель", sound: "як українське «л»", example: "Licht", example_uk: "світло" },
+-        { letter: "M m", name: "ем", sound: "як українське «м»", example: "Mutter", example_uk: "мама" },
+-        { letter: "N n", name: "ен", sound: "як українське «н»", example: "Nacht", example_uk: "ніч" },
+-        { letter: "O o", name: "о", sound: "як українське «о»", example: "Onkel", example_uk: "дядько" },
+-        { letter: "P p", name: "пе", sound: "як українське «п»", example: "Papier", example_uk: "папір" },
+-        { letter: "Q q", name: "ку", sound: "як «к» (завжди разом з «u»: qu — «кв»)", example: "Quelle", example_uk: "джерело" },
+-        { letter: "R r", name: "ер", sound: "гортанне «р», вимовляється у горлі (не як українське)", example: "rot", example_uk: "червоний" },
+-        { letter: "S s", name: "ес", sound: "перед голосною — як «з»; в кінці слова — як «с»", example: "Sonne", example_uk: "сонце" },
+-        { letter: "T t", name: "те", sound: "як українське «т»", example: "Tisch", example_uk: "стіл" },
+-        { letter: "U u", name: "у", sound: "як українське «у»", example: "Uhr", example_uk: "годинник" },
+-        { letter: "V v", name: "фау", sound: "як «ф» (у власних і запозичених словах — як «в»)", example: "Vater", example_uk: "тато" },
+-        { letter: "W w", name: "ве", sound: "як українське «в»", example: "Wasser", example_uk: "вода" },
+-        { letter: "X x", name: "ікс", sound: "як «кс»", example: "Taxi", example_uk: "таксі" },
+-        { letter: "Y y", name: "іпсилон", sound: "заокруглене «і», немає аналога в українській (як нім. ü)", example: "Typ", example_uk: "тип" },
+-        { letter: "Z z", name: "цет", sound: "як українське «ц»", example: "Zeit", example_uk: "час" },
+-        { letter: "Ä ä", name: "а-умляут", sound: "як українське «е», трохи ширше", example: "Mädchen", example_uk: "дівчинка" },
+-        { letter: "Ö ö", name: "о-умляут", sound: "заокруглене, як нім. ö — немає аналога в українській", example: "schön", example_uk: "гарний" },
+-        { letter: "Ü ü", name: "у-умляут", sound: "заокруглене «і», немає аналога в українській", example: "Tür", example_uk: "двері" },
+-        { letter: "ß", name: "ес-цет", sound: "як подвоєне «с» (заміна на «ss», якщо великих літер немає)", example: "Straße", example_uk: "вулиця" },
++        { letter: "A a", name: "а", sound: "як українське «а»", example: "Apfel", example_uk: "яблуко", name_en: "ah", name_ru: "а", sound_en: "like “a” in “father”", sound_ru: "как русское «а»", example_en: "apple", example_ru: "яблоко" },
++        { letter: "B b", name: "бе", sound: "як українське «б»", example: "Buch", example_uk: "книга", name_en: "bay", name_ru: "бэ", sound_en: "like English “b” in “boy” (at the end of a word like “p”)", sound_ru: "как русское «б» (в конце слова — как «п»)", example_en: "book", example_ru: "книга" },
++        { letter: "C c", name: "це", sound: "здебільшого в поєднаннях: ch, sch; окремо рідко (як «ц» або «к»)", example: "Café", example_uk: "кафе", name_en: "tsay", name_ru: "цэ", sound_en: "mostly inside “ch” and “sch”; on its own rare (like “ts” or “k”)", sound_ru: "в основном в сочетаниях ch, sch; отдельно редко (как «ц» или «к»)", example_en: "café", example_ru: "кафе" },
++        { letter: "D d", name: "де", sound: "як українське «д»", example: "Dorf", example_uk: "село", name_en: "day", name_ru: "дэ", sound_en: "like English “d” in “dog” (at the end of a word like “t”)", sound_ru: "как русское «д» (в конце слова — как «т»)", example_en: "village", example_ru: "деревня" },
++        { letter: "E e", name: "е", sound: "як українське «е»", example: "Ende", example_uk: "кінець", name_en: "ay", name_ru: "э", sound_en: "like “e” in “bed” (long: like “ay” in “say” without the glide)", sound_ru: "как русское «э»", example_en: "end", example_ru: "конец" },
++        { letter: "F f", name: "еф", sound: "як українське «ф»", example: "Fisch", example_uk: "риба", name_en: "eff", name_ru: "эф", sound_en: "like English “f” in “fun”", sound_ru: "как русское «ф»", example_en: "fish", example_ru: "рыба" },
++        { letter: "G g", name: "ге", sound: "як українське «ґ»", example: "Garten", example_uk: "сад", name_en: "gay", name_ru: "гэ", sound_en: "like “g” in “go”", sound_ru: "как русское «г»", example_en: "garden", example_ru: "сад" },
++        { letter: "H h", name: "га", sound: "легке «г», як в англ. house; після голосної подовжує її й не вимовляється", example: "Haus", example_uk: "будинок", name_en: "hah", name_ru: "ха", sound_en: "a light “h” as in “house”; after a vowel it lengthens it and is silent", sound_ru: "лёгкое «х», как в англ. house; после гласной удлиняет её и не произносится", example_en: "house", example_ru: "дом" },
++        { letter: "I i", name: "і", sound: "як українське «і»", example: "Insel", example_uk: "острів", name_en: "ee", name_ru: "и", sound_en: "like “ee” in “see”", sound_ru: "как русское «и»", example_en: "island", example_ru: "остров" },
++        { letter: "J j", name: "йот", sound: "як українське «й»", example: "Jahr", example_uk: "рік", name_en: "yot", name_ru: "йот", sound_en: "like “y” in “yes”", sound_ru: "как русское «й»", example_en: "year", example_ru: "год" },
++        { letter: "K k", name: "ка", sound: "як українське «к»", example: "Katze", example_uk: "кіт", name_en: "kah", name_ru: "ка", sound_en: "like English “k” in “cat”", sound_ru: "как русское «к»", example_en: "cat", example_ru: "кошка" },
++        { letter: "L l", name: "ель", sound: "як українське «л»", example: "Licht", example_uk: "світло", name_en: "ell", name_ru: "эль", sound_en: "like English “l” in “lamp”", sound_ru: "как русское «л»", example_en: "light", example_ru: "свет" },
++        { letter: "M m", name: "ем", sound: "як українське «м»", example: "Mutter", example_uk: "мама", name_en: "em", name_ru: "эм", sound_en: "like English “m” in “moon”", sound_ru: "как русское «м»", example_en: "mother", example_ru: "мама" },
++        { letter: "N n", name: "ен", sound: "як українське «н»", example: "Nacht", example_uk: "ніч", name_en: "en", name_ru: "эн", sound_en: "like English “n” in “night”", sound_ru: "как русское «н»", example_en: "night", example_ru: "ночь" },
++        { letter: "O o", name: "о", sound: "як українське «о»", example: "Onkel", example_uk: "дядько", name_en: "oh", name_ru: "о", sound_en: "like “o” in “more”", sound_ru: "как русское «о»", example_en: "uncle", example_ru: "дядя" },
++        { letter: "P p", name: "пе", sound: "як українське «п»", example: "Papier", example_uk: "папір", name_en: "pay", name_ru: "пэ", sound_en: "like English “p” in “pen”", sound_ru: "как русское «п»", example_en: "paper", example_ru: "бумага" },
++        { letter: "Q q", name: "ку", sound: "як «к» (завжди разом з «u»: qu — «кв»)", example: "Quelle", example_uk: "джерело", name_en: "koo", name_ru: "ку", sound_en: "like “k”; always with “u” (qu = “kv”)", sound_ru: "как «к» (всегда вместе с «u»: qu — «кв»)", example_en: "spring / source", example_ru: "источник" },
++        { letter: "R r", name: "ер", sound: "гортанне «р», вимовляється у горлі (не як українське)", example: "rot", example_uk: "червоний", name_en: "air", name_ru: "эр", sound_en: "a guttural “r” made at the back of the throat (not like the English r)", sound_ru: "гортанное «р», произносится в горле (не как русское)", example_en: "red", example_ru: "красный" },
++        { letter: "S s", name: "ес", sound: "перед голосною — як «з»; в кінці слова — як «с»", example: "Sonne", example_uk: "сонце", name_en: "ess", name_ru: "эс", sound_en: "before a vowel like “z” in “zoo”; at the end of a word like “s”", sound_ru: "перед гласной — как «з»; в конце слова — как «с»", example_en: "sun", example_ru: "солнце" },
++        { letter: "T t", name: "те", sound: "як українське «т»", example: "Tisch", example_uk: "стіл", name_en: "tay", name_ru: "тэ", sound_en: "like English “t” in “top”", sound_ru: "как русское «т»", example_en: "table", example_ru: "стол" },
++        { letter: "U u", name: "у", sound: "як українське «у»", example: "Uhr", example_uk: "годинник", name_en: "oo", name_ru: "у", sound_en: "like “oo” in “moon”", sound_ru: "как русское «у»", example_en: "clock / watch", example_ru: "часы" },
++        { letter: "V v", name: "фау", sound: "як «ф» (у власних і запозичених словах — як «в»)", example: "Vater", example_uk: "тато", name_en: "fow (as in “cow”)", name_ru: "фау", sound_en: "like “f” (in loanwords like “v”)", sound_ru: "как «ф» (в заимствованных словах — как «в»)", example_en: "father", example_ru: "папа" },
++        { letter: "W w", name: "ве", sound: "як українське «в»", example: "Wasser", example_uk: "вода", name_en: "vay", name_ru: "вэ", sound_en: "like English “v” in “van”", sound_ru: "как русское «в»", example_en: "water", example_ru: "вода" },
++        { letter: "X x", name: "ікс", sound: "як «кс»", example: "Taxi", example_uk: "таксі", name_en: "iks", name_ru: "икс", sound_en: "like “ks”", sound_ru: "как «кс»", example_en: "taxi", example_ru: "такси" },
++        { letter: "Y y", name: "іпсилон", sound: "заокруглене «і», немає аналога в українській (як нім. ü)", example: "Typ", example_uk: "тип", name_en: "UP-si-lon", name_ru: "ипсилон", sound_en: "rounded “ee” (lips rounded), no English equivalent (like German ü)", sound_ru: "округлённое «и», в русском аналога нет (как нем. ü)", example_en: "type / guy", example_ru: "тип" },
++        { letter: "Z z", name: "цет", sound: "як українське «ц»", example: "Zeit", example_uk: "час", name_en: "tset", name_ru: "цет", sound_en: "like “ts” in “cats”", sound_ru: "как русское «ц»", example_en: "time", example_ru: "время" },
++        { letter: "Ä ä", name: "а-умляут", sound: "як українське «е», трохи ширше", example: "Mädchen", example_uk: "дівчинка", name_en: "ah-OOM-lowt", name_ru: "а-умлаут", sound_en: "like “e” in “bed”, a little wider", sound_ru: "как русское «э», чуть шире", example_en: "girl", example_ru: "девочка" },
++        { letter: "Ö ö", name: "о-умляут", sound: "заокруглене, як нім. ö — немає аналога в українській", example: "schön", example_uk: "гарний", name_en: "oh-OOM-lowt", name_ru: "о-умлаут", sound_en: "rounded, like “ur” in “fur” without the r (German ö); no exact English equivalent", sound_ru: "округлённое, как нем. ö — аналога в русском нет", example_en: "beautiful", example_ru: "красивый" },
++        { letter: "Ü ü", name: "у-умляут", sound: "заокруглене «і», немає аналога в українській", example: "Tür", example_uk: "двері", name_en: "ew-OOM-lowt", name_ru: "у-умлаут", sound_en: "say “ee” with rounded lips (German ü); no English equivalent", sound_ru: "округлённое «и», в русском аналога нет", example_en: "door", example_ru: "дверь" },
++        { letter: "ß", name: "ес-цет", sound: "як подвоєне «с» (заміна на «ss», якщо великих літер немає)", example: "Straße", example_uk: "вулиця", name_en: "ess-TSET", name_ru: "эс-цет", sound_en: "like a double “ss” (written “ss” if there are no capital letters)", sound_ru: "как удвоенное «с» (заменяется на «ss», если нет заглавных букв)", example_en: "street", example_ru: "улица" },
+     ];
+ 
+     // =====================================================================
+diff --git a/js/data-en.js b/js/data-en.js
+index 308bfb6..829b0ba 100644
+--- a/js/data-en.js
++++ b/js/data-en.js
+@@ -644,33 +644,37 @@
+     // =====================================================================
+     //  АБЕТКА
+     // =====================================================================
++    // Формат елемента ALPHABET:
++    //   обов'язкові (українською, запасний варіант): letter, name, sound, example, example_uk
++    //   необов'язкові для інтерфейсу en/ru: name_en, name_ru, sound_en, sound_ru, example_en, example_ru
++    //   (екран абетки бере поле мови інтерфейсу, а якщо його нема — українське; див. localizedAlphabetField)
+     const ALPHABET = [
+-        { letter: "A a", name: "ей", sound: "«ей», у словах часто як «е» чи «а»", example: "cat", example_uk: "кіт" },
+-        { letter: "B b", name: "бі", sound: "як українське «б»", example: "book", example_uk: "книга" },
+-        { letter: "C c", name: "сі", sound: "як «к» або «с» залежно від слова", example: "cup", example_uk: "чашка" },
+-        { letter: "D d", name: "ді", sound: "як українське «д»", example: "dog", example_uk: "собака" },
+-        { letter: "E e", name: "і", sound: "у словах часто як «е»", example: "egg", example_uk: "яйце" },
+-        { letter: "F f", name: "еф", sound: "як українське «ф»", example: "fish", example_uk: "риба" },
+-        { letter: "G g", name: "джі", sound: "як «ґ» або «дж» залежно від слова", example: "green", example_uk: "зелений" },
+-        { letter: "H h", name: "ейч", sound: "легке видихання, як в «hello»", example: "house", example_uk: "будинок" },
+-        { letter: "I i", name: "ай", sound: "у словах часто як коротке «і»", example: "ink", example_uk: "чорнило" },
+-        { letter: "J j", name: "джей", sound: "як українське «дж»", example: "jam", example_uk: "варення" },
+-        { letter: "K k", name: "кей", sound: "як українське «к»", example: "key", example_uk: "ключ" },
+-        { letter: "L l", name: "ел", sound: "як українське «л»", example: "lion", example_uk: "лев" },
+-        { letter: "M m", name: "ем", sound: "як українське «м»", example: "moon", example_uk: "місяць" },
+-        { letter: "N n", name: "ен", sound: "як українське «н»", example: "night", example_uk: "ніч" },
+-        { letter: "O o", name: "оу", sound: "у словах часто як коротке «о»", example: "orange", example_uk: "апельсин" },
+-        { letter: "P p", name: "пі", sound: "як українське «п»", example: "pen", example_uk: "ручка" },
+-        { letter: "Q q", name: "к'ю", sound: "завжди разом з «u» — «кв»", example: "queen", example_uk: "королева" },
+-        { letter: "R r", name: "ар", sound: "легше за українське «р», без розкату", example: "red", example_uk: "червоний" },
+-        { letter: "S s", name: "ес", sound: "як українське «с»", example: "sun", example_uk: "сонце" },
+-        { letter: "T t", name: "ті", sound: "як українське «т»", example: "table", example_uk: "стіл" },
+-        { letter: "U u", name: "ю", sound: "у словах часто як «а» чи «ю»", example: "umbrella", example_uk: "парасолька" },
+-        { letter: "V v", name: "ві", sound: "як українське «в», але зуби торкаються губи", example: "van", example_uk: "фургон" },
+-        { letter: "W w", name: "дабл-ю", sound: "як коротке українське «у»", example: "water", example_uk: "вода" },
+-        { letter: "X x", name: "екс", sound: "як «кс»", example: "box", example_uk: "коробка" },
+-        { letter: "Y y", name: "вай", sound: "як «й» на початку слова, «і» в кінці", example: "yellow", example_uk: "жовтий" },
+-        { letter: "Z z", name: "зед", sound: "як українське «з»", example: "zoo", example_uk: "зоопарк" },
++        { letter: "A a", name: "ей", sound: "«ей», у словах часто як «е» чи «а»", example: "cat", example_uk: "кіт", name_en: "ay", name_ru: "эй", sound_en: "its name sounds like “ay”; in words often a short “a” as in “cat”", sound_ru: "произносится «эй»; в словах часто как «э» или «а»", example_en: "a small furry pet", example_ru: "кот" },
++        { letter: "B b", name: "бі", sound: "як українське «б»", example: "book", example_uk: "книга", name_en: "bee", name_ru: "би", sound_en: "like “b” in “book”", sound_ru: "как русское «б»", example_en: "pages you read", example_ru: "книга" },
++        { letter: "C c", name: "сі", sound: "як «к» або «с» залежно від слова", example: "cup", example_uk: "чашка", name_en: "see", name_ru: "си", sound_en: "like “k” (cup) or “s” (city), depending on the word", sound_ru: "как «к» или «с» в зависимости от слова", example_en: "a small container for drinking", example_ru: "чашка" },
++        { letter: "D d", name: "ді", sound: "як українське «д»", example: "dog", example_uk: "собака", name_en: "dee", name_ru: "ди", sound_en: "like “d” in “dog”", sound_ru: "как русское «д»", example_en: "a pet that barks", example_ru: "собака" },
++        { letter: "E e", name: "і", sound: "у словах часто як «е»", example: "egg", example_uk: "яйце", name_en: "ee", name_ru: "и", sound_en: "often a short “e” as in “egg”; silent at the end of many words", sound_ru: "в словах часто как «э»", example_en: "laid by a hen", example_ru: "яйцо" },
++        { letter: "F f", name: "еф", sound: "як українське «ф»", example: "fish", example_uk: "риба", name_en: "eff", name_ru: "эф", sound_en: "like “f” in “fish”", sound_ru: "как русское «ф»", example_en: "an animal that lives in water", example_ru: "рыба" },
++        { letter: "G g", name: "джі", sound: "як «ґ» або «дж» залежно від слова", example: "green", example_uk: "зелений", name_en: "jee", name_ru: "джи", sound_en: "hard like “g” in “green”, or soft like “j” in “gem”, depending on the word", sound_ru: "как «г» или «дж» в зависимости от слова", example_en: "the colour of grass", example_ru: "зелёный" },
++        { letter: "H h", name: "ейч", sound: "легке видихання, як в «hello»", example: "house", example_uk: "будинок", name_en: "aitch", name_ru: "эйч", sound_en: "a light breath of air, as in “house”", sound_ru: "лёгкий выдох, как в «hello»", example_en: "a home to live in", example_ru: "дом" },
++        { letter: "I i", name: "ай", sound: "у словах часто як коротке «і»", example: "ink", example_uk: "чорнило", name_en: "eye", name_ru: "ай", sound_en: "often a short “i” as in “ink”; “eye” in its name", sound_ru: "в словах часто как короткое «и»", example_en: "liquid for pens", example_ru: "чернила" },
++        { letter: "J j", name: "джей", sound: "як українське «дж»", example: "jam", example_uk: "варення", name_en: "jay", name_ru: "джей", sound_en: "like “j” in “jam”", sound_ru: "как русское «дж»", example_en: "sweet fruit spread", example_ru: "варенье" },
++        { letter: "K k", name: "кей", sound: "як українське «к»", example: "key", example_uk: "ключ", name_en: "kay", name_ru: "кей", sound_en: "like “k” in “key”", sound_ru: "как русское «к»", example_en: "opens a lock", example_ru: "ключ" },
++        { letter: "L l", name: "ел", sound: "як українське «л»", example: "lion", example_uk: "лев", name_en: "el", name_ru: "эл", sound_en: "like “l” in “lion”", sound_ru: "как русское «л»", example_en: "a big wild cat", example_ru: "лев" },
++        { letter: "M m", name: "ем", sound: "як українське «м»", example: "moon", example_uk: "місяць", name_en: "em", name_ru: "эм", sound_en: "like “m” in “moon”", sound_ru: "как русское «м»", example_en: "shines in the night sky", example_ru: "луна" },
++        { letter: "N n", name: "ен", sound: "як українське «н»", example: "night", example_uk: "ніч", name_en: "en", name_ru: "эн", sound_en: "like “n” in “night”", sound_ru: "как русское «н»", example_en: "the dark part of the day", example_ru: "ночь" },
++        { letter: "O o", name: "оу", sound: "у словах часто як коротке «о»", example: "orange", example_uk: "апельсин", name_en: "oh", name_ru: "оу", sound_en: "often a short “o” as in “orange”", sound_ru: "в словах часто как короткое «о»", example_en: "a citrus fruit (and a colour)", example_ru: "апельсин" },
++        { letter: "P p", name: "пі", sound: "як українське «п»", example: "pen", example_uk: "ручка", name_en: "pee", name_ru: "пи", sound_en: "like “p” in “pen”", sound_ru: "как русское «п»", example_en: "you write with it", example_ru: "ручка" },
++        { letter: "Q q", name: "к'ю", sound: "завжди разом з «u» — «кв»", example: "queen", example_uk: "королева", name_en: "kyoo", name_ru: "кью", sound_en: "always with “u”: qu = “kw”", sound_ru: "всегда вместе с «u» — «кв»", example_en: "a female ruler", example_ru: "королева" },
++        { letter: "R r", name: "ар", sound: "легше за українське «р», без розкату", example: "red", example_uk: "червоний", name_en: "ar", name_ru: "ар", sound_en: "softer than other “r” sounds, with the tongue curled back — not rolled", sound_ru: "мягче русского «р», без раската", example_en: "the colour of a tomato", example_ru: "красный" },
++        { letter: "S s", name: "ес", sound: "як українське «с»", example: "sun", example_uk: "сонце", name_en: "ess", name_ru: "эс", sound_en: "like “s” in “sun”", sound_ru: "как русское «с»", example_en: "the star that gives us daylight", example_ru: "солнце" },
++        { letter: "T t", name: "ті", sound: "як українське «т»", example: "table", example_uk: "стіл", name_en: "tee", name_ru: "ти", sound_en: "like “t” in “table”", sound_ru: "как русское «т»", example_en: "furniture you eat at", example_ru: "стол" },
++        { letter: "U u", name: "ю", sound: "у словах часто як «а» чи «ю»", example: "umbrella", example_uk: "парасолька", name_en: "yoo", name_ru: "ю", sound_en: "often “uh” (umbrella) or “yoo” (use)", sound_ru: "в словах часто как «а» или «ю»", example_en: "protects you from rain", example_ru: "зонт" },
++        { letter: "V v", name: "ві", sound: "як українське «в», але зуби торкаються губи", example: "van", example_uk: "фургон", name_en: "vee", name_ru: "ви", sound_en: "like “v” in “van” — teeth touch the lower lip", sound_ru: "как русское «в», но зубы касаются губы", example_en: "a vehicle for carrying goods", example_ru: "фургон" },
++        { letter: "W w", name: "дабл-ю", sound: "як коротке українське «у»", example: "water", example_uk: "вода", name_en: "DUB-ul-yoo", name_ru: "дабл-ю", sound_en: "a short “w” gliding into the next vowel, like a quick “oo”", sound_ru: "как короткое русское «у»", example_en: "the liquid we drink", example_ru: "вода" },
++        { letter: "X x", name: "екс", sound: "як «кс»", example: "box", example_uk: "коробка", name_en: "eks", name_ru: "экс", sound_en: "like “ks”", sound_ru: "как «кс»", example_en: "a container", example_ru: "коробка" },
++        { letter: "Y y", name: "вай", sound: "як «й» на початку слова, «і» в кінці", example: "yellow", example_uk: "жовтий", name_en: "wy", name_ru: "уай", sound_en: "like “y” in “yellow” at the start of a word; “ee” or “eye” at the end", sound_ru: "как «й» в начале слова, «и» в конце", example_en: "the colour of a banana", example_ru: "жёлтый" },
++        { letter: "Z z", name: "зед", sound: "як українське «з»", example: "zoo", example_uk: "зоопарк", name_en: "zed (zee in the US)", name_ru: "зед", sound_en: "like “z” in “zoo”", sound_ru: "как русское «з»", example_en: "a place with wild animals", example_ru: "зоопарк" },
+     ];
+ 
+     // =====================================================================
+diff --git a/js/data-es.js b/js/data-es.js
+index 7d343d6..199441b 100644
+--- a/js/data-es.js
++++ b/js/data-es.js
+@@ -599,34 +599,38 @@
+     // =====================================================================
+     //  ALPHABET — АБЕТКА (іспанська)
+     // =====================================================================
++    // Формат елемента ALPHABET:
++    //   обов'язкові (українською, запасний варіант): letter, name, sound, example, example_uk
++    //   необов'язкові для інтерфейсу en/ru: name_en, name_ru, sound_en, sound_ru, example_en, example_ru
++    //   (екран абетки бере поле мови інтерфейсу, а якщо його нема — українське; див. localizedAlphabetField)
+     const ALPHABET = [
+-        { letter: "A a", name: "а", sound: "як українське «а»", example: "amor", example_uk: "любов" },
+-        { letter: "B b", name: "бе", sound: "як українське «б»", example: "bueno", example_uk: "хороший" },
+-        { letter: "C c", name: "се", sound: "перед a/o/u — як «к»; перед e/i — як англ. «th» (Іспанія) або «с» (Лат. Америка)", example: "casa", example_uk: "будинок" },
+-        { letter: "D d", name: "де", sound: "як українське «д»", example: "día", example_uk: "день" },
+-        { letter: "E e", name: "е", sound: "як українське «е»", example: "elefante", example_uk: "слон" },
+-        { letter: "F f", name: "efе", sound: "як українське «ф»", example: "familia", example_uk: "родина" },
+-        { letter: "G g", name: "хе", sound: "перед a/o/u — як «г» твердо; перед e/i — гортанне «х»", example: "gato", example_uk: "кіт" },
+-        { letter: "H h", name: "аче", sound: "не вимовляється взагалі (німа)", example: "hola", example_uk: "привіт" },
+-        { letter: "I i", name: "і", sound: "як українське «і»", example: "isla", example_uk: "острів" },
+-        { letter: "J j", name: "хота", sound: "гортанне «х», як в «ага»", example: "jugar", example_uk: "грати" },
+-        { letter: "K k", name: "ка", sound: "як українське «к» (рідко, лише в запозиченнях)", example: "kilo", example_uk: "кілограм" },
+-        { letter: "L l", name: "еле", sound: "як українське «л»", example: "libro", example_uk: "книга" },
+-        { letter: "M m", name: "еме", sound: "як українське «м»", example: "mesa", example_uk: "стіл" },
+-        { letter: "N n", name: "ене", sound: "як українське «н»", example: "noche", example_uk: "ніч" },
+-        { letter: "Ñ ñ", name: "енье", sound: "як українське «нь» (м'яке н)", example: "niño", example_uk: "хлопчик" },
+-        { letter: "O o", name: "о", sound: "як українське «о»", example: "oso", example_uk: "ведмідь" },
+-        { letter: "P p", name: "пе", sound: "як українське «п»", example: "perro", example_uk: "собака" },
+-        { letter: "Q q", name: "ку", sound: "як «к» (завжди разом з немою «u»: que, qui)", example: "queso", example_uk: "сир" },
+-        { letter: "R r", name: "ере", sound: "легко розкотисте «р»", example: "río", example_uk: "річка" },
+-        { letter: "S s", name: "есе", sound: "як українське «с»", example: "sol", example_uk: "сонце" },
+-        { letter: "T t", name: "те", sound: "як українське «т»", example: "tiempo", example_uk: "час/погода" },
+-        { letter: "U u", name: "у", sound: "як українське «у»", example: "uva", example_uk: "виноград" },
+-        { letter: "V v", name: "уве", sound: "вимовляється як «б» (звучить майже однаково з B)", example: "vaca", example_uk: "корова" },
+-        { letter: "W w", name: "уве добле", sound: "як англ. «w» (лише в запозиченнях)", example: "web", example_uk: "мережа" },
+-        { letter: "X x", name: "екіс", sound: "як «кс»", example: "examen", example_uk: "іспит" },
+-        { letter: "Y y", name: "йе / і гріега", sound: "як українське «й»; окремо — як «і»", example: "yo", example_uk: "я" },
+-        { letter: "Z z", name: "сета", sound: "як англ. «th» (Іспанія) або «с» (Лат. Америка)", example: "zapato", example_uk: "черевик" },
++        { letter: "A a", name: "а", sound: "як українське «а»", example: "amor", example_uk: "любов", name_en: "ah", name_ru: "а", sound_en: "like “a” in “father”", sound_ru: "как русское «а»", example_en: "love", example_ru: "любовь" },
++        { letter: "B b", name: "бе", sound: "як українське «б»", example: "bueno", example_uk: "хороший", name_en: "beh", name_ru: "бэ", sound_en: "like English “b” in “boy” (between vowels softer)", sound_ru: "как русское «б» (между гласными мягче)", example_en: "good", example_ru: "хороший" },
++        { letter: "C c", name: "се", sound: "перед a/o/u — як «к»; перед e/i — як англ. «th» (Іспанія) або «с» (Лат. Америка)", example: "casa", example_uk: "будинок", name_en: "seh (theh in Spain)", name_ru: "сэ", sound_en: "before a/o/u like “k” in “cat”; before e/i like “th” in “think” (Spain) or “s” (Latin America)", sound_ru: "перед a/o/u — как «к»; перед e/i — как англ. «th» (Испания) или «с» (Лат. Америка)", example_en: "house", example_ru: "дом" },
++        { letter: "D d", name: "де", sound: "як українське «д»", example: "día", example_uk: "день", name_en: "deh", name_ru: "дэ", sound_en: "like English “d” in “dog” (between vowels softer, like “th” in “this”)", sound_ru: "как русское «д»", example_en: "day", example_ru: "день" },
++        { letter: "E e", name: "е", sound: "як українське «е»", example: "elefante", example_uk: "слон", name_en: "eh", name_ru: "э", sound_en: "like “e” in “bed”", sound_ru: "как русское «э»", example_en: "elephant", example_ru: "слон" },
++        { letter: "F f", name: "ефе", sound: "як українське «ф»", example: "familia", example_uk: "родина", name_en: "EH-feh", name_ru: "эфе", sound_en: "like English “f” in “fun”", sound_ru: "как русское «ф»", example_en: "family", example_ru: "семья" },
++        { letter: "G g", name: "хе", sound: "перед a/o/u — як «г» твердо; перед e/i — гортанне «х»", example: "gato", example_uk: "кіт", name_en: "heh", name_ru: "хе", sound_en: "before a/o/u like a firm “g” in “go”; before e/i a raspy “h” (like “ch” in Scottish “loch”)", sound_ru: "перед a/o/u — твёрдое «г»; перед e/i — гортанное «х»", example_en: "cat", example_ru: "кот" },
++        { letter: "H h", name: "аче", sound: "не вимовляється взагалі (німа)", example: "hola", example_uk: "привіт", name_en: "AH-cheh", name_ru: "аче", sound_en: "silent — not pronounced at all", sound_ru: "не произносится вообще (немая)", example_en: "hello", example_ru: "привет" },
++        { letter: "I i", name: "і", sound: "як українське «і»", example: "isla", example_uk: "острів", name_en: "ee", name_ru: "и", sound_en: "like “ee” in “see”", sound_ru: "как русское «и»", example_en: "island", example_ru: "остров" },
++        { letter: "J j", name: "хота", sound: "гортанне «х», як в «ага»", example: "jugar", example_uk: "грати", name_en: "HOH-tah", name_ru: "хота", sound_en: "a raspy “h”, like “ch” in Scottish “loch”", sound_ru: "гортанное «х», как в «ага»", example_en: "to play", example_ru: "играть" },
++        { letter: "K k", name: "ка", sound: "як українське «к» (рідко, лише в запозиченнях)", example: "kilo", example_uk: "кілограм", name_en: "kah", name_ru: "ка", sound_en: "like English “k” (rare, only in loanwords)", sound_ru: "как русское «к» (редко, только в заимствованиях)", example_en: "kilogram", example_ru: "килограмм" },
++        { letter: "L l", name: "еле", sound: "як українське «л»", example: "libro", example_uk: "книга", name_en: "EH-leh", name_ru: "эле", sound_en: "like English “l” in “lamp”", sound_ru: "как русское «л»", example_en: "book", example_ru: "книга" },
++        { letter: "M m", name: "еме", sound: "як українське «м»", example: "mesa", example_uk: "стіл", name_en: "EH-meh", name_ru: "эме", sound_en: "like English “m” in “moon”", sound_ru: "как русское «м»", example_en: "table", example_ru: "стол" },
++        { letter: "N n", name: "ене", sound: "як українське «н»", example: "noche", example_uk: "ніч", name_en: "EH-neh", name_ru: "эне", sound_en: "like English “n” in “night”", sound_ru: "как русское «н»", example_en: "night", example_ru: "ночь" },
++        { letter: "Ñ ñ", name: "енье", sound: "як українське «нь» (м'яке н)", example: "niño", example_uk: "хлопчик", name_en: "EH-nyeh", name_ru: "энье", sound_en: "like “ny” in “canyon”", sound_ru: "как русское «нь» (мягкое н)", example_en: "boy / child", example_ru: "мальчик" },
++        { letter: "O o", name: "о", sound: "як українське «о»", example: "oso", example_uk: "ведмідь", name_en: "oh", name_ru: "о", sound_en: "like “o” in “more”, short and pure (no “w” glide)", sound_ru: "как русское «о»", example_en: "bear", example_ru: "медведь" },
++        { letter: "P p", name: "пе", sound: "як українське «п»", example: "perro", example_uk: "собака", name_en: "peh", name_ru: "пэ", sound_en: "like English “p” in “spot” (without the puff of air)", sound_ru: "как русское «п»", example_en: "dog", example_ru: "собака" },
++        { letter: "Q q", name: "ку", sound: "як «к» (завжди разом з немою «u»: que, qui)", example: "queso", example_uk: "сир", name_en: "koo", name_ru: "ку", sound_en: "like “k” (always with a silent “u”: que, qui)", sound_ru: "как «к» (всегда вместе с немой «u»: que, qui)", example_en: "cheese", example_ru: "сыр" },
++        { letter: "R r", name: "ере", sound: "легко розкотисте «р»", example: "río", example_uk: "річка", name_en: "EH-rreh", name_ru: "эре", sound_en: "a lightly rolled or tapped “r”", sound_ru: "слегка раскатистое «р»", example_en: "river", example_ru: "река" },
++        { letter: "S s", name: "есе", sound: "як українське «с»", example: "sol", example_uk: "сонце", name_en: "EH-seh", name_ru: "эсе", sound_en: "like “s” in “sun”", sound_ru: "как русское «с»", example_en: "sun", example_ru: "солнце" },
++        { letter: "T t", name: "те", sound: "як українське «т»", example: "tiempo", example_uk: "час/погода", name_en: "teh", name_ru: "тэ", sound_en: "like English “t” in “stop” (without the puff of air)", sound_ru: "как русское «т»", example_en: "time / weather", example_ru: "время / погода" },
++        { letter: "U u", name: "у", sound: "як українське «у»", example: "uva", example_uk: "виноград", name_en: "oo", name_ru: "у", sound_en: "like “oo” in “moon”", sound_ru: "как русское «у»", example_en: "grapes", example_ru: "виноград" },
++        { letter: "V v", name: "уве", sound: "вимовляється як «б» (звучить майже однаково з B)", example: "vaca", example_uk: "корова", name_en: "OO-beh", name_ru: "уве", sound_en: "pronounced like “b” (sounds almost the same as B)", sound_ru: "произносится как «б» (звучит почти так же, как B)", example_en: "cow", example_ru: "корова" },
++        { letter: "W w", name: "уве добле", sound: "як англ. «w» (лише в запозиченнях)", example: "web", example_uk: "мережа", name_en: "OO-beh DOH-bleh", name_ru: "уве добле", sound_en: "like English “w” (only in loanwords)", sound_ru: "как англ. «w» (только в заимствованиях)", example_en: "web", example_ru: "сеть" },
++        { letter: "X x", name: "екіс", sound: "як «кс»", example: "examen", example_uk: "іспит", name_en: "EH-kees", name_ru: "экис", sound_en: "like “ks”", sound_ru: "как «кс»", example_en: "exam", example_ru: "экзамен" },
++        { letter: "Y y", name: "йе / і гріега", sound: "як українське «й»; окремо — як «і»", example: "yo", example_uk: "я", name_en: "ee-GREE-eh-gah / yeh", name_ru: "и грьега / йе", sound_en: "like “y” in “yes”; on its own (“y” = and) like “ee”", sound_ru: "как русское «й»; отдельно — как «и»", example_en: "I", example_ru: "я" },
++        { letter: "Z z", name: "сета", sound: "як англ. «th» (Іспанія) або «с» (Лат. Америка)", example: "zapato", example_uk: "черевик", name_en: "SEH-tah", name_ru: "сета", sound_en: "like “th” in “think” (Spain) or “s” (Latin America)", sound_ru: "как англ. «th» (Испания) или «с» (Лат. Америка)", example_en: "shoe", example_ru: "туфля" },
+     ];
+ 
+     // =====================================================================
+diff --git a/js/data-fr.js b/js/data-fr.js
+index 7df769f..6516585 100644
+--- a/js/data-fr.js
++++ b/js/data-fr.js
+@@ -733,33 +733,37 @@
+     // =====================================================================
+     //  ALPHABET — АБЕТКА (французька)
+     // =====================================================================
++    // Формат елемента ALPHABET:
++    //   обов'язкові (українською, запасний варіант): letter, name, sound, example, example_uk
++    //   необов'язкові для інтерфейсу en/ru: name_en, name_ru, sound_en, sound_ru, example_en, example_ru
++    //   (екран абетки бере поле мови інтерфейсу, а якщо його нема — українське; див. localizedAlphabetField)
+     const ALPHABET = [
+-        { letter: "A a", name: "а", sound: "як українське «а»", example: "ami", example_uk: "друг" },
+-        { letter: "B b", name: "бе", sound: "як українське «б»", example: "bonjour", example_uk: "добрий день" },
+-        { letter: "C c", name: "се", sound: "перед a/o/u — як «к»; перед e/i/y — як «с»", example: "chat", example_uk: "кіт" },
+-        { letter: "D d", name: "де", sound: "як українське «д»", example: "deux", example_uk: "два" },
+-        { letter: "E e", name: "е (неме)", sound: "часто ледь чутне «е»; з наголосом звучить чіткіше (é, è)", example: "elle", example_uk: "вона" },
+-        { letter: "F f", name: "еф", sound: "як українське «ф»", example: "femme", example_uk: "жінка" },
+-        { letter: "G g", name: "же", sound: "перед a/o/u — як «ґ»; перед e/i/y — як «ж»", example: "garçon", example_uk: "хлопчик" },
+-        { letter: "H h", name: "аш", sound: "не вимовляється взагалі (німа)", example: "homme", example_uk: "чоловік" },
+-        { letter: "I i", name: "і", sound: "як українське «і»", example: "île", example_uk: "острів" },
+-        { letter: "J j", name: "жі", sound: "як українське «ж»", example: "jour", example_uk: "день" },
+-        { letter: "K k", name: "ка", sound: "як українське «к» (рідко, лише в запозиченнях)", example: "kilo", example_uk: "кілограм" },
+-        { letter: "L l", name: "ель", sound: "як українське «л»", example: "livre", example_uk: "книга" },
+-        { letter: "M m", name: "ем", sound: "як українське «м»", example: "maison", example_uk: "будинок" },
+-        { letter: "N n", name: "ен", sound: "як українське «н»; носовий звук у поєднанні з голосною (an, on, in)", example: "nuit", example_uk: "ніч" },
+-        { letter: "O o", name: "о", sound: "як українське «о»", example: "eau", example_uk: "вода" },
+-        { letter: "P p", name: "пе", sound: "як українське «п»", example: "pain", example_uk: "хліб" },
+-        { letter: "Q q", name: "кю", sound: "як «к» (завжди разом з «u»: qu)", example: "quatre", example_uk: "чотири" },
+-        { letter: "R r", name: "ер", sound: "гортанне «р», вимовляється у горлі (не як українське)", example: "rouge", example_uk: "червоний" },
+-        { letter: "S s", name: "ес", sound: "як українське «с»; між голосними — як «з»", example: "soleil", example_uk: "сонце" },
+-        { letter: "T t", name: "те", sound: "як українське «т»", example: "table", example_uk: "стіл" },
+-        { letter: "U u", name: "ю", sound: "заокруглене «і», немає аналога в українській (як нім. ü)", example: "une", example_uk: "одна" },
+-        { letter: "V v", name: "ве", sound: "як українське «в»", example: "ville", example_uk: "місто" },
+-        { letter: "W w", name: "дубль-ве", sound: "як «в» (лише в запозиченнях)", example: "wagon", example_uk: "вагон" },
+-        { letter: "X x", name: "ікс", sound: "як «кс» або «гз»", example: "exemple", example_uk: "приклад" },
+-        { letter: "Y y", name: "і грек", sound: "як «і» або як «й» перед голосною", example: "yeux", example_uk: "очі" },
+-        { letter: "Z z", name: "зед", sound: "як українське «з»", example: "zéro", example_uk: "нуль" },
++        { letter: "A a", name: "а", sound: "як українське «а»", example: "ami", example_uk: "друг", name_en: "ah", name_ru: "а", sound_en: "like “a” in “father”", sound_ru: "как русское «а»", example_en: "friend", example_ru: "друг" },
++        { letter: "B b", name: "бе", sound: "як українське «б»", example: "bonjour", example_uk: "добрий день", name_en: "bay", name_ru: "бэ", sound_en: "like English “b” in “boy”", sound_ru: "как русское «б»", example_en: "hello / good day", example_ru: "здравствуйте / добрый день" },
++        { letter: "C c", name: "се", sound: "перед a/o/u — як «к»; перед e/i/y — як «с»", example: "chat", example_uk: "кіт", name_en: "say", name_ru: "сэ", sound_en: "before a/o/u like “k” in “cat”; before e/i/y like “s” in “sun”", sound_ru: "перед a/o/u — как «к»; перед e/i/y — как «с»", example_en: "cat", example_ru: "кот" },
++        { letter: "D d", name: "де", sound: "як українське «д»", example: "deux", example_uk: "два", name_en: "day", name_ru: "дэ", sound_en: "like English “d” in “dog”", sound_ru: "как русское «д»", example_en: "two", example_ru: "два" },
++        { letter: "E e", name: "е (неме)", sound: "часто ледь чутне «е»; з наголосом звучить чіткіше (é, è)", example: "elle", example_uk: "вона", name_en: "uh (silent e)", name_ru: "э (немое)", sound_en: "often a barely audible “uh” (like the “e” in “the”); with an accent (é, è) it is clearer", sound_ru: "часто едва слышное «э»; с ударением (é, è) звучит отчётливее", example_en: "she", example_ru: "она" },
++        { letter: "F f", name: "еф", sound: "як українське «ф»", example: "femme", example_uk: "жінка", name_en: "eff", name_ru: "эф", sound_en: "like English “f” in “fun”", sound_ru: "как русское «ф»", example_en: "woman", example_ru: "женщина" },
++        { letter: "G g", name: "же", sound: "перед a/o/u — як «ґ»; перед e/i/y — як «ж»", example: "garçon", example_uk: "хлопчик", name_en: "zhay", name_ru: "жэ", sound_en: "before a/o/u like “g” in “go”; before e/i/y like “s” in “measure”", sound_ru: "перед a/o/u — как «г»; перед e/i/y — как «ж»", example_en: "boy", example_ru: "мальчик" },
++        { letter: "H h", name: "аш", sound: "не вимовляється взагалі (німа)", example: "homme", example_uk: "чоловік", name_en: "ash", name_ru: "аш", sound_en: "silent — not pronounced at all", sound_ru: "не произносится вообще (немая)", example_en: "man", example_ru: "мужчина" },
++        { letter: "I i", name: "і", sound: "як українське «і»", example: "île", example_uk: "острів", name_en: "ee", name_ru: "и", sound_en: "like “ee” in “see”", sound_ru: "как русское «и»", example_en: "island", example_ru: "остров" },
++        { letter: "J j", name: "жі", sound: "як українське «ж»", example: "jour", example_uk: "день", name_en: "zhee", name_ru: "жи", sound_en: "like “s” in “measure” (the French “j”)", sound_ru: "как русское «ж»", example_en: "day", example_ru: "день" },
++        { letter: "K k", name: "ка", sound: "як українське «к» (рідко, лише в запозиченнях)", example: "kilo", example_uk: "кілограм", name_en: "kah", name_ru: "ка", sound_en: "like English “k” (rare, only in loanwords)", sound_ru: "как русское «к» (редко, только в заимствованиях)", example_en: "kilogram", example_ru: "килограмм" },
++        { letter: "L l", name: "ель", sound: "як українське «л»", example: "livre", example_uk: "книга", name_en: "ell", name_ru: "эль", sound_en: "like English “l” in “lamp”", sound_ru: "как русское «л»", example_en: "book", example_ru: "книга" },
++        { letter: "M m", name: "ем", sound: "як українське «м»", example: "maison", example_uk: "будинок", name_en: "em", name_ru: "эм", sound_en: "like English “m” in “moon”", sound_ru: "как русское «м»", example_en: "house", example_ru: "дом" },
++        { letter: "N n", name: "ен", sound: "як українське «н»; носовий звук у поєднанні з голосною (an, on, in)", example: "nuit", example_uk: "ніч", name_en: "en", name_ru: "эн", sound_en: "like English “n”; nasalises the vowel before it (an, on, in)", sound_ru: "как русское «н»; носовой звук в сочетании с гласной (an, on, in)", example_en: "night", example_ru: "ночь" },
++        { letter: "O o", name: "о", sound: "як українське «о»", example: "eau", example_uk: "вода", name_en: "oh", name_ru: "о", sound_en: "like “o” in “more”, short and pure (no “w” glide)", sound_ru: "как русское «о»", example_en: "water", example_ru: "вода" },
++        { letter: "P p", name: "пе", sound: "як українське «п»", example: "pain", example_uk: "хліб", name_en: "pay", name_ru: "пэ", sound_en: "like English “p” in “spot” (without the puff of air)", sound_ru: "как русское «п»", example_en: "bread", example_ru: "хлеб" },
++        { letter: "Q q", name: "кю", sound: "як «к» (завжди разом з «u»: qu)", example: "quatre", example_uk: "чотири", name_en: "kew", name_ru: "кю", sound_en: "like “k” (always with “u”: qu)", sound_ru: "как «к» (всегда вместе с «u»: qu)", example_en: "four", example_ru: "четыре" },
++        { letter: "R r", name: "ер", sound: "гортанне «р», вимовляється у горлі (не як українське)", example: "rouge", example_uk: "червоний", name_en: "air", name_ru: "эр", sound_en: "a guttural “r” made at the back of the throat (not like the English r)", sound_ru: "гортанное «р», произносится в горле (не как русское)", example_en: "red", example_ru: "красный" },
++        { letter: "S s", name: "ес", sound: "як українське «с»; між голосними — як «з»", example: "soleil", example_uk: "сонце", name_en: "ess", name_ru: "эс", sound_en: "like “s” in “sun”; between vowels like “z” in “zoo”", sound_ru: "как русское «с»; между гласными — как «з»", example_en: "sun", example_ru: "солнце" },
++        { letter: "T t", name: "те", sound: "як українське «т»", example: "table", example_uk: "стіл", name_en: "tay", name_ru: "тэ", sound_en: "like English “t” in “stop” (without the puff of air)", sound_ru: "как русское «т»", example_en: "table", example_ru: "стол" },
++        { letter: "U u", name: "ю", sound: "заокруглене «і», немає аналога в українській (як нім. ü)", example: "une", example_uk: "одна", name_en: "ew (rounded)", name_ru: "ю", sound_en: "no English equivalent: say “ee” with tightly rounded lips (like German ü)", sound_ru: "округлённое «и», в русском аналога нет (как нем. ü)", example_en: "one (feminine) / a", example_ru: "одна" },
++        { letter: "V v", name: "ве", sound: "як українське «в»", example: "ville", example_uk: "місто", name_en: "vay", name_ru: "вэ", sound_en: "like English “v” in “van”", sound_ru: "как русское «в»", example_en: "city / town", example_ru: "город" },
++        { letter: "W w", name: "дубль-ве", sound: "як «в» (лише в запозиченнях)", example: "wagon", example_uk: "вагон", name_en: "doo-bluh-vay", name_ru: "дубль-вэ", sound_en: "like “v” (only in loanwords)", sound_ru: "как «в» (только в заимствованиях)", example_en: "carriage / wagon", example_ru: "вагон" },
++        { letter: "X x", name: "ікс", sound: "як «кс» або «гз»", example: "exemple", example_uk: "приклад", name_en: "eeks", name_ru: "икс", sound_en: "like “ks” or “gz”", sound_ru: "как «кс» или «гз»", example_en: "example", example_ru: "пример" },
++        { letter: "Y y", name: "і грек", sound: "як «і» або як «й» перед голосною", example: "yeux", example_uk: "очі", name_en: "ee-grek", name_ru: "игрек", sound_en: "like “ee”, or like “y” in “yes” before a vowel", sound_ru: "как «и» или как «й» перед гласной", example_en: "eyes", example_ru: "глаза" },
++        { letter: "Z z", name: "зед", sound: "як українське «з»", example: "zéro", example_uk: "нуль", name_en: "zed", name_ru: "зед", sound_en: "like English “z” in “zoo”", sound_ru: "как русское «з»", example_en: "zero", example_ru: "ноль" },
+     ];
+ 
+     // =====================================================================
+diff --git a/js/data-it.js b/js/data-it.js
+index 409943f..00c53f0 100644
+--- a/js/data-it.js
++++ b/js/data-it.js
+@@ -552,33 +552,37 @@
+     // Традиційна італійська абетка — 21 літера (без J, K, W, X, Y, які
+     // вживаються лише в запозичених словах); ці 5 додано окремо нижче з
+     // поміткою.
++    // Формат елемента ALPHABET:
++    //   обов'язкові (українською, запасний варіант): letter, name, sound, example, example_uk
++    //   необов'язкові для інтерфейсу en/ru: name_en, name_ru, sound_en, sound_ru, example_en, example_ru
++    //   (екран абетки бере поле мови інтерфейсу, а якщо його нема — українське; див. localizedAlphabetField)
+     const ALPHABET = [
+-        { letter: "A a", name: "а", sound: "як українське «а»", example: "amico", example_uk: "друг" },
+-        { letter: "B b", name: "бі", sound: "як українське «б»", example: "bello", example_uk: "гарний" },
+-        { letter: "C c", name: "чі", sound: "перед a/o/u — як «к»; перед e/i — як «ч»", example: "casa", example_uk: "будинок" },
+-        { letter: "D d", name: "ді", sound: "як українське «д»", example: "dove", example_uk: "де" },
+-        { letter: "E e", name: "е", sound: "як українське «е»", example: "elefante", example_uk: "слон" },
+-        { letter: "F f", name: "еффе", sound: "як українське «ф»", example: "fiore", example_uk: "квітка" },
+-        { letter: "G g", name: "джі", sound: "перед a/o/u — як «ґ»; перед e/i — як «дж»", example: "gatto", example_uk: "кіт" },
+-        { letter: "H h", name: "акка", sound: "не вимовляється взагалі (німа)", example: "ho", example_uk: "маю" },
+-        { letter: "I i", name: "і", sound: "як українське «і»", example: "isola", example_uk: "острів" },
+-        { letter: "L l", name: "елле", sound: "як українське «л»", example: "luna", example_uk: "місяць" },
+-        { letter: "M m", name: "емме", sound: "як українське «м»", example: "mare", example_uk: "море" },
+-        { letter: "N n", name: "енне", sound: "як українське «н»", example: "notte", example_uk: "ніч" },
+-        { letter: "O o", name: "о", sound: "як українське «о»", example: "oro", example_uk: "золото" },
+-        { letter: "P p", name: "пі", sound: "як українське «п»", example: "pane", example_uk: "хліб" },
+-        { letter: "Q q", name: "ку", sound: "як «к» (завжди разом з «u»: qu)", example: "questo", example_uk: "цей" },
+-        { letter: "R r", name: "ерре", sound: "легко розкотисте «р»", example: "rosso", example_uk: "червоний" },
+-        { letter: "S s", name: "ессе", sound: "як українське «с»; між голосними іноді як «з»", example: "sole", example_uk: "сонце" },
+-        { letter: "T t", name: "ті", sound: "як українське «т»", example: "tempo", example_uk: "час/погода" },
+-        { letter: "U u", name: "у", sound: "як українське «у»", example: "uva", example_uk: "виноград" },
+-        { letter: "V v", name: "ву", sound: "як українське «в»", example: "vita", example_uk: "життя" },
+-        { letter: "Z z", name: "дзета", sound: "як «дз» або «тц» залежно від слова", example: "zero", example_uk: "нуль" },
+-        { letter: "J j*", name: "і лунга", sound: "*лише в запозиченнях, як «й»", example: "jeans", example_uk: "джинси" },
+-        { letter: "K k*", name: "каппа", sound: "*лише в запозиченнях, як «к»", example: "kiwi", example_uk: "ківі" },
+-        { letter: "W w*", name: "доппіа ву", sound: "*лише в запозиченнях, як «в»", example: "weekend", example_uk: "вихідні" },
+-        { letter: "X x*", name: "ікс", sound: "*лише в запозиченнях, як «кс»", example: "taxi", example_uk: "таксі" },
+-        { letter: "Y y*", name: "іпсилон", sound: "*лише в запозиченнях, як «і»", example: "yoga", example_uk: "йога" },
++        { letter: "A a", name: "а", sound: "як українське «а»", example: "amico", example_uk: "друг", name_en: "ah", name_ru: "а", sound_en: "like “a” in “father”", sound_ru: "как русское «а»", example_en: "friend", example_ru: "друг" },
++        { letter: "B b", name: "бі", sound: "як українське «б»", example: "bello", example_uk: "гарний", name_en: "bee", name_ru: "би", sound_en: "like English “b” in “boy”", sound_ru: "как русское «б»", example_en: "beautiful / handsome", example_ru: "красивый" },
++        { letter: "C c", name: "чі", sound: "перед a/o/u — як «к»; перед e/i — як «ч»", example: "casa", example_uk: "будинок", name_en: "chee", name_ru: "чи", sound_en: "before a/o/u like “k” in “cat”; before e/i like “ch” in “chair”", sound_ru: "перед a/o/u — как «к»; перед e/i — как «ч»", example_en: "house", example_ru: "дом" },
++        { letter: "D d", name: "ді", sound: "як українське «д»", example: "dove", example_uk: "де", name_en: "dee", name_ru: "ди", sound_en: "like English “d” in “dog”", sound_ru: "как русское «д»", example_en: "where", example_ru: "где" },
++        { letter: "E e", name: "е", sound: "як українське «е»", example: "elefante", example_uk: "слон", name_en: "eh", name_ru: "э", sound_en: "like “e” in “bed” (no glide to “ay”)", sound_ru: "как русское «э»", example_en: "elephant", example_ru: "слон" },
++        { letter: "F f", name: "еффе", sound: "як українське «ф»", example: "fiore", example_uk: "квітка", name_en: "EF-feh", name_ru: "эффе", sound_en: "like English “f” in “fun”", sound_ru: "как русское «ф»", example_en: "flower", example_ru: "цветок" },
++        { letter: "G g", name: "джі", sound: "перед a/o/u — як «ґ»; перед e/i — як «дж»", example: "gatto", example_uk: "кіт", name_en: "jee", name_ru: "джи", sound_en: "before a/o/u like “g” in “go”; before e/i like “j” in “jam”", sound_ru: "перед a/o/u — как «г»; перед e/i — как «дж»", example_en: "cat", example_ru: "кот" },
++        { letter: "H h", name: "акка", sound: "не вимовляється взагалі (німа)", example: "ho", example_uk: "маю", name_en: "AK-kah", name_ru: "акка", sound_en: "silent — not pronounced at all", sound_ru: "не произносится вообще (немая)", example_en: "I have", example_ru: "имею" },
++        { letter: "I i", name: "і", sound: "як українське «і»", example: "isola", example_uk: "острів", name_en: "ee", name_ru: "и", sound_en: "like “ee” in “see”", sound_ru: "как русское «и»", example_en: "island", example_ru: "остров" },
++        { letter: "L l", name: "елле", sound: "як українське «л»", example: "luna", example_uk: "місяць", name_en: "EL-leh", name_ru: "элле", sound_en: "like English “l” in “lamp”", sound_ru: "как русское «л»", example_en: "moon", example_ru: "луна" },
++        { letter: "M m", name: "емме", sound: "як українське «м»", example: "mare", example_uk: "море", name_en: "EM-meh", name_ru: "эмме", sound_en: "like English “m” in “moon”", sound_ru: "как русское «м»", example_en: "sea", example_ru: "море" },
++        { letter: "N n", name: "енне", sound: "як українське «н»", example: "notte", example_uk: "ніч", name_en: "EN-neh", name_ru: "энне", sound_en: "like English “n” in “night”", sound_ru: "как русское «н»", example_en: "night", example_ru: "ночь" },
++        { letter: "O o", name: "о", sound: "як українське «о»", example: "oro", example_uk: "золото", name_en: "oh", name_ru: "о", sound_en: "like “o” in “more”, but short and pure (no “w” glide)", sound_ru: "как русское «о»", example_en: "gold", example_ru: "золото" },
++        { letter: "P p", name: "пі", sound: "як українське «п»", example: "pane", example_uk: "хліб", name_en: "pee", name_ru: "пи", sound_en: "like English “p” in “spot” (without the puff of air)", sound_ru: "как русское «п»", example_en: "bread", example_ru: "хлеб" },
++        { letter: "Q q", name: "ку", sound: "як «к» (завжди разом з «u»: qu)", example: "questo", example_uk: "цей", name_en: "koo", name_ru: "ку", sound_en: "like “k”; always written with “u” (qu = “kw”)", sound_ru: "как «к» (всегда вместе с «u»: qu)", example_en: "this", example_ru: "этот" },
++        { letter: "R r", name: "ерре", sound: "легко розкотисте «р»", example: "rosso", example_uk: "червоний", name_en: "ER-reh", name_ru: "эрре", sound_en: "a lightly rolled or tapped “r”", sound_ru: "слегка раскатистое «р»", example_en: "red", example_ru: "красный" },
++        { letter: "S s", name: "ессе", sound: "як українське «с»; між голосними іноді як «з»", example: "sole", example_uk: "сонце", name_en: "ES-seh", name_ru: "эссе", sound_en: "like “s” in “sun”; between vowels sometimes like “z” in “zoo”", sound_ru: "как русское «с»; между гласными иногда как «з»", example_en: "sun", example_ru: "солнце" },
++        { letter: "T t", name: "ті", sound: "як українське «т»", example: "tempo", example_uk: "час/погода", name_en: "tee", name_ru: "ти", sound_en: "like English “t” in “stop” (without the puff of air)", sound_ru: "как русское «т»", example_en: "time / weather", example_ru: "время / погода" },
++        { letter: "U u", name: "у", sound: "як українське «у»", example: "uva", example_uk: "виноград", name_en: "oo", name_ru: "у", sound_en: "like “oo” in “moon”", sound_ru: "как русское «у»", example_en: "grapes", example_ru: "виноград" },
++        { letter: "V v", name: "ву", sound: "як українське «в»", example: "vita", example_uk: "життя", name_en: "voo", name_ru: "ву", sound_en: "like English “v” in “van”", sound_ru: "как русское «в»", example_en: "life", example_ru: "жизнь" },
++        { letter: "Z z", name: "дзета", sound: "як «дз» або «тц» залежно від слова", example: "zero", example_uk: "нуль", name_en: "DZEH-tah", name_ru: "дзета", sound_en: "like “ts” in “cats” or “dz” in “adze”, depending on the word", sound_ru: "как «дз» или «тц» — в зависимости от слова", example_en: "zero", example_ru: "ноль" },
++        { letter: "J j*", name: "і лунга", sound: "*лише в запозиченнях, як «й»", example: "jeans", example_uk: "джинси", name_en: "ee LOON-gah", name_ru: "и лунга", sound_en: "*only in loanwords, like “y” in “yes”", sound_ru: "*только в заимствованиях, как «й»", example_en: "jeans", example_ru: "джинсы" },
++        { letter: "K k*", name: "каппа", sound: "*лише в запозиченнях, як «к»", example: "kiwi", example_uk: "ківі", name_en: "KAP-pah", name_ru: "каппа", sound_en: "*only in loanwords, like “k”", sound_ru: "*только в заимствованиях, как «к»", example_en: "kiwi", example_ru: "киви" },
++        { letter: "W w*", name: "доппіа ву", sound: "*лише в запозиченнях, як «в»", example: "weekend", example_uk: "вихідні", name_en: "DOP-pyah voo", name_ru: "доппиа ву", sound_en: "*only in loanwords, like “v” (sometimes like English “w”)", sound_ru: "*только в заимствованиях, как «в»", example_en: "weekend", example_ru: "выходные" },
++        { letter: "X x*", name: "ікс", sound: "*лише в запозиченнях, як «кс»", example: "taxi", example_uk: "таксі", name_en: "eeks", name_ru: "икс", sound_en: "*only in loanwords, like “ks”", sound_ru: "*только в заимствованиях, как «кс»", example_en: "taxi", example_ru: "такси" },
++        { letter: "Y y*", name: "іпсилон", sound: "*лише в запозиченнях, як «і»", example: "yoga", example_uk: "йога", name_en: "EEP-see-lon", name_ru: "ипсилон", sound_en: "*only in loanwords, like “ee”", sound_ru: "*только в заимствованиях, как «и»", example_en: "yoga", example_ru: "йога" },
+     ];
+ 
+     // =====================================================================
+diff --git a/js/data-ja.js b/js/data-ja.js
+index f406d7f..6845d74 100644
+--- a/js/data-ja.js
++++ b/js/data-ja.js
+@@ -404,53 +404,57 @@
+     //  ALPHABET — ХІРАГАНА (46 базових знаків, ґодзюон)
+     //  Схема як в інших мов: letter = знак, name = назва (ромадзі).
+     // =====================================================================
++    // Формат елемента ALPHABET:
++    //   обов'язкові (українською, запасний варіант): letter, name, sound, example, example_uk
++    //   необов'язкові для інтерфейсу en/ru: name_en, name_ru, sound_en, sound_ru, example_en, example_ru
++    //   (екран абетки бере поле мови інтерфейсу, а якщо його нема — українське; див. localizedAlphabetField)
+     const ALPHABET = [
+-        { letter: "あ", name: "a", sound: "a — читається як укр. «а»", example: "あさ", example_uk: "ранок" },
+-        { letter: "い", name: "i", sound: "i — читається як укр. «і»", example: "いぬ", example_uk: "собака" },
+-        { letter: "う", name: "u", sound: "u — читається як коротке «у»", example: "うみ", example_uk: "море" },
+-        { letter: "え", name: "e", sound: "e — читається як укр. «е»", example: "えき", example_uk: "станція" },
+-        { letter: "お", name: "o", sound: "o — читається як укр. «о»", example: "おちゃ", example_uk: "чай" },
+-        { letter: "か", name: "ka", sound: "ka — «ка»", example: "かさ", example_uk: "парасолька" },
+-        { letter: "き", name: "ki", sound: "ki — «кі»", example: "きた", example_uk: "північ" },
+-        { letter: "く", name: "ku", sound: "ku — «ку»", example: "くつ", example_uk: "взуття" },
+-        { letter: "け", name: "ke", sound: "ke — «ке»", example: "けさ", example_uk: "цей ранок" },
+-        { letter: "こ", name: "ko", sound: "ko — «ко»", example: "こども", example_uk: "дитина" },
+-        { letter: "さ", name: "sa", sound: "sa — «са»", example: "さかな", example_uk: "риба" },
+-        { letter: "し", name: "shi", sound: "shi — «ші» (не «сі»!)", example: "しろ", example_uk: "білий" },
+-        { letter: "す", name: "su", sound: "su — «су»", example: "すし", example_uk: "суші" },
+-        { letter: "せ", name: "se", sound: "se — «се»", example: "せんせい", example_uk: "вчитель" },
+-        { letter: "そ", name: "so", sound: "so — «со»", example: "そら", example_uk: "небо" },
+-        { letter: "た", name: "ta", sound: "ta — «та»", example: "たまご", example_uk: "яйце" },
+-        { letter: "ち", name: "chi", sound: "chi — «чі» (не «ті»!)", example: "ちず", example_uk: "мапа" },
+-        { letter: "つ", name: "tsu", sound: "tsu — «цу», особливий звук, якого нема в українській", example: "つき", example_uk: "місяць" },
+-        { letter: "て", name: "te", sound: "te — «те»", example: "てがみ", example_uk: "лист" },
+-        { letter: "と", name: "to", sound: "to — «то»", example: "とけい", example_uk: "годинник" },
+-        { letter: "な", name: "na", sound: "na — «на»", example: "なつ", example_uk: "літо" },
+-        { letter: "に", name: "ni", sound: "ni — «ні»", example: "にく", example_uk: "м'ясо" },
+-        { letter: "ぬ", name: "nu", sound: "nu — «ну»", example: "ぬの", example_uk: "тканина" },
+-        { letter: "ね", name: "ne", sound: "ne — «не»", example: "ねこ", example_uk: "кіт" },
+-        { letter: "の", name: "no", sound: "no — «но»", example: "のみもの", example_uk: "напій" },
+-        { letter: "は", name: "ha", sound: "ha — «ха» (як частка теми читається «ва», див. граматику)", example: "はな", example_uk: "квітка" },
+-        { letter: "ひ", name: "hi", sound: "hi — «хі»", example: "ひと", example_uk: "людина" },
+-        { letter: "ふ", name: "fu", sound: "fu — м'яке «фу», щось середнє між «фу» і «ху»", example: "ふゆ", example_uk: "зима" },
+-        { letter: "へ", name: "he", sound: "he — «хе»", example: "へや", example_uk: "кімната" },
+-        { letter: "ほ", name: "ho", sound: "ho — «хо»", example: "ほし", example_uk: "зірка" },
+-        { letter: "ま", name: "ma", sound: "ma — «ма»", example: "まど", example_uk: "вікно" },
+-        { letter: "み", name: "mi", sound: "mi — «мі»", example: "みず", example_uk: "вода" },
+-        { letter: "む", name: "mu", sound: "mu — «му»", example: "むし", example_uk: "комаха" },
+-        { letter: "め", name: "me", sound: "me — «ме»", example: "めがね", example_uk: "окуляри" },
+-        { letter: "も", name: "mo", sound: "mo — «мо»", example: "もり", example_uk: "ліс" },
+-        { letter: "や", name: "ya", sound: "ya — «я»", example: "やま", example_uk: "гора" },
+-        { letter: "ゆ", name: "yu", sound: "yu — «ю»", example: "ゆき", example_uk: "сніг" },
+-        { letter: "よ", name: "yo", sound: "yo — «йо»", example: "よる", example_uk: "ніч" },
+-        { letter: "ら", name: "ra", sound: "ra — щось середнє між укр. «ра» і «ла»", example: "らいねん", example_uk: "наступний рік" },
+-        { letter: "り", name: "ri", sound: "ri — середнє між «рі» і «лі»", example: "りんご", example_uk: "яблуко" },
+-        { letter: "る", name: "ru", sound: "ru — середнє між «ру» і «лу»", example: "るす", example_uk: "відсутність вдома" },
+-        { letter: "れ", name: "re", sound: "re — середнє між «ре» і «ле»", example: "れきし", example_uk: "історія" },
+-        { letter: "ろ", name: "ro", sound: "ro — середнє між «ро» і «ло»", example: "ろうか", example_uk: "коридор" },
+-        { letter: "わ", name: "wa", sound: "wa — «ва»", example: "わたし", example_uk: "я" },
+-        { letter: "を", name: "o", sound: "o — вимовляється як «о», використовується ЛИШЕ як частка прямого додатка (граматика)", example: "ほんを よみます", example_uk: "читаю книгу" },
+-        { letter: "ん", name: "n", sound: "n — носове «н», єдиний знак хірагани без голосного", example: "ほん", example_uk: "книга" },
++        { letter: "あ", name: "a", sound: "a — читається як укр. «а»", example: "あさ", example_uk: "ранок", name_ru: "а", sound_en: "a — like “a” in “father”", sound_ru: "a — как русское «а»", example_en: "morning", example_ru: "утро" },
++        { letter: "い", name: "i", sound: "i — читається як укр. «і»", example: "いぬ", example_uk: "собака", name_ru: "и", sound_en: "i — like “ee” in “see”", sound_ru: "i — как русское «и»", example_en: "dog", example_ru: "собака" },
++        { letter: "う", name: "u", sound: "u — читається як коротке «у»", example: "うみ", example_uk: "море", name_ru: "у", sound_en: "u — like “oo” in “moon”, but with relaxed, unrounded lips", sound_ru: "u — короткое «у» (без округления губ)", example_en: "sea", example_ru: "море" },
++        { letter: "え", name: "e", sound: "e — читається як укр. «е»", example: "えき", example_uk: "станція", name_ru: "э", sound_en: "e — like “e” in “bed”", sound_ru: "e — как русское «э»", example_en: "station", example_ru: "станция" },
++        { letter: "お", name: "o", sound: "o — читається як укр. «о»", example: "おちゃ", example_uk: "чай", name_ru: "о", sound_en: "o — like “o” in “more”", sound_ru: "o — как русское «о»", example_en: "tea", example_ru: "чай" },
++        { letter: "か", name: "ka", sound: "ka — «ка»", example: "かさ", example_uk: "парасолька", name_ru: "ка", sound_en: "ka — like “ka” in “karaoke”", sound_ru: "ka — «ка»", example_en: "umbrella", example_ru: "зонт" },
++        { letter: "き", name: "ki", sound: "ki — «кі»", example: "きた", example_uk: "північ", name_ru: "ки", sound_en: "ki — like “key”", sound_ru: "ki — «ки»", example_en: "north", example_ru: "север" },
++        { letter: "く", name: "ku", sound: "ku — «ку»", example: "くつ", example_uk: "взуття", name_ru: "ку", sound_en: "ku — like “coo” in “cool”", sound_ru: "ku — «ку»", example_en: "shoes", example_ru: "обувь" },
++        { letter: "け", name: "ke", sound: "ke — «ке»", example: "けさ", example_uk: "цей ранок", name_ru: "кэ", sound_en: "ke — like “ke” in “kettle”", sound_ru: "ke — «кэ»", example_en: "this morning", example_ru: "сегодня утром" },
++        { letter: "こ", name: "ko", sound: "ko — «ко»", example: "こども", example_uk: "дитина", name_ru: "ко", sound_en: "ko — like “co” in “coat”", sound_ru: "ko — «ко»", example_en: "child", example_ru: "ребёнок" },
++        { letter: "さ", name: "sa", sound: "sa — «са»", example: "さかな", example_uk: "риба", name_ru: "са", sound_en: "sa — like “sa” in “sonar”", sound_ru: "sa — «са»", example_en: "fish", example_ru: "рыба" },
++        { letter: "し", name: "shi", sound: "shi — «ші» (не «сі»!)", example: "しろ", example_uk: "білий", name_ru: "ши", sound_en: "shi — like “she” (not “see”!)", sound_ru: "shi — «ши» (не «си»!)", example_en: "white", example_ru: "белый" },
++        { letter: "す", name: "su", sound: "su — «су»", example: "すし", example_uk: "суші", name_ru: "су", sound_en: "su — like “sue”", sound_ru: "su — «су»", example_en: "sushi", example_ru: "суши" },
++        { letter: "せ", name: "se", sound: "se — «се»", example: "せんせい", example_uk: "вчитель", name_ru: "сэ", sound_en: "se — like “se” in “set”", sound_ru: "se — «сэ»", example_en: "teacher", example_ru: "учитель" },
++        { letter: "そ", name: "so", sound: "so — «со»", example: "そら", example_uk: "небо", name_ru: "со", sound_en: "so — like “so”", sound_ru: "so — «со»", example_en: "sky", example_ru: "небо" },
++        { letter: "た", name: "ta", sound: "ta — «та»", example: "たまご", example_uk: "яйце", name_ru: "та", sound_en: "ta — like “ta” in “tar”", sound_ru: "ta — «та»", example_en: "egg", example_ru: "яйцо" },
++        { letter: "ち", name: "chi", sound: "chi — «чі» (не «ті»!)", example: "ちず", example_uk: "мапа", name_ru: "чи", sound_en: "chi — like “chee” in “cheese” (not “tee”!)", sound_ru: "chi — «чи» (не «ти»!)", example_en: "map", example_ru: "карта" },
++        { letter: "つ", name: "tsu", sound: "tsu — «цу», особливий звук, якого нема в українській", example: "つき", example_uk: "місяць", name_ru: "цу", sound_en: "tsu — “ts” as at the end of “cats” + “oo” (a sound English only has inside words)", sound_ru: "tsu — «цу», особый звук, которого нет в русском", example_en: "moon", example_ru: "луна" },
++        { letter: "て", name: "te", sound: "te — «те»", example: "てがみ", example_uk: "лист", name_ru: "тэ", sound_en: "te — like “te” in “ten”", sound_ru: "te — «тэ»", example_en: "letter", example_ru: "письмо" },
++        { letter: "と", name: "to", sound: "to — «то»", example: "とけい", example_uk: "годинник", name_ru: "то", sound_en: "to — like “toe”", sound_ru: "to — «то»", example_en: "clock / watch", example_ru: "часы" },
++        { letter: "な", name: "na", sound: "na — «на»", example: "なつ", example_uk: "літо", name_ru: "на", sound_en: "na — like “na” in “nacho”", sound_ru: "na — «на»", example_en: "summer", example_ru: "лето" },
++        { letter: "に", name: "ni", sound: "ni — «ні»", example: "にく", example_uk: "м'ясо", name_ru: "ни", sound_en: "ni — like “knee”", sound_ru: "ni — «ни»", example_en: "meat", example_ru: "мясо" },
++        { letter: "ぬ", name: "nu", sound: "nu — «ну»", example: "ぬの", example_uk: "тканина", name_ru: "ну", sound_en: "nu — like “noo” in “noodle”", sound_ru: "nu — «ну»", example_en: "cloth", example_ru: "ткань" },
++        { letter: "ね", name: "ne", sound: "ne — «не»", example: "ねこ", example_uk: "кіт", name_ru: "нэ", sound_en: "ne — like “ne” in “net”", sound_ru: "ne — «нэ»", example_en: "cat", example_ru: "кот" },
++        { letter: "の", name: "no", sound: "no — «но»", example: "のみもの", example_uk: "напій", name_ru: "но", sound_en: "no — like “no”", sound_ru: "no — «но»", example_en: "drink", example_ru: "напиток" },
++        { letter: "は", name: "ha", sound: "ha — «ха» (як частка теми читається «ва», див. граматику)", example: "はな", example_uk: "квітка", name_ru: "ха", sound_en: "ha — like “ha” in “hah”", sound_ru: "ha — «ха» (как частица темы читается «ва», см. грамматику)", example_en: "flower", example_ru: "цветок" },
++        { letter: "ひ", name: "hi", sound: "hi — «хі»", example: "ひと", example_uk: "людина", name_ru: "хи", sound_en: "hi — like “he”", sound_ru: "hi — «хи»", example_en: "person", example_ru: "человек" },
++        { letter: "ふ", name: "fu", sound: "fu — м'яке «фу», щось середнє між «фу» і «ху»", example: "ふゆ", example_uk: "зима", name_ru: "фу", sound_en: "fu — softer than English “f”: between “foo” and “hoo” (blow gently, lips barely touch)", sound_ru: "fu — мягкое «фу», нечто среднее между «фу» и «ху»", example_en: "winter", example_ru: "зима" },
++        { letter: "へ", name: "he", sound: "he — «хе»", example: "へや", example_uk: "кімната", name_ru: "хэ", sound_en: "he — like “he” in “hen”", sound_ru: "he — «хэ»", example_en: "room", example_ru: "комната" },
++        { letter: "ほ", name: "ho", sound: "ho — «хо»", example: "ほし", example_uk: "зірка", name_ru: "хо", sound_en: "ho — like “ho” in “hoe”", sound_ru: "ho — «хо»", example_en: "star", example_ru: "звезда" },
++        { letter: "ま", name: "ma", sound: "ma — «ма»", example: "まど", example_uk: "вікно", name_ru: "ма", sound_en: "ma — like “ma” in “mama”", sound_ru: "ma — «ма»", example_en: "window", example_ru: "окно" },
++        { letter: "み", name: "mi", sound: "mi — «мі»", example: "みず", example_uk: "вода", name_ru: "ми", sound_en: "mi — like “me”", sound_ru: "mi — «ми»", example_en: "water", example_ru: "вода" },
++        { letter: "む", name: "mu", sound: "mu — «му»", example: "むし", example_uk: "комаха", name_ru: "му", sound_en: "mu — like “moo”", sound_ru: "mu — «му»", example_en: "insect", example_ru: "насекомое" },
++        { letter: "め", name: "me", sound: "me — «ме»", example: "めがね", example_uk: "окуляри", name_ru: "мэ", sound_en: "me — like “me” in “met”", sound_ru: "me — «мэ»", example_en: "glasses", example_ru: "очки" },
++        { letter: "も", name: "mo", sound: "mo — «мо»", example: "もり", example_uk: "ліс", name_ru: "мо", sound_en: "mo — like “mo” in “more”", sound_ru: "mo — «мо»", example_en: "forest", example_ru: "лес" },
++        { letter: "や", name: "ya", sound: "ya — «я»", example: "やま", example_uk: "гора", name_ru: "я", sound_en: "ya — like “ya” in “yacht”", sound_ru: "ya — «я»", example_en: "mountain", example_ru: "гора" },
++        { letter: "ゆ", name: "yu", sound: "yu — «ю»", example: "ゆき", example_uk: "сніг", name_ru: "ю", sound_en: "yu — like “you”", sound_ru: "yu — «ю»", example_en: "snow", example_ru: "снег" },
++        { letter: "よ", name: "yo", sound: "yo — «йо»", example: "よる", example_uk: "ніч", name_ru: "ё", sound_en: "yo — like “yo” in “yoga”", sound_ru: "yo — «ё»", example_en: "night", example_ru: "ночь" },
++        { letter: "ら", name: "ra", sound: "ra — щось середнє між укр. «ра» і «ла»", example: "らいねん", example_uk: "наступний рік", name_ru: "ра", sound_en: "ra — between English “r”, “l” and “d”: a quick tap of the tongue", sound_ru: "ra — нечто среднее между русскими «ра» и «ла»", example_en: "next year", example_ru: "следующий год" },
++        { letter: "り", name: "ri", sound: "ri — середнє між «рі» і «лі»", example: "りんご", example_uk: "яблуко", name_ru: "ри", sound_en: "ri — quick tap, between “ree” and “lee”", sound_ru: "ri — среднее между «ри» и «ли»", example_en: "apple", example_ru: "яблоко" },
++        { letter: "る", name: "ru", sound: "ru — середнє між «ру» і «лу»", example: "るす", example_uk: "відсутність вдома", name_ru: "ру", sound_en: "ru — quick tap, between “roo” and “loo”", sound_ru: "ru — среднее между «ру» и «лу»", example_en: "being away from home", example_ru: "отсутствие дома" },
++        { letter: "れ", name: "re", sound: "re — середнє між «ре» і «ле»", example: "れきし", example_uk: "історія", name_ru: "рэ", sound_en: "re — quick tap, between “re” and “le”", sound_ru: "re — среднее между «рэ» и «лэ»", example_en: "history", example_ru: "история" },
++        { letter: "ろ", name: "ro", sound: "ro — середнє між «ро» і «ло»", example: "ろうか", example_uk: "коридор", name_ru: "ро", sound_en: "ro — quick tap, between “ro” and “lo”", sound_ru: "ro — среднее между «ро» и «ло»", example_en: "corridor", example_ru: "коридор" },
++        { letter: "わ", name: "wa", sound: "wa — «ва»", example: "わたし", example_uk: "я", name_ru: "ва", sound_en: "wa — like “wa” in “wah”", sound_ru: "wa — «ва»", example_en: "I / me", example_ru: "я" },
++        { letter: "を", name: "o", sound: "o — вимовляється як «о», використовується ЛИШЕ як частка прямого додатка (граматика)", example: "ほんを よみます", example_uk: "читаю книгу", name_ru: "о", sound_en: "o — pronounced like “o” (お); used ONLY as the direct-object particle (see grammar)", sound_ru: "o — произносится как «о», используется ТОЛЬКО как частица прямого дополнения (грамматика)", example_en: "I read a book", example_ru: "читаю книгу" },
++        { letter: "ん", name: "n", sound: "n — носове «н», єдиний знак хірагани без голосного", example: "ほん", example_uk: "книга", name_ru: "н", sound_en: "n — a nasal “n”, the only kana with no vowel; like “ng” in “sing” before k/g, “m” before m/b/p", sound_ru: "n — носовое «н», единственный знак хираганы без гласной", example_en: "book", example_ru: "книга" },
+     ];
+ 
+     // =====================================================================
+diff --git a/js/data.js b/js/data.js
+index 1011c52..7a99fd6 100644
+--- a/js/data.js
++++ b/js/data.js
+@@ -2052,38 +2052,38 @@ const STUDY_PLANS = {
+         //  АБЕТКА (норвезька)
+         // =====================================================================
+         const ALPHABET = [
+-            { letter: "A a", name: "а", sound: "як українське «а»", example: "app", example_uk: "аплодисменти" },
+-            { letter: "B b", name: "бе", sound: "як українське «б»", example: "bok", example_uk: "книга" },
+-            { letter: "C c", name: "се", sound: "як «с» (рідко «к»)", example: "cirka", example_uk: "приблизно" },
+-            { letter: "D d", name: "де", sound: "як українське «д»", example: "dag", example_uk: "день" },
+-            { letter: "E e", name: "е", sound: "як українське «е»", example: "eple", example_uk: "яблуко" },
+-            { letter: "F f", name: "еф", sound: "як українське «ф»", example: "fisk", example_uk: "риба" },
+-            { letter: "G g", name: "ге", sound: "як «ґ»; перед i/y/øy — як «й»", example: "gate", example_uk: "вулиця" },
+-            { letter: "H h", name: "хо", sound: "як українське «г» (легке, як в англ. house)", example: "hus", example_uk: "будинок" },
+-            { letter: "I i", name: "і", sound: "як українське «і»", example: "is", example_uk: "морозиво/лід" },
+-            { letter: "J j", name: "є", sound: "як українське «й»", example: "ja", example_uk: "так" },
+-            { letter: "K k", name: "ко", sound: "як українське «к»; перед i/y/øy — м'якше, як «хь»", example: "katt", example_uk: "кіт" },
+-            { letter: "L l", name: "ель", sound: "як українське «л»", example: "lys", example_uk: "світло" },
+-            { letter: "M m", name: "ем", sound: "як українське «м»", example: "mat", example_uk: "їжа" },
+-            { letter: "N n", name: "ен", sound: "як українське «н»", example: "natt", example_uk: "ніч" },
+-            { letter: "O o", name: "у", sound: "часто звучить як українське «у»", example: "ost", example_uk: "сир" },
+-            { letter: "P p", name: "пе", sound: "як українське «п»", example: "penn", example_uk: "ручка" },
+-            { letter: "Q q", name: "ку", sound: "як «к» (дуже рідко вживається)", example: "quiz", example_uk: "вікторина" },
+-            { letter: "R r", name: "ер", sound: "гортанне «р», інакше ніж українське", example: "rød", example_uk: "червоний" },
+-            { letter: "S s", name: "ес", sound: "як українське «с»", example: "sol", example_uk: "сонце" },
+-            { letter: "T t", name: "те", sound: "як українське «т»", example: "tid", example_uk: "час" },
+-            { letter: "U u", name: "у", sound: "заокруглене, ближче до «ю» без «й»", example: "ute", example_uk: "надворі" },
+-            { letter: "V v", name: "ве", sound: "як українське «в»", example: "vann", example_uk: "вода" },
+-            { letter: "W w", name: "дубль-ве", sound: "як «в» (рідко вживається)", example: "web", example_uk: "мережа" },
+-            { letter: "X x", name: "екс", sound: "як «кс» (рідко вживається)", example: "xylofon", example_uk: "ксилофон" },
+-            { letter: "Y y", name: "и", sound: "заокруглене «і», немає аналога в українській", example: "by", example_uk: "місто" },
+-            { letter: "Z z", name: "сетт", sound: "як «с» (рідко вживається)", example: "zoom", example_uk: "збільшення" },
++            { letter: "A a", name: "а", sound: "як українське «а»", example: "app", example_uk: "додаток", name_en: "ah", name_ru: "а", sound_en: "like “a” in “father”", sound_ru: "как русское «а»", example_en: "app (application)", example_ru: "приложение" },
++            { letter: "B b", name: "бе", sound: "як українське «б»", example: "bok", example_uk: "книга", name_en: "beh", name_ru: "бе", sound_en: "like English “b” in “book”", sound_ru: "как русское «б»", example_en: "book", example_ru: "книга" },
++            { letter: "C c", name: "се", sound: "як «с» (рідко «к»)", example: "cirka", example_uk: "приблизно", name_en: "seh", name_ru: "се", sound_en: "like “s” (rarely “k”)", sound_ru: "как «с» (редко «к»)", example_en: "approximately", example_ru: "приблизительно" },
++            { letter: "D d", name: "де", sound: "як українське «д»", example: "dag", example_uk: "день", name_en: "deh", name_ru: "де", sound_en: "like English “d” in “day”", sound_ru: "как русское «д»", example_en: "day", example_ru: "день" },
++            { letter: "E e", name: "е", sound: "як українське «е»", example: "eple", example_uk: "яблуко", name_en: "eh", name_ru: "е", sound_en: "like “e” in “bed”", sound_ru: "как русское «э»", example_en: "apple", example_ru: "яблоко" },
++            { letter: "F f", name: "еф", sound: "як українське «ф»", example: "fisk", example_uk: "риба", name_en: "eff", name_ru: "еф", sound_en: "like English “f” in “fish”", sound_ru: "как русское «ф»", example_en: "fish", example_ru: "рыба" },
++            { letter: "G g", name: "ге", sound: "як «ґ»; перед i/y/øy — як «й»", example: "gate", example_uk: "вулиця", name_en: "geh", name_ru: "ге", sound_en: "like “g” in “go”; before i/y/øy like “y” in “yes”", sound_ru: "как «г»; перед i/y/øy — как «й»", example_en: "street", example_ru: "улица" },
++            { letter: "H h", name: "хо", sound: "як українське «г» (легке, як в англ. house)", example: "hus", example_uk: "будинок", name_en: "hoh", name_ru: "хо", sound_en: "like “h” in “house” (light)", sound_ru: "как русское «г» (лёгкое, как в англ. house)", example_en: "house", example_ru: "дом" },
++            { letter: "I i", name: "і", sound: "як українське «і»", example: "is", example_uk: "морозиво/лід", name_en: "ee", name_ru: "и", sound_en: "like “ee” in “see”", sound_ru: "как русское «и»", example_en: "ice / ice cream", example_ru: "мороженое / лёд" },
++            { letter: "J j", name: "є", sound: "як українське «й»", example: "ja", example_uk: "так", name_en: "yoh", name_ru: "йо", sound_en: "like “y” in “yes”", sound_ru: "как русское «й»", example_en: "yes", example_ru: "да" },
++            { letter: "K k", name: "ко", sound: "як українське «к»; перед i/y/øy — м'якше, як «хь»", example: "katt", example_uk: "кіт", name_en: "koh", name_ru: "ко", sound_en: "like “k” in “cat”; before i/y/øy softer, like the “h” in “huge”", sound_ru: "как «к»; перед i/y/øy — мягче, как «хь»", example_en: "cat", example_ru: "кот" },
++            { letter: "L l", name: "ель", sound: "як українське «л»", example: "lys", example_uk: "світло", name_en: "ell", name_ru: "эль", sound_en: "like “l” in “lamp”", sound_ru: "как русское «л»", example_en: "light", example_ru: "свет" },
++            { letter: "M m", name: "ем", sound: "як українське «м»", example: "mat", example_uk: "їжа", name_en: "emm", name_ru: "эм", sound_en: "like “m” in “moon”", sound_ru: "как русское «м»", example_en: "food", example_ru: "еда" },
++            { letter: "N n", name: "ен", sound: "як українське «н»", example: "natt", example_uk: "ніч", name_en: "enn", name_ru: "эн", sound_en: "like “n” in “night”", sound_ru: "как русское «н»", example_en: "night", example_ru: "ночь" },
++            { letter: "O o", name: "у", sound: "часто звучить як українське «у»", example: "ost", example_uk: "сир", name_en: "oo", name_ru: "у", sound_en: "often like “oo” in “moon” (sometimes like “o” in “more”)", sound_ru: "часто звучит как русское «у»", example_en: "cheese", example_ru: "сыр" },
++            { letter: "P p", name: "пе", sound: "як українське «п»", example: "penn", example_uk: "ручка", name_en: "peh", name_ru: "пе", sound_en: "like “p” in “pen”", sound_ru: "как русское «п»", example_en: "pen", example_ru: "ручка" },
++            { letter: "Q q", name: "ку", sound: "як «к» (дуже рідко вживається)", example: "quiz", example_uk: "вікторина", name_en: "koo", name_ru: "ку", sound_en: "like “k” (very rare)", sound_ru: "как «к» (очень редко)", example_en: "quiz", example_ru: "викторина" },
++            { letter: "R r", name: "ер", sound: "гортанне «р», інакше ніж українське", example: "rød", example_uk: "червоний", name_en: "air", name_ru: "эр", sound_en: "a tapped “r” (guttural in the south and west); not like the English r", sound_ru: "«р» с одним касанием языка (на юге и западе — гортанное); не как английское", example_en: "red", example_ru: "красный" },
++            { letter: "S s", name: "ес", sound: "як українське «с»", example: "sol", example_uk: "сонце", name_en: "ess", name_ru: "эс", sound_en: "like “s” in “sun”", sound_ru: "как русское «с»", example_en: "sun", example_ru: "солнце" },
++            { letter: "T t", name: "те", sound: "як українське «т»", example: "tid", example_uk: "час", name_en: "teh", name_ru: "те", sound_en: "like “t” in “top”", sound_ru: "как русское «т»", example_en: "time", example_ru: "время" },
++            { letter: "U u", name: "у", sound: "заокруглене, ближче до «ю» без «й»", example: "ute", example_uk: "надворі", name_en: "ew (rounded)", name_ru: "у", sound_en: "rounded vowel, close to “ee” with pursed lips; no exact English equivalent", sound_ru: "округлённое, ближе к «ю» без «й»", example_en: "outside", example_ru: "снаружи" },
++            { letter: "V v", name: "ве", sound: "як українське «в»", example: "vann", example_uk: "вода", name_en: "veh", name_ru: "ве", sound_en: "like “v” in “van”", sound_ru: "как русское «в»", example_en: "water", example_ru: "вода" },
++            { letter: "W w", name: "дубль-ве", sound: "як «в» (рідко вживається)", example: "web", example_uk: "мережа", name_en: "DOH-belt veh", name_ru: "дубль-ве", sound_en: "like “v” (rare)", sound_ru: "как «в» (редко)", example_en: "web", example_ru: "сеть" },
++            { letter: "X x", name: "екс", sound: "як «кс» (рідко вживається)", example: "xylofon", example_uk: "ксилофон", name_en: "eks", name_ru: "экс", sound_en: "like “ks” (rare)", sound_ru: "как «кс» (редко)", example_en: "xylophone", example_ru: "ксилофон" },
++            { letter: "Y y", name: "и", sound: "заокруглене «і», немає аналога в українській", example: "by", example_uk: "місто", name_en: "ü (rounded “ee”)", name_ru: "и (с округлёнными губами)", sound_en: "rounded “ee” (lips rounded, like German ü); no English equivalent", sound_ru: "округлённое «и», в русском аналога нет", example_en: "city / town", example_ru: "город" },
++            { letter: "Z z", name: "сетт", sound: "як «с» (рідко вживається)", example: "zoom", example_uk: "збільшення", name_en: "sett", name_ru: "сетт", sound_en: "like “s” (rare)", sound_ru: "как «с» (редко)", example_en: "zoom", example_ru: "приближение" },
+             // Раніше приклад для æ був данським словом (æble) з приміткою
+             // "рідко починає слова в норвезькій" — по суті визнання, що приклад
+             // не підходить. Замінено на реальне норвезьке слово з æ.
+-            { letter: "Æ æ", name: "е", sound: "відкрите «е», трохи ширше за звичайне", example: "være", example_uk: "бути" },
+-            { letter: "Ø ø", name: "ьо", sound: "заокруглене, як нім. ö — немає аналога в українській", example: "øy", example_uk: "острів" },
+-            { letter: "Å å", name: "о", sound: "закрите заокруглене «о»", example: "å gå", example_uk: "йти (частка + дієслово)" },
++            { letter: "Æ æ", name: "е", sound: "відкрите «е», трохи ширше за звичайне", example: "være", example_uk: "бути", name_en: "ae", name_ru: "э", sound_en: "open “e”, like “a” in “cat” but a little wider", sound_ru: "открытое «э», чуть шире обычного", example_en: "to be", example_ru: "быть" },
++            { letter: "Ø ø", name: "ьо", sound: "заокруглене, як нім. ö — немає аналога в українській", example: "øy", example_uk: "острів", name_en: "oe", name_ru: "ё", sound_en: "rounded, like “ur” in “fur” without the r (German ö); no English equivalent", sound_ru: "округлённое, как нем. ö — аналога в русском нет", example_en: "island", example_ru: "остров" },
++            { letter: "Å å", name: "о", sound: "закрите заокруглене «о»", example: "å gå", example_uk: "йти (частка + дієслово)", name_en: "oh", name_ru: "о", sound_en: "like “o” in “more” (closed, rounded)", sound_ru: "закрытое округлённое «о»", example_en: "to go (particle + verb)", example_ru: "идти (частица + глагол)" },
+         ];
+ 
+         // =====================================================================
+diff --git a/js/i18n.js b/js/i18n.js
+index 739e6b9..cd561ec 100644
+--- a/js/i18n.js
++++ b/js/i18n.js
+@@ -591,6 +591,63 @@ function wordExampleTranslation(word, level, lang) {
+     return word.ex_uk;
+ }
+ 
++// Чи має слово СПРАВЖНІЙ переклад мовою lang. wordTranslation() мовчки підставляє
++// українську, коли en/ru немає — для показу слова це ок, але для варіантів
++// відповіді в тестах це дає суміш мов (3 варіанти англійською + 1 українською).
++// Тому тести добирають і питання, і неправильні варіанти лише зі слів, у яких
++// переклад цією мовою є насправді.
++function hasWordTranslation(word, lang) {
++    lang = lang || (typeof STATE !== 'undefined' && STATE && STATE.vocabLang) || 'uk';
++    if (!word) return false;
++    const v = lang === 'en' ? word.en : lang === 'ru' ? word.ru : word.uk;
++    if (typeof v !== 'string' || !v.trim()) return false;
++    // «англійський» переклад кирилицею — це не переклад (помилка даних/генерації)
++    if (lang === 'en' && /[\u0400-\u04FF]/.test(v)) return false;
++    return true;
++}
++
++// Те саме для перекладу речення-прикладу (en_ex / ru_ex) — його показують у тестах
++// Cloze/Order як підказку.
++function hasExampleTranslation(word, lang) {
++    lang = lang || (typeof STATE !== 'undefined' && STATE && STATE.vocabLang) || 'uk';
++    if (!word) return false;
++    const v = lang === 'en' ? word.en_ex : lang === 'ru' ? word.ru_ex : word.ex_uk;
++    if (typeof v !== 'string' || !v.trim()) return false;
++    if (lang === 'en' && /[\u0400-\u04FF]/.test(v)) return false;
++    return true;
++}
++
++// Віддає перевагу словам, у яких є справжній переклад прикладу мовою інтерфейсу.
++// Якщо таких замало (< minCount) — повертає всі, щоб тест не став порожнім:
++// краще підказка запасною мовою, ніж жодного питання.
++function preferTranslatedExamples(words, minCount, lang) {
++    const good = (words || []).filter(w => hasExampleTranslation(w, lang));
++    return good.length >= (minCount || 3) ? good : (words || []);
++}
++
++function translatableWords(words, lang) {
++    return (words || []).filter(w => hasWordTranslation(w, lang));
++}
++
++// Неправильні варіанти-переклади для слова `word`: лише зі слів пулу, що мають
++// переклад мовою lang, без самого слова і без дублікатів тексту (два однакові
++// варіанти зробили б питання двозначним).
++function translationDistractors(pool, word, count, level, lang) {
++    lang = lang || (typeof STATE !== 'undefined' && STATE && STATE.vocabLang) || 'uk';
++    const norm = s => String(s).trim().toLowerCase();
++    const seen = new Set([norm(wordTranslation(word, level, lang))]);
++    const out = [];
++    for (const x of shuffle(pool || [])) {
++        if (!x || x.no === word.no || !hasWordTranslation(x, lang)) continue;
++        const tr = wordTranslation(x, level, lang);
++        if (seen.has(norm(tr))) continue;
++        seen.add(norm(tr));
++        out.push(tr);
++        if (out.length >= count) break;
++    }
++    return out;
++}
++
+ // Застосовує переклад до статичних елементів сторінки входу/шапки, які
+ // живуть поза #mainContent і тому не перемальовуються через navigate().
+ function applyStaticTranslations() {
+diff --git a/js/languages.js b/js/languages.js
+index e3b0efa..ddd1fab 100644
+--- a/js/languages.js
++++ b/js/languages.js
+@@ -363,7 +363,13 @@ async function generateAlphabetWithAI(lang) {
+         `розмовляє українською. Формат масиву: [{"letter": "як виглядає літера (велика й мала, наприклад \\"A a\\")", ` +
+         `"name": "як літера називається (українською транслітерацією)", ` +
+         `"sound": "коротке, практичне пояснення вимови українською — не наукова фонетика, а orientir для новачка", ` +
+-        `"example": "приклад слова з цією літерою мовою вивчення", "example_uk": "переклад прикладу українською"}, ...]. ` +
++        `"example": "приклад слова з цією літерою мовою вивчення", "example_uk": "переклад прикладу українською", ` +
++        // Поля для інтерфейсу англійською/російською (екран абетки показує їх замість українських).
++        // sound_en має порівнювати з АНГЛІЙСЬКИМИ звуками ("like 'a' in 'father'"), а не з українськими.
++        `"name_en": "letter name spelled for English speakers, e.g. 'bee'", "name_ru": "название буквы кириллицей по-русски", ` +
++        `"sound_en": "short practical pronunciation tip in English, comparing to English sounds", ` +
++        `"sound_ru": "короткая подсказка по произношению по-русски", ` +
++        `"example_en": "English translation of the example word", "example_ru": "перевод слова-примера на русский"}, ...]. ` +
+         `Включи ВСІ літери абетки цієї мови в правильному порядку (якщо в мові є діакритичні літери — включи і їх наприкінці).`;
+     const sys = `Ти — досвідчений викладач мови "${targetLangName}" для україномовних початківців з нуля. ` +
+         "Відповідай ЛИШЕ чистим JSON-масивом без жодного тексту навколо, без markdown-огорожі.";
+diff --git a/js/views-alphabet.js b/js/views-alphabet.js
+index 2cad39b..8fa71fa 100644
+--- a/js/views-alphabet.js
++++ b/js/views-alphabet.js
+@@ -19,6 +19,24 @@
+ // "Числа" (уже перекладені, з прикладами), тому просто фільтруються
+ // звідти.
+ 
++// Поля картки абетки залежать від мови інтерфейсу. Базові (українські) поля —
++// name / sound / example_uk — лишаються обов'язковими й служать запасним
++// варіантом; для інших мов інтерфейсу дані МОЖУТЬ мати необов'язкові поля:
++//     name_en / name_ru        — як літера називається (латиницею / російською)
++//     sound_en / sound_ru      — пояснення вимови для носія цієї мови
++//     example_en / example_ru  — переклад слова-прикладу
++// field: 'name' | 'sound' | 'translation' (переклад слова-прикладу).
++// Є локалізоване поле — беремо його; нема — тихо повертаємось до базового.
++function localizedAlphabetField(item, field) {
++    const ui = (STATE && (STATE.uiLang || STATE.vocabLang)) || 'uk';
++    const base = field === 'translation' ? 'example' : field;
++    if (ui !== 'uk') {
++        const v = item[base + '_' + ui];
++        if (typeof v === 'string' && v.trim()) return v;
++    }
++    return (field === 'translation' ? item.example_uk : item[field]) || '';
++}
++
+ function viewAlphabet() {
+     const lang = STATE.targetLang || 'no';
+     const langName = targetLangName(lang);
+@@ -45,9 +63,9 @@ function viewAlphabet() {
+                         <span style="font-size:1.6rem;font-weight:700;font-family:'Fraunces',serif;">${escHtml(item.letter)}</span>
+                         <button class="btn btn-ghost btn-sm alpha-listen" data-letter="${escHtml(item.letter.split(' ')[0])}" title="${t('reading_tap_hint') || ''}">🔊</button>
+                     </div>
+-                    <p style="color:var(--ink-soft);font-size:.8rem;margin:6px 0 2px;">${t('alphabet_called')}: <b>${escHtml(item.name)}</b></p>
+-                    <p style="color:var(--ink-soft);font-size:.8rem;margin:2px 0;">${escHtml(item.sound)}</p>
+-                    <p style="font-size:.85rem;margin-top:8px;"><i>${escHtml(item.example)}</i> — ${escHtml(item.example_uk)}</p>
++                    <p style="color:var(--ink-soft);font-size:.8rem;margin:6px 0 2px;">${t('alphabet_called')}: <b>${escHtml(localizedAlphabetField(item, 'name'))}</b></p>
++                    <p style="color:var(--ink-soft);font-size:.8rem;margin:2px 0;">${escHtml(localizedAlphabetField(item, 'sound'))}</p>
++                    <p style="font-size:.85rem;margin-top:8px;"><i>${escHtml(item.example)}</i> — ${escHtml(localizedAlphabetField(item, 'translation'))}</p>
+                 </div>
+             `);
+             card.querySelector('.alpha-listen').onclick = () => speak(item.example, lang);
+diff --git a/js/views-core.js b/js/views-core.js
+index ba23bed..53e4b41 100644
+--- a/js/views-core.js
++++ b/js/views-core.js
+@@ -518,12 +518,13 @@ async function buildDynamicLevelTest(lang) {
+     }
+     const groups = [];
+     for (const level of LEVELS) {
+-        const words = vocabForLevel(level, lang);
++        // лише слова з реальним перекладом мовою інтерфейсу — інакше варіанти змішують мови
++        const words = translatableWords(vocabForLevel(level, lang), STATE.vocabLang);
+         if (!words || words.length < 4) continue; // замало слів для рівня — пропускаємо, а не показуємо порожні/непарні питання
+         const pool = shuffle(words).slice(0, 5);
+         pool.forEach(w => {
+             const correct = wordTranslation(w, level, STATE.vocabLang);
+-            const distractors = shuffle(words.filter(x => x.no !== w.no)).slice(0, 2).map(x => wordTranslation(x, level, STATE.vocabLang));
++            const distractors = translationDistractors(words, w, 2, level, STATE.vocabLang);
+             if (distractors.length < 2 || !correct) return;
+             const opts = shuffle([correct, ...distractors]);
+             groups.push({ lvl: level, q: `${t('how_translate')} «${w.no}»?`, opts, a: opts.indexOf(correct) });
+@@ -1009,7 +1010,7 @@ function renderMCCard(item, deckWords, level) {
+     // аргумент — рівень, той самий патерн, що й у renderFlipCard вище).
+     const lvl = item.key.split('|')[0];
+     const correctTranslation = wordTranslation(item.w, lvl);
+-    const distractors = shuffle(deckWords.filter(w => w.no !== item.w.no)).slice(0, 3).map(w => wordTranslation(w, lvl));
++    const distractors = translationDistractors(deckWords, item.w, 3, lvl);
+     const options = shuffle([correctTranslation, ...distractors]);
+     const opts = el(`<div class="mc-options"></div>`);
+     options.forEach(opt => {
+@@ -1222,11 +1223,13 @@ function currentLevelWords() {
+ // Тепер: якщо слів замало — чесне повідомлення + вихід (на A1 чи додому);
+ // якщо слова саме зараз підвантажуються/генеруються (ensureVocabAvailable
+ // уже виставив прапорець) — показуємо "готуємо", а не "замало слів".
+-function testPoolGuard(minWords) {
++function testPoolGuard(minWords, needTranslation) {
+     minWords = minWords || 4;
+     const lang = STATE.targetLang || 'no';
+     const level = LD().level || 'A1';
+-    const pool = currentLevelWords(); // заодно запускає ensureVocabAvailable()
++    let pool = currentLevelWords(); // заодно запускає ensureVocabAvailable()
++    // Тести з варіантами-перекладами рахують лише слова, що мають переклад мовою інтерфейсу
++    if (needTranslation && pool) pool = translatableWords(pool, STATE.vocabLang);
+     if (pool && pool.length >= minWords) return null;
+     const loading = typeof _vocabAutoGenLoading !== 'undefined' && _vocabAutoGenLoading[lang + '|' + level];
+     if (loading) {
+@@ -1447,19 +1450,19 @@ function runQuiz(sub, route, title) {
+ 
+ function viewTestMC() {
+     if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
+-        const poolGuard = testPoolGuard(); if (poolGuard) return poolGuard;
++        const poolGuard = testPoolGuard(4, true); if (poolGuard) return poolGuard;
+         const level = LD().level || "A1";
+         const lang = STATE.targetLang || 'no';
+         if (lang !== 'no') ensureGrammarAvailable(lang, level); // тихо; якщо не встигне — цього разу просто без граматичних питань
+-        const words = shuffle(currentLevelWords()).slice(0, 6);
++        const words = shuffle(translatableWords(currentLevelWords(), STATE.vocabLang)).slice(0, 6);
+         const gramQs = grammarForLevel(level, lang).map(g => ({ q: grammarLocalizedQ(g), opts: g.ex
+                 .opts, a: g.ex.a }));
+         const wordQs = words.map(w => {
+             const correctTranslation = wordTranslation(w, level, STATE.vocabLang);
+-            const distractors = shuffle(currentLevelWords().filter(x => x.no !== w.no)).slice(0, 3).map(x => wordTranslation(x, level, STATE.vocabLang));
++            const distractors = translationDistractors(currentLevelWords(), w, 3, level, STATE.vocabLang);
+             const opts = shuffle([correctTranslation, ...distractors]);
+             return { q: `${t('how_translate')} «${w.no}»?`, opts, a: opts.indexOf(correctTranslation) };
+-        });
++        }).filter(q => q.opts.length >= 2); // питання з єдиним варіантом пройти неможливо
+         SUBSTATE.qs = shuffle(wordQs.concat(gramQs)).slice(0, 8);
+         SUBSTATE.i = 0;
+         SUBSTATE.correct = 0;
+@@ -1490,7 +1493,7 @@ function clozeBlank(word, exampleNo) {
+ function viewTestCloze() {
+     if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
+         const poolGuard = testPoolGuard(); if (poolGuard) return poolGuard;
+-        const eligible = currentLevelWords().filter(w => clozeBlank(w.no, w.ex_no) !== null);
++        const eligible = preferTranslatedExamples(currentLevelWords().filter(w => clozeBlank(w.no, w.ex_no) !== null), 3);
+         const words = shuffle(eligible).slice(0, 6);
+         SUBSTATE.qs = words.map(w => {
+             const sentence = clozeBlank(w.no, w.ex_no);
+@@ -1639,8 +1642,9 @@ function viewTestCloze() {
+ function viewTestOrder() {
+     if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
+         const poolGuard = testPoolGuard(); if (poolGuard) return poolGuard;
+-        const words = shuffle(currentLevelWords().filter(w => w.ex_no && w.ex_no.split(' ').length >= 3 && w.ex_no.split(' ')  // w.ex_no може бути порожнім (напр. нідерландські 'welkom')
+-            .length <= 7)).slice(0, 5);
++        const orderable = currentLevelWords().filter(w => w.ex_no && w.ex_no.split(' ').length >= 3 && w.ex_no.split(' ')  // w.ex_no може бути порожнім (напр. нідерландські 'welkom')
++            .length <= 7);
++        const words = shuffle(preferTranslatedExamples(orderable, 3)).slice(0, 5);
+         SUBSTATE.qs = words.map(w => {
+             const clean = w.ex_no.replace(/[.,!?]/g, '');
+             const tokens = clean.split(' ');
+@@ -1809,8 +1813,8 @@ function viewTestOrder() {
+ 
+ function viewTestListen() {
+     if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
+-        const poolGuard = testPoolGuard(); if (poolGuard) return poolGuard;
+-        const words = shuffle(currentLevelWords()).slice(0, 6);
++        const poolGuard = testPoolGuard(4, true); if (poolGuard) return poolGuard;
++        const words = shuffle(translatableWords(currentLevelWords(), STATE.vocabLang)).slice(0, 6);
+         // Раніше варіанти відповіді завжди були українською (w.uk) —
+         // тепер локалізуються через wordTranslation(), як і решта тестів.
+         // КРИТИЧНО: об'єкт питання раніше не мав поля "q" (текст питання),
+@@ -1823,10 +1827,10 @@ function viewTestListen() {
+         // замість тексту питання.
+         SUBSTATE.qs = words.map(w => {
+             const correctTranslation = wordTranslation(w, LD().level);
+-            const distractors = shuffle(currentLevelWords().filter(x => x.no !== w.no)).slice(0, 3).map(x => wordTranslation(x, LD().level));
++            const distractors = translationDistractors(currentLevelWords(), w, 3, LD().level, STATE.vocabLang);
+             const opts = shuffle([correctTranslation, ...distractors]);
+             return { no: w.no, audio: w.no, opts, a: opts.indexOf(correctTranslation) };
+-        });
++        }).filter(q => q.opts.length >= 2);
+         SUBSTATE.i = 0;
+         SUBSTATE.correct = 0;
+         SUBSTATE.userAnswers = null;
+@@ -1836,8 +1840,8 @@ function viewTestListen() {
+ 
+ function viewTestTranslate() {
+     if (!SUBSTATE.qs || SUBSTATE.qs.length === 0) {
+-        const poolGuard = testPoolGuard(); if (poolGuard) return poolGuard;
+-        const words = shuffle(currentLevelWords()).slice(0, 6);
++        const poolGuard = testPoolGuard(4, true); if (poolGuard) return poolGuard;
++        const words = shuffle(translatableWords(currentLevelWords(), STATE.vocabLang)).slice(0, 6);
+         SUBSTATE.qs = words.map(w => {
+             return { word: w, dirToNo: Math.random() < 0.5 };
+         });
