@@ -888,3 +888,23 @@
     .topbar .brand { font-size: 1rem; }
     .target-lang-btn { padding: 4px 9px !important; }
 }
+
+/* ===== Телефони: зручні для пальця цілі натискання та читабельний текст =====
+   Перевірено реальним рендером (Chromium, 390px): шапка-перемикач мови була 61×22px,
+   кнопки ~29px, чіпи 39×26px, підписи меню 10px, дні серії 8.8px. Рекомендація
+   Apple/Google/WCAG 2.5.8 — приблизно 44px. Діє лише на пристроях із «грубим» вказівником
+   (палець), тож на десктопі вигляд не змінюється. */
+@media (pointer: coarse) {
+    .btn, .chip, .mc-opt, .chat-suggest-chip, .target-lang-btn, .lang-chip {
+        min-height: 44px;
+        display: inline-flex; align-items: center; justify-content: center;
+    }
+    .mc-opt { display: flex; justify-content: flex-start; }
+    .soundbtn, .avatar-btn, .assistant-close-btn { min-width: 44px; min-height: 44px; }
+    .chip { min-width: 44px; }
+    .nav-lbl { font-size: 11px; }
+    .calendar-strip .day { font-size: .66rem; }
+    .vocab-table .status { font-size: .7rem; }
+    button.chip { font-size: .8rem !important; }
+    .type-input, input[type="text"], input[type="email"], input[type="password"], input[type="search"], select { min-height: 44px; }
+}

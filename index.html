@@ -492,7 +492,7 @@
         // сайт — нічого критичного не ламається.
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch((err) => {
+                navigator.serviceWorker.register('/sw.js')  /* абсолютний шлях: відносний 'sw.js' на /no/vocabulary → /no/sw.js (HTML) → реєстрація падала */.catch((err) => {
                     console.warn('[PWA] Service worker не зареєструвався:', err);
                 });
             });

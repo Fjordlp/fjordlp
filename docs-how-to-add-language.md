@@ -75,3 +75,26 @@
 помилок AI. Далі просто вставляєш знайдені слова/переклади у формат вище.
 Я можу допомогти звести будь-який знайдений список у потрібний JS-формат,
 якщо накидаєш його мені — не обов'язково вручну форматувати кожне слово.
+
+## Alphabet entries (`ALPHABET`) — multilingual fields
+
+Each entry in `window.LANG_DATA[code].ALPHABET`:
+
+```js
+{
+  letter: "C c",
+  // обов'язкові (українською) — також запасний варіант:
+  name: "чі", sound: "перед a/o/u — як «к»; перед e/i — як «ч»",
+  example: "casa", example_uk: "будинок",
+  // необов'язкові — для інтерфейсу English / Русский:
+  name_en: "chee",  name_ru: "чи",
+  sound_en: "before a/o/u like “k” in “cat”; before e/i like “ch” in “chair”",
+  sound_ru: "перед a/o/u — как «к»; перед e/i — как «ч»",
+  example_en: "house", example_ru: "дом"
+}
+```
+
+The Alphabet screen (`localizedAlphabetField()` in `js/views-alphabet.js`) shows the
+`*_en` / `*_ru` field matching `STATE.uiLang` and falls back to the Ukrainian field when
+it is missing. Write `sound_en` for English speakers (compare to English sounds), not as a
+literal translation of the Ukrainian text. `data-it.js` is the fully localised reference.
