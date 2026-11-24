@@ -460,12 +460,58 @@ function waitForVoices() {
     });
 }
 
+// ---------------------------------------------------------------------
+//  Заздалегідь записане аудіо (/audio/<lang>/<hash>.mp3 + manifest.json)
+// ---------------------------------------------------------------------
+// Хеш МАЄ збігатися з h() у tools/generate_audio.py: SHA-1 від
+// text.trim() в UTF-8, перші 16 hex-символів.
+let _audioManifestPromise = null;
+let _currentAudio = null;
+function loadAudioManifest() {
+    if (!_audioManifestPromise) {
+        _audioManifestPromise = fetch('/audio/manifest.json')
+            .then(r => (r.ok ? r.json() : {}))
+            .catch(() => ({}));
+    }
+    return _audioManifestPromise;
+}
+async function audioHash(text) {
+    if (!(window.crypto && crypto.subtle)) return null; // потрібен https
+    const buf = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(text.trim()));
+    return Array.from(new Uint8Array(buf)).slice(0, 8)
+        .map(b => b.toString(16).padStart(2, '0')).join('');
+}
+async function playPrerecordedAudio(text, lang) {
+    try {
+        const manifest = await loadAudioManifest();
+        const list = manifest[lang];
+        if (!list || !list.length) return false;
+        const hash = await audioHash(text);
+        if (!hash || !list.includes(hash)) return false;
+        if (_currentAudio) { _currentAudio.pause(); _currentAudio = null; }
+        if ('speechSynthesis' in window) speechSynthesis.cancel();
+        const audio = new Audio('/audio/' + lang + '/' + hash + '.mp3');
+        _currentAudio = audio;
+        await audio.play();
+        return true;
+    } catch (e) {
+        console.warn('Записане аудіо не спрацювало, пробуємо далі:', e);
+        return false;
+    }
+}
+
 // text — що озвучити; lang — код мови ЦЬОГО тексту (не обов'язково
 // STATE.targetLang, хоча зазвичай так і є — явний параметр безпечніший,
 // ніж мовчазне читання глобального стану всередині функції озвучення).
 async function speak(text, lang) {
     lang = lang || (typeof STATE !== 'undefined' && STATE && STATE.targetLang) || 'no';
     const voiceCfg = getTtsVoice(lang);
+
+    // Варіант 0 (найкращий): заздалегідь згенерований нейронний MP3 зі
+    // статичної папки /audio (див. tools/generate_audio.py). Не потребує
+    // ні Worker'а, ні квот; працює для всіх мов, включно з uk та is.
+    // Якщо файлу для цього тексту нема — тихо йдемо далі по ланцюжку.
+    if (await playPrerecordedAudio(text, lang)) return;
 
     // Варіант 1: власний Worker-проксі (/tts-api → VoiceRSS, безкоштовний
     // ключ без платіжної картки — код Worker'а див. у

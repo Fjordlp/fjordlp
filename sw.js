@@ -26,7 +26,7 @@
 // на кожне пробудження створювався новий порожній кеш, а старі не прибирались до наступного activate.
 // Тепер ім'я стабільне; при зміні файлів застосунку просто підніміть CACHE_VERSION (разом із зміною sw.js
 // браузер перевстановить воркер, а activate видалить кеші з іншою версією).
-const CACHE_VERSION = '2026-11-01-1';
+const CACHE_VERSION = '2026-11-24-1';
 const CACHE_NAME = 'fjord-shell-' + CACHE_VERSION;
 
 const APP_SHELL = [
@@ -65,6 +65,10 @@ const APP_SHELL = [
   './js/data-pt.js',
   './js/data-sv.js',
   './js/data-uk.js',
+  './js/data-ru.js',
+  './js/data-tr.js',
+  './js/data-da.js',
+  './js/data-fi.js',
   './js/lessons.js',
   './js/views-lessons.js',
   './js/views-alphabet.js',
@@ -104,6 +108,10 @@ self.addEventListener('fetch', (event) => {
   if (!isSameOrigin) {
     return;
   }
+
+  // Аудіо (/audio/*.mp3) не кешуємо в SW: файлів багато, а браузер сам
+  // кешує їх за HTTP-заголовками; Range-запити (206) не можна класти в cache.put.
+  if (url.pathname.startsWith('/audio/')) return;
 
   event.respondWith(
     fetch(req).then((res) => {
